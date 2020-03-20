@@ -21,6 +21,7 @@ module.exports = {
                 options: {
                     presets: [ '@babel/preset-env', '@babel/preset-react' ],
                     plugins: [
+                        ["emotion"],
                         ["@babel/plugin-proposal-class-properties"],
                         ["@babel/plugin-transform-runtime",
                             {
