@@ -1,10 +1,13 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
+import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 
+import javax.xml.rpc.ServiceException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,9 +21,11 @@ public class FileDownloader {
     private static final String STS_DONE = "done";
 
     private final Log log = LogFactory.getLog(getClass());
-    private HashMap<String, FileDownloadExecutor> mHolders = new HashMap<>();
 
+    private HashMap<String, FileDownloadExecutor> mHolders;
+    private FileServiceManage mServiceManager;
     private static FileDownloader instance = null;
+
     static {
         instance = new FileDownloader();
     }
@@ -29,7 +34,15 @@ public class FileDownloader {
         return instance;
     }
 
-    private FileDownloader() {/* Singleton. Prevent to call the constructor. */}
+    private FileDownloader() {
+        FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+        try {
+            mServiceManager = serviceLocator.getFileServiceManage();
+        } catch (ServiceException e) {
+            e.printStackTrace();
+        }
+        mHolders = new HashMap<>();
+    }
 
 
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
@@ -38,7 +51,7 @@ public class FileDownloader {
             log.warn("addRequest(): thread full");
             return null;
         }
-        FileDownloadExecutor holder = new FileDownloadExecutor(dlList);
+        FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, dlList);
         mHolders.put(holder.getId(), holder);
 
         holder.start();
