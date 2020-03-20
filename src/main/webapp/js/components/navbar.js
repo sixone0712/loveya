@@ -62,7 +62,7 @@ export default function RSSnav() {
         <Nav className="ml-auto" navbar>
           <UncontrolledDropdown nav inNavbar>
             <DropdownToggle nav style={colorWhite}>
-              <FontAwesomeIcon icon={faUserCircle} size="lg" /> gtpark
+              <FontAwesomeIcon icon={faUserCircle} size="lg" /> ymkwon
             </DropdownToggle>
             <DropdownMenu right>
               <DropdownItem>Change Password</DropdownItem>

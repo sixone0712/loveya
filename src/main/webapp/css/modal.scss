@@ -44,14 +44,25 @@
     font-size: 16px;
     font-weight: 700;
     color: #333;
+    margin-bottom: 4px
   }
-  .content {
+  .content-with-title {
     border-top: 1px solid #ffa94d;
-    margin-top: 16px;
+  }
+
+  .content-without-title {
+    margin: 30px 0px;
+  }
+  .content,
+  .content-with-title,
+  .content-without-title {
     p {
       padding: 8px 0px;
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.5);
+      font-size: 14px;
+      text-align: center;
+    }
+    p:first-child {
+      margin-top: 1rem;
     }
   }
 
@@ -59,17 +70,27 @@
     margin: 8px 0 0 0;
     button {
       padding: 12px 0;
-      background-color: #ffa94d;
       font-size: 14px;
       color: white;
       border: 0;
       cursor: pointer;
-      &:hover {
-        background-color: #ffc078;
+      &:focus {
+        outline: none;
       }
-      &:active {
-        background-color: #ffc078;
-      }
+    }
+    button.primary {
+      background-color: #ffa94d;
+    }
+    button.primary:hover,
+    button.primary:active {
+      background-color: #ffc078;
+    }
+    button.secondary {
+      background-color: #85a4b3;
+    }
+    button.secondary:hover,
+    button.secondary:active {
+      background-color: #b6c6ce;
     }
     button.alert-type {
       width: 100%;
@@ -103,5 +124,9 @@
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.7);
   }
+}
+
+.child-overlay {
+  background-color: rgba(0, 0, 0, 0);
 }
 /* modal style end */

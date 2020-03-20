@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import moment from "moment";
 import { DatetimePicker } from "rc-datetime-picker";
 import { Input, Label } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
 
 const pickerFlex = {
   display: "flex",
@@ -10,7 +12,8 @@ const pickerFlex = {
 };
 
 const labelStyle = {
-  fontSize: "14px"
+  fontSize: "14px",
+  fontWeight: "300"
 };
 
 const inputStyle = {
@@ -21,36 +24,35 @@ const inputStyle = {
 class CreateDatetimePicker extends Component {
   constructor(props) {
     super(props);
+    const { label, moment } = this.props;
     this.state = {
-      moment: moment()
-        .hour(0)
-        .minute(0)
+      label,
+      moment
     };
   }
 
   handleChange = moment => {
     this.setState({
-      moment
+      moment: moment
     });
   };
 
   render() {
-    const { label } = this.props;
+    const { label, moment } = this.state;
 
     return (
       <>
-        <Label style={labelStyle}>{label}</Label>
+        <Label style={labelStyle}>
+          <FontAwesomeIcon icon={faCalendarCheck} size="lg" /> {label}
+        </Label>
         <Input
           type="text"
           style={inputStyle}
-          value={this.state.moment.format("YYYY-MM-DD HH:mm")}
+          value={moment.format("YYYY-MM-DD HH:mm")}
           className="input-datepicker"
           readOnly
         />
-        <DatetimePicker
-          moment={this.state.moment}
-          onChange={this.handleChange}
-        />
+        <DatetimePicker moment={moment} onChange={this.handleChange} />
       </>
     );
   }
@@ -60,10 +62,20 @@ function RSSdatetimePicker() {
   return (
     <div style={pickerFlex}>
       <div>
-        <CreateDatetimePicker label={"From"} />
+        <CreateDatetimePicker
+          label={"From"}
+          moment={moment()
+            .hour(0)
+            .minute(0)}
+        />
       </div>
       <div>
-        <CreateDatetimePicker label={"To"} />
+        <CreateDatetimePicker
+          label={"To"}
+          moment={moment()
+            .hour(23)
+            .minute(59)}
+        />
       </div>
     </div>
   );

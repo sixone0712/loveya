@@ -6,8 +6,11 @@ import {
   FormGroup,
   ButtonToggle,
   Button,
-  Input
+  Input,
+  Collapse
 } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import Checkbox from "./checkbox";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 
@@ -91,8 +94,7 @@ class RSScategorylist extends Component {
       ],
       checkedListAll: [],
       ItemsChecked: false,
-      showGenre: false,
-      isModalOpen: false
+      showGenre: false
     };
   }
 
@@ -149,21 +151,14 @@ class RSScategorylist extends Component {
     }
   };
 
-  openModal = () => {
-    this.setState({ isModalOpen: true });
-  };
-
-  closeModal = () => {
-    this.setState({ isModalOpen: false });
-  };
+  handleSelectBoxChange = () => {};
 
   render() {
     const {
       showGenre,
       categorylist,
       checkedListAll,
-      ItemsChecked,
-      isModalOpen
+      ItemsChecked
     } = this.state;
 
     return (
@@ -174,7 +169,7 @@ class RSScategorylist extends Component {
           </div>
           <Col>
             <FormGroup style={formGroupStyle}>
-              {showGenre && (
+              <Collapse isOpen={showGenre}>
                 <div style={genreStyle}>
                   <Input
                     type="select"
@@ -182,41 +177,42 @@ class RSScategorylist extends Component {
                     id="genreSel"
                     style={selectStyle}
                     className="catlist-select"
+                    value="0"
+                    onChange={this.handleSelectBoxChange.bind(this)}
                   >
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
+                    <option value="0" disabled hidden>
+                      Select Genre
+                    </option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
                   </Input>
-                  <Button
-                    outline
-                    size="sm"
-                    color="info"
-                    className="catlist-btn"
-                    onClick={this.openModal}
-                  >
-                    Create
-                  </Button>{" "}
-                  <Button
-                    outline
-                    size="sm"
-                    color="info"
-                    className="catlist-btn"
-                  >
-                    Edit
-                  </Button>{" "}
-                  <Button
-                    outline
-                    size="sm"
-                    color="info"
-                    className="catlist-btn"
-                  >
-                    Delete
-                  </Button>
-                  <GenreModal isOpen={isModalOpen} close={this.closeModal} />
+                  <InputModal
+                    title={"Create Genre"}
+                    openbtn={"Create"}
+                    inputname={"genName"}
+                    inputpholder={"Enter Genre Name"}
+                    leftbtn={"Create"}
+                    rightbtn={"Cancel"}
+                  />
+                  <InputModal
+                    title={"Edit Genre"}
+                    openbtn={"Edit"}
+                    inputname={"genName"}
+                    inputpholder={"Edit Genre Name"}
+                    leftbtn={"Edit"}
+                    rightbtn={"Cancel"}
+                  />
+                  <ConfirmModal
+                    openbtn={"Delete"}
+                    message={"Do you want to delete the selected genre?"}
+                    leftbtn={"Delete"}
+                    rightbtn={"Cancel"}
+                  />
                 </div>
-              )}
+              </Collapse>
               {categorylist.map(cat => {
                 return (
                   <Checkbox
@@ -263,36 +259,176 @@ class RSScategorylist extends Component {
   }
 }
 
-class GenreModal extends Component {
+class InputModal extends Component {
+  constructor(props) {
+    super(props);
+    const {
+      title,
+      openbtn,
+      inputname,
+      inputpholder,
+      leftbtn,
+      rightbtn
+    } = this.props;
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.state = {
+      title,
+      openbtn,
+      inputname,
+      inputpholder,
+      leftbtn,
+      rightbtn,
+      isOpen: false
+    };
+  }
+
+  openModal = () => {
+    this.setState({
+      isOpen: true
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      isOpen: false
+    });
+  };
+
   render() {
-    const { isOpen, close } = this.props;
+    const {
+      title,
+      openbtn,
+      inputname,
+      inputpholder,
+      leftbtn,
+      rightbtn,
+      isOpen
+    } = this.state;
     return (
       <>
+        <Button
+          outline
+          size="sm"
+          color="info"
+          className="catlist-btn"
+          onClick={this.openModal}
+        >
+          {openbtn}
+        </Button>
         {isOpen ? (
           <ReactTransitionGroup
             transitionName={"Custom-modal-anim"}
             transitionEnterTimeout={200}
             transitionLeaveTimeout={200}
           >
-            <div className="Custom-modal-overlay" onClick={close} />
+            <div className="Custom-modal-overlay" onClick={this.closeModal} />
             <div className="Custom-modal">
-              <p className="title">Create Genre</p>
-              <div className="content">
+              <p className="title">{title}</p>
+              <div className="content-with-title">
                 <FormGroup style={{ marginTop: "1rem" }}>
                   <Input
                     type="text"
-                    name="genName"
-                    placeholder="Enter Genre Name"
+                    name={inputname}
+                    placeholder={inputpholder}
                     className="catlist-input"
                   />
                 </FormGroup>
               </div>
               <div className="button-wrap">
-                <button className="form-type left-btn" onClick={close}>
-                  Create
+                <button
+                  className="primary form-type left-btn"
+                  onClick={this.closeModal}
+                >
+                  {leftbtn}
                 </button>
-                <button className="form-type right-btn" onClick={close}>
-                  Cancel
+                <button
+                  className="primary form-type right-btn"
+                  onClick={this.closeModal}
+                >
+                  {rightbtn}
+                </button>
+              </div>
+            </div>
+          </ReactTransitionGroup>
+        ) : (
+          <ReactTransitionGroup
+            transitionName={"Custom-modal-anim"}
+            transitionEnterTimeout={200}
+            transitionLeaveTimeout={200}
+          />
+        )}
+      </>
+    );
+  }
+}
+
+class ConfirmModal extends Component {
+  constructor(props) {
+    super(props);
+    const { openbtn, message, leftbtn, rightbtn } = this.props;
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.state = {
+      openbtn,
+      message,
+      leftbtn,
+      rightbtn,
+      isOpen: false
+    };
+  }
+
+  openModal = () => {
+    this.setState({
+      isOpen: true
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      isOpen: false
+    });
+  };
+
+  render() {
+    const { openbtn, message, leftbtn, rightbtn, isOpen } = this.state;
+    return (
+      <>
+        <Button
+          outline
+          size="sm"
+          color="info"
+          className="catlist-btn"
+          onClick={this.openModal}
+        >
+          {openbtn}
+        </Button>
+        {isOpen ? (
+          <ReactTransitionGroup
+            transitionName={"Custom-modal-anim"}
+            transitionEnterTimeout={200}
+            transitionLeaveTimeout={200}
+          >
+            <div className="Custom-modal-overlay" onClick={this.closeModal} />
+            <div className="Custom-modal">
+              <div className="content-without-title">
+                <p>
+                  <FontAwesomeIcon icon={faTrashAlt} size="6x" />
+                </p>
+                <p>{message}</p>
+              </div>
+              <div className="button-wrap">
+                <button
+                  className="primary form-type left-btn"
+                  onClick={this.closeModal}
+                >
+                  {leftbtn}
+                </button>
+                <button
+                  className="primary form-type right-btn"
+                  onClick={this.closeModal}
+                >
+                  {rightbtn}
                 </button>
               </div>
             </div>

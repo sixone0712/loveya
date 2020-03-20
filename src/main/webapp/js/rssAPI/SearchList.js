@@ -13,12 +13,19 @@ export const setEndDate = (props, date) => {
     searchListActions.searchSetEndDate(date);
 };
 
-export const setSearchList = (props) => {
+export const setSearchList = async (props) => {
     const { searchListActions } = props;
     const toolList = props.toolInfoList;
     const logInfoList = props.logInfoList;
     const startDate = props.startDate;
     const endDate = props.endDate;
-    searchListActions.searchSetEndDate({ toolList, logInfoList, startDate, endDate });
+    await searchListActions.searchSetEndDate({ toolList, logInfoList, startDate, endDate });
+    startSearchList(props);
+};
+
+export const startSearchList = (props) => {
+    const { searchListActions } = props;
+    const { requestList } = props;
+    searchListActions.searchLoadList("createFileList", requestList);
 };
 

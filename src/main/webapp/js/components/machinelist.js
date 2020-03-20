@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import { Card, CardBody, Col, FormGroup, ButtonToggle } from "reactstrap";
+import { Collapse } from "react-collapse";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import Checkbox from "./checkbox";
 
 const formGroupStyle = {
@@ -16,114 +19,90 @@ const buttonPosition = {
 class RSSmachinelist extends Component {
   constructor(props) {
     super(props);
-    this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
     this.state = {
-      machinelist: [
+      titleList: [
         {
-          id: "mc1",
-          name: "Machine 1",
-          value: 1
+          structId: "Equipment"
         },
         {
-          id: "mc2",
-          name: "Machine 2",
-          value: 2
-        },
-        {
-          id: "mc3",
-          name: "Machine 3",
-          value: 3
-        },
-        {
-          id: "mc4",
-          name: "Machine 4",
-          value: 4
-        },
-        {
-          id: "mc5",
-          name: "Machine 5",
-          value: 5
-        },
-        {
-          id: "mc6",
-          name: "Machine 6",
-          value: 6
-        },
-        {
-          id: "mc7",
-          name: "Machine 7",
-          value: 7
-        },
-        {
-          id: "mc8",
-          name: "Machine 8",
-          value: 8
-        },
-        {
-          id: "mc9",
-          name: "Machine 9",
-          value: 9
-        },
-        {
-          id: "mc10",
-          name: "Machine 10",
-          value: 10
+          structId: "System"
         }
       ],
-      checkedListAll: [],
+      machineList: [
+        {
+          structId: "Equipment",
+          id: "mc1",
+          name: "Machine 1"
+        },
+        {
+          structId: "Equipment",
+          id: "mc2",
+          name: "Machine 2"
+        },
+        {
+          structId: "Equipment",
+          id: "mc3",
+          name: "Machine 3"
+        },
+        {
+          structId: "Equipment",
+          id: "mc4",
+          name: "Machine 4"
+        },
+        {
+          structId: "Equipment",
+          id: "mc5",
+          name: "Machine 5"
+        },
+        {
+          structId: "System",
+          id: "mc6",
+          name: "Machine 6"
+        },
+        {
+          structId: "System",
+          id: "mc7",
+          name: "Machine 7"
+        },
+        {
+          structId: "System",
+          id: "mc8",
+          name: "Machine 8"
+        },
+        {
+          structId: "System",
+          id: "mc9",
+          name: "Machine 9"
+        },
+        {
+          structId: "System",
+          id: "mc10",
+          name: "Machine 10"
+        }
+      ],
+      checkedList: [],
       ItemsChecked: false
     };
   }
 
-  selectedItems = e => {
-    const { value, checked } = e.target;
-    let { checkedListAll } = this.state;
-
-    if (checked) {
-      checkedListAll = [...checkedListAll, value];
-    } else {
-      checkedListAll = checkedListAll.filter(item => item !== value);
-      if (this.state.ItemsChecked) {
-        this.setState({
-          ItemsChecked: !this.state.ItemsChecked
-        });
-      }
-    }
-    this.setState({ checkedListAll });
-  };
-
   selectItem = () => {
-    const { ItemsChecked, machinelist } = this.state;
+    const { ItemsChecked, machineList } = this.state;
     const collection = [];
 
     if (!ItemsChecked) {
-      for (const machine of machinelist) {
-        collection.push(machine.value);
+      for (const machine of machineList) {
+        collection.push(machine.id);
       }
     }
 
     this.setState({
-      checkedListAll: collection,
+      checkedList: collection,
       ItemsChecked: !ItemsChecked
     });
   };
 
-  handleCheckboxClick = e => {
-    const { value, checked } = e.target;
-
-    if (checked) {
-      this.setState(prevState => ({
-        checkedListAll: [...prevState.checkedListAll, value * 1]
-      }));
-    } else {
-      this.setState(prevState => ({
-        checkedListAll: prevState.checkedListAll.filter(item => item != value)
-      }));
-    }
-  };
-
   render() {
-    const { machinelist, checkedListAll, ItemsChecked } = this.state;
+    const { machineList, checkedList, titleList, ItemsChecked } = this.state;
 
     return (
       <Card className="ribbon-wrapper machinelist-custom">
@@ -131,16 +110,13 @@ class RSSmachinelist extends Component {
           <div className="ribbon ribbon-clip ribbon-primary">Machine</div>
           <Col>
             <FormGroup style={formGroupStyle}>
-              {machinelist.map(machine => {
+              {titleList.map((title, index) => {
                 return (
-                  <Checkbox
-                    item={machine}
-                    key={machine.value}
-                    selectedItems={this.selectedItems.bind(this)}
-                    ItemsChecked={ItemsChecked}
-                    isChecked={checkedListAll.includes(machine.value)}
-                    handleCheckboxClick={this.handleCheckboxClick}
-                    labelClass="machinelist-label"
+                  <MachineCollapse
+                    key={index}
+                    structId={title.structId}
+                    machineList={machineList}
+                    checkedList={checkedList}
                   />
                 );
               })}
@@ -159,6 +135,75 @@ class RSSmachinelist extends Component {
           </div>
         </CardBody>
       </Card>
+    );
+  }
+}
+
+class MachineCollapse extends Component {
+  constructor(props) {
+    super(props);
+    const { machineList, checkedList, structId } = this.props;
+    this.toggle = this.toggle.bind(this);
+    this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
+    this.state = {
+      machineList,
+      checkedList,
+      structId,
+      isOpened: false
+    };
+  }
+
+  toggle = () => {
+    this.setState({
+      isOpened: !this.state.isOpened
+    });
+  };
+
+  handleCheckboxClick = e => {
+    const { id, checked } = e.target;
+
+    if (checked) {
+      this.setState(prevState => ({
+        checkedList: [...prevState.checkedList, id]
+      }));
+    } else {
+      this.setState(prevState => ({
+        checkedList: prevState.checkedList.filter(item => item !== id)
+      }));
+    }
+  };
+
+  render() {
+    const { machineList, checkedList, structId, isOpened } = this.state;
+    const titleStyle = {
+      border: "1px solid rgba(171, 140, 228, 0.3)",
+      borderRadius: "3px 3px 0 0",
+      padding: "0.5rem",
+      backgroundColor: "rgba(171, 140, 228, 0.1)",
+      cursor: "pointer"
+    };
+    return (
+      <>
+        <div style={titleStyle} onClick={this.toggle}>
+          <FontAwesomeIcon icon={faBars} /> {structId}
+        </div>
+        <Collapse isOpened={isOpened}>
+          {machineList.map((machine, index) => {
+            if (machine.structId === structId) {
+              return (
+                <Checkbox
+                  item={machine}
+                  key={index}
+                  isChecked={checkedList.includes(machine.id)}
+                  handleCheckboxClick={this.handleCheckboxClick}
+                  labelClass="machinelist-label"
+                />
+              );
+            }
+            return "";
+          })}
+        </Collapse>
+      </>
     );
   }
 }

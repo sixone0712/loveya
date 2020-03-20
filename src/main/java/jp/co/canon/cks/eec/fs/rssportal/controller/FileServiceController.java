@@ -85,7 +85,7 @@ public class FileServiceController {
 
     @Async
     @PostMapping("/createFileList")
-    public RSSFileInfoBeanResponse[] createFileList2(@RequestBody RSSRequestSearch[] requestList) throws Exception {
+    public RSSFileInfoBeanResponse[] createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
         ArrayList<RSSFileInfoBeanResponse> resultList = new ArrayList<>();
 
         for(RSSRequestSearch request :  requestList) {
@@ -117,21 +117,24 @@ public class FileServiceController {
 
             for (int i = 0; i < src.length; i++) {
                 RSSFileInfoBeanResponse dest = new RSSFileInfoBeanResponse();
-                dest.setFile(src[i].getType().equals("F"));
-                dest.setFileId(0);
-                dest.setLogId(logId);
-                dest.setFileName(src[i].getName());
-                dest.setFilePath(src[i].getName());
-                dest.setFileSize(src[i].getSize());
-                dest.setFileDate(Long.toString(src[i].getTimestamp().getTimeInMillis()));
-                dest.setFileStatus("");
+                if(dest.isFile()) {
+                    dest.setFile(src[i].getType().equals("F"));
+                    dest.setFileId(0);
+                    dest.setLogId(logId);
+                    dest.setFileName(src[i].getName());
+                    dest.setFilePath(src[i].getName());
+                    dest.setFileSize(src[i].getSize());
+                    dest.setFileDate(Long.toString(src[i].getTimestamp().getTimeInMillis()));
+                    dest.setFileStatus("");
 
-                dest.setStructId(structId);
-                dest.setTargetName(targetName);
-                dest.setLogName(logName);
-                resultList.add(dest);
+                    // additional info
+                    dest.setStructId(structId);
+                    dest.setTargetName(targetName);
+                    dest.setLogName(logName);
+
+                    resultList.add(dest);
+                }
             }
-
         }
 
         RSSFileInfoBeanResponse[] array = resultList.toArray(new RSSFileInfoBeanResponse[resultList.size()]);
