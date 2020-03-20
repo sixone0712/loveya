@@ -1,6 +1,6 @@
 
 
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 
 import lombok.Getter;

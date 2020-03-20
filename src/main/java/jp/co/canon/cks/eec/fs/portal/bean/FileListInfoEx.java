@@ -10,7 +10,7 @@
  * Copyright(C) Canon Inc. All right reserved.
  *
  */
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 import java.util.ArrayList;
 import java.util.List;

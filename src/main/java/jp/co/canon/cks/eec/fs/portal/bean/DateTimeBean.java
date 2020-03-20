@@ -14,7 +14,7 @@
  *            日付の場合は、getDate()のみエラーになる入力をそのまま出力するように修正した。
  * 2011/01/12 setDate()の判定を厳密に行うように修正した。
  */
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 import java.io.Serializable;
 import java.text.DateFormat;

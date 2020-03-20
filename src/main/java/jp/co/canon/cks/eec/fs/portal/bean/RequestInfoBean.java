@@ -14,7 +14,7 @@
  * 2011/01/17 ZIPファイルサイズ用のプロパティとgetter、setter追加した。
  */
 
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

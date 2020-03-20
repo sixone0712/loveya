@@ -1,6 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.model;
 
-import jp.co.canon.cks.eec.fs.rssportal.bean.Constants;
+import jp.co.canon.cks.eec.fs.portal.bean.Constants;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -15,7 +15,7 @@
  * 2011/01/09 DownloadFileRepository用に定義を追加した。
  * 2011/01/17 ファイルサイズ算出用にスケールと1024の定義を追加した。
  */
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 /**
  * <p>Title:</p> File upload Service

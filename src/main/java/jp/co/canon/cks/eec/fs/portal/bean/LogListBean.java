@@ -12,7 +12,7 @@
  * 2011/01/06 メソッドコメント追加。
  */
 
-package jp.co.canon.cks.eec.fs.rssportal.bean;
+package jp.co.canon.cks.eec.fs.portal.bean;
 
 import java.util.List;
 
