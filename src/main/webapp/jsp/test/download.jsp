@@ -19,6 +19,23 @@ div {
 <script>
     function requestDl() {
 
+        /*
+            {
+        "fileId": 0,
+        "fileStatus": "",
+        "logId": "001",
+        "fileName": "20200319141829",
+        "fileSize": 22,
+        "fileDate": "1584595109000",
+        "filePath": "20200319141829",
+        "file": true,
+        "structId": "VSS",
+        "targetName": "VSSVM87A5",
+        "logName": "001 RUNNING STATUS",
+        "sizeKB": 1
+    },
+         */
+
         let data = {list: [
             {
                 machine:'machine-1',

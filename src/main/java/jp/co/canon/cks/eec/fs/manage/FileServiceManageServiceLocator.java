@@ -40,7 +40,7 @@ public class FileServiceManageServiceLocator extends org.apache.axis.client.Serv
     }
 
     public jp.co.canon.cks.eec.fs.manage.FileServiceManage getFileServiceManage() throws javax.xml.rpc.ServiceException {
-       java.net.URL endpoint;
+        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(FileServiceManage_address);
         }
@@ -119,22 +119,22 @@ public class FileServiceManageServiceLocator extends org.apache.axis.client.Serv
     }
 
     /**
-    * Set the endpoint address for the specified port name.
-    */
+     * Set the endpoint address for the specified port name.
+     */
     public void setEndpointAddress(java.lang.String portName, java.lang.String address) throws javax.xml.rpc.ServiceException {
-        
-if ("FileServiceManage".equals(portName)) {
+
+        if ("FileServiceManage".equals(portName)) {
             setFileServiceManageEndpointAddress(address);
         }
-        else 
-{ // Unknown Port Name
+        else
+        { // Unknown Port Name
             throw new javax.xml.rpc.ServiceException(" Cannot set Endpoint Address for Unknown Port" + portName);
         }
     }
 
     /**
-    * Set the endpoint address for the specified port name.
-    */
+     * Set the endpoint address for the specified port name.
+     */
     public void setEndpointAddress(javax.xml.namespace.QName portName, java.lang.String address) throws javax.xml.rpc.ServiceException {
         setEndpointAddress(portName.getLocalPart(), address);
     }
