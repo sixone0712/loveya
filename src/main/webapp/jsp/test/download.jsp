@@ -6,6 +6,14 @@ body {
     font-size: 11pt;
 }
 
+div {
+    border: none;
+    position: relative;
+    padding: 8px;
+    margin: 12px;
+    width: fit-content;
+}
+
 </style>
 
 <script>
@@ -16,12 +24,14 @@ body {
                 machine:'machine-1',
                 category:'category-1',
                 file:'file-1',
-                filesize:'3204'
+                filesize:'3204',
+                date: '2020-14-12'
             },{
                 machine:'machine-2',
                 category:'category-2',
                 file:'file-2',
-                filesize:'32444'
+                filesize:'32444',
+                date: '2020-14-12'
             }
         ]};
 
@@ -34,8 +44,18 @@ body {
                 type:'get',
                 async:true,
                 success: resp=>{
-                    console.log('status=');
                     console.log(resp);
+
+                    let total = resp.totalFiles;
+                    let download = resp.downloadFiles;
+                    $('#progress').text(download);
+                    $('#total').text(total);
+
+                    if(total!=0 && total==download) {
+                        $('#link').text('TBD');
+                    } else {
+                        setTimeout(timer, 500);
+                    }
                 },
                 error: ()=>{
                     console.log('failed to check status');
@@ -54,7 +74,7 @@ body {
                 console.log(resp);
                 $('#id').attr('value', resp);
                 if(finish==false) {
-                    setTimeout(timer, 1000);
+                    setTimeout(timer, 500);
                 }
             },
             error: () => console.log('Error')
@@ -68,16 +88,22 @@ body {
 
 <form>
     <div>
-        <h2>request download</h2>
+        <h2>Step1. Request download</h2>
+        <h3>dl/request</h3>
         <input type="button" value="go" onclick="requestDl();">
     </div>
-    <hr>
+
     <div>
+        <h2>Step2. Polling download status</h2>
+        <h3>dl/status</h3>
         dlId : <input id="id" name="downloadId" value="">
-    </div>
-    <hr>
-    <div>
         Progress : <span id="progress">?</span> / <span id="total">?</span>
+    </div>
+
+    <div>
+        <h2>Step3. Download</h2>
+        <h3>dl/download</h3>
+        <span id="link"></span>
     </div>
 </form>
 

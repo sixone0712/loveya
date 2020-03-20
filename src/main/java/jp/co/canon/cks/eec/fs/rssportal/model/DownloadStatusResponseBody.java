@@ -11,7 +11,7 @@ public class DownloadStatusResponseBody {
     private String dlId;
     private String status = "invalid-id";
     private int totalFiles = -1;
-    private int completeFiles = -1;
+    private int downloadFiles = -1;
     private List<String> totalFileList = null;
 
     public DownloadStatusResponseBody(@NonNull final String dlId) {
@@ -22,8 +22,9 @@ public class DownloadStatusResponseBody {
             return;
         }
         status = dl.getStatus(dlId);
-        totalFileList = dl.getTotalFileList(dlId);
-        // FIXME
+        //totalFileList = dl.getTotalFileList(dlId);
+        totalFiles = dl.getTotalFiles(dlId);
+        downloadFiles = dl.getDownloadFiles(dlId);
     }
 
     public String getDlId() {
@@ -38,8 +39,8 @@ public class DownloadStatusResponseBody {
         return totalFiles;
     }
 
-    public int getCompleteFiles() {
-        return completeFiles;
+    public int getDownloadFiles() {
+        return downloadFiles;
     }
 
     public List<String> getTotalFileList() {
@@ -58,8 +59,8 @@ public class DownloadStatusResponseBody {
         this.totalFiles = totalFiles;
     }
 
-    public void setCompleteFiles(int completeFiles) {
-        this.completeFiles = completeFiles;
+    public void setDownloadFiles(int downloadFiles) {
+        this.downloadFiles = downloadFiles;
     }
 
     public void setTotalFileList(List<String> totalFileList) {

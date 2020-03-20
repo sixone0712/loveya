@@ -3,11 +3,15 @@ package jp.co.canon.cks.eec.fs.portal.bussiness;
 import jp.co.canon.cks.eec.fs.portal.bean.FileInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.LogInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Calendar;
 import java.util.Map;
 
-public class TedFileServiceModel implements FileServiceModel {
+public class TedFileServiceModelImpl implements FileServiceModel {
+
+    private final Log log = LogFactory.getLog(getClass());
 
     @Override
     public void logout(String user) throws ServiceException {
@@ -41,6 +45,8 @@ public class TedFileServiceModel implements FileServiceModel {
 
     @Override
     public String registRequest(String system, String user, String tool, String comment, String logType, String[] fileName, long[] fileSizes, String[] fileTimestamps) throws ServiceException {
+        log.warn("registRequest!");
+        something(3000);
         return null;
     }
 
@@ -57,5 +63,15 @@ public class TedFileServiceModel implements FileServiceModel {
     @Override
     public RequestListBean createDownloadList(String system, String tool, String reqNo) throws ServiceException {
         return null;
+    }
+
+    /* something is dummy for something */
+    private void something(long l) {
+        log.warn("sleep for "+l+" msec");
+        try {
+            Thread.sleep(l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

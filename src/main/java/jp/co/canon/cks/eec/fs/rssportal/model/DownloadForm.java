@@ -15,8 +15,8 @@ public class DownloadForm {
         mFiles = new ArrayList<>();
     }
 
-    public void addFile(final String file, final long size) {
-        mFiles.add(new FileInfo(file, size));
+    public void addFile(final String file, final long size, final String date) {
+        mFiles.add(new FileInfo(file, size, date));
     }
 
     /* Getters */

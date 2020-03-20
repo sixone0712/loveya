@@ -7,7 +7,6 @@ import org.springframework.lang.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FileDownloader {
 
@@ -19,7 +18,7 @@ public class FileDownloader {
     private static final String STS_DONE = "done";
 
     private final Log log = LogFactory.getLog(getClass());
-    private HashMap<String, FileDownloadHolder> mHolders = new HashMap<>();
+    private HashMap<String, FileDownloadExecutor> mHolders = new HashMap<>();
 
     private static FileDownloader instance = null;
     static {
@@ -33,14 +32,13 @@ public class FileDownloader {
     private FileDownloader() {/* Singleton. Prevent to call the constructor. */}
 
 
-
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
         log.warn("addRequest( request-size="+dlList.size()+")");
         if(mHolders.size()>=MAX_THREADS_AT_ONCE) {
             log.warn("addRequest(): thread full");
             return null;
         }
-        FileDownloadHolder holder = new FileDownloadHolder(dlList);
+        FileDownloadExecutor holder = new FileDownloadExecutor(dlList);
         mHolders.put(holder.getId(), holder);
 
         holder.start();
@@ -59,7 +57,7 @@ public class FileDownloader {
         if(mHolders.containsKey(dlId)==false) {
             return null;
         }
-        FileDownloadHolder holder = mHolders.get(dlId);
+        FileDownloadExecutor holder = mHolders.get(dlId);
         // FIXME
         return null;
     }
@@ -74,7 +72,7 @@ public class FileDownloader {
         if(mHolders.containsKey(dlId)==false) {
             return STS_INVALID_ID;
         }
-        FileDownloadHolder holder = mHolders.get(dlId);
+        FileDownloadExecutor holder = mHolders.get(dlId);
         if(holder.isRunning()) {
             return STS_IN_PROGRESS;
         } else {
@@ -84,6 +82,33 @@ public class FileDownloader {
 
     public boolean isValidId(@NonNull final String dlId) {
         return mHolders.containsKey(dlId)?true:false;
+    }
+
+    public String getDownloadInfo(@NonNull final String dlId) {
+
+        if(mHolders.containsKey(dlId)==false) {
+            return null;
+        }
+
+        FileDownloadExecutor holder = mHolders.get(dlId);
+        if(holder.isRunning()==true) {
+            return null;
+        }
+        return holder.getDownloadPath();
+    }
+
+    public int getTotalFiles(@NonNull final String dlId) {
+        if(isValidId(dlId)==false) {
+            return 0;
+        }
+        return mHolders.get(dlId).getTotalFiles();
+    }
+
+    public int getDownloadFiles(@NonNull final String dlId) {
+        if(isValidId(dlId)==false) {
+            return 0;
+        }
+        return mHolders.get(dlId).getDownloadFiles();
     }
 
 }

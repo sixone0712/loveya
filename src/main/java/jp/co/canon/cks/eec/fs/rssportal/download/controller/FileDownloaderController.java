@@ -8,14 +8,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 @Controller
 public class FileDownloaderController {
@@ -24,10 +25,9 @@ public class FileDownloaderController {
 
     @RequestMapping(value="dl/request")
     @ResponseBody
-    public String reqTest(@RequestBody Map<String, Object> param) {
+    public String request(@RequestBody Map<String, Object> param) {
 
-        log.warn("reqTest()");
-        log.warn("param size="+param.size());
+        log.warn("request()");
 
         if(param.size()==0 || param.containsKey("list")==false) {
             log.warn("no target to download");
@@ -44,9 +44,11 @@ public class FileDownloaderController {
             checkItem &= item.containsKey("category");
             checkItem &= item.containsKey("file");
             checkItem &= item.containsKey("filesize");
+            checkItem &= item.containsKey("date");
 
             if(checkItem) {
-                addDownloadItem(map, (String)item.get("machine"), (String)item.get("category"), (String)item.get("file"), (String)item.get("filesize"));
+                addDownloadItem(map, (String)item.get("machine"), (String)item.get("category"),
+                        (String)item.get("file"), (String)item.get("filesize"), (String)item.get("date"));
             } else {
                 log.error("parameter failed");
                 return null;
@@ -55,20 +57,6 @@ public class FileDownloaderController {
 
         List<DownloadForm> targetList = new ArrayList<>();
         map.forEach((m, submap)->submap.forEach((c, dlForm)->targetList.add(dlForm)));
-
-        /*
-        map.forEach(new BiConsumer<String, Map<String, DownloadForm>>() {
-            @Override
-            public void accept(String s, Map<String, DownloadForm> submap) {
-                submap.forEach(new BiConsumer<String, DownloadForm>() {
-                    @Override
-                    public void accept(String s, DownloadForm downloadForm) {
-                        targetList.add(downloadForm);
-                    }
-                });
-            }
-        });
-         */
 
         log.warn("targetList size="+targetList.size());
         String dlId = FileDownloader.getInstance().addRequest(targetList);
@@ -92,7 +80,6 @@ public class FileDownloaderController {
             return null;
         }
         return new DownloadStatusResponseBody(dlId);
-
     }
 
     @RequestMapping("dl/download")
@@ -113,11 +100,13 @@ public class FileDownloaderController {
             return null;
         }
 
+        String dlPath = dl.getDownloadInfo(dlId);
+
         // FIXME
         return null;
     }
 
-    private void addDownloadItem(final Map map, final String machine, final String category, final String file, final String size) {
+    private void addDownloadItem(final Map map, final String machine, final String category, final String file, final String size, final String date) {
 
         DownloadForm form;
 
@@ -140,7 +129,7 @@ public class FileDownloaderController {
             log.error("fatal: addDownloadItem could not find form");
             return;
         }
-        form.addFile(file, Long.parseLong(size));
+        form.addFile(file, Long.parseLong(size), date);
     }
 
 
