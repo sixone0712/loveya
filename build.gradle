@@ -1,0 +1,62 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    // Build War
+    //id 'war'
+}
+
+// Build War
+/*
+rssportalWar {
+    archiveBaseName = '-'
+    archiveFileName = '-.war'
+    archiveVersion = "0.0.0"
+}
+*/
+
+
+group = 'jp.co.canon.cks.eec.fs'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    // Build War
+    //providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    // Build Jar
+    compile 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    compile 'javax.servlet:jstl'
+
+    // Dummy
+    compile fileTree(dir: '/src/libs', include: ['*.jar'])
+
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+}
+
+test {
+    useJUnitPlatform()
+}
