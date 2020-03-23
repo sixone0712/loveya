@@ -41,6 +41,7 @@ const initialState = Map({
 		})
 	]),
 
+	logInfoListCheckCnt: 0,
 	logInfoList: List([
 		Map({
 			keyIndex: 0,
@@ -147,29 +148,50 @@ export default handleActions({
 	[VIEW_CHECK_LOGTYPE_LIST]: (state, action) => {
 		console.log("handleActions[VIEW_CHECK_LOGTYPE_LIST]");
 		const logInfoList = state.get("logInfoList");
+		let logInfoListCheckCnt = state.get("logInfoListCheckCnt");
 		const index = action.payload;
 
-		console.log("logInfoList", logInfoList);
+		console.log("logInfoList", logInfoList.toJS());
 		console.log("index", index);
+		const check =  logInfoList.getIn([index, "checked"]);
+		console.log("check", check);
+		if(check){
+			logInfoListCheckCnt--;
+		} else {
+			logInfoListCheckCnt++;
+		}
 
-		return state.set("logInfoList", logInfoList.update(index, list => list.set("checked", !list.get("checked"))));
+		return state.set("logInfoList", logInfoList.update(index, list => list.set("checked", !list.get("checked"))))
+					.set("logInfoListCheckCnt", logInfoListCheckCnt);
 	},
 
 	[VIEW_CHECK_ALL_LOGTYPE_LIST] : (state, action) => {
 		const logInfoList = state.get("logInfoList");
 		const check = action.payload;
+		let logInfoListCheckCnt = 0;
 
 		const newlogInfoList = logInfoList.map(list => list.set("checked", check));
 
-		return state.set("logInfoList", newlogInfoList);
+		if(check){
+			logInfoListCheckCnt = newlogInfoList.size;
+		}
+
+		return state.set("logInfoList", newlogInfoList)
+					.set("logInfoListCheckCnt", logInfoListCheckCnt);
 	},
 
 	[VIEW_APPLY_GENRE_LIST]: (state, action) => {
 		console.log("handleActions[VIEW_APPLY_GENRE_LIST]");
 
 		const logInfoList = state.get("logInfoList");
-		const { genreList } = action.payload;
+		const { genreList, keyName } = action.payload;
+
 		console.log("genreList", genreList.toJS());
+
+		const selectedGenre =  genreList.toJS().filter(list => list.keyName === keyName);
+		console.log("selectedGenre", selectedGenre);
+
+		let logInfoListCheckCnt = 0;
 
 		/*
 		genreList
@@ -181,19 +203,24 @@ export default handleActions({
 		}
 		*/
 
-		const fileCat = genreList.get("fileCat");
-		console.log("fileCat", fileCat.toJS());
+		const fileCat = selectedGenre[0].fileCat;
+		console.log("fileCat", fileCat);
+
 
 		const initLogInfoList = logInfoList.map(list => list.set("checked", false));
-		console.log("initLogInfoList", initLogInfoList.toJS());
+		console.log("initLogInfoList", initLogInfoList);
 
 		const newLogInfoList = fileCat.reduce((pre, cur) => {
-			return pre.update(cur, list => list.set("checked", true));
+			//return pre.update(cur, list => list.set("checked", true));
+			return pre.update(cur, list => {
+				logInfoListCheckCnt++;
+				return list.set("checked", true);});
 		}, initLogInfoList);
 
 		console.log("newLogInfoList", newLogInfoList.toJS());
 
-		return state.set("logInfoList", newLogInfoList);
+		return state.set("logInfoList", newLogInfoList)
+					.set("logInfoListCheckCnt", logInfoListCheckCnt);
 	}
 	
 }, initialState)

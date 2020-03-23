@@ -6,10 +6,9 @@ import * as genreListActions from './modules/genreList';
 import * as searchListActions from './modules/searchList';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
-
-
-import Navbar from "./components/navbar";
-import Manual from "./components/manual";
+import * as API from "./api";
+import Navbar from "./components/Navbar";
+import Manual from "./components/Manual";
 
 class App extends Component {
 
@@ -51,7 +50,7 @@ export default connect(
         equipmentList: state.viewList.get('equipmentList'),
         toolInfoList: state.viewList.get('toolInfoList'),
         logInfoList: state.viewList.get('logInfoList'),
-        genreLists: state.genreList.get('genreLists'),
+        genreList: state.genreList.get('genreList'),
         genreCnt: state.genreList.get('genreCnt'),
         requestList: state.searchList.get('requestList'),
         responseList: state.searchList.get('responseList'),

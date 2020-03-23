@@ -51,7 +51,7 @@ dependencies {
     compile 'javax.servlet:jstl'
 
     // Dummy
-    compile fileTree(dir: '/src/libs', include: ['*.jar'])
+    compile fileTree(dir: './src/libs', include: ['*.jar'])
 
     implementation 'com.google.code.gson:gson:2.8.6'
 
