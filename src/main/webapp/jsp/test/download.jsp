@@ -34,21 +34,80 @@ div {
         "logName": "001 RUNNING STATUS",
         "sizeKB": 1
     },
+    (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+0:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323001949"
+filesize: 22
+date: "20200323001949"
+__proto__: Object
+1:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323002250"
+filesize: 22
+date: "20200323002250"
+__proto__: Object
+2:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323002758"
+filesize: 22
+date: "20200323002758"
+__proto__: Object
+3:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323003125"
+filesize: 22
+date: "20200323003125"
+__proto__: Object
+4:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323004643"
+filesize: 22
+date: "20200323004643"
+__proto__: Object
+5:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323010329"
+filesize: 22
+date: "20200323010329"
+__proto__: Object
+6:
+structId: "CR7"
+machine: "EQVM88"
+category: "001"
+file: "20200323010646"
+filesize: 22
+date: "20200323010646"
+__proto__: Object
+length: 7
+__proto__: Array(0)
          */
 
         let data = {list: [
             {
-                machine:'machine-1',
-                category:'category-1',
-                file:'file-1',
-                filesize:'3204',
-                date: '2020-14-12'
+                machine: "EQVM88",
+                category: "001",
+                file: "20200323003125",
+                filesize: "22",
+                date: "20200323003125",
             },{
-                machine:'machine-2',
-                category:'category-2',
-                file:'file-2',
-                filesize:'32444',
-                date: '2020-14-12'
+                machine: "EQVM88",
+                category: "001",
+                file: "20200323004643",
+                filesize: "22",
+                date: "20200323004643"
             }
         ]};
 

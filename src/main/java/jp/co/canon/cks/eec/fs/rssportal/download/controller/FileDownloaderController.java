@@ -1,8 +1,12 @@
 package jp.co.canon.cks.eec.fs.rssportal.download.controller;
 
+import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
+import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
+import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.xml.rpc.ServiceException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

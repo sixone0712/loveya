@@ -1,5 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.manage.DownloadInfoModel;
+import jp.co.canon.cks.eec.fs.manage.DownloadListModel;
+import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
@@ -10,9 +13,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 
+import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.logging.SimpleFormatter;
 
 public class FileDownloadExecutor {
 
@@ -28,11 +36,12 @@ public class FileDownloadExecutor {
     private Status mStatus = Status.idle;
     private List<DownloadForm> mDlList;
     private boolean mIsRunning = false;
-    private FileServiceModel mService = null;
+    private FileServiceManage mServiceManager;
+    private FileServiceModel mService; // 'mService' will be removed.
     private int mTotalFiles = -1;
     private int mDownloadFiles = -1;
     private String mPath = null;
-    private FileServiceManage mServiceManager;
+
 
     public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request) {
         mServiceManager = serviceManager;
@@ -49,22 +58,21 @@ public class FileDownloadExecutor {
         mTotalFiles = 0;
         mDlList.forEach(form -> mTotalFiles+=form.getFiles().size());
 
-
         mService = new TedFileServiceModelImpl();   // It's dummy interface, FIXME
         mDlList.forEach( dlItem -> {
             String[] files = new String[dlItem.getFiles().size()];
             long[] sizes = new long[dlItem.getFiles().size()];
-            String[] dates = new String[dlItem.getFiles().size()];
+            Calendar[] dates = new Calendar[dlItem.getFiles().size()];
 
             for(int i=0; i<dlItem.getFiles().size(); ++i) {
                 FileInfo f = dlItem.getFiles().get(i);
                 files[i] = f.getName();
                 sizes[i] = f.getSize();
-                dates[i] = f.getDate();
+                dates[i] = convertStringToCalendar(f.getDate());
             }
 
             try {
-                mService.registRequest( // FIXME
+                String reqNo = mServiceManager.registRequest(
                         dlItem.getSystem(),
                         null,
                         dlItem.getTool(),
@@ -73,10 +81,29 @@ public class FileDownloadExecutor {
                         files,
                         sizes,
                         dates);
-            } catch (ServiceException e) {
-                e.printStackTrace();
-                log.error("FileServiceModel.registRequest occurs service exception");
+                log.warn("registRequest reqNo="+reqNo);
+
+                DownloadListModel dlList = mServiceManager.createDownloadList(dlItem.getSystem(), dlItem.getTool(), reqNo);
+                DownloadInfoModel[] dlInfos = dlList.getDownloadInfos();
+                log.warn("dlInfos="+dlInfos.length);
+
+                if(dlInfos.length>0) {
+                    for(DownloadInfoModel info: dlInfos) {
+                        FileInfoModel[] fileInfos = info.getFiles();
+                        log.warn("downloadInfo "+info.getRequestNo()+" files="+fileInfos.length);
+                        if(fileInfos.length>0) {
+                            for(FileInfoModel file: fileInfos) {
+                                String fileUrl = mServiceManager.download(null, dlItem.getSystem(), dlItem.getTool(), reqNo, file.getName());
+                                log.warn("fileUrl="+fileUrl);
+                            }
+                        }
+                    }
+                }
+
+            } catch (RemoteException e) {
                 mStatus = Status.error;
+                log.error("FileServiceModel.registRequest occurs service exception");
+                e.printStackTrace();
             }
             mDownloadFiles += dlItem.getFiles().size();
             log.warn("====download files="+mDownloadFiles);
@@ -87,17 +114,19 @@ public class FileDownloadExecutor {
 
         // Compress files
         mPath = "Congrat!";
-
-        if(false) {
-            /* FIXME */
-            log.warn("download start");
-            something(20000);
-            log.warn("download done");
-            /* FIXME */
-        }
-
         mIsRunning = false;
     };
+
+    private Calendar convertStringToCalendar(@NonNull final String str) {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat fmter = new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            cal.setTime(fmter.parse(str));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return cal;
+    }
 
     public String getId() {
         return mId;
@@ -152,14 +181,7 @@ public class FileDownloadExecutor {
         }
     }
 
-    /* something is dummy for something */
-    private void something(long l) {
-        log.warn("fall a sleep for "+l+" msec");
-        try {
-            Thread.sleep(l);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+
+
 
 }

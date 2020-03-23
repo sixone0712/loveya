@@ -2,12 +2,16 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 
 import javax.xml.rpc.ServiceException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,6 +51,7 @@ public class FileDownloader {
 
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
         log.warn("addRequest( request-size="+dlList.size()+")");
+
         if(mHolders.size()>=MAX_THREADS_AT_ONCE) {
             log.warn("addRequest(): thread full");
             return null;
