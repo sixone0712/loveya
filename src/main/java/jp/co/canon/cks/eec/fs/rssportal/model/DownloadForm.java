@@ -24,4 +24,9 @@ public class DownloadForm {
     public String getTool() {return mTool;}
     public String getLogType() {return mLogType;}
     public List<FileInfo> getFiles() {return mFiles;}
+
+    /* Setters */
+    protected void setFiles(List<FileInfo> files) {
+        mFiles = files;
+    }
 }
