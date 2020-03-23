@@ -1,8 +1,5 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.cks.eec.fs.manage.DownloadInfoModel;
-import jp.co.canon.cks.eec.fs.manage.DownloadListModel;
-import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
@@ -17,10 +14,8 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.lang.NonNull;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileDownloadExecutor {
@@ -40,7 +34,7 @@ public class FileDownloadExecutor {
     private final Log log = LogFactory.getLog(getClass());
     private static final String file_format = "%s/%s/%s";
 
-    private static final String user_name = "eecAdmin";
+    private static final String user_name = "eecAdmin";     // FIXME
     private static final String ftp_root = "./ftp_data";
     private static final String ftp_cache_dir = "cache";
 
@@ -52,7 +46,7 @@ public class FileDownloadExecutor {
     private String mId;
     private Status mStatus = Status.idle;
     private List<DownloadForm> mDlList;
-    private List<FileDownloadInfo> mDownloadInfos;
+    private List<FileDownloadContext> downloadContexts;
     private List<CustomURL> mUrlList;
 
     private boolean mIsRunning = false;
@@ -70,52 +64,42 @@ public class FileDownloadExecutor {
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
         mId = "dl"+(mUniqueKey++)+"-"+String.valueOf(stamp.getTime());
         mDlList = request;
-        mDownloadInfos = new ArrayList<>();
+        downloadContexts = new ArrayList<>();
         for(DownloadForm req: request) {
-            mDownloadInfos.add(new FileDownloadInfo(req));
+            downloadContexts.add(new FileDownloadContext(mId, req));
         }
+        downloadContexts.forEach(context -> mTotalFiles+=context.getFileCount());
+
+        mDownloadFiles = 0;
         mUrlList = new ArrayList<>();
     }
 
     private Runnable mRunner = () -> {
 
         mIsRunning = true;
-        mDownloadFiles = 0;
-        mTotalFiles = 0;
-        mDownloadInfos.forEach(inf -> mTotalFiles+=inf.getFiles().size());
 
-        mDownloadInfos.forEach( inf -> {
-            String[] files = new String[inf.getFiles().size()];
-            long[] sizes = new long[inf.getFiles().size()];
-            Calendar[] dates = new Calendar[inf.getFiles().size()];
-
-            for(int i=0; i<inf.getFiles().size(); ++i) {
-                FileInfo f = inf.getFiles().get(i);
-                files[i] = f.getName();
-                sizes[i] = f.getSize();
-                dates[i] = convertStringToCalendar(f.getDate());
-            }
+        downloadContexts.forEach(context -> {
 
             try {
                 String reqNo = mServiceManager.registRequest(
-                        inf.getSystem(),
+                        context.getSystem(),
                         user_name,
-                        inf.getTool(),
+                        context.getTool(),
                         "",
-                        inf.getLogType(),
-                        files,
-                        sizes,
-                        dates);
+                        context.getLogType(),
+                        context.getFileNames(),
+                        context.getFileSizes(),
+                        context.getFileDates());
                 log.warn("registRequest reqNo=" + reqNo);
 
-                while(!inf.isDownloadComplete()) {
-                    RequestListBean requestList = mService.createDownloadList(inf.getSystem(), null, null);
+                while(!context.isDownloadComplete()) {
+                    RequestListBean requestList = mService.createDownloadList(context.getSystem(), null, null);
                     for (int i = 0; i < requestList.getRequestListCount(); ++i) {
                         RequestInfoBean reqInfo = requestList.getRequestInfo(i);
                         if (reqInfo.getRequestNo().equals(reqNo)) {
-                            String url = mServiceManager.download(user_name, inf.getSystem(), inf.getTool(), reqNo, reqInfo.getArchiveFileName());
+                            String url = mServiceManager.download(user_name, context.getSystem(), context.getTool(), reqNo, reqInfo.getArchiveFileName());
                             log.warn("download " + reqInfo.getArchiveFileName() + "(url=" + url + ")");
-                            inf.setUrl(url);
+                            context.setUrl(url);
                             break;
                         }
                     }
@@ -131,7 +115,7 @@ public class FileDownloadExecutor {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            mDownloadFiles += inf.getFiles().size();
+            mDownloadFiles += context.getFileCount();
             log.warn("====download files="+mDownloadFiles);
         });
 
@@ -164,7 +148,7 @@ public class FileDownloadExecutor {
         }
     }
 
-    private String getLogSubDir(@NonNull FileDownloadInfo logInf) {
+    private String getLogSubDir(@NonNull FileDownloadContext logInf) {
         return logInf.getTool()+"/"+logInf.getLogType();
     }
 
@@ -180,7 +164,7 @@ public class FileDownloadExecutor {
             dir.mkdirs();
         }
 
-        for(FileDownloadInfo inf: mDownloadInfos) {
+        for(FileDownloadContext inf: downloadContexts) {
 
             CustomURL url = inf.getUrl();
             File toolDir = new File(dir, getLogSubDir(inf));
