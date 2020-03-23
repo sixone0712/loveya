@@ -5,5 +5,12 @@ export function get(getId) {
 }
 
 export function post(postId, postData) {
-    return axios.post('/api/' + postId, postData);
+    return axios.post(postId, postData);
+}
+
+export function postDownload(postId, postData) {
+    return axios.post(postId, postData, {
+        headers: {
+            'Content-Type': 'application/json',
+        }});
 }
