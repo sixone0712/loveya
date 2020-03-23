@@ -96,8 +96,9 @@ public class FileDownloaderController {
     }
 
     @RequestMapping("dl/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam(value="dlId", defaultValue="") String dlId,
-                                                            HttpServletResponse resp) {
+    public ResponseEntity<InputStreamResource> downloadFile(
+            @RequestParam(value="dlId", defaultValue="") String dlId,
+            HttpServletResponse response) {
         if(dlId.isEmpty()) {
             log.warn("invalid param");
             return null;
@@ -123,7 +124,7 @@ public class FileDownloaderController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(Files.size(Paths.get(dlPath)));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            resp.setHeader("Content-Disposition", "attachment; filename="+"test.zip");
+            response.setHeader("Content-Disposition", "attachment; filename="+"test.zip");
             return new ResponseEntity(isr, headers, HttpStatus.OK);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
