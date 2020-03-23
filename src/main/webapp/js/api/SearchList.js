@@ -29,7 +29,7 @@ export const setSearchList = (props) => {
 export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
-    searchListActions.searchLoadList("createFileList", requestList.toJS());
+    searchListActions.searchLoadList("api/createFileList", requestList.toJS());
 };
 
 export const getResponseList = (props) => {
@@ -61,21 +61,26 @@ export const startDownload = async (props) => {
     const responseListJS = responseList.toJS();
     console.log("responseListJS", responseListJS);
 
+
     const downloadList = responseListJS.reduce((acc, cur, idx) => {
         if (cur.checked) acc.push({
             structId: cur.structId,
             machine: cur.targetName,
             category: cur.logId,
             file: cur.fileName,
-            filesize: cur.fileSize,
+            filesize: String(cur.fileSize),
             date: cur.fileDate,
         });
         return acc;
     }, []);
 
-    console.log("downloadList", downloadList);
+    const jsonList = new Object();
+    jsonList.list = downloadList;
 
-    const result = await services.axiosAPI.post("dl/request", downloadList)
+    console.log("downloadList", downloadList);
+    console.log("jsonList", jsonList);
+
+    const result = await services.axiosAPI.postDownload("dl/request", jsonList)
         .then((data) => data.data)
         .catch((error) => {
             console.log("[startDownload]error", error);
