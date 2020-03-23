@@ -13,6 +13,7 @@ import {bindActionCreators} from "redux";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
 import moment from "moment";
+import {setRowsPerPage} from "../../api";
 
 const tableStyle = {
   boxShadow: "0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12)",
@@ -71,7 +72,7 @@ class FileList extends Component {
     super(props);
     this.state = {
       itemsChecked: false,
-      pageSize: 10,
+      pageSize: this.props.responsePerPage,
       currentPage: 1
     };
   }
@@ -84,6 +85,7 @@ class FileList extends Component {
   };
 
   onChangeRowsPerPage = (e) => {
+    setRowsPerPage(this.props, e.target.value);
     this.setState(
         {
           ...this.state,
@@ -91,7 +93,7 @@ class FileList extends Component {
           currentPage: 1
         }
     )
-  } ;
+  };
 
   checkFileItem = (e) => {
     const idx = e.target.id.split('_')[1];
@@ -117,7 +119,8 @@ class FileList extends Component {
       currentPage
     } = this.state;
 
-    if (count === 0) {
+    //if (count === 0 && this.props.resSuccess) {
+    if (count === 0 || this.props.resError || this.props.resPending) {
       return (
         <div style={divStyle}>
           <Card className="ribbon-wrapper" style={cardStyle}>
@@ -166,29 +169,29 @@ class FileList extends Component {
                     <th>Size</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {files.map((file, key) => {
-                    const convFileDate = API.convertDateFormat(file.fileDate);
-                    return (
-                        <tr key={key}>
-                          <td style={checkStyle}>
-                            <CheckBox
-                                 key={key}
-                                index={file.keyIndex}
-                                name={file.fileName}
-                                isChecked={file.checked}
-                                handleCheckboxClick={this.checkFileItem}
-                                labelClass="filelist-label"
-                            />
-                          </td>
-                          <td>{file.targetName}</td>
-                          <td>{file.logName}</td>
-                          <td>{file.fileName}</td>
-                          <td>{convFileDate}</td>
-                          <td>{file.sizeKB}</td>
-                        </tr>
-                    );
-                  })}
+                 <tbody>
+                {files.map((file, key) => {
+                  const convFileDate = API.convertDateFormat(file.fileDate);
+                  return (
+                      <tr key={key}>
+                        <td style={checkStyle}>
+                          <CheckBox
+                              key={key}
+                              index={file.keyIndex}
+                              name={file.fileName}
+                              isChecked={file.checked}
+                              handleCheckboxClick={this.checkFileItem}
+                              labelClass="filelist-label"
+                          />
+                        </td>
+                        <td>{file.targetName}</td>
+                        <td>{file.logName}</td>
+                        <td>{file.fileName}</td>
+                        <td>{convFileDate}</td>
+                        <td>{file.sizeKB}</td>
+                      </tr>
+                  );
+                })}
                 </tbody>
               </Table>
             </CardBody>
@@ -264,6 +267,10 @@ export default connect(
       responseList: state.searchList.get('responseList'),
       responseListCnt: state.searchList.get('responseListCnt'),
       downloadCnt: state.searchList.get('downloadCnt'),
+      responsePerPage: state.searchList.get('responsePerPage'),
+      resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
+      resPending: state.pender.pending['searchList/SEARCH_LOAD_RESPONSE_LIST'],
+      resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
     }),
     (dispatch) => ({
       searchListActions: bindActionCreators(searchListActions, dispatch)
