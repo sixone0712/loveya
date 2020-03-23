@@ -8,12 +8,12 @@ export const getRequestList = (props) => {
 
 export const setStartDate = (props, date) => {
     const { searchListActions } = props;
-    searchListActions.searchSetStartDate(date);
+    searchListActions.searchSetRequestStartDate(date);
 };
 
 export const setEndDate = (props, date) => {
     const { searchListActions } = props;
-    searchListActions.searchSetEndDate(date);
+    searchListActions.searchSetRequestEndDate(date);
 };
 
 export const setSearchList = (props) => {
@@ -22,14 +22,15 @@ export const setSearchList = (props) => {
     const logInfoList = props.logInfoList;
     const startDate = props.startDate;
     const endDate = props.endDate;
-    searchListActions.searchSetList({ toolList, logInfoList, startDate, endDate });
+    searchListActions.searchSetRequestList({ toolList, logInfoList, startDate, endDate });
     //startSearchList(props);
 };
 
 export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
-    searchListActions.searchLoadList("api/createFileList", requestList.toJS());
+    searchListActions.searchInitResponseList();
+    searchListActions.searchLoadResponseList("api/createFileList", requestList.toJS());
 };
 
 export const getResponseList = (props) => {
@@ -44,15 +45,15 @@ export const getResponseListCnt = (props) => {
 
 export const checkResponseList = (props, idx) => {
     const { searchListActions } = props;
-    searchListActions.searchCheckList(idx);
+    searchListActions.searchCheckResponseList(idx);
 };
 
 export const checkAllResponseList = (props, isAllChecked) => {
     const { searchListActions } = props;
     if(isAllChecked === true) {
-        searchListActions.searchCheckALLList(true);
+        searchListActions.searchCheckALLResponseList(true);
     } else {
-        searchListActions.searchCheckALLList(false);
+        searchListActions.searchCheckALLResponseList(false);
     }
 };
 
@@ -101,4 +102,9 @@ export const convertDateFormat = (date) => {
     const sec = date.substr(12,2);
 
     return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
-}
+};
+
+export const setRowsPerPage = (props, page) => {
+    const { searchListActions } = props;
+    searchListActions.searchSetResponsePerPage(page);
+};
