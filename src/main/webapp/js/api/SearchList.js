@@ -1,3 +1,6 @@
+import services from "../services";
+import * as Define from "../define";
+
 export const getRequestList = (props) => {
     const { requestList } = props;
     return requestList.toJS();
@@ -53,7 +56,7 @@ export const checkAllResponseList = (props, isAllChecked) => {
     }
 };
 
-export const startDownload = (props) => {
+export const startDownload = async (props) => {
     const { responseList } = props;
     const responseListJS = responseList.toJS();
     console.log("responseListJS", responseListJS);
@@ -71,6 +74,15 @@ export const startDownload = (props) => {
     }, []);
 
     console.log("downloadList", downloadList);
+
+    const result = await services.axiosAPI.post("dl/request", downloadList)
+        .then((data) => data.data)
+        .catch((error) => {
+            console.log("[startDownload]error", error);
+            return Define.GENRE_SET_FAIL_SEVER_ERROR;
+        });
+
+    return result;
 };
 
 export const convertDateFormat = (date) => {

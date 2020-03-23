@@ -60,7 +60,8 @@ class DownloadConfirmModal extends Component {
             ...this.state,
             processModalOpen: true
         });
-        API.startDownload(this.props);
+        const downloadURL = API.startDownload(this.props);
+        console.log("downloadURL", downloadURL);
     };
 
     closeProcessModal = () => {
