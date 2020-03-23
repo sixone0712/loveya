@@ -12,6 +12,7 @@ public class FileDownloadInfo extends DownloadForm {
     private boolean downloadComplete;
     private boolean ftpProcComplete;
     private CustomURL url;
+    private File rootDir;
     private File localPath;
 
     public FileDownloadInfo(@NonNull String tool, @NonNull String logType) {
@@ -49,5 +50,13 @@ public class FileDownloadInfo extends DownloadForm {
 
     public boolean isFtpProcComplete() {
         return ftpProcComplete;
+    }
+
+    public void setRootDir(@NonNull final File rootDir) {
+        this.rootDir = rootDir;
+    }
+
+    public File getRootDir() {
+        return rootDir;
     }
 }

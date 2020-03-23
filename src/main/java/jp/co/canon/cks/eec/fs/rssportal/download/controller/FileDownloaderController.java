@@ -107,6 +107,7 @@ public class FileDownloaderController {
         }
 
         String dlPath = dl.getDownloadInfo(dlId);
+        log.warn("download path="+dlPath);
 
         // FIXME
         return null;

@@ -21,6 +21,9 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -28,6 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class FileDownloadExecutor {
 
@@ -129,13 +135,16 @@ public class FileDownloadExecutor {
             log.warn("====download files="+mDownloadFiles);
         });
 
-        mStatus = Status.done;
-        log.warn("download done");
-
         doFtpProc();
+        doCompress();
 
-        // Compress files
-        mPath = "Congrat!";
+        if(mPath!=null) {
+            // Compress files
+            log.warn("download done (zip="+mPath+")");
+            mStatus = Status.done;
+        } else {
+            mStatus = Status.error;
+        }
         mIsRunning = false;
     };
 
@@ -214,6 +223,7 @@ public class FileDownloadExecutor {
                     outs.flush();
                 }
                 outs.close();
+                inf.setRootDir(dir);
                 inf.setLocalPath(cache);
                 log.warn("ftp-proc: "+url.getLastFileName()+" download done");
 
@@ -230,7 +240,42 @@ public class FileDownloadExecutor {
     }
 
     private void doCompress() {
-        // compress all
+
+        log.warn("doCompress()");
+        File zipDir = new File("./zip");
+        try {
+            FileUtils.deleteDirectory(zipDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        zipDir.mkdirs();
+        String path = zipDir.getPath()+"/test.zip";
+        pack("./ftp_data/cache", path);
+        mPath = path;
+    }
+
+    public void pack(String sourceDirPath, String zipFilePath) {
+        try {
+            Path p = Files.createFile(Paths.get(zipFilePath));
+            ZipOutputStream  zs = new ZipOutputStream(Files.newOutputStream(p));
+            Path pp = Paths.get(sourceDirPath);
+            ZipOutputStream finalZs = zs;
+            Files.walk(pp)
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                        try {
+                            finalZs.putNextEntry(zipEntry);
+                            Files.copy(path, finalZs);
+                            finalZs.closeEntry();
+                        } catch (IOException e) {
+                            System.err.println(e);
+                        }
+                    });
+            zs.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {
