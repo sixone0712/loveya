@@ -1,11 +1,18 @@
 package jp.co.canon.cks.eec.fs.rssportal.download.controller;
 
+import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
+import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
+import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.rpc.ServiceException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +96,9 @@ public class FileDownloaderController {
     }
 
     @RequestMapping("dl/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam(value="dlId", defaultValue="") String dlId) {
+    public ResponseEntity<InputStreamResource> downloadFile(
+            @RequestParam(value="dlId", defaultValue="") String dlId,
+            HttpServletResponse response) {
         if(dlId.isEmpty()) {
             log.warn("invalid param");
             return null;
@@ -101,10 +116,26 @@ public class FileDownloaderController {
         }
 
         String dlPath = dl.getDownloadInfo(dlId);
+        log.warn("download path="+dlPath);
 
-        // FIXME
-        return null;
+        try {
+            InputStream is = new FileInputStream(new File(dlPath));
+            InputStreamResource isr = new InputStreamResource(is);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentLength(Files.size(Paths.get(dlPath)));
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setHeader("Content-Disposition", "attachment; filename="+"test.zip");
+            return new ResponseEntity(isr, headers, HttpStatus.OK);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
+
+
 
     private void addDownloadItem(final Map map, final String machine, final String category, final String file, final String size, final String date) {
 
