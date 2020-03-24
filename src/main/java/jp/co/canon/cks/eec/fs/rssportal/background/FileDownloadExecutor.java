@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class FileDownloadExecutor {
+public class FileDownloadExecutor implements DownloadConfig {
 
     private final Log log = LogFactory.getLog(getClass());
     private static final String file_format = "%s/%s/%s";
@@ -43,17 +43,17 @@ public class FileDownloadExecutor {
     };
 
     private static int mUniqueKey = 1;
-    private String mId;
+    private String downloadId;
     private Status mStatus = Status.idle;
-    private List<DownloadForm> mDlList;
+    private List<DownloadForm> downloadForms;
     private List<FileDownloadContext> downloadContexts;
-    private List<CustomURL> mUrlList;
+    private String baseDir;
 
     private boolean mIsRunning = false;
     private FileServiceManage mServiceManager;
     private FileServiceModel mService;
-    private int mTotalFiles = -1;
-    private int mDownloadFiles = -1;
+    private int totalFiles = -1;
+    private int downloadFiles = -1;
     private String mPath = null;
 
 
@@ -62,225 +62,148 @@ public class FileDownloadExecutor {
         mService = new FileServiceUsedSOAP("10.1.36.118:8080");
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        mId = "dl"+(mUniqueKey++)+"-"+String.valueOf(stamp.getTime());
-        mDlList = request;
+        downloadId = "dl"+(mUniqueKey++)+"-"+String.valueOf(stamp.getTime());
+        downloadForms = request;
         downloadContexts = new ArrayList<>();
-        for(DownloadForm req: request) {
-            downloadContexts.add(new FileDownloadContext(mId, req));
-        }
-        downloadContexts.forEach(context -> mTotalFiles+=context.getFileCount());
-
-        mDownloadFiles = 0;
-        mUrlList = new ArrayList<>();
+        baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
     }
 
-    private Runnable mRunner = () -> {
+    private void initialize() {
+        log.info(downloadId+": initialize()");
+        for(DownloadForm form: downloadForms) {
+            downloadContexts.add(new FileDownloadContext(downloadId, form));
+        }
+        totalFiles = 0;
+        downloadContexts.forEach(context -> totalFiles +=context.getFileCount());
+        downloadFiles = 0;
+    }
 
-        mIsRunning = true;
+    private class doAsyncProc implements Runnable {
 
-        downloadContexts.forEach(context -> {
+        final private FileDownloadContext context;
+
+        private doAsyncProc(@NonNull FileDownloadContext context) {
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+
+            log.info(downloadId+": doAsyncProc()");
 
             try {
-                String reqNo = mServiceManager.registRequest(
-                        context.getSystem(),
-                        user_name,
-                        context.getTool(),
-                        "",
-                        context.getLogType(),
-                        context.getFileNames(),
-                        context.getFileSizes(),
-                        context.getFileDates());
-                log.warn("registRequest reqNo=" + reqNo);
-
-                while(!context.isDownloadComplete()) {
-                    RequestListBean requestList = mService.createDownloadList(context.getSystem(), null, null);
-                    for (int i = 0; i < requestList.getRequestListCount(); ++i) {
-                        RequestInfoBean reqInfo = requestList.getRequestInfo(i);
-                        if (reqInfo.getRequestNo().equals(reqNo)) {
-                            String url = mServiceManager.download(user_name, context.getSystem(), context.getTool(), reqNo, reqInfo.getArchiveFileName());
-                            log.warn("download " + reqInfo.getArchiveFileName() + "(url=" + url + ")");
-                            context.setUrl(url);
-                            break;
-                        }
-                    }
-                    Thread.sleep(300);
-                }
+                regist();
+                download();
+                transfer();
+                extract();
 
             } catch (RemoteException e) {
-                mStatus = Status.error;
-                log.error("FileServiceModel.registRequest occurs service exception");
+                e.printStackTrace();
+            } catch (InterruptedException e) { // relevant to sleep working
                 e.printStackTrace();
             } catch (ServiceException e) {
                 e.printStackTrace();
+            }
+        }
+
+        private void regist() throws RemoteException {
+
+            log.info("regist()");
+            String request = mServiceManager.registRequest(
+                    context.getSystem(),
+                    context.getUser(),
+                    context.getTool(),
+                    context.getComment(),
+                    context.getLogType(),
+                    context.getFileNames(),
+                    context.getFileSizes(),
+                    context.getFileDates());
+
+            log.warn("requestNo="+request);
+            context.setRequestNo(request);
+        }
+
+        private void download() throws ServiceException, RemoteException, InterruptedException {
+
+            log.info("download()");
+            while(true) {
+                RequestListBean requestList = mService.createDownloadList(context.getSystem(), null, null);
+                for (int i = 0; i < requestList.getRequestListCount(); ++i) {
+                    RequestInfoBean reqInfo = requestList.getRequestInfo(i);
+                    if (reqInfo.getRequestNo().equals(context.getRequestNo())) {
+                        String achieveUrl = mServiceManager.download(user_name, context.getSystem(), context.getTool(),
+                                context.getRequestNo(), reqInfo.getArchiveFileName());
+                        log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
+                        context.setAchieveUrl(achieveUrl);
+                        break;
+                    }
+                }
+                if(context.isDownloadComplete()) {
+                    break;
+                }
+                Thread.sleep(300);
+            }
+        }
+
+        private void transfer() {
+
+            log.info("transfer()");
+            CustomURL url = context.getAchieveUrl();
+
+            FtpWorker worker = new FtpWorker(url.getHost(), url.getPort(), url.getLoginUser(),
+                    url.getLoginPassword(), url.getFtpMode());
+
+            worker.open();
+
+            Path path = Paths.get(context.getOutPath(), url.getLastFileName());
+            if(worker.transfer(url.getFile(), path.toString())) {
+                context.setFtpProcComplete(true);
+            }
+
+            worker.close();
+        }
+
+        private void extract() {
+            log.trace("extract()");
+            downloadFiles += context.getFileCount();
+        }
+    }
+
+    private void compress() {
+        log.info(downloadId+": compress()");
+        Compressor comp = new Compressor();
+        String zipDir = Paths.get(DownloadConfig.ZIP_PATH, downloadId, "test.zip").toString();
+        comp.compress(baseDir, zipDir);
+    }
+
+    private void wrapup() {
+        log.info(downloadId+": wrapup()");
+    }
+
+    private Runnable runner = () -> {
+        initialize();
+        downloadContexts.forEach(context->{
+            (new Thread(new doAsyncProc(context))).start();
+        });
+        while(downloadFiles!=totalFiles) {
+            try {
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            mDownloadFiles += context.getFileCount();
-            log.warn("====download files="+mDownloadFiles);
-        });
-
-        doFtpProc();
-        doCompress();
-
-        if(mPath!=null) {
-            // Compress files
-            log.warn("download done (zip="+mPath+")");
-            mStatus = Status.done;
-        } else {
-            mStatus = Status.error;
         }
-        mIsRunning = false;
+        compress();
+        wrapup();
     };
 
-    private File getCacheDir() {
-        File dir = new File("./ftp_data/cache");
-        if(dir.exists()==false) {
-            dir.mkdirs();
-        }
-        return dir;
-    }
-
-    private void flushCache(File cacheDir) {
-        try {
-            FileUtils.deleteDirectory(cacheDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String getLogSubDir(@NonNull FileDownloadContext logInf) {
-        return logInf.getTool()+"/"+logInf.getLogType();
-    }
-
-    private void doFtpProc() {
-
-        log.warn("doFtpProc()");
-
-        File dir = new File(ftp_root, ftp_cache_dir);
-        if(dir.exists()) {
-            flushCache(dir);
-        }
-        if(dir.exists()==false) {
-            dir.mkdirs();
-        }
-
-        for(FileDownloadContext inf: downloadContexts) {
-
-            CustomURL url = inf.getUrl();
-            File toolDir = new File(dir, getLogSubDir(inf));
-            toolDir.mkdirs();
-
-            if (inf.isDownloadComplete()==false || url == null) {
-                log.warn("download hasn't completed");
-                continue;
-            }
-
-            File cache = new File(toolDir, url.getLastFileName());
-
-            FTP ftp = new FTP(url.getHost(), url.getPort());
-            try {
-                if(cache.createNewFile()==false) {
-                    log.warn("creating file failed");
-                    continue;
-                }
-                OutputStream outs = new FileOutputStream(cache);
-
-                ftp.connect();
-                ftp.login(url.getLoginUser(), url.getLoginPassword());
-                ftp.binary();
-
-                String ftpMode = url.getFtpMode();
-                if (ftpMode != null && ftpMode.isEmpty() == false && ftpMode.equals("active")) {
-                    ftp.setDataConnectionMode(1);
-                } else {
-                    ftp.setDataConnectionMode(2);
-                }
-                InputStream is = ftp.openFileStream(url.getFile());
-
-                byte[] buffer = new byte[256];
-                while (true) {
-                    int size = is.read(buffer);
-                    if (size == -1) {
-                        break;
-                    }
-                    outs.write(buffer);
-                    outs.flush();
-                }
-                outs.close();
-                inf.setRootDir(dir);
-                inf.setLocalPath(cache);
-                log.warn("ftp-proc: "+url.getLastFileName()+" download done");
-
-            } catch (FTPException e) {
-                e.printStackTrace();
-            } catch (SocketTimeoutException e) {
-                e.printStackTrace();
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void doCompress() {
-
-        log.warn("doCompress()");
-        File zipDir = new File("./zip");
-        try {
-            FileUtils.deleteDirectory(zipDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        zipDir.mkdirs();
-        String path = zipDir.getPath()+"/test.zip";
-        pack("./ftp_data/cache", path);
-        mPath = path;
-    }
-
-    public void pack(String sourceDirPath, String zipFilePath) {
-        try {
-            Path p = Files.createFile(Paths.get(zipFilePath));
-            ZipOutputStream  zs = new ZipOutputStream(Files.newOutputStream(p));
-            Path pp = Paths.get(sourceDirPath);
-            ZipOutputStream finalZs = zs;
-            Files.walk(pp)
-                    .filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                        try {
-                            finalZs.putNextEntry(zipEntry);
-                            Files.copy(path, finalZs);
-                            finalZs.closeEntry();
-                        } catch (IOException e) {
-                            System.err.println(e);
-                        }
-                    });
-            zs.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Calendar convertStringToCalendar(@NonNull final String str) {
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat fmter = new SimpleDateFormat("yyyyMMddHHmmss");
-        try {
-            cal.setTime(fmter.parse(str));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return cal;
-    }
-
     public String getId() {
-        return mId;
+        return downloadId;
     }
 
     public void start() {
-        log.warn("file download start ("+mDlList.size()+")");
+        log.warn("file download start ("+ downloadForms.size()+")");
         dumpFileList();
-        (new Thread(mRunner)).start();
+        (new Thread(runner)).start();
     }
 
     public void stop() {
@@ -293,7 +216,7 @@ public class FileDownloadExecutor {
 
     public List<String> getFileList() {
         List<String> list = new ArrayList<>();
-        for(DownloadForm form: mDlList) {
+        for(DownloadForm form: downloadForms) {
             form.getFiles().forEach(fileInfo -> {
                 list.add(String.format(file_format, form.getTool(), form.getLogType(), fileInfo.getName()));
             });
@@ -306,16 +229,16 @@ public class FileDownloadExecutor {
     }
 
     public int getDownloadFiles() {
-        return mDownloadFiles;
+        return downloadFiles;
     }
 
     public int getTotalFiles() {
-        return mTotalFiles;
+        return totalFiles;
     }
 
     private void dumpFileList() {
-        if(mDlList!=null) {
-            for(DownloadForm form: mDlList) {
+        if(downloadForms !=null) {
+            for(DownloadForm form: downloadForms) {
                 log.warn(String.format("tool: %s logType: %s", form.getTool(), form.getLogType()));
                 for(FileInfo file: form.getFiles()) {
                     log.warn(String.format("  %s (%d)", file.getName(), file.getSize()));
@@ -325,8 +248,5 @@ public class FileDownloadExecutor {
             log.error("null dlList");
         }
     }
-
-
-
 
 }
