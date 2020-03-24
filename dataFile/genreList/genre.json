@@ -2,19 +2,25 @@
   {
     "dispName": "chpark",
     "keyName": "chpark",
-    "machine": [0, 1, 2, 3],
-    "fileCat": [4, 5, 6, 7]
+    "machine": [],
+    "fileCat": [
+      1
+    ]
   },
   {
     "dispName": "gtpark",
     "keyName": "gtpark",
-    "machine": [0, 1, 2, 3],
-    "fileCat": [4, 5, 6, 7]
+    "machine": [],
+    "fileCat": [
+      2
+    ]
   },
   {
     "dispName": "ymkwon",
     "keyName": "ymwon",
-    "machine": [0, 1, 2, 3],
-    "fileCat": [4, 5, 6, 7]
+    "machine": [],
+    "fileCat": [
+      3
+    ]
   }
 ]

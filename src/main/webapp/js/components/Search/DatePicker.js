@@ -36,7 +36,7 @@ const CreateDatetimePicker = (props) => {
             <Input
                 type="text"
                 style={inputStyle}
-                value={moment(date).format("YYYY-MM-DD HH:mm")}
+                value={date.format("YYYY-MM-DD HH:mm")}
                 className="input-datepicker"
                 readOnly
             />
@@ -53,10 +53,14 @@ class DatePicker extends Component {
     }
 
     onStartDateChanage = startDate => {
+        console.log("onStartDateChanage");
+        console.log("startDate", startDate);
         API.setStartDate(this.props, startDate)
     };
 
     onEndDateChanage = endDate => {
+        console.log("onEndDateChanage");
+        console.log("endDate", endDate);
         API.setEndDate(this.props, endDate)
     };
 

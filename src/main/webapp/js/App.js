@@ -20,9 +20,9 @@ class App extends Component {
         console.log("componentDidMount");
         const { viewListActions } = this.props;
         const { genreListActions } = this.props;
-        viewListActions.viewLoadToolInfoList("createToolList");
-        viewListActions.viewLoadLogTypeList("createFileTypeList");
-        genreListActions.genreLoadList("getGenre");
+        viewListActions.viewLoadToolInfoList("api/createToolList");
+        viewListActions.viewLoadLogTypeList("api/createFileTypeList");
+        genreListActions.genreLoadList("api/getGenre");
     }
 
     render() {

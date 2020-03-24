@@ -3,6 +3,7 @@ import { Map, List, fromJS } from 'immutable';
 import { pender } from 'redux-pender';
 import services from "../services";
 import moment from "moment";
+import * as  API from "../api";
 
 const SEARCH_SET_REQUEST_LIST= 'searchList/SEARCH_SET_REQUEST_LIST';
 const SEARCH_SET_REQEUST_START_DATE= 'searchList/SEARCH_SET_REQEUST_START_DATE';
@@ -61,13 +62,15 @@ const initialState = Map({
             checked: false
 		})
     ]),
-    
-    startDate: moment()
-        .hour(0)
-        .minute(0),
-    endDate : moment()
-        .hour(23)
-        .minute(59),
+
+
+    //startDate: moment().set({'hour' : 0, 'minute': 0, 'second': 1}),
+    startDate: moment().utc().startOf('day'),
+        // .hour(1)
+        // .minute(0),
+    endDate : moment().utc().endOf('day')
+        // .hour(23)
+        // .minute(59),
 });
 
 //2020-08-20 07:25
@@ -96,14 +99,15 @@ export default handleActions({
                         structId: list.structId,
                         targetName: list.targetName,
                         logName: list.logName,
-                        sizeKB: list.sizeKB,
-                        checked: false
+                        sizeKB: API.bytesToSize(list.fileSize),
+                        checked: true
                     }
                 });
 
                 const newListSize = newLists.length;
                 return state.set('responseList', fromJS(newLists)).set('requestListCnt', newListSize)
-                            .set('responseListCnt', newListSize);
+                            .set('responseListCnt', newListSize)
+                            .set('downloadCnt', newListSize);
             },
             // 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
         }),
@@ -113,6 +117,8 @@ export default handleActions({
         const startTime = action.payload;
         //const moment = require("moment");
         //const convDate = moment(startTime).format("YYMMDDHHMMSS");
+        console.log("SEARCH_SET_REQEUST_START_DATE");
+        console.log("action.payload", action.payload);
 
         return state.set("startDate", startTime);
     },
@@ -123,7 +129,10 @@ export default handleActions({
         //const moment = require("moment");
         //const convDate = moment(endDate).format("YYMMDDHHMMSS");
 
-        return state.set("startDate", endDate);
+        console.log("SEARCH_SET_REQUEST_END_DATE");
+        console.log("action.payload", action.payload);
+
+        return state.set("endDate", endDate);
     },
 
 

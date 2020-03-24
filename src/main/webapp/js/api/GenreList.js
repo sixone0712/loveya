@@ -6,7 +6,7 @@ export const setGenreList =  async (props)  => {
     console.log("genreList", props.genreList.toJS());
 
     const result = await services.axiosAPI.post("api/setGenre", props.genreList.toJS())
-        .then((data) => Define.GENRE_SET_SUCCESS)
+        .then((data) => Define.RSS_SUCCESS)
         .catch((error) => {
             console.log("[setGenreList]error", error);
             return Define.GENRE_SET_FAIL_SEVER_ERROR;
@@ -56,7 +56,7 @@ export const addGenreList = (props, dispName, keyName) => {
 
     //setGenreList(props);
     console.log("###addGenreList END");
-    return Define.GENRE_SET_SUCCESS;
+    return Define.RSS_SUCCESS;
 };
 
 export const deleteGenreList = (props, keyName) => {
@@ -64,7 +64,7 @@ export const deleteGenreList = (props, keyName) => {
     genreListActions.genreDeleteList({ keyName });
 
     //setGenreList(props);
-    return Define.GENRE_SET_SUCCESS;
+    return Define.RSS_SUCCESS;
 };
 
 export const editGenreList = (props, dispName, keyName) => {
@@ -108,7 +108,7 @@ export const editGenreList = (props, dispName, keyName) => {
 
     genreListActions.genreEditList({dispName, keyName, machine: [], fileCat});
     //setGenreList(props);
-    return Define.GENRE_SET_SUCCESS;
+    return Define.RSS_SUCCESS;
 };
 
 export const selectGenreList = (props, keyName) => {
@@ -125,17 +125,4 @@ export const selectGenreList = (props, keyName) => {
     } else {
         viewListActions.viewApplyGenreList({ genreList, keyName });
     }
-};
-
-export const dispGenreAlert = (error) => {
-    let msg;
-    switch (error) {
-        case Define.GENRE_SET_FAIL_NO_ITEM: msg = "Please choose a category."; break;
-        case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The device name is duplicated."; break;
-        case Define.GENRE_SET_FAIL_EMPTY_NAME: msg = "Please input genre name"; break;
-        case Define.GENRE_SET_FAIL_SEVER_ERROR: msg = "Network connection error"; break;
-        case Define.GENRE_SET_FAIL_NOT_SELECT_GENRE: msg = "Please choose a genre"; break;
-        default: msg="what's error : " + error; break;
-    }
-    alert(msg)
 };

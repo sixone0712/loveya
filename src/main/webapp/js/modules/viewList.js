@@ -11,8 +11,8 @@ const VIEW_CHECK_LOGTYPE_LIST= 'viewList/VIEW_CHECK_LOGTYPE_LIST';
 const VIEW_CHECK_ALL_LOGTYPE_LIST= 'viewList/VIEW_CHECK_ALL_LOGTYPE_LIST';
 const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
 
-export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);
-export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.get);
+export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);	// getURL
+export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.get);		// getURL
 export const viewCheckToolList = createAction(VIEW_CHECK_TOOL_LIST); 	// index
 export const viewCheckAllToolList = createAction(VIEW_CHECK_ALL_TOOL_LIST);		// check
 export const viewCheckLogTypeList = createAction(VIEW_CHECK_LOGTYPE_LIST); 	// index
@@ -29,6 +29,7 @@ const initialState = Map({
 		})
 	]),
 
+	toolInfoListCheckCnt: 0,
 	toolInfoList: List([
 		Map({
 			keyIndex: 0,
@@ -128,21 +129,37 @@ export default handleActions({
 	[VIEW_CHECK_TOOL_LIST]: (state, action) => {
 		console.log("handleActions[VIEW_CHECK_TOOL_LIST]");
 		const toolInfoList = state.get("toolInfoList");
+		let toolInfoListCheckCnt = state.get("toolInfoListCheckCnt");
 		const index = action.payload;
 
 		console.log("toolInfoList", toolInfoList);
 		console.log("index", index);
 
-		return state.set("toolInfoList", toolInfoList.update(index, list => list.set("checked", !list.get("checked"))));
+		const check =  toolInfoList.getIn([index, "checked"]);
+		console.log("check", check);
+		if(check){
+			toolInfoListCheckCnt--;
+		} else {
+			toolInfoListCheckCnt++;
+		}
+
+		return state.set("toolInfoList", toolInfoList.update(index, list => list.set("checked", !list.get("checked"))))
+					.set("toolInfoListCheckCnt", toolInfoListCheckCnt);
 	},
 
 	[VIEW_CHECK_ALL_TOOL_LIST] : (state, action) => {
 		const toolInfoList = state.get("toolInfoList");
 		const check = action.payload;
+		let toolInfoListCheckCnt = 0;
 
 		const newToolList = toolInfoList.map(list => list.set("checked", check));
 
-		return state.set("toolInfoList", newToolList);
+		if(check){
+			toolInfoListCheckCnt = newToolList.size;
+		}
+
+		return state.set("toolInfoList", newToolList)
+					.set("toolInfoListCheckCnt", toolInfoListCheckCnt);
 	},
 
 	[VIEW_CHECK_LOGTYPE_LIST]: (state, action) => {

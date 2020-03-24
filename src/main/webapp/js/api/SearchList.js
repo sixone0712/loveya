@@ -22,8 +22,22 @@ export const setSearchList = (props) => {
     const logInfoList = props.logInfoList;
     const startDate = props.startDate;
     const endDate = props.endDate;
-    searchListActions.searchSetRequestList({ toolList, logInfoList, startDate, endDate });
+    let error = Define.RSS_SUCCESS;
+
+    if(props.toolInfoListCheckCnt <= 0 && props.logInfoListCheckCnt <= 0) {
+        error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY
+    } else if(props.toolInfoListCheckCnt <= 0) {
+        error = Define.SEARCH_FAIL_NO_MACHINE
+    } else if(props.logInfoListCheckCnt <= 0) {
+        error = Define.SEARCH_FAIL_NO_CATEGORY
+    } else if(startDate.isAfter(endDate)) {
+        error = Define.SEARCH_FAIL_DATE
+    } else {
+        searchListActions.searchSetRequestList({toolList, logInfoList, startDate, endDate});
+    }
+
     //startSearchList(props);
+    return error
 };
 
 export const startSearchList = (props) => {
@@ -81,7 +95,7 @@ export const startDownload = async (props) => {
     console.log("downloadList", downloadList);
     console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.postDownload("dl/request", jsonList)
+    const result = await services.axiosAPI.postJson("dl/request", jsonList)
         .then((data) => data.data)
         .catch((error) => {
             console.log("[startDownload]error", error);
@@ -107,4 +121,12 @@ export const convertDateFormat = (date) => {
 export const setRowsPerPage = (props, page) => {
     const { searchListActions } = props;
     searchListActions.searchSetResponsePerPage(page);
+};
+
+export const bytesToSize = (bytes) => {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes == 0) return 'n/a';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    if (i == 0) return bytes + ' ' + sizes[i];
+    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
 };

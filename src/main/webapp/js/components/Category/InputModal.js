@@ -9,7 +9,6 @@ class InputModal extends Component {
         super(props);
         this.state = {
             isOpen: false,
-            isError: Define.GENRE_SET_INIT
         };
     }
 
@@ -33,8 +32,8 @@ class InputModal extends Component {
         console.log("this.props.logInfoListCheckCnt", this.props.logInfoListCheckCnt);
         if(openbtn === "Create") {
             if(this.props.logInfoListCheckCnt <= 0){
-                this.setState({isError: Define.GENRE_SET_FAIL_NO_ITEM});
-                API.dispGenreAlert(Define.GENRE_SET_FAIL_NO_ITEM);
+                this.props.setErrorStatus(Define.GENRE_SET_FAIL_NO_ITEM);
+                API.dispAlert(Define.GENRE_SET_FAIL_NO_ITEM);
                 return;
             }
             this.props.onChangeGenreName("");
@@ -42,7 +41,8 @@ class InputModal extends Component {
             console.log("#############################");
             console.log("this.props.selectedKeyName", this.props.selectedKeyName );
             if(this.props.selectedKeyName === "selectGenre") {
-                API.dispGenreAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+                this.props.setErrorStatus(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+                API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
                 return;
             }
         }
@@ -60,13 +60,13 @@ class InputModal extends Component {
 
         //call async functionn
         const result = await this.props.confirmFunc(this.props.genreName, selectedKeyName);
-        if(result === Define.GENRE_SET_SUCCESS){
-            this.setState({isError: Define.GENRE_SET_SUCCESS});
+        if(result === Define.RSS_SUCCESS){
+            this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.closeModal();
             this.props.handleSelectBoxChange(this.props.genreName);
         } else {
-            this.setState({isError: result});
-            API.dispGenreAlert(result);
+            this.props.setErrorStatus(result);
+            API.dispAlert(result);
 
         }
     };

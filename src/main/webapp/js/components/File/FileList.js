@@ -12,8 +12,8 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
-import moment from "moment";
 import {setRowsPerPage} from "../../api";
+import * as Define from '../../define';
 
 const tableStyle = {
   boxShadow: "0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12)",
@@ -71,11 +71,19 @@ class FileList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      itemsChecked: false,
+      itemsChecked: true,
       pageSize: this.props.responsePerPage,
-      currentPage: 1
+      currentPage: 1,
+      isError: Define.RSS_SUCCESS
     };
   }
+
+  setErrorStatus = (error) => {
+    this.setState({
+      ...this.state,
+      isError: error
+    })
+  };
 
   handlePageChange = page => {
     this.setState({
@@ -106,7 +114,7 @@ class FileList extends Component {
       itemsChecked: checked
     });
 
-    console.log(this.state.i)
+    console.log(this.state.i);
     API.checkAllResponseList(this.props, checked);
   };
 
@@ -116,10 +124,10 @@ class FileList extends Component {
     const {
       itemsChecked,
       pageSize,
-      currentPage
+      currentPage,
+      isError
     } = this.state;
 
-    //if (count === 0 && this.props.resSuccess) {
     if (count === 0 || this.props.resError || this.props.resPending) {
       return (
         <div style={divStyle}>
@@ -220,6 +228,8 @@ class FileList extends Component {
                 message={"Do you want to download the selected file?"}
                 leftbtn={"Download"}
                 rightbtn={"Cancel"}
+                isError={isError}
+                setErrorStatus={this.setErrorStatus}
               />
             </div>
           </Card>

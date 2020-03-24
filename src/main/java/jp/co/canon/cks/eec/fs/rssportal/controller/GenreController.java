@@ -37,7 +37,7 @@ public class GenreController {
  
             fileStream.close(); //스트림 닫기
          } catch (Exception e) {
-         e.getStackTrace();
+            e.getStackTrace();
          }
 
          System.out.print(convStr);
@@ -46,7 +46,6 @@ public class GenreController {
         Gson gson = new Gson();
         Genre[] genreClass = gson.fromJson(convStr, Genre[].class);
 
-        
         return genreClass;
     }
 

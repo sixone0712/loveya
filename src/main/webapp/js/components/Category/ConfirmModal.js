@@ -11,7 +11,6 @@ class ConfirmModal extends Component {
         super(props);
         this.state = {
             isOpen: false,
-            isError: Define.GENRE_SET_INIT
         };
     }
 
@@ -31,7 +30,8 @@ class ConfirmModal extends Component {
 
     canOpenModal = () => {
         if(this.props.selectedKeyName === "selectGenre") {
-            API.dispGenreAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+            this.props.setErrorStatus(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+            API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
             return;
         }
 
@@ -43,13 +43,13 @@ class ConfirmModal extends Component {
         //call async functionn
         const result = await this.props.confirmFunc(this.props.selectedKeyName);
         console.log("actionFunc=>confirmFunc=>result", result);
-        if(result === Define.GENRE_SET_SUCCESS){
-            this.setState({isError: Define.GENRE_SET_SUCCESS});
+        if(result === Define.RSS_SUCCESS){
+            this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.closeModal();
             this.props.handleSelectBoxChange("selectGenre");
         } else {
-            this.setState({isError: result});
-            API.dispGenreAlert(result);
+            this.props.setErrorStatus(result);
+            API.dispAlert(result);
         }
         console.log("###actionFuncEnd");
     };

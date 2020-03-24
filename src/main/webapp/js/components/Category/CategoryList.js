@@ -44,14 +44,21 @@ class CategoryList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      checkedListAll: [],
       ItemsChecked: false,
       showGenre: false,
       selectedGenre: "selectGenre",
       selectedKeyName: "selectGenre",
       genreName: "",
+      isError: Define.RSS_SUCCESS
     };
   }
+
+  setErrorStatus = (error) => {
+    this.setState({
+      ...this.state,
+      isError: error
+    })
+  };
 
   handleGenreToggle = () => {
     this.setState({
@@ -98,7 +105,7 @@ class CategoryList extends Component {
     console.log("###addGenreListCate Start");
     let result = await API.addGenreList(this.props, dispName, keyName);
 
-    if(result === Define.GENRE_SET_SUCCESS) {
+    if(result === Define.RSS_SUCCESS) {
       console.log("=========");
       result = await API.setGenreList(this.props).then(result => {
         console.log("setGenreList/return");
@@ -114,7 +121,7 @@ class CategoryList extends Component {
   editGenreList = async (dispName, keyName) => {
     let result =  await API.editGenreList(this.props, dispName, keyName);
 
-    if(result === Define.GENRE_SET_SUCCESS) {
+    if(result === Define.RSS_SUCCESS) {
       console.log("=========");
       result = await API.setGenreList(this.props).then(result => {
         console.log("setGenreList/return");
@@ -131,7 +138,7 @@ class CategoryList extends Component {
     let result =  await API.deleteGenreList(this.props, keyName);
     console.log("deleteGenreList=>deleteGenreList=>result", result);
 
-    if(result === Define.GENRE_SET_SUCCESS) {
+    if(result === Define.RSS_SUCCESS) {
       console.log("=========");
       result = await API.setGenreList(this.props).then(result => {
         console.log("deleteGenreList/return", result);
@@ -209,6 +216,8 @@ class CategoryList extends Component {
                         handleSelectBoxChange={this.handleSelectBoxChange}
                         genreName={this.state.genreName}
                         onChangeGenreName={this.onChangeGenreName}
+                        isError={this.state.isError}
+                        setErrorStatus={this.setErrorStatus}
                     />
                     <InputModal
                         title={"Edit Genre"}
@@ -224,6 +233,8 @@ class CategoryList extends Component {
                         handleSelectBoxChange={this.handleSelectBoxChange}
                         genreName={this.state.genreName}
                         onChangeGenreName={this.onChangeGenreName}
+                        isError={this.state.isError}
+                        setErrorStatus={this.setErrorStatus}
                     />
                     <ConfirmModal
                         openbtn={"Delete"}
@@ -233,6 +244,8 @@ class CategoryList extends Component {
                         confirmFunc={this.deleteGenreList}
                         selectedKeyName={selectedKeyName}
                         handleSelectBoxChange={this.handleSelectBoxChange}
+                        isError={this.state.isError}
+                        setErrorStatus={this.setErrorStatus}
                     />
                   </div>
                 </Collapse>

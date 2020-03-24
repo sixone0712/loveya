@@ -8,6 +8,7 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
+import * as Define from "../../define";
 
 const spinnerStyle = {
     display: "flex",
@@ -42,10 +43,16 @@ class DownloadConfirmModal extends Component {
     }
 
     openParentModal = () => {
-        this.setState({
-            ...this.state,
-            parentModalOpen: true
-        });
+        if(this.props.downloadCnt <= 0) {
+            this.props.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
+            API.dispAlert(Define.FILE_FAIL_NO_ITEM);
+        } else {
+            this.props.setErrorStatus(Define.RSS_SUCCESS);
+            this.setState({
+                ...this.state,
+                parentModalOpen: true
+            });
+        }
     };
 
     closeParentModal = () => {
@@ -289,6 +296,7 @@ class DownloadConfirmModal extends Component {
 export default connect(
     (state) => ({
         responseList: state.searchList.get('responseList'),
+        downloadCnt: state.searchList.get('downloadCnt'),
     }),
     (dispatch) => ({
         searchListActions: bindActionCreators(searchListActions, dispatch)
