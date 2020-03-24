@@ -9,6 +9,7 @@ import {bindActionCreators} from "redux";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
 import * as Define from "../../define";
+import services from "../../services";
 
 const spinnerStyle = {
     display: "flex",
@@ -62,13 +63,19 @@ class DownloadConfirmModal extends Component {
         });
     };
 
-    openProcessModal = () => {
+    openProcessModal = async () => {
         this.setState({
             ...this.state,
             processModalOpen: true
         });
-        const downloadURL = API.startDownload(this.props);
-        console.log("downloadURL", downloadURL);
+
+        const { searchListActions } = this.props;
+        searchListActions.searchSetDlId({dlId: "", status: "", totalFiles: 0, downloadFiles: 0})
+
+        const requestId = await API.requestDownload(this.props);
+        searchListActions.searchSetDlId({dlId: requestId});
+        console.log("requestId", requestId);
+        console.log(await services.axiosAPI.get("dl/status?dlId=" + requestId));
     };
 
     closeProcessModal = () => {
@@ -297,6 +304,7 @@ export default connect(
     (state) => ({
         responseList: state.searchList.get('responseList'),
         downloadCnt: state.searchList.get('downloadCnt'),
+        downloadStatus: state.searchList.get('downloadStatus'),
     }),
     (dispatch) => ({
         searchListActions: bindActionCreators(searchListActions, dispatch)

@@ -14,3 +14,17 @@ export function postJson(postId, postData) {
             'Content-Type': 'application/json',
         }});
 }
+
+
+export const postJson2 = async (postId, postData) => {
+
+    let res = await axios.post(postId, postData, {
+        headers: {
+            'Content-Type': 'application/json',
+        }});
+
+    console.log("postJson2");
+    let data = await res.data;
+    console.log("postJson2Final", data);
+    return data;
+};

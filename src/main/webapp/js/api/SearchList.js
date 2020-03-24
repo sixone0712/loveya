@@ -1,5 +1,6 @@
 import services from "../services";
 import * as Define from "../define";
+import axios from "axios";
 
 export const getRequestList = (props) => {
     const { requestList } = props;
@@ -71,11 +72,10 @@ export const checkAllResponseList = (props, isAllChecked) => {
     }
 };
 
-export const startDownload = async (props) => {
+export const requestDownload = async (props) => {
     const { responseList } = props;
     const responseListJS = responseList.toJS();
     console.log("responseListJS", responseListJS);
-
 
     const downloadList = responseListJS.reduce((acc, cur, idx) => {
         if (cur.checked) acc.push({
@@ -96,14 +96,17 @@ export const startDownload = async (props) => {
     console.log("jsonList", jsonList);
 
     const result = await services.axiosAPI.postJson("dl/request", jsonList)
-        .then((data) => data.data)
+        .then((data) => {console.log("data", data); return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
             return Define.GENRE_SET_FAIL_SEVER_ERROR;
         });
 
+    console.log("result", result);
+
     return result;
 };
+
 
 export const convertDateFormat = (date) => {
     if(date == "" || date == null) return "0000/00/00 00:00:00";
@@ -130,3 +133,55 @@ export const bytesToSize = (bytes) => {
     if (i == 0) return bytes + ' ' + sizes[i];
     return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
 };
+
+
+export const setDownload = (props) => {
+    const { responseList } = props;
+    const responseListJS = responseList.toJS();
+    console.log("responseListJS", responseListJS);
+
+    const downloadList = responseListJS.reduce((acc, cur, idx) => {
+        if (cur.checked) acc.push({
+            structId: cur.structId,
+            machine: cur.targetName,
+            category: cur.logId,
+            file: cur.fileName,
+            filesize: String(cur.fileSize),
+            date: cur.fileDate,
+        });
+        return acc;
+    }, []);
+
+    const jsonList = new Object();
+    jsonList.list = downloadList;
+
+    return jsonList;
+};
+
+/*
+export const getStartDownload = (url, jsonList) => new Promise((resolve, reject) => {
+    services.axiosAPI.postJson(url, jsonList).then(result=> {
+            console.log("getStartDownload");
+            resolve(result.data);
+        }
+    )});
+*/
+
+export const getStartDownload = async (url, jsonList) => {
+
+    console.log("11111111111111");
+    const res = await axios.post(url, jsonList, {
+        headers: {
+            'Content-Type': 'application/json',
+    }});
+
+    console.log("2222222222222");
+    const data = res.data;
+    console.log("3333333333333");
+    return data;
+};
+
+export const testAPI = (func, url, jsonList) => {
+    return func(url, jsonList);
+};
+
