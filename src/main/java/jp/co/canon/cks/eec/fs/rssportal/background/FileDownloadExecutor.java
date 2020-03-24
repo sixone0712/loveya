@@ -55,7 +55,7 @@ public class FileDownloadExecutor implements DownloadConfig {
         mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        downloadId = "dl"+(mUniqueKey++)+"-"+String.valueOf(stamp.getTime());
+        downloadId = "DL"+(mUniqueKey++)+String.valueOf(stamp.getTime());
         downloadForms = request;
         downloadContexts = new ArrayList<>();
         baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
