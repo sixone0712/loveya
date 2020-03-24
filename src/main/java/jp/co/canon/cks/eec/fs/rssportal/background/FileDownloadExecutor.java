@@ -173,7 +173,9 @@ public class FileDownloadExecutor implements DownloadConfig {
         log.info(downloadId+": compress()");
         Compressor comp = new Compressor();
         String zipDir = Paths.get(DownloadConfig.ZIP_PATH, downloadId, "test.zip").toString();
-        comp.compress(baseDir, zipDir);
+        if(comp.compress(baseDir, zipDir)) {
+            mPath = zipDir;
+        }
     }
 
     private void wrapup() {
