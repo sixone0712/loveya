@@ -15,58 +15,6 @@ import * as API from "../../api";
 import {setRowsPerPage} from "../../api";
 import * as Define from '../../define';
 
-const tableStyle = {
-  boxShadow: "0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12)",
-  marginTop: ".5rem",
-  marginBottom: ".5rem"
-};
-
-const cardStyle = {
-  margin: "10px 0px",
-  boxShadow: "0 1px 11px 0 rgba(0,0,0,.1)"
-};
-
-const divStyle = {
-  paddingLeft: "10px",
-  paddingRight: "10px"
-};
-
-const theadSelect = {
-  width: "5%",
-  textAlign: "center"
-};
-
-const checkStyle = {
-  paddingLeft: "0.9rem"
-};
-
-const paginationStyle = {
-  marginLeft: "auto",
-  marginRight: "auto",
-  fontSize: "14px"
-};
-
-const buttonPosition = {
-  position: "absolute",
-  top: "17px",
-  right: "20px",
-  display: "flex"
-};
-
-const selectStyle = {
-  fontSize: "14px",
-  marginLeft: "10px",
-  marginRight: "20px"
-};
-
-const labelStyle = {
-  top: "6px",
-  position: "relative",
-  whiteSpace: "nowrap",
-  fontSize: "14px",
-  fontWeight: "300"
-};
-
 class FileList extends Component {
   constructor(props) {
     super(props);
@@ -135,11 +83,11 @@ class FileList extends Component {
 
     if (count === 0 || this.props.resError || this.props.resPending) {
       return (
-        <div style={divStyle}>
-          <Card className="ribbon-wrapper" style={cardStyle}>
+        <div className="filelist-container">
+          <Card className="ribbon-wrapper card-filelist">
             <CardBody className="card-body-filelist">
               <div className="ribbon ribbon-clip ribbon-info">File</div>
-              <div style={{ textAlign: "center" }}>
+              <div className="filelist-no-search">
                 <p>
                   <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
                 </p>
@@ -152,14 +100,14 @@ class FileList extends Component {
     } else {
       const files = filePaginate(responseList, currentPage, pageSize);
       return (
-        <div style={divStyle}>
-          <Card className="ribbon-wrapper" style={cardStyle}>
+        <div className="filelist-container">
+          <Card className="ribbon-wrapper card-filelist">
             <CardBody className="card-body-filelist">
               <div className="ribbon ribbon-clip ribbon-info">File</div>
-              <Table style={tableStyle}>
+              <Table>
                 <thead>
                   <tr>
-                    <th style={theadSelect}>
+                    <th>
                       <div>
                         <ButtonToggle
                           outline
@@ -187,7 +135,7 @@ class FileList extends Component {
                   const convFileDate = API.convertDateFormat(file.fileDate);
                   return (
                       <tr key={key}>
-                        <td style={checkStyle}>
+                        <td>
                           <CheckBox
                               key={key}
                               index={file.keyIndex}
@@ -213,13 +161,12 @@ class FileList extends Component {
               itemsCount={count}
               onPageChange={this.handlePageChange}
             />
-            <div style={buttonPosition}>
-              <label style={labelStyle}>Rows per page:</label>
+            <div className="filelist-item-area">
+              <label>Rows per page:</label>
               <Input
                 type="select"
                 name="dispSize"
                 id="dispSize"
-                style={selectStyle}
                 className="filelist-select"
                 onChange={this.onChangeRowsPerPage}
               >
@@ -262,7 +209,7 @@ const FilePagination = props => {
   }
 
   return (
-    <div style={paginationStyle}>
+    <div className="filelist-pagination">
       <PaginationComponent
         totalItems={itemsCount}
         pageSize={pageSize}

@@ -103,7 +103,7 @@ class InputModal extends Component {
                         <div className="Custom-modal">
                             <p className="title">{title}</p>
                             <div className="content-with-title">
-                                <FormGroup style={{ marginTop: "1rem" }}>
+                                <FormGroup>
                                     <Input
                                         type="text"
                                         name={inputname}

@@ -2,16 +2,12 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
-import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 
 import javax.xml.rpc.ServiceException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,6 +18,7 @@ public class FileDownloader {
     /* Downloader status */
     private static final String STS_INVALID_ID = "invalid-id";
     private static final String STS_IN_PROGRESS = "in-progress";
+    private static final String STS_ERROR = "error";
     private static final String STS_DONE = "done";
 
     private final Log log = LogFactory.getLog(getClass());
@@ -91,10 +88,13 @@ public class FileDownloader {
             return STS_INVALID_ID;
         }
         FileDownloadExecutor holder = mHolders.get(dlId);
-        if(holder.isRunning()) {
-            return STS_IN_PROGRESS;
-        } else {
+        String status = holder.getStatus();
+        if(status.equalsIgnoreCase("error")) {
+            return STS_ERROR;
+        } else if(status.equalsIgnoreCase("complete")) {
             return STS_DONE;
+        } else {
+            return STS_IN_PROGRESS;
         }
     }
 

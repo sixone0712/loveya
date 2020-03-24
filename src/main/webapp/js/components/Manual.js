@@ -1,28 +1,17 @@
 import React from "react";
 import { Container, Row, Col } from "reactstrap";
 
-import Machinelist from "./Machine/MachineList";
-import Categorylist from "./Category/CategoryList";
-import Formlist from "./Search/FormList";
-import Filelist from "./File/FileList";
-import Footer from "./Footer";
-
-const containerStyle = {
-  paddingTop: "4rem",
-  paddingBottom: "1rem",
-  backgroundColor: "#f6f7fb"
-};
-
-const rowStyle = {
-  paddingLeft: "10px",
-  paddingRight: "10px"
-};
+import Machinelist from "./Machine/machinelist";
+import Categorylist from "./Category/categorylist";
+import Formlist from "./Search/formlist";
+import Filelist from "./File/filelist";
+import Footer from "./footer";
 
 export default function Manual() {
   return (
     <>
-      <Container style={containerStyle} fluid={true}>
-        <Row style={rowStyle}>
+      <Container className="manual-container" fluid={true}>
+        <Row>
           <Col>
             <Machinelist />
           </Col>

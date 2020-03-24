@@ -2,14 +2,12 @@ var path = require('path');
 
 module.exports = {
     context: path.resolve(__dirname, 'src/main/webapp/js'),
-    entry: {
-        index: './index.js'
-    },
-    devtool: 'sourcemaps',
+    entry: [ '@babel/polyfill', './index.js' ],
+    devtool: 'source-map',
     cache: true,
     output: {
         path: __dirname,
-        filename: './src/main/webapp/build/react/[name].bundle.js'
+        filename: './src/main/webapp/build/react/index.bundle.js'
     },
     mode: 'none',
     module: {
@@ -34,6 +32,6 @@ module.exports = {
         }, {
             test: /\.(sa|sc|c)ss$/,
             use: [ 'style-loader', 'css-loader', 'sass-loader' ]
-        } ]
+        }]
     }
 };

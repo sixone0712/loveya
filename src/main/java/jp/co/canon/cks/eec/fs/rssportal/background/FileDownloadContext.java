@@ -7,12 +7,13 @@ import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
-public class FileDownloadContext /*extends DownloadForm*/ {
+public class FileDownloadContext implements DownloadConfig {
 
     private final String id;
     private final String user;
@@ -28,12 +29,14 @@ public class FileDownloadContext /*extends DownloadForm*/ {
 
     private final DownloadForm downloadForm;
 
+    private String requestNo;
     private boolean downloadComplete;
     private boolean ftpProcComplete;
-    private CustomURL url;
+    private CustomURL achieveUrl;
 
     private File rootDir;
-    private File localPath;
+    private File outFile;
+    private String outPath;
 
     public FileDownloadContext(@NonNull String id, @NonNull DownloadForm form) {
 
@@ -57,26 +60,29 @@ public class FileDownloadContext /*extends DownloadForm*/ {
             fileDates[i] = convertStringToCalendar(fileInfo.getDate());
         }
 
+        Path path = Paths.get(DownloadConfig.ROOT_PATH, id, tool, logType);
+        this.outPath = path.toString();
+
         downloadComplete = false;
         ftpProcComplete = false;
     }
 
-    public void setUrl(@NonNull final String url) {
+    public void setAchieveUrl(@NonNull final String achieveUrl) {
         try {
-            this.url = new CustomURL(url);
+            this.achieveUrl = new CustomURL(achieveUrl);
             downloadComplete = true;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
 
-    public void setLocalPath(@NonNull final File localPath) {
-        this.localPath = localPath;
+    public void setOutFile(@NonNull final File outFile) {
+        this.outFile = outFile;
         ftpProcComplete = true;
     }
 
-    public CustomURL getUrl() {
-        return url;
+    public CustomURL getAchieveUrl() {
+        return achieveUrl;
     }
 
     public boolean isDownloadComplete() {
@@ -85,6 +91,10 @@ public class FileDownloadContext /*extends DownloadForm*/ {
 
     public boolean isFtpProcComplete() {
         return ftpProcComplete;
+    }
+
+    public void setFtpProcComplete(boolean ftpProcComplete) {
+        this.ftpProcComplete = ftpProcComplete;
     }
 
     public void setRootDir(@NonNull final File rootDir) {
@@ -101,6 +111,14 @@ public class FileDownloadContext /*extends DownloadForm*/ {
 
     public String getTool() {
         return tool;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public String getUser() {
+        return user;
     }
 
     public String getLogType() {
@@ -121,6 +139,18 @@ public class FileDownloadContext /*extends DownloadForm*/ {
 
     public Calendar[] getFileDates() {
         return fileDates;
+    }
+
+    public String getRequestNo() {
+        return requestNo;
+    }
+
+    public void setRequestNo(String requestNo) {
+        this.requestNo = requestNo;
+    }
+
+    public String getOutPath() {
+        return outPath;
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {

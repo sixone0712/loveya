@@ -9,34 +9,17 @@ import {bindActionCreators} from "redux";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
 
-const pickerFlex = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between"
-};
-
-const labelStyle = {
-  fontSize: "14px",
-  fontWeight: "300"
-};
-
-const inputStyle = {
-  fontSize: "14px",
-  marginBottom: "0.5rem"
-};
-
 const CreateDatetimePicker = (props) => {
     const {label, date, onChangeDate} = props;
 
     return (
         <>
-            <Label style={labelStyle}>
+            <Label>
                 <FontAwesomeIcon icon={faCalendarCheck} size="lg"/> {label}
             </Label>
             <Input
                 type="text"
-                style={inputStyle}
-                value={date.format("YYYY-MM-DD HH:mm")}
+                value={moment(date).format("YYYY-MM-DD HH:mm")}
                 className="input-datepicker"
                 readOnly
             />
@@ -53,14 +36,10 @@ class DatePicker extends Component {
     }
 
     onStartDateChanage = startDate => {
-        console.log("onStartDateChanage");
-        console.log("startDate", startDate);
         API.setStartDate(this.props, startDate)
     };
 
     onEndDateChanage = endDate => {
-        console.log("onEndDateChanage");
-        console.log("endDate", endDate);
         API.setEndDate(this.props, endDate)
     };
 
@@ -69,15 +48,15 @@ class DatePicker extends Component {
         const { startDate, endDate }  = this.props;
 
         return (
-            <div style={pickerFlex}>
-                <div>
+            <div className="datepicker-item-area">
+                <div className="datepicker-item">
                     <CreateDatetimePicker
                         label={"From"}
                         date={startDate}
                         onChangeDate={this.onStartDateChanage}
                     />
                 </div>
-                <div>
+                <div className="datepicker-item">
                     <CreateDatetimePicker
                         label={"To"}
                         date={endDate}

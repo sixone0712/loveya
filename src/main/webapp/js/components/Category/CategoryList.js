@@ -18,28 +18,6 @@ import * as genreListActions from "../../modules/genreList";
 import * as API from '../../api'
 import * as Define from "../../define";
 
-const formGroupStyle = {
-  marginBottom: "0px",
-  fontSize: "15px"
-};
-
-const buttonPosition = {
-  position: "absolute",
-  top: "17px",
-  right: "20px"
-};
-
-const selectStyle = {
-  fontSize: "14px",
-  width: "58%"
-};
-
-const genreStyle = {
-  display: "flex",
-  marginBottom: "10px",
-  justifyContent: "space-between"
-};
-
 class CategoryList extends Component {
   constructor(props) {
     super(props);
@@ -175,14 +153,13 @@ class CategoryList extends Component {
               File Category
             </div>
             <Col>
-              <FormGroup style={formGroupStyle}>
+              <FormGroup className="catlist-form-group">
                 <Collapse isOpen={showGenre}>
-                  <div style={genreStyle}>
+                  <div className="catlist-genre-area">
                     <Input
                         type="select"
                         name="genreSel"
                         id="genreSel"
-                        style={selectStyle}
                         className="catlist-select"
                         value={this.state.selectedGenre}
                         onChange={(e) => this.handleSelectBoxChange(e.target.value)}
@@ -263,7 +240,7 @@ class CategoryList extends Component {
                 })}
               </FormGroup>
             </Col>
-            <div style={buttonPosition}>
+            <div className="manual-btn-area">
               <ButtonToggle
                   outline
                   size="sm"
