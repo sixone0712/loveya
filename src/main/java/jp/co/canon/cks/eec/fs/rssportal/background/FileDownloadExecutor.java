@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileDownloadExecutor implements DownloadConfig {
@@ -164,7 +165,40 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
 
         private void extract() {
-            log.trace("extract()");
+            log.trace("extract(achieve="+context.getAchieveUrl().getLastFileName()+")");
+            String achieve = Paths.get(context.getOutPath(), context.getAchieveUrl().getLastFileName()).toString();
+            File zipFile = new File(achieve);
+
+            if(achieve.endsWith(".zip")) {
+                String dir = parseDir(achieve);
+                if(zipFile.exists()==false || zipFile.isDirectory()) {
+                    log.error("error! wrong achieve files");
+                    return;
+                }
+
+                try {
+                    byte[] buf = new byte[1024];
+                    ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+                    ZipEntry entry = zis.getNextEntry();
+                    while(entry!=null) {
+                        File tmpFile = new File(dir, entry.getName());
+                        FileOutputStream fos = new FileOutputStream(tmpFile);
+                        int size;
+                        while((size=zis.read(buf))>0) {
+                            fos.write(buf);
+                        }
+                        fos.close();
+                        entry = zis.getNextEntry();
+                    }
+                    zis.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    log.error("error! could not get next entry");
+                    e.printStackTrace();
+                }
+                zipFile.delete();
+            }
             downloadFiles += context.getFileCount();
         }
     }
@@ -238,6 +272,16 @@ public class FileDownloadExecutor implements DownloadConfig {
         return totalFiles;
     }
 
+    private String parseDir(@NonNull final String file) {
+        String sep = File.separator;
+        int idx = file.lastIndexOf(sep);
+        if(idx==-1) {
+            return "";
+        }
+        return file.substring(0, idx);
+    }
+
+
     private void dumpFileList() {
         if(downloadForms !=null) {
             for(DownloadForm form: downloadForms) {
@@ -250,5 +294,6 @@ public class FileDownloadExecutor implements DownloadConfig {
             log.error("null dlList");
         }
     }
+
 
 }
