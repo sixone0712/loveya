@@ -3,32 +3,25 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
-import jp.co.canon.cks.eec.fs.portal.bussiness.*;
+import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
+import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
-import jp.co.canon.cks.eec.util.ftp.FTP;
-import jp.co.canon.cks.eec.util.ftp.FTPException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.lang.NonNull;
 
 import java.io.*;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 public class FileDownloadExecutor implements DownloadConfig {
 
@@ -36,21 +29,19 @@ public class FileDownloadExecutor implements DownloadConfig {
     private static final String file_format = "%s/%s/%s";
 
     private static final String user_name = "eecAdmin";     // FIXME
-    private static final String ftp_root = "./ftp_data";
-    private static final String ftp_cache_dir = "cache";
 
     private enum Status {
-        idle, running, done, error
+        idle, init, download, compress, complete, error
     };
 
     private static int mUniqueKey = 1;
     private String downloadId;
-    private Status mStatus = Status.idle;
+    private Status status;
+    private String errString;
     private List<DownloadForm> downloadForms;
     private List<FileDownloadContext> downloadContexts;
     private String baseDir;
 
-    private boolean mIsRunning = false;
     private FileServiceManage mServiceManager;
     private FileServiceModel mService;
     private int totalFiles = -1;
@@ -59,8 +50,9 @@ public class FileDownloadExecutor implements DownloadConfig {
 
 
     public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request) {
+        status = Status.idle;
         mServiceManager = serviceManager;
-        mService = new FileServiceUsedSOAP("10.1.36.118:8080");
+        mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
         downloadId = "dl"+(mUniqueKey++)+"-"+String.valueOf(stamp.getTime());
@@ -70,6 +62,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     private void initialize() {
+        status = Status.init;
         log.info(downloadId+": initialize()");
         for(DownloadForm form: downloadForms) {
             downloadContexts.add(new FileDownloadContext(downloadId, form));
@@ -172,7 +165,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             if(achieve.endsWith(".zip")) {
                 String dir = parseDir(achieve);
                 if(zipFile.exists()==false || zipFile.isDirectory()) {
-                    log.error("error! wrong achieve files");
+                    setError("wrong achieve file");
                     return;
                 }
 
@@ -194,8 +187,8 @@ public class FileDownloadExecutor implements DownloadConfig {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
-                    log.error("error! could not get next entry");
                     e.printStackTrace();
+                    setError("cannot find next ZipEntry");
                 }
                 zipFile.delete();
             }
@@ -204,6 +197,10 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     private void compress() {
+        if(status==Status.error) {
+            return;
+        }
+        status = Status.compress;
         log.info(downloadId+": compress()");
         Compressor comp = new Compressor();
         String zipDir = Paths.get(DownloadConfig.ZIP_PATH, downloadId, "test.zip").toString();
@@ -214,14 +211,20 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     private void wrapup() {
         log.info(downloadId+": wrapup()");
+        status = Status.complete;
     }
 
     private Runnable runner = () -> {
+
         initialize();
-        downloadContexts.forEach(context->{
-            (new Thread(new doAsyncProc(context))).start();
-        });
+
+        status = Status.download;
+        downloadContexts.forEach(context->(new Thread(new doAsyncProc(context))).start());
+
         while(downloadFiles!=totalFiles) {
+            if(status==Status.error) {
+                return;
+            }
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
@@ -231,6 +234,28 @@ public class FileDownloadExecutor implements DownloadConfig {
         compress();
         wrapup();
     };
+
+    private String parseDir(@NonNull final String file) {
+        String sep = File.separator;
+        int idx = file.lastIndexOf(sep);
+        if(idx==-1) {
+            return "";
+        }
+        return file.substring(0, idx);
+    }
+
+    private void dumpFileList() {
+        if(downloadForms !=null) {
+            for(DownloadForm form: downloadForms) {
+                log.warn(String.format("tool: %s logType: %s", form.getTool(), form.getLogType()));
+                for(FileInfo file: form.getFiles()) {
+                    log.warn(String.format("  %s (%d)", file.getName(), file.getSize()));
+                }
+            }
+        } else {
+            log.error("null dlList");
+        }
+    }
 
     public String getId() {
         return downloadId;
@@ -243,11 +268,25 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     public void stop() {
-        // FIXME
+        // TBD
+    }
+
+    private void setError() {
+        setError("no reason");
+    }
+
+    private void setError(@NonNull final String error) {
+        log.error(error);
+        status = Status.error;
+        errString = error;
     }
 
     public boolean isRunning() {
-        return mIsRunning;
+        return (status==Status.complete || status==Status.error)?true:false;
+    }
+
+    public String getStatus() {
+        return status.toString();
     }
 
     public List<String> getFileList() {
@@ -272,28 +311,7 @@ public class FileDownloadExecutor implements DownloadConfig {
         return totalFiles;
     }
 
-    private String parseDir(@NonNull final String file) {
-        String sep = File.separator;
-        int idx = file.lastIndexOf(sep);
-        if(idx==-1) {
-            return "";
-        }
-        return file.substring(0, idx);
+    public String getErrString() {
+        return errString;
     }
-
-
-    private void dumpFileList() {
-        if(downloadForms !=null) {
-            for(DownloadForm form: downloadForms) {
-                log.warn(String.format("tool: %s logType: %s", form.getTool(), form.getLogType()));
-                for(FileInfo file: form.getFiles()) {
-                    log.warn(String.format("  %s (%d)", file.getName(), file.getSize()));
-                }
-            }
-        } else {
-            log.error("null dlList");
-        }
-    }
-
-
 }
