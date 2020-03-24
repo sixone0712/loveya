@@ -10,14 +10,6 @@ import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
 import * as Define from "../../define";
 
-const spinnerStyle = {
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "colunm",
-    justifyContent: "center",
-    padding: "16px"
-};
-
 class DownloadConfirmModal extends Component {
     constructor(props) {
         super(props);
@@ -182,7 +174,7 @@ class DownloadConfirmModal extends Component {
                         <div className="Custom-modal-overlay child-overlay" />
                         <div className="Custom-modal">
                             <div className="content-without-title">
-                                <div style={spinnerStyle}>
+                                <div className="spinner-area">
                                     <ScaleLoader
                                         loading={true}
                                         height={45}

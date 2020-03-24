@@ -6,17 +6,6 @@ import * as viewListActions from "../../modules/viewList";
 import * as API from '../../api'
 import EquipmentCollapse from "./EquipmentCollapse";
 
-const formGroupStyle = {
-  marginBottom: "0px",
-  fontSize: "15px"
-};
-
-const buttonPosition = {
-  position: "absolute",
-  top: "17px",
-  right: "20px"
-};
-
 class MachineList extends Component {
   constructor(props) {
     super(props);
@@ -48,7 +37,7 @@ class MachineList extends Component {
         <CardBody className="custom-scrollbar card-body-custom card-body-machinelist">
           <div className="ribbon ribbon-clip ribbon-primary">Machine</div>
           <Col>
-            <FormGroup style={formGroupStyle}>
+            <FormGroup className="machinelist-form-group">
               {titleList.map((title, index) => {
                 return (
                   <EquipmentCollapse
@@ -62,7 +51,7 @@ class MachineList extends Component {
               })}
             </FormGroup>
           </Col>
-          <div style={buttonPosition}>
+          <div className="manual-btn-area">
             <ButtonToggle
               outline
               size="sm"
