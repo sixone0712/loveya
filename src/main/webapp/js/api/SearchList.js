@@ -175,7 +175,27 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
             status: res.data.status,
             totalFiles: res.data.totalFiles,
             downloadFiles: res.data.downloadFiles });
-    }, 1000, props, requestId, modalFunc);
+    }, 500, props, requestId, modalFunc);
+
+    return interval;
+};
+
+export const setWatchSearchStatus = (intervalProps) => {
+    const interval = setInterval( (intervalProps) => {
+        const { func1, getIntervalFunc, setIntervalFunc, getResStatus} = intervalProps;
+        const intervalFunc = getIntervalFunc();
+        const resStatus =getResStatus();
+
+        console.log("intervalFunc", intervalFunc);
+        console.log("resStatus", resStatus);
+
+
+        if(resStatus === "success" || resStatus === "error") {
+            clearInterval(intervalFunc);
+            setIntervalFunc(null);
+            func1();
+        }
+    }, 200, intervalProps);
 
     return interval;
 };

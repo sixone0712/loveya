@@ -11,7 +11,39 @@ class FormList extends Component{
 
     constructor() {
         super();
+
+        this.state = {
+            intervalValue: null
+        }
     }
+
+    getIntervalFunc = () => {
+        return this.state.intervalValue;
+    };
+
+    setIntervalFunc = (value) => {
+        this.setState({
+            ...this.state,
+            intervalValue: value
+        });
+    };
+
+    getResStatus = () => {
+        let status = "init";
+        if(this.props.resSuccess) {
+            status = "success";
+        } else if (this.props.resPending) {
+            status = "pending";
+        } else if (this.props.resError) {
+            status = "Error";
+        }
+
+        return status;
+    };
+
+    func1 = () => {
+        alert("완료되었습니다.");
+    };
 
     onSerach = async () => {
         console.log('##########################################################');
@@ -25,6 +57,22 @@ class FormList extends Component{
         console.log('##########################################################');
         console.log('startSearchList end');
         console.log('##########################################################');
+
+        const intervalProps = {
+            func1: this.func1,
+            getIntervalFunc : this.getIntervalFunc,
+            setIntervalFunc: this.setIntervalFunc,
+            getResStatus: this.getResStatus
+        };
+
+        const interval = API.setWatchSearchStatus(intervalProps);
+        console.log("!!!!!!!!!!!!!!!!!!!");
+        console.log("interval", interval);
+        this.setState({
+            ...this.state,
+            intervalValue: interval
+        })
+
     };
 
     render() {
@@ -60,6 +108,9 @@ export default connect(
       requestList: state.searchList.get('requestList'),
       startDate: state.searchList.get('startDate'),
       endDate: state.searchList.get('endDate'),
+      resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
+      resPending: state.pender.pending['searchList/SEARCH_LOAD_RESPONSE_LIST'],
+      resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
     }),
     (dispatch) => ({
       // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
