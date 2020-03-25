@@ -258,7 +258,7 @@ export default handleActions({
         const downloadStatus = state.get("downloadStatus").toJS();
 
         console.log("func", func);
-        if(func !== undefined) {
+        if(func !== undefined ) {
             downloadStatus.func = func;
         }
 

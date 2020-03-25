@@ -25,16 +25,39 @@ export const downloadFile = async (dlId) => {
         method,
         responseType: 'blob',   //important
     })
-        .then(({ data }) => {
+        .then( res  => {
+            //.then(({ data }) => {
+            /*
             const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+            console.log("new Blob([data])", new Blob([data]));
             const link = document.createElement('a');
             const  fileName = moment().format("YYYYMMDDHHmmss").toString() + ".zip";
             link.href = downloadUrl;
-            link.setAttribute('download', fileName);    //any other extension
+            //link.setAttribute('download', fileName);    //any other extension
+            document.body.appendChild(link);
+            //link.click();
+            //link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+            return Define.RSS_SUCCESS;
+             */
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            const contentDisposition = res.headers['content-disposition']; // 파일 이름
+            let fileName = 'unknown';
+            if (contentDisposition) {
+                const [fileNameMatch] = contentDisposition.split(';').filter(str => str.includes('filename'));
+                if (fileNameMatch)
+                    [, fileName] = fileNameMatch.split('=');
+            }
+            link.href = url;
+            link.setAttribute('download', `${fileName}`);
+            link.style.cssText = 'display:none';
             document.body.appendChild(link);
             link.click();
             link.remove();
+            window.URL.revokeObjectURL(url);
             return Define.RSS_SUCCESS;
+
         })
         .catch(error => {
            return Define.RSS_FAIL

@@ -23,7 +23,7 @@ export const getGenreList = (props) => {
 
 export const getGenreCnt = (props) => {
     const { genreCnt } = props;
-    return genreCnt.toJS();
+    return genreCnt;
 };
 
 export const addGenreList = (props, dispName, keyName) => {

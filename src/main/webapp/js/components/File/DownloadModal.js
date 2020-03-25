@@ -17,14 +17,6 @@ class DownloadConfirmModal extends Component {
     constructor(props) {
         super(props);
         const { openbtn, message, leftbtn, rightbtn } = this.props;
-        this.openParentModal = this.openParentModal.bind(this);
-        this.closeParentModal = this.closeParentModal.bind(this);
-        this.openProcessModal = this.openProcessModal.bind(this);
-        this.closeProcessModal = this.closeProcessModal.bind(this);
-        this.openCancelModal = this.openCancelModal.bind(this);
-        this.closeCancelModal = this.closeCancelModal.bind(this);
-        this.openCompleteModal = this.openCompleteModal.bind(this);
-        this.closeCompleteModal = this.closeCompleteModal.bind(this);
         this.state = {
             openbtn,
             message,
@@ -66,24 +58,26 @@ class DownloadConfirmModal extends Component {
 
         // 초기화
         const { searchListActions } = this.props;
-        searchListActions.searchSetDlStatus({dlId: "", status: "", totalFiles: 0, downloadFiles: 0})
+        searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
+        this.props.setErrorStatus(Define.RSS_SUCCESS);
 
         // Download Request 요청
         const requestId = await API.requestDownload(this.props);
         searchListActions.searchSetDlStatus({dlId: requestId});
         console.log("requestId", requestId);
 
-        // Download Status 요청
+        // SetInterval에서 사용할 Modal Func 추가
         const modalFunc = {
             closeProcessModal: this.closeProcessModal,
             openCompleteModal: this.openCompleteModal,
             closeCompleteModal: this.closeCompleteModal
         };
 
+        // Download Status 요청
         if(requestId !== "") {
             const intervalFunc = await API.setWatchDlStatus(this.props, requestId, modalFunc);
-            console.log("intervalFunc", intervalFunc);
             searchListActions.searchSetDlStatus({func: intervalFunc});
+            this.props.setErrorStatus(Define.RSS_FAIL);
         }
     };
 
@@ -101,8 +95,20 @@ class DownloadConfirmModal extends Component {
         });
     };
 
-    closeCancelModal = (siCancel) => {
-        if(cancel) {
+    closeCancelModal = (isCancel) => {
+        if(isCancel) {
+            const downloadStatus = this.props.downloadStatus;
+            const { func } = downloadStatus.toJS();
+
+            // SetInveral 상태요청 중지
+            if(func !== null){
+                clearInterval(func);
+            }
+
+            const {searchListActions } = this.props;
+            // 상태 초기화
+            searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
+            this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.setState({
                 ...this.state,
                 processModalOpen: false,
@@ -135,11 +141,14 @@ class DownloadConfirmModal extends Component {
         });
 
         if(isSave) {
-            const {downloadStatus} = this.props;
-            //const res = await services.axiosAPI.get("dl/download?dlId=" + downloadStatus.toJS().dlId);
-            //console.log("res.data", res.data);
+            const { downloadStatus } = this.props;
             result = await services.axiosAPI.downloadFile(downloadStatus.toJS().dlId);
+            this.props.setErrorStatus(result);
         }
+        // 상태 초기화
+        const { searchListActions } = this.props;
+        searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
+        this.props.setErrorStatus(Define.RSS_SUCCESS);
         console.log("result", result);
     };
 
