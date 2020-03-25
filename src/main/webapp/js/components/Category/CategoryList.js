@@ -173,7 +173,7 @@ class CategoryList extends Component {
                       {/*<option value="3">3</option>*/}
                       {/*<option value="4">4</option>*/}
                       {/*<option value="5">5</option>*/}
-                    <option value="selectGenre">
+                    <option value="selectGenre" disabled hidden>
                       Select Genre
                     </option>
                     {genreList.map((list, idx) => <option key={idx+1} value={list.keyName}>{list.dispName}</option>)}
