@@ -72,11 +72,12 @@ public class FileDownloadExecutor implements DownloadConfig {
         downloadFiles = 0;
     }
 
-    private class doAsyncProc implements Runnable {
+    private class AsyncProc implements Runnable {
 
-        final private FileDownloadContext context;
+        private boolean completed = false;
+        private final FileDownloadContext context;
 
-        private doAsyncProc(@NonNull FileDownloadContext context) {
+        private AsyncProc(@NonNull FileDownloadContext context) {
             this.context = context;
         }
 
@@ -90,6 +91,7 @@ public class FileDownloadExecutor implements DownloadConfig {
                 download();
                 transfer();
                 extract();
+                completed = true;
 
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -122,20 +124,16 @@ public class FileDownloadExecutor implements DownloadConfig {
             log.info("download()");
             while(true) {
                 RequestListBean requestList = mService.createDownloadList(context.getSystem(), null, null);
-                for (int i = 0; i < requestList.getRequestListCount(); ++i) {
-                    RequestInfoBean reqInfo = requestList.getRequestInfo(i);
-                    if (reqInfo.getRequestNo().equals(context.getRequestNo())) {
-                        String achieveUrl = mServiceManager.download(user_name, context.getSystem(), context.getTool(),
-                                context.getRequestNo(), reqInfo.getArchiveFileName());
-                        log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
-                        context.setAchieveUrl(achieveUrl);
-                        break;
-                    }
+                RequestInfoBean reqInfo = requestList.get(context.getRequestNo());
+                if(reqInfo==null) {
+                    Thread.sleep(300);
+                    continue;
                 }
-                if(context.isDownloadComplete()) {
-                    break;
-                }
-                Thread.sleep(300);
+                String achieveUrl = mServiceManager.download(user_name, context.getSystem(), context.getTool(),
+                        context.getRequestNo(), reqInfo.getArchiveFileName());
+                log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
+                context.setAchieveUrl(achieveUrl);
+                break;
             }
         }
 
@@ -194,6 +192,10 @@ public class FileDownloadExecutor implements DownloadConfig {
             }
             downloadFiles += context.getFileCount();
         }
+
+        public boolean isCompleted() {
+            return completed;
+        }
     }
 
     private void compress() {
@@ -219,7 +221,13 @@ public class FileDownloadExecutor implements DownloadConfig {
         initialize();
 
         status = Status.download;
-        downloadContexts.forEach(context->(new Thread(new doAsyncProc(context))).start());
+        downloadContexts.forEach(context->{
+            // Temporarily, downloading works sequentially.
+            // There is performance issue on soap service when it works as entire multi-threading.
+            AsyncProc proc = new AsyncProc(context);
+            new Thread(proc).start();
+            while(proc.isCompleted()==false);
+        });
 
         while(downloadFiles!=totalFiles) {
             if(status==Status.error) {

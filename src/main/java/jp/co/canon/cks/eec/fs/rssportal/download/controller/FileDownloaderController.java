@@ -86,7 +86,7 @@ public class FileDownloaderController {
         }
         String dlId = (String)param.get("dlId");
 
-        log.warn("getStatus(dlId="+dlId+")");
+        log.trace("getStatus(dlId="+dlId+")");
 
         FileDownloader dl = FileDownloader.getInstance();
         if(dl.isValidId(dlId)==false) {
