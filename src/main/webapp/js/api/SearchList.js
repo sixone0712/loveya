@@ -158,41 +158,9 @@ export const setDownload = (props) => {
     return jsonList;
 };
 
-/*
-export const getStartDownload = (url, jsonList) => new Promise((resolve, reject) => {
-    services.axiosAPI.postJson(url, jsonList).then(result=> {
-            console.log("getStartDownload");
-            resolve(result.data);
-        }
-    )});
-*/
-
-export const getStartDownload = async (url, jsonList) => {
-
-    console.log("11111111111111");
-    const res = await axios.post(url, jsonList, {
-        headers: {
-            'Content-Type': 'application/json',
-    }});
-
-    console.log("2222222222222");
-    const data = res.data;
-    console.log("3333333333333");
-    return data;
-};
-
-export const testAPI = (func, url, jsonList) => {
-    return func(url, jsonList);
-};
-
-
 export const setWatchDlStatus = (props, requestId, modalFunc) => {
-    console.log("props1", props);
     const interval = setInterval(async (props, requestId, modalFunc) => {
-        console.log("setInterval");
-        console.log("props2", props);
         const res = await services.axiosAPI.get("dl/status?dlId=" + requestId);
-        console.log("props3", props);
         const { searchListActions } = props;
         const { func } = props.downloadStatus;
 
@@ -207,7 +175,6 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
             status: res.data.status,
             totalFiles: res.data.totalFiles,
             downloadFiles: res.data.downloadFiles });
-        console.log("res.data", res.data);
     }, 200, props, requestId, modalFunc);
 
     return interval;
