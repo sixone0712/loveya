@@ -1,28 +1,58 @@
 import React, { Component } from "react";
 import {Button, FormGroup, Input} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import * as Define from '../../define';
 import * as API from "../../api";
 
 class InputModal extends Component {
     constructor(props) {
         super(props);
+        this.errRef = React.createRef();
         this.state = {
-            isOpen: false,
+            inputOpen: false,
+            alertOpen: false,
+            CompleteOpen: false,
+            errMsg: "",
+            alertMsg: ""
         };
     }
 
-    openModal = () => {
+    openInputModal = () => {
         this.setState({
             ...this.state,
-            isOpen: true
+            inputOpen: true
         });
     };
 
-    closeModal = () => {
+    closeInputModal = () => {
         this.setState({
             ...this.state,
-            isOpen: false
+            inputOpen: false
+        });
+    };
+
+    openAlertModal = (val) => {
+        let msg = "";
+
+        switch(val) {
+            case Define.GENRE_SET_FAIL_NO_ITEM: msg = "Please choose a category."; break;
+            case Define.GENRE_SET_FAIL_NOT_SELECT_GENRE: msg = "Please choose a genre."; break;
+            default: msg="what's error : " + error; break;
+        }
+
+        this.setState({
+            ...this.state,
+            alertMsg: msg,
+            alertOpen: true
+        });
+    };
+
+    closeAlertModal = () => {
+        this.setState({
+            ...this.state,
+            alertOpen: false
         });
     };
 
@@ -33,7 +63,9 @@ class InputModal extends Component {
         if(openbtn === "Create") {
             if(this.props.logInfoListCheckCnt <= 0){
                 this.props.setErrorStatus(Define.GENRE_SET_FAIL_NO_ITEM);
-                API.dispAlert(Define.GENRE_SET_FAIL_NO_ITEM);
+                //API.dispAlert(Define.GENRE_SET_FAIL_NO_ITEM);
+                //return;
+                this.openAlertModal(Define.GENRE_SET_FAIL_NO_ITEM);
                 return;
             }
             this.props.onChangeGenreName("");
@@ -42,11 +74,12 @@ class InputModal extends Component {
             console.log("this.props.selectedKeyName", this.props.selectedKeyName );
             if(this.props.selectedKeyName === "selectGenre") {
                 this.props.setErrorStatus(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
-                API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+                //API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+                this.openAlertModal(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
                 return;
             }
         }
-        this.openModal();
+        this.openInputModal();
     };
 
     actionFunc = async (openbtn) => {
@@ -58,16 +91,32 @@ class InputModal extends Component {
             selectedKeyName = this.props.selectedKeyName;
         }
 
-        //call async functionn
+        //call async function
         const result = await this.props.confirmFunc(this.props.genreName, selectedKeyName);
         if(result === Define.RSS_SUCCESS){
             this.props.setErrorStatus(Define.RSS_SUCCESS);
-            this.closeModal();
+            this.closeInputModal();
             this.props.handleSelectBoxChange(this.props.genreName);
         } else {
-            this.props.setErrorStatus(result);
-            API.dispAlert(result);
+            let msg = "";
 
+            this.props.setErrorStatus(result);
+
+            switch (result) {
+                case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The genre name is duplicated."; break;
+                case Define.GENRE_SET_FAIL_EMPTY_NAME: msg = "Please input genre name"; break;
+                case Define.GENRE_SET_FAIL_SEVER_ERROR: msg = "Network connection error"; break;
+                default: msg="what's error : " + error; break;
+            }
+
+            this.setState({
+                ...this.state,
+                errMsg: msg
+            });
+
+            this.errRef.current.classList.remove('modal-err-msg-hidden');
+
+            //API.dispAlert(result);
         }
     };
 
@@ -78,9 +127,9 @@ class InputModal extends Component {
             inputname,
             inputpholder,
             leftbtn,
-            rightbtn,
+            rightbtn
         } = this.props;
-        const { isOpen } = this.state;
+        const { inputOpen, alertOpen, errMsg, alertMsg } = this.state;
 
         return (
             <>
@@ -93,13 +142,13 @@ class InputModal extends Component {
                 >
                     {openbtn}
                 </Button>
-                {isOpen ? (
+                {inputOpen ? (
                     <ReactTransitionGroup
                         transitionName={"Custom-modal-anim"}
                         transitionEnterTimeout={200}
                         transitionLeaveTimeout={200}
                     >
-                        <div className="Custom-modal-overlay" onClick={this.closeModal} />
+                        <div className="Custom-modal-overlay" onClick={this.closeInputModal} />
                         <div className="Custom-modal">
                             <p className="title">{title}</p>
                             <div className="content-with-title">
@@ -112,6 +161,7 @@ class InputModal extends Component {
                                         className="catlist-input"
                                         onChange={(e) => this.props.onChangeGenreName(e.target.value)}
                                     />
+                                    <p className="modal-err-msg modal-err-msg-hidden" ref={this.errRef}>{errMsg}</p>
                                 </FormGroup>
                             </div>
                             <div className="button-wrap">
@@ -123,9 +173,40 @@ class InputModal extends Component {
                                 </button>
                                 <button
                                     className="primary form-type right-btn"
-                                    onClick={this.closeModal}
+                                    onClick={this.closeInputModal}
                                 >
                                     {rightbtn}
+                                </button>
+                            </div>
+                        </div>
+                    </ReactTransitionGroup>
+                ) : (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    />
+                )}
+                {alertOpen ? (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    >
+                        <div className="Custom-modal-overlay" onClick={this.closeAlertModal} />
+                        <div className="Custom-modal">
+                            <div className="content-without-title">
+                                <p>
+                                    <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
+                                </p>
+                                <p>{alertMsg}</p>
+                            </div>
+                            <div className="button-wrap">
+                                <button
+                                    className="primary alert-type"
+                                    onClick={this.closeAlertModal}
+                                >
+                                    Close
                                 </button>
                             </div>
                         </div>

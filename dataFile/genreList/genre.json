@@ -4,6 +4,7 @@
     "keyName": "chpark",
     "machine": [],
     "fileCat": [
+      0,
       1
     ]
   },
@@ -12,15 +13,17 @@
     "keyName": "gtpark",
     "machine": [],
     "fileCat": [
-      2
+      2,
+      3
     ]
   },
   {
     "dispName": "ymkwon",
-    "keyName": "ymwon",
+    "keyName": "ymkwon",
     "machine": [],
     "fileCat": [
-      3
+      4,
+      5
     ]
   }
 ]

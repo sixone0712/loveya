@@ -4,7 +4,7 @@ export const dispAlert = (error) => {
     let msg;
     switch (error) {
         case Define.GENRE_SET_FAIL_NO_ITEM: msg = "Please choose a category."; break;
-        case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The device name is duplicated."; break;
+        case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The genre name is duplicated."; break;
         case Define.GENRE_SET_FAIL_EMPTY_NAME: msg = "Please input genre name"; break;
         case Define.GENRE_SET_FAIL_SEVER_ERROR: msg = "Network connection error"; break;
         case Define.GENRE_SET_FAIL_NOT_SELECT_GENRE: msg = "Please choose a genre"; break;
@@ -16,5 +16,5 @@ export const dispAlert = (error) => {
         case Define.FILE_FAIL_NO_ITEM: msg = "Please choose a file"; break;
         default: msg="what's error : " + error; break;
     }
-    alert(msg)
+    alert(msg);
 };

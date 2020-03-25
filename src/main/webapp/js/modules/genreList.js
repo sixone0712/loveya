@@ -41,6 +41,11 @@ export default handleActions({
 
         onSuccess: (state, action) => { // 성공했을때 해야 할 작업이 따로 없으면 이 함수 또한 생략해도 됩니다.
             console.log("[genreList/GENRE_LOAD_LIST]");
+            if(action.payload.data === "") {
+                console.warn("[GENRE_LOAD_LIST] Genre is not exist.");
+                return state;
+            }
+
             const genreList = fromJS(action.payload.data);
             const genreCnt = genreList.size;
 

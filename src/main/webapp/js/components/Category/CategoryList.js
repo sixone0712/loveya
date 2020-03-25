@@ -137,14 +137,10 @@ class CategoryList extends Component {
 
     const categorylist = API.getLogInfoList(this.props);
     const genreList = API.getGenreList(this.props);
+    const genreCnt = API.getGenreCnt(this.props);
     console.log("categorylist", categorylist);
     console.log("genreList", genreList);
-
-    const optionList = genreList.map((list, idx) => {
-        return <option value={idx}>{list.dispName}</option>;
-    });
-
-    console.log("optionList", optionList);
+    console.log("genreCnt", genreCnt);
 
     return (
         <Card className="ribbon-wrapper catlist-custom">
@@ -173,10 +169,12 @@ class CategoryList extends Component {
                       {/*<option value="3">3</option>*/}
                       {/*<option value="4">4</option>*/}
                       {/*<option value="5">5</option>*/}
-                    <option value="selectGenre">
+                    <option value="selectGenre" disabled hidden>
                       Select Genre
                     </option>
-                    {genreList.map((list, idx) => <option key={idx+1} value={list.keyName}>{list.dispName}</option>)}
+                      { genreCnt > 0 &&
+                        genreList.map((list, idx) => <option key={idx+1} value={list.keyName}>{list.dispName}</option>)
+                      }
                     </Input>
 
                     <InputModal
