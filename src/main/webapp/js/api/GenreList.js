@@ -34,6 +34,10 @@ export const addGenreList = (props, dispName, keyName) => {
     const logInfoListToJS = logInfoList.toJS();
     const genreListJS = genreList.toJS();
 
+    if(dispName.length <= 0) {
+        return Define.GENRE_SET_FAIL_EMPTY_NAME;
+    }
+
     const findList = genreListJS.filter(function(item){
         return item.keyName === dispName;
     });
@@ -86,7 +90,7 @@ export const editGenreList = (props, dispName, keyName) => {
     const findList = genreListJS.filter(function(item){
 
         console.log("item.keyName", item.keyName, "dispName", dispName);
-        return item.keyName === dispName;
+        return item.dispName === dispName && item.keyName !== keyName;
     });
 
     console.log("findList", findList);

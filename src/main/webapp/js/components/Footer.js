@@ -7,10 +7,7 @@ export default function RSSfooter() {
       <Row>
         <Col>
           <ul className="list-unstyled">
-            <li className="float-lg-left">Copyright CANON INC. 2020</li>
-            <li className="float-lg-right">
-              <a href="#">Back to top</a>
-            </li>
+            <li className="float-lg-right">Copyright CANON INC. 2020</li>
           </ul>
         </Col>
       </Row>
