@@ -13,6 +13,13 @@ const SEARCH_LOAD_RESPONSE_LIST= 'searchList/SEARCH_LOAD_RESPONSE_LIST';
 const SEARCH_CHECK_RESPONSE_LIST = 'searchList/SEARCH_CHECK_RESPONSE_LIST';
 const SEARCH_CHECK_ALL_RESPONSE_LIST = 'searchList/SEARCH_CHECK_ALL_RESPONSE_LIST';
 const SEARCH_SET_RESPONSE_PERPAGE= 'searchList/SEARCH_SET_RESPONSE_PERPAGE';
+const SEARCH_SET_DL_STATUS= 'searchList/SEARCH_SET_DL_STATUS';
+/*
+const SEARCH_SET_DL_ID= 'searchList/SEARCH_SET_DOWNLAD_ID';
+const SEARCH_SET_DL_STATUS= 'searchList/SEARCH_SET_DL_STATUS';
+const SEARCH_SET_DL_TOTAL_FILES= 'searchList/SEARCH_SET_DL_TOTAL_FILES';
+const SEARCH_SET_DL_DOWNLOAD_FILES= 'searchList/SEARCH_SET_DL_DOWNLOAD_FILES';
+*/
 
 export const searchSetRequestList = createAction(SEARCH_SET_REQUEST_LIST); 	// toolList
 export const searchSetRequestStartDate = createAction(SEARCH_SET_REQEUST_START_DATE); 	// toolList
@@ -22,6 +29,13 @@ export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, se
 export const searchCheckResponseList = createAction(SEARCH_CHECK_RESPONSE_LIST); 	// toolList
 export const searchCheckALLResponseList = createAction(SEARCH_CHECK_ALL_RESPONSE_LIST); 	// toolList
 export const searchSetResponsePerPage = createAction(SEARCH_SET_RESPONSE_PERPAGE); 	// toolList
+export const searchSetDlStatus = createAction(SEARCH_SET_DL_STATUS);
+/*
+export const searchSetDlId = createAction(SEARCH_SET_DL_ID);
+export const searchSetDlId = createAction(SEARCH_SET_DL_STATUS);
+export const searchSetDlId = createAction(SEARCH_SET_DL_TOTAL_FILES);
+export const searchSetDlId = createAction(SEARCH_SET_DL_DOWNLOAD_FILES);
+*/
 
 
 const initialState = Map({
@@ -63,6 +77,13 @@ const initialState = Map({
 		})
     ]),
 
+    downloadStatus: Map({
+        func: null,
+        dlId: "",
+        status: "init",
+        totalFiles: 0,
+        downloadFiles: 0,
+    }),
 
     //startDate: moment().set({'hour' : 0, 'minute': 0, 'second': 1}),
     startDate: moment().utc().startOf('day'),
@@ -230,5 +251,40 @@ export default handleActions({
     [SEARCH_INIT_RESPONSE_LIST] : (state, action) => {
         return state.set("responsePerPage", action.payload);
     },
+
+    [SEARCH_SET_DL_STATUS] : (state, action) => {
+
+        const { func, dlId, status, totalFiles, downloadFiles } = action.payload;
+        const downloadStatus = state.get("downloadStatus").toJS();
+
+        console.log("func", func);
+        if(func !== undefined) {
+            downloadStatus.func = func;
+        }
+
+        console.log("dlId", dlId);
+        if(dlId !== undefined) {
+            downloadStatus.dlId = dlId;
+        }
+        console.log("status", status);
+        if(status !== undefined) {
+            if(status ==="done" || status === "error") {
+                clearInterval(downloadStatus.func);
+                downloadStatus.func = null;
+            }
+            downloadStatus.status = status;
+        }
+        console.log("totalFiles", totalFiles);
+        if(totalFiles !== undefined) {
+            downloadStatus.totalFiles = totalFiles;
+        }
+        console.log("downloadFiles", downloadFiles);
+        if(downloadFiles !== undefined) {
+            downloadStatus.downloadFiles = downloadFiles;
+        }
+
+        console.log("downloadStatus", downloadStatus);
+        return state.set("downloadStatus", fromJS(downloadStatus));
+    }
 
 }, initialState)
