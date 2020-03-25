@@ -244,6 +244,16 @@ public class FileDownloadExecutor implements DownloadConfig {
         return file.substring(0, idx);
     }
 
+    private void setError() {
+        setError("no reason");
+    }
+
+    private void setError(@NonNull final String error) {
+        log.error(error);
+        status = Status.error;
+        errString = error;
+    }
+
     private void dumpFileList() {
         if(downloadForms !=null) {
             for(DownloadForm form: downloadForms) {
@@ -271,18 +281,8 @@ public class FileDownloadExecutor implements DownloadConfig {
         // TBD
     }
 
-    private void setError() {
-        setError("no reason");
-    }
-
-    private void setError(@NonNull final String error) {
-        log.error(error);
-        status = Status.error;
-        errString = error;
-    }
-
     public boolean isRunning() {
-        return (status==Status.complete || status==Status.error)?true:false;
+        return (status==Status.complete || status==Status.error)?false:true;
     }
 
     public String getStatus() {

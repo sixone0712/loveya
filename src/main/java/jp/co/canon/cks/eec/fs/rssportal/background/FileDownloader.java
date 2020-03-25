@@ -49,10 +49,13 @@ public class FileDownloader {
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
         log.warn("addRequest( request-size="+dlList.size()+")");
 
-        if(mHolders.size()>=MAX_THREADS_AT_ONCE) {
-            log.warn("addRequest(): thread full");
-            return null;
+        if(false) {
+            if (mHolders.size() >= MAX_THREADS_AT_ONCE) {
+                log.warn("addRequest(): thread full");
+                return null;
+            }
         }
+
         FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, dlList);
         mHolders.put(holder.getId(), holder);
 
