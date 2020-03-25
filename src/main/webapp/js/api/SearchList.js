@@ -17,7 +17,7 @@ export const setEndDate = (props, date) => {
     searchListActions.searchSetRequestEndDate(date);
 };
 
-export const setSearchList = (props) => {
+export const setSearchList = async (props) => {
     const { searchListActions } = props;
     const toolList = props.toolInfoList;
     const logInfoList = props.logInfoList;
@@ -34,7 +34,7 @@ export const setSearchList = (props) => {
     } else if(startDate.isAfter(endDate)) {
         error = Define.SEARCH_FAIL_DATE
     } else {
-        searchListActions.searchSetRequestList({toolList, logInfoList, startDate, endDate});
+        await searchListActions.searchSetRequestList({toolList, logInfoList, startDate, endDate});
     }
 
     //startSearchList(props);
@@ -175,7 +175,7 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
             status: res.data.status,
             totalFiles: res.data.totalFiles,
             downloadFiles: res.data.downloadFiles });
-    }, 200, props, requestId, modalFunc);
+    }, 1000, props, requestId, modalFunc);
 
     return interval;
 };
