@@ -10,6 +10,8 @@ import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
 import * as Define from "../../define";
 import services from "../../services";
+import axios from 'axios';
+import moment from "moment";
 
 class DownloadConfirmModal extends Component {
     constructor(props) {
@@ -31,7 +33,7 @@ class DownloadConfirmModal extends Component {
             parentModalOpen: false,
             processModalOpen: false,
             cancelModalOpen: false,
-            completeModalOpen: false
+            completeModalOpen: false,
         };
     }
 
@@ -58,16 +60,31 @@ class DownloadConfirmModal extends Component {
     openProcessModal = async () => {
         this.setState({
             ...this.state,
+            parentModalOpen: false,
             processModalOpen: true
         });
 
+        // 초기화
         const { searchListActions } = this.props;
-        searchListActions.searchSetDlId({dlId: "", status: "", totalFiles: 0, downloadFiles: 0})
+        searchListActions.searchSetDlStatus({dlId: "", status: "", totalFiles: 0, downloadFiles: 0})
 
+        // Download Request 요청
         const requestId = await API.requestDownload(this.props);
-        searchListActions.searchSetDlId({dlId: requestId});
+        searchListActions.searchSetDlStatus({dlId: requestId});
         console.log("requestId", requestId);
-        console.log(await services.axiosAPI.get("dl/status?dlId=" + requestId));
+
+        // Download Status 요청
+        const modalFunc = {
+            closeProcessModal: this.closeProcessModal,
+            openCompleteModal: this.openCompleteModal,
+            closeCompleteModal: this.closeCompleteModal
+        };
+
+        if(requestId !== "") {
+            const intervalFunc = await API.setWatchDlStatus(this.props, requestId, modalFunc);
+            console.log("intervalFunc", intervalFunc);
+            searchListActions.searchSetDlStatus({func: intervalFunc});
+        }
     };
 
     closeProcessModal = () => {
@@ -84,13 +101,20 @@ class DownloadConfirmModal extends Component {
         });
     };
 
-    closeCancelModal = () => {
-        this.setState({
-            ...this.state,
-            cancelModalOpen: false,
-            processModalOpen: false,
-            parentModalOpen: false
-        });
+    closeCancelModal = (siCancel) => {
+        if(cancel) {
+            this.setState({
+                ...this.state,
+                processModalOpen: false,
+                cancelModalOpen: false
+
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                cancelModalOpen: false,
+            });
+        }
     };
 
     openCompleteModal = () => {
@@ -100,7 +124,8 @@ class DownloadConfirmModal extends Component {
         });
     };
 
-    closeCompleteModal = () => {
+    closeCompleteModal = async (isSave) => {
+        let result = Define.RSS_SUCCESS;
         this.setState({
             ...this.state,
             completeModalOpen: false,
@@ -108,6 +133,14 @@ class DownloadConfirmModal extends Component {
             processModalOpen: false,
             parentModalOpen: false
         });
+
+        if(isSave) {
+            const {downloadStatus} = this.props;
+            //const res = await services.axiosAPI.get("dl/download?dlId=" + downloadStatus.toJS().dlId);
+            //console.log("res.data", res.data);
+            result = await services.axiosAPI.downloadFile(downloadStatus.toJS().dlId);
+        }
+        console.log("result", result);
     };
 
     render() {
@@ -121,6 +154,9 @@ class DownloadConfirmModal extends Component {
             cancelModalOpen,
             completeModalOpen
         } = this.state;
+
+        const { totalFiles, downloadFiles} = this.props.downloadStatus.toJS();
+
         return (
             <>
                 <Button
@@ -192,9 +228,12 @@ class DownloadConfirmModal extends Component {
                                 </div>
                                 <p>
                                     Downloading...
-                                    <br />
-                                    (10/100)
                                 </p>
+                                {totalFiles > 0 && true &&
+                                <p>
+                                    ({downloadFiles}/{totalFiles})
+                                </p>
+                                }
                             </div>
                             <div className="button-wrap">
                                 <button
@@ -230,13 +269,13 @@ class DownloadConfirmModal extends Component {
                             <div className="button-wrap">
                                 <button
                                     className="secondary form-type left-btn"
-                                    onClick={this.closeCancelModal}
+                                    onClick={()=> this.closeCancelModal(true)}
                                 >
                                     Yes
                                 </button>
                                 <button
                                     className="secondary form-type right-btn"
-                                    onClick={this.openCompleteModal}
+                                    onClick={()=> this.closeCancelModal(false)}
                                 >
                                     No
                                 </button>
@@ -267,13 +306,13 @@ class DownloadConfirmModal extends Component {
                             <div className="button-wrap">
                                 <button
                                     className="secondary form-type left-btn"
-                                    onClick={this.closeCompleteModal}
+                                    onClick={() => this.closeCompleteModal(true)}
                                 >
                                     Save
                                 </button>
                                 <button
                                     className="secondary form-type right-btn"
-                                    onClick={this.closeCompleteModal}
+                                    onClick={() => this.closeCompleteModal(false)}
                                 >
                                     Cancel
                                 </button>

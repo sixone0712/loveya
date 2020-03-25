@@ -185,3 +185,30 @@ export const testAPI = (func, url, jsonList) => {
     return func(url, jsonList);
 };
 
+
+export const setWatchDlStatus = (props, requestId, modalFunc) => {
+    console.log("props1", props);
+    const interval = setInterval(async (props, requestId, modalFunc) => {
+        console.log("setInterval");
+        console.log("props2", props);
+        const res = await services.axiosAPI.get("dl/status?dlId=" + requestId);
+        console.log("props3", props);
+        const { searchListActions } = props;
+        const { func } = props.downloadStatus;
+
+        if(res.data.status === "done" || res.data.status ==="error") {
+            clearInterval(func);
+            modalFunc.closeProcessModal();
+            modalFunc.openCompleteModal();
+        }
+
+        searchListActions.searchSetDlStatus({
+            dlId: res.data.dlId,
+            status: res.data.status,
+            totalFiles: res.data.totalFiles,
+            downloadFiles: res.data.downloadFiles });
+        console.log("res.data", res.data);
+    }, 200, props, requestId, modalFunc);
+
+    return interval;
+};

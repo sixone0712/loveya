@@ -29,7 +29,7 @@ export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, se
 export const searchCheckResponseList = createAction(SEARCH_CHECK_RESPONSE_LIST); 	// toolList
 export const searchCheckALLResponseList = createAction(SEARCH_CHECK_ALL_RESPONSE_LIST); 	// toolList
 export const searchSetResponsePerPage = createAction(SEARCH_SET_RESPONSE_PERPAGE); 	// toolList
-export const searchSetDlId = createAction(SEARCH_SET_DL_STATUS);
+export const searchSetDlStatus = createAction(SEARCH_SET_DL_STATUS);
 /*
 export const searchSetDlId = createAction(SEARCH_SET_DL_ID);
 export const searchSetDlId = createAction(SEARCH_SET_DL_STATUS);
@@ -78,6 +78,7 @@ const initialState = Map({
     ]),
 
     downloadStatus: Map({
+        func: null,
         dlId: "",
         status: "init",
         totalFiles: 0,
@@ -253,8 +254,13 @@ export default handleActions({
 
     [SEARCH_SET_DL_STATUS] : (state, action) => {
 
-        const { dlId, status, totalFiles, downloadFiles } = action.payload;
+        const { func, dlId, status, totalFiles, downloadFiles } = action.payload;
         const downloadStatus = state.get("downloadStatus").toJS();
+
+        console.log("func", func);
+        if(func !== undefined) {
+            downloadStatus.func = func;
+        }
 
         console.log("dlId", dlId);
         if(dlId !== undefined) {
@@ -262,6 +268,10 @@ export default handleActions({
         }
         console.log("status", status);
         if(status !== undefined) {
+            if(status ==="done" || status === "error") {
+                clearInterval(downloadStatus.func);
+                downloadStatus.func = null;
+            }
             downloadStatus.status = status;
         }
         console.log("totalFiles", totalFiles);
@@ -270,7 +280,7 @@ export default handleActions({
         }
         console.log("downloadFiles", downloadFiles);
         if(downloadFiles !== undefined) {
-            downloadStatus.totalFiles = totalFiles;
+            downloadStatus.downloadFiles = downloadFiles;
         }
 
         console.log("downloadStatus", downloadStatus);
