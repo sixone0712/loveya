@@ -76,7 +76,8 @@ class DownloadConfirmModal extends Component {
         const modalFunc = {
             closeProcessModal: this.closeProcessModal,
             openCompleteModal: this.openCompleteModal,
-            closeCompleteModal: this.closeCompleteModal
+            closeCompleteModal: this.closeCompleteModal,
+            openErrorModal: this.openErrorModal
         };
 
         // Download Status 요청
@@ -101,7 +102,7 @@ class DownloadConfirmModal extends Component {
         });
     };
 
-    closeCancelModal = (isCancel) => {
+    closeCancelModal = async (isCancel) => {
         if(isCancel) {
             const downloadStatus = this.props.downloadStatus;
             const { func } = downloadStatus.toJS();
@@ -123,18 +124,28 @@ class DownloadConfirmModal extends Component {
                 });
             }, 100);
         } else {
-            this.setState({
+            // setState는 비동기이기 때문에 await로 대기한다.
+            await this.setState({
                 ...this.state,
                 cancelModalOpen: false,
             });
+
+            const downloadStatus = this.props.downloadStatus;
+            const { status, totalFiles, downloadFiles} = downloadStatus.toJS();
+            // 이미 다운로드가 완료 된 상태인 경우 openCompleteModal을 Open한다.
+            if(status === "done" && totalFiles === downloadFiles) {
+                this.openCompleteModal();
+            }
         }
     };
 
     openCompleteModal = () => {
-        this.setState({
-            ...this.state,
-            completeModalOpen: true
-        });
+        if(this.state.cancelModalOpen !== true) {
+            this.setState({
+                ...this.state,
+                completeModalOpen: true
+            });
+        }
     };
 
     closeCompleteModal = async (isSave) => {
@@ -151,22 +162,21 @@ class DownloadConfirmModal extends Component {
         }
         // 상태 초기화
         const { searchListActions } = this.props;
-        searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
+        searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
         this.props.setErrorStatus(Define.RSS_SUCCESS);
-        console.log("result", result);
     };
 
     openErrorModal = () => {
         this.setState({
             errorModalOpen: true
         });
-    }
+    };
 
     closeErrorModal = () => {
         this.setState({
             errorModalOpen: false
         });
-    }
+    };
 
     render() {
         const {

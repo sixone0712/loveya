@@ -5,7 +5,7 @@ export const setGenreList =  async (props)  => {
     console.log("###setGenreList Start ");
     console.log("genreList", props.genreList.toJS());
 
-    const result = await services.axiosAPI.postByObject("api/setGenre", props.genreList.toJS())
+    const result = await services.axiosAPI.postByObject("/api/setGenre", props.genreList.toJS())
         .then((data) => Define.RSS_SUCCESS)
         .catch((error) => {
             console.log("[setGenreList]error", error);

@@ -41,7 +41,7 @@ class FormList extends Component{
         } else if (this.props.resPending) {
             status = "pending";
         } else if (this.props.resError) {
-            status = "Error";
+            status = "error";
         }
 
         return status;
@@ -49,6 +49,7 @@ class FormList extends Component{
 
     onSearch = async () => {
         let msg = "";
+        // Seacrh Request 데이터 저장
         const errCode = await API.setSearchList(this.props);
 
         switch (errCode) {
@@ -70,33 +71,23 @@ class FormList extends Component{
             return;
         }
         this.openProcessModal();
-        console.log('##########################################################');
-        console.log('setSearchList before');
-        console.log('##########################################################');
-        //await API.setSearchList(this.props);
-        console.log('##########################################################');
-        console.log('setSearchList after');
-        console.log('##########################################################');
+
         API.startSearchList(this.props);
-        console.log('##########################################################');
-        console.log('startSearchList end');
-        console.log('##########################################################');
+
 
         const intervalProps = {
-            modalFunc: this.closeProcessModal,
+            closeProcessModal: this.closeProcessModal,
             getIntervalFunc : this.getIntervalFunc,
             setIntervalFunc: this.setIntervalFunc,
-            getResStatus: this.getResStatus
+            getResStatus: this.getResStatus,
+            openErrorModal: this.openErrorModal
         };
 
         const interval = API.setWatchSearchStatus(intervalProps);
-        console.log("!!!!!!!!!!!!!!!!!!!");
-        console.log("interval", interval);
         this.setState({
             ...this.state,
             intervalValue: interval
         })
-
     };
 
     openProcessModal = () => {
@@ -115,13 +106,13 @@ class FormList extends Component{
         this.setState({
            isErrorOpen: true
         });
-    }
+    };
 
     closeErrorModal = () => {
         this.setState({
            isErrorOpen: false
         });
-    }
+    };
 
     render() {
         const { isProcessOpen, isErrorOpen, modalMsg } = this.state;
