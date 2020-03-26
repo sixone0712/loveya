@@ -180,14 +180,6 @@ export default handleActions({
         const newSearchList = new Array();
         for (let tList of newToolList) {
             for(let fList of newLogInfoList) {
-                console.log("tList", tList);
-                console.log("tList.structId", tList.structId);
-                console.log("tList.targetName", tList.targetname);
-                console.log("tList.targetType", tList.targettype);
-                console.log("fList.logType", fList.logType);
-                console.log("fList.logCode", fList.logCode);
-                console.log("fList.logName", fList.logName);
-
                 newSearchList.push(
                     {
                         structId: tList.structId,
