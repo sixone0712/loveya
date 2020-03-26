@@ -95,7 +95,7 @@ export const requestDownload = async (props) => {
     console.log("downloadList", downloadList);
     console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.postJson("dl/request", jsonList)
+    const result = await services.axiosAPI.postByJson("dl/request", jsonList)
         .then((data) => {console.log("data", data); return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
@@ -161,6 +161,7 @@ export const setDownload = (props) => {
 export const setWatchDlStatus = (props, requestId, modalFunc) => {
     const interval = setInterval(async (props, requestId, modalFunc) => {
         const res = await services.axiosAPI.get("dl/status?dlId=" + requestId);
+        //const res = await services.axiosAPI.postByJson("dl/status",  { dlId: requestId });
         const { searchListActions } = props;
         const { func } = props.downloadStatus;
 
