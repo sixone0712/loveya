@@ -90,7 +90,9 @@ public class FileDownloadExecutor implements DownloadConfig {
                 regist();
                 download();
                 transfer();
-                extract();
+                if(false) {
+                    extract();
+                }
                 completed = true;
 
             } catch (RemoteException e) {
@@ -237,6 +239,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             String requestNo;
             RequestInfoBean info;
             long ts;
+            boolean activated;
 
             public TargetInfo(String system, String tool, String requestNo, RequestInfoBean info, long ts) {
                 this.system = system;
@@ -244,6 +247,7 @@ public class FileDownloadExecutor implements DownloadConfig {
                 this.requestNo = requestNo;
                 this.info = info;
                 this.ts = ts;
+                this.activated = true;
             }
         }
 
@@ -254,20 +258,22 @@ public class FileDownloadExecutor implements DownloadConfig {
             log.info("download monitor start");
             while(status==Status.download) {
                 for(TargetInfo target: targets) {
-                    synchronized (target) {
-                        try {
-                            RequestListBean requestList = mService.createRequestList(target.system,
-                                    target.tool, target.requestNo);
-                            if(requestList!=null) {
-                                target.info = requestList.get(target.requestNo);
-                                if(target.info!=null) {
+                    if(target.activated) {
+                        synchronized (target) {
+                            try {
+                                RequestListBean requestList = mService.createRequestList(target.system,
+                                        target.tool, target.requestNo);
+                                if (requestList != null) {
+                                    target.info = requestList.get(target.requestNo);
+                                    if (target.info != null) {
                                     /*log.info("monitor: " + target.info.getRequestNo() + ": " + target.info.getNumerator() + "/" +
                                             target.info.getDenominator());*/
-                                    target.ts = System.currentTimeMillis();
+                                        target.ts = System.currentTimeMillis();
+                                    }
                                 }
+                            } catch (ServiceException e) {
+                                e.printStackTrace();
                             }
-                        } catch (ServiceException e) {
-                            e.printStackTrace();
                         }
                     }
                 }
@@ -307,7 +313,8 @@ public class FileDownloadExecutor implements DownloadConfig {
             TargetInfo target = getTarget(system, tool, requestNo);
             if(target!=null) {
                 synchronized (targets) {
-                    targets.remove(target);
+                    //targets.remove(target);
+                    target.activated = false;
                 }
             }
         }
