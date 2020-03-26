@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,15 +45,15 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     private FileServiceManage mServiceManager;
     private FileServiceModel mService;
+    private DownloadMonitor downloadMonitor;
     private int totalFiles = -1;
-    private int downloadFiles = -1;
     private String mPath = null;
-
 
     public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request) {
         status = Status.idle;
         mServiceManager = serviceManager;
         mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
+        downloadMonitor = new DownloadMonitor();
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
         downloadId = "DL"+(mUniqueKey++)+String.valueOf(stamp.getTime());
@@ -69,7 +70,6 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
         totalFiles = 0;
         downloadContexts.forEach(context -> totalFiles +=context.getFileCount());
-        downloadFiles = 0;
     }
 
     private class AsyncProc implements Runnable {
@@ -122,13 +122,28 @@ public class FileDownloadExecutor implements DownloadConfig {
         private void download() throws ServiceException, RemoteException, InterruptedException {
 
             log.info("download()");
+            downloadMonitor.add(context.getSystem(), context.getTool(), context.getRequestNo());
+
             while(true) {
-                RequestListBean requestList = mService.createDownloadList(context.getSystem(), null, null);
+                RequestInfoBean requestInfoBean = downloadMonitor.get(context.getSystem(), context.getTool(), context.getRequestNo());
+                if (requestInfoBean != null) {
+                    context.setDownloadFiles(requestInfoBean.getNumerator());
+                    if(requestInfoBean.getNumerator() == requestInfoBean.getDenominator()) {
+                        downloadMonitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
+                        break;
+                    }
+                }
+                Thread.sleep(100);
+            }
+
+            while(true) {
+                RequestListBean requestList = mService.createDownloadList(context.getSystem(), context.getTool(), context.getRequestNo());
                 RequestInfoBean reqInfo = requestList.get(context.getRequestNo());
                 if(reqInfo==null) {
-                    Thread.sleep(300);
+                    Thread.sleep(100);
                     continue;
                 }
+
                 String achieveUrl = mServiceManager.download(user_name, context.getSystem(), context.getTool(),
                         context.getRequestNo(), reqInfo.getArchiveFileName());
                 log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
@@ -174,8 +189,7 @@ public class FileDownloadExecutor implements DownloadConfig {
                     while(entry!=null) {
                         File tmpFile = new File(dir, entry.getName());
                         FileOutputStream fos = new FileOutputStream(tmpFile);
-                        int size;
-                        while((size=zis.read(buf))>0) {
+                        while(zis.read(buf)>0) {
                             fos.write(buf);
                         }
                         fos.close();
@@ -190,7 +204,6 @@ public class FileDownloadExecutor implements DownloadConfig {
                 }
                 zipFile.delete();
             }
-            downloadFiles += context.getFileCount();
         }
 
         public boolean isCompleted() {
@@ -216,11 +229,101 @@ public class FileDownloadExecutor implements DownloadConfig {
         status = Status.complete;
     }
 
+    private class DownloadMonitor implements Runnable {
+
+        class TargetInfo {
+            String system;
+            String tool;
+            String requestNo;
+            RequestInfoBean info;
+            long ts;
+
+            public TargetInfo(String system, String tool, String requestNo, RequestInfoBean info, long ts) {
+                this.system = system;
+                this.tool = tool;
+                this.requestNo = requestNo;
+                this.info = info;
+                this.ts = ts;
+            }
+        }
+
+        private List<TargetInfo> targets = new ArrayList<>();
+
+        @Override
+        public void run() {
+            log.info("download monitor start");
+            while(status==Status.download) {
+                for(TargetInfo target: targets) {
+                    synchronized (target) {
+                        try {
+                            RequestListBean requestList = mService.createRequestList(target.system,
+                                    target.tool, target.requestNo);
+                            if(requestList!=null) {
+                                target.info = requestList.get(target.requestNo);
+                                if(target.info!=null) {
+                                    /*log.info("monitor: " + target.info.getRequestNo() + ": " + target.info.getNumerator() + "/" +
+                                            target.info.getDenominator());*/
+                                    target.ts = System.currentTimeMillis();
+                                }
+                            }
+                        } catch (ServiceException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            log.info("download monitor end");
+        }
+
+        private TargetInfo getTarget(String system, String tool, String requestNo) {
+            for(TargetInfo target: targets) {
+                if(target.system.equals(system) && target.tool.equals(tool) && target.requestNo.equals(requestNo)) {
+                    return target;
+                }
+            }
+            return null;
+        }
+
+        public void add(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
+            if(getTarget(system, tool, requestNo)==null) {
+                try {
+                    RequestListBean requestList = mService.createDownloadList(system, tool, requestNo);
+                    RequestInfoBean inf = requestList.get(requestNo);
+                    synchronized (targets) {
+                        targets.add(new TargetInfo(system, tool, requestNo, inf, System.currentTimeMillis()));
+                    }
+                } catch (ServiceException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void delete(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
+            TargetInfo target = getTarget(system, tool, requestNo);
+            if(target!=null) {
+                synchronized (targets) {
+                    targets.remove(target);
+                }
+            }
+        }
+
+        public RequestInfoBean get(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
+            TargetInfo target = getTarget(system, tool, requestNo);
+            return target!=null?target.info:null;
+        }
+    };
+
     private Runnable runner = () -> {
 
         initialize();
 
         status = Status.download;
+        new Thread(downloadMonitor).start();
         downloadContexts.forEach(context->{
             // Temporarily, downloading works sequentially.
             // There is performance issue on soap service when it works as entire multi-threading.
@@ -229,7 +332,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             while(proc.isCompleted()==false);
         });
 
-        while(downloadFiles!=totalFiles) {
+        /*while(downloadFiles!=totalFiles) {
             if(status==Status.error) {
                 return;
             }
@@ -238,7 +341,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
         compress();
         wrapup();
     };
@@ -312,7 +415,9 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     public int getDownloadFiles() {
-        return downloadFiles;
+        AtomicInteger files = new AtomicInteger();
+        downloadContexts.forEach(context-> files.addAndGet(context.getDownloadFiles()));
+        return files.get();
     }
 
     public int getTotalFiles() {

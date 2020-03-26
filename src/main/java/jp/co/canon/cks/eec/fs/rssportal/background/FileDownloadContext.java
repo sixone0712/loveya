@@ -38,6 +38,8 @@ public class FileDownloadContext implements DownloadConfig {
     private File outFile;
     private String outPath;
 
+    private int downloadFiles;
+
     public FileDownloadContext(@NonNull String id, @NonNull DownloadForm form) {
 
         this.downloadForm = form;
@@ -63,6 +65,7 @@ public class FileDownloadContext implements DownloadConfig {
         Path path = Paths.get(DownloadConfig.ROOT_PATH, id, tool, logType);
         this.outPath = path.toString();
 
+        downloadFiles = 0;
         downloadComplete = false;
         ftpProcComplete = false;
     }
@@ -151,6 +154,14 @@ public class FileDownloadContext implements DownloadConfig {
 
     public String getOutPath() {
         return outPath;
+    }
+
+    public int getDownloadFiles() {
+        return downloadFiles;
+    }
+
+    public void setDownloadFiles(int downloadFiles) {
+        this.downloadFiles = downloadFiles;
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {
