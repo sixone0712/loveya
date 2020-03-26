@@ -13,7 +13,7 @@ export const genreLoadList = createAction(GENRE_LOAD_LIST, services.axiosAPI.get
 export const genreAddList = createAction(GENRE_ADD_LIST); 	// { mode, logInfoList}}
 export const genreDeleteList = createAction(GENRE_DELETE_LIST); 	// { mode, logInfoList}}
 export const genreEditList = createAction(GENRE_EDIT_LIST); 	// { mode, logInfoList}}
-export const genreSetDBList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.post);
+export const genreSetDBList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.postByObject);
 
 
 const initialState = Map({
