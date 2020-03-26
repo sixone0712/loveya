@@ -35,7 +35,7 @@ export function postByJson(url, postData) {
 
 export const downloadFile = async (dlId) => {
     const method = 'GET';
-    const url = "dl/download?dlId=" + dlId;
+    const url = "/dl/download?dlId=" + dlId;
     const result = await axios.request({
         url,
         method,

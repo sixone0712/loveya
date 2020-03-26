@@ -46,7 +46,7 @@ export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList("api/createFileList", requestList.toJS());
+    searchListActions.searchLoadResponseList("/api/createFileList", requestList.toJS());
 };
 
 export const getResponseList = (props) => {
@@ -96,7 +96,7 @@ export const requestDownload = async (props) => {
     console.log("downloadList", downloadList);
     console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.postByJson("dl/request", jsonList)
+    const result = await services.axiosAPI.postByJson("/dl/request", jsonList)
         .then((data) => {console.log("data", data); return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
@@ -161,15 +161,24 @@ export const setDownload = (props) => {
 
 export const setWatchDlStatus = (props, requestId, modalFunc) => {
     const interval = setInterval(async (props, requestId, modalFunc) => {
-        const res = await services.axiosAPI.get("dl/status?dlId=" + requestId);
-        //const res = await services.axiosAPI.postByJson("dl/status",  { dlId: requestId });
+        const res = await services.axiosAPI.get("/dl/status?dlId=" + requestId)
+            .then(res => res)
+            .catch(res => {let newRes;  newRes.data.status = "error"; return newRes});
+
         const { searchListActions } = props;
         const { func } = props.downloadStatus;
 
-        if(res.data.status === "done" || res.data.status ==="error") {
+        if(res.data.status === "done" || res.data.status ==="error" || res.data === null) {
             clearInterval(func);
             modalFunc.closeProcessModal();
-            modalFunc.openCompleteModal();
+            if(res.data.status === "done") {
+                modalFunc.openCompleteModal();
+            } else {
+                // 1. 네트워크 에러로 상태를 취득 할 수 없는 경우(axios.get에러)
+                // 2. dl/status에서 error를 응답한 경우
+                // 2. dl/status에서 error로 인하여 null을 응답한 경우
+                modalFunc.openErrorModal();
+            }
         }
 
         searchListActions.searchSetDlStatus({
@@ -184,18 +193,18 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
 
 export const setWatchSearchStatus = (intervalProps) => {
     const interval = setInterval( (intervalProps) => {
-        const { modalFunc, getIntervalFunc, setIntervalFunc, getResStatus} = intervalProps;
+        const { closeProcessModal, getIntervalFunc, setIntervalFunc, getResStatus, openErrorModal} = intervalProps;
         const intervalFunc = getIntervalFunc();
-        const resStatus =getResStatus();
-
-        console.log("intervalFunc", intervalFunc);
+        const resStatus = getResStatus();
         console.log("resStatus", resStatus);
-
-
         if(resStatus === "success" || resStatus === "error") {
             clearInterval(intervalFunc);
             setIntervalFunc(null);
-            modalFunc();
+            closeProcessModal();
+            // 네트워크에 문제가 생겼을 경우 에러 팝업을 Open
+            if(resStatus === "error") {
+                openErrorModal();
+            }
         }
     }, 200, intervalProps);
 
