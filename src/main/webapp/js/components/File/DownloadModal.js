@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import {Button} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBan, faChevronCircleDown, faDownload} from "@fortawesome/free-solid-svg-icons";
+import {faBan, faChevronCircleDown, faDownload, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -26,13 +26,16 @@ class DownloadConfirmModal extends Component {
             processModalOpen: false,
             cancelModalOpen: false,
             completeModalOpen: false,
+            errorModalOpen: false
         };
     }
 
     openParentModal = () => {
         if(this.props.downloadCnt <= 0) {
             this.props.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
-            API.dispAlert(Define.FILE_FAIL_NO_ITEM);
+            //API.dispAlert(Define.FILE_FAIL_NO_ITEM);
+            this.openErrorModal();
+            return;
         } else {
             this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.setState({
@@ -50,11 +53,14 @@ class DownloadConfirmModal extends Component {
     };
 
     openProcessModal = async () => {
-        this.setState({
-            ...this.state,
-            parentModalOpen: false,
-            processModalOpen: true
-        });
+        this.closeParentModal();
+
+        setTimeout(() => {
+            this.setState({
+                ...this.state,
+                processModalOpen: true
+            });
+        }, 100);
 
         // 초기화
         const { searchListActions } = this.props;
@@ -109,12 +115,13 @@ class DownloadConfirmModal extends Component {
             // 상태 초기화
             searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
             this.props.setErrorStatus(Define.RSS_SUCCESS);
-            this.setState({
-                ...this.state,
-                processModalOpen: false,
-                cancelModalOpen: false
-
-            });
+            this.closeProcessModal();
+            setTimeout(() => {
+                this.setState({
+                    ...this.state,
+                    cancelModalOpen: false
+                });
+            }, 100);
         } else {
             this.setState({
                 ...this.state,
@@ -134,10 +141,7 @@ class DownloadConfirmModal extends Component {
         let result = Define.RSS_SUCCESS;
         this.setState({
             ...this.state,
-            completeModalOpen: false,
-            cancelModalOpen: false,
-            processModalOpen: false,
-            parentModalOpen: false
+            completeModalOpen: false
         });
 
         if(isSave) {
@@ -152,6 +156,18 @@ class DownloadConfirmModal extends Component {
         console.log("result", result);
     };
 
+    openErrorModal = () => {
+        this.setState({
+            errorModalOpen: true
+        });
+    }
+
+    closeErrorModal = () => {
+        this.setState({
+            errorModalOpen: false
+        });
+    }
+
     render() {
         const {
             openbtn,
@@ -161,7 +177,8 @@ class DownloadConfirmModal extends Component {
             parentModalOpen,
             processModalOpen,
             cancelModalOpen,
-            completeModalOpen
+            completeModalOpen,
+            errorModalOpen
         } = this.state;
 
         const { totalFiles, downloadFiles} = this.props.downloadStatus.toJS();
@@ -223,7 +240,7 @@ class DownloadConfirmModal extends Component {
                         transitionEnterTimeout={200}
                         transitionLeaveTimeout={200}
                     >
-                        <div className="Custom-modal-overlay child-overlay" />
+                        <div className="Custom-modal-overlay" />
                         <div className="Custom-modal">
                             <div className="content-without-title">
                                 <div className="spinner-area">
@@ -235,11 +252,11 @@ class DownloadConfirmModal extends Component {
                                         margin={5}
                                     />
                                 </div>
-                                <p>
+                                <p className="no-margin-no-padding">
                                     Downloading...
                                 </p>
                                 {totalFiles > 0 && true &&
-                                <p>
+                                <p className="no-margin-no-padding">
                                     ({downloadFiles}/{totalFiles})
                                 </p>
                                 }
@@ -267,7 +284,7 @@ class DownloadConfirmModal extends Component {
                         transitionEnterTimeout={200}
                         transitionLeaveTimeout={200}
                     >
-                        <div className="Custom-modal-overlay child-overlay" />
+                        <div className="Custom-modal-overlay" />
                         <div className="Custom-modal">
                             <div className="content-without-title">
                                 <p>
@@ -304,7 +321,7 @@ class DownloadConfirmModal extends Component {
                         transitionEnterTimeout={200}
                         transitionLeaveTimeout={200}
                     >
-                        <div className="Custom-modal-overlay child-overlay" />
+                        <div className="Custom-modal-overlay" />
                         <div className="Custom-modal">
                             <div className="content-without-title">
                                 <p>
@@ -324,6 +341,34 @@ class DownloadConfirmModal extends Component {
                                     onClick={() => this.closeCompleteModal(false)}
                                 >
                                     Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </ReactTransitionGroup>
+                ) : (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    />
+                )}
+                {errorModalOpen ? (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    >
+                        <div className="Custom-modal-overlay" onClick={this.closeErrorModal} />
+                        <div className="Custom-modal">
+                            <div className="content-without-title">
+                                <p>
+                                    <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
+                                </p>
+                                <p>Please choose a file.</p>
+                            </div>
+                            <div className="button-wrap">
+                                <button className="alert-type secondary" onClick={this.closeErrorModal}>
+                                    Close
                                 </button>
                             </div>
                         </div>

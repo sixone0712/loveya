@@ -25,12 +25,13 @@ export const setSearchList = async (props) => {
     const endDate = props.endDate;
     let error = Define.RSS_SUCCESS;
 
-    if(props.toolInfoListCheckCnt <= 0 && props.logInfoListCheckCnt <= 0) {
+    //if(props.toolInfoListCheckCnt <= 0 && props.logInfoListCheckCnt <= 0) {
+    if(props.toolInfoListCheckCnt <= 0 || props.logInfoListCheckCnt <= 0) {
         error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY
-    } else if(props.toolInfoListCheckCnt <= 0) {
-        error = Define.SEARCH_FAIL_NO_MACHINE
-    } else if(props.logInfoListCheckCnt <= 0) {
-        error = Define.SEARCH_FAIL_NO_CATEGORY
+    //} else if(props.toolInfoListCheckCnt <= 0) {
+        //error = Define.SEARCH_FAIL_NO_MACHINE
+    //} else if(props.logInfoListCheckCnt <= 0) {
+        //error = Define.SEARCH_FAIL_NO_CATEGORY
     } else if(startDate.isAfter(endDate)) {
         error = Define.SEARCH_FAIL_DATE
     } else {
@@ -38,7 +39,7 @@ export const setSearchList = async (props) => {
     }
 
     //startSearchList(props);
-    return error
+    return error;
 };
 
 export const startSearchList = (props) => {
@@ -182,7 +183,7 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
 
 export const setWatchSearchStatus = (intervalProps) => {
     const interval = setInterval( (intervalProps) => {
-        const { func1, getIntervalFunc, setIntervalFunc, getResStatus} = intervalProps;
+        const { modalFunc, getIntervalFunc, setIntervalFunc, getResStatus} = intervalProps;
         const intervalFunc = getIntervalFunc();
         const resStatus =getResStatus();
 
@@ -193,7 +194,7 @@ export const setWatchSearchStatus = (intervalProps) => {
         if(resStatus === "success" || resStatus === "error") {
             clearInterval(intervalFunc);
             setIntervalFunc(null);
-            func1();
+            modalFunc();
         }
     }, 200, intervalProps);
 

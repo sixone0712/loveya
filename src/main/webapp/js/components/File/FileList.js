@@ -161,6 +161,9 @@ class FileList extends Component {
               itemsCount={count}
               onPageChange={this.handlePageChange}
             />
+            <div className="filelist-info-area">
+              <label>{this.props.downloadCnt} File Selected</label>
+            </div>
             <div className="filelist-item-area">
               <label>Rows per page:</label>
               <Input

@@ -599,6 +599,19 @@
   justify-content: space-around;
 }
 
+.filelist-info-area {
+  position: absolute;
+  top: 17px;
+  left: 150px;
+}
+
+.filelist-info-area label {
+  top: 3px;
+  position: relative;
+  font-size: 14px;
+  font-weight: 300;
+}
+
 .filelist-item-area {
   position: absolute;
   top: 17px;

@@ -1,19 +1,25 @@
 import React, { Component } from "react";
 import { Card, CardBody, Col, FormGroup, Button } from "reactstrap";
+import ReactTransitionGroup from "react-addons-css-transition-group";
+import ScaleLoader from "react-spinners/ScaleLoader";
 import DatePicker from "./DatePicker";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as searchListActions from "../../modules/searchList";
 import * as API from "../../api";
+import * as Define from "../../define";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 
 class FormList extends Component{
-
     constructor() {
         super();
-
         this.state = {
-            intervalValue: null
+            modalMsg: null,
+            intervalValue: null,
+            isProcessOpen: false,
+            isErrorOpen: false
         }
     }
 
@@ -41,15 +47,33 @@ class FormList extends Component{
         return status;
     };
 
-    func1 = () => {
-        alert("완료되었습니다.");
-    };
+    onSearch = async () => {
+        let msg = "";
+        const errCode = await API.setSearchList(this.props);
 
-    onSerach = async () => {
+        switch (errCode) {
+            case Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY:
+                msg = "Please choose a machine and category.";
+                break;
+            case Define.SEARCH_FAIL_DATE:
+                msg = "Please set the start time before the end time.";
+                break;
+            default:
+                break;
+        }
+
+        if (msg.toString().length > 0) {
+            this.setState({
+                modalMsg: msg
+            });
+            this.openErrorModal();
+            return;
+        }
+        this.openProcessModal();
         console.log('##########################################################');
         console.log('setSearchList before');
         console.log('##########################################################');
-        await API.setSearchList(this.props);
+        //await API.setSearchList(this.props);
         console.log('##########################################################');
         console.log('setSearchList after');
         console.log('##########################################################');
@@ -59,7 +83,7 @@ class FormList extends Component{
         console.log('##########################################################');
 
         const intervalProps = {
-            func1: this.func1,
+            modalFunc: this.closeProcessModal,
             getIntervalFunc : this.getIntervalFunc,
             setIntervalFunc: this.setIntervalFunc,
             getResStatus: this.getResStatus
@@ -75,7 +99,33 @@ class FormList extends Component{
 
     };
 
+    openProcessModal = () => {
+        this.setState({
+            isProcessOpen: true
+        });
+    };
+
+    closeProcessModal = () => {
+        this.setState({
+            isProcessOpen: false
+        });
+    };
+
+    openErrorModal = () => {
+        this.setState({
+           isErrorOpen: true
+        });
+    }
+
+    closeErrorModal = () => {
+        this.setState({
+           isErrorOpen: false
+        });
+    }
+
     render() {
+        const { isProcessOpen, isErrorOpen, modalMsg } = this.state;
+
         return (
             <Card className="ribbon-wrapper formlist-custom">
                 <CardBody className="custom-scrollbar card-body-custom card-body-formlist">
@@ -90,10 +140,67 @@ class FormList extends Component{
                             outline size="sm"
                             color="info"
                             className="formlist-btn"
-                            onClick={this.onSerach}
+                            onClick={this.onSearch}
                         >
                             Search
                         </Button>
+                        {isProcessOpen ? (
+                            <ReactTransitionGroup
+                                transitionName={"Custom-modal-anim"}
+                                transitionEnterTimeout={200}
+                                transitionLeaveTimeout={200}
+                            >
+                                <div className="Custom-modal-overlay" />
+                                <div className="Custom-modal">
+                                    <div className="content-without-title">
+                                        <div className="spinner-area">
+                                            <ScaleLoader
+                                                loading={true}
+                                                height={45}
+                                                width={16}
+                                                radius={30}
+                                                margin={5}
+                                            />
+                                        </div>
+                                        <p>Searching...</p>
+                                    </div>
+                                </div>
+                            </ReactTransitionGroup>
+                        ) : (
+                            <ReactTransitionGroup
+                                transitionName={"Custom-modal-anim"}
+                                transitionEnterTimeout={200}
+                                transitionLeaveTimeout={200}
+                            />
+                        )}
+                        {isErrorOpen ? (
+                            <ReactTransitionGroup
+                                transitionName={"Custom-modal-anim"}
+                                transitionEnterTimeout={200}
+                                transitionLeaveTimeout={200}
+                            >
+                                <div className="Custom-modal-overlay" onClick={this.closeErrorModal} />
+                                <div className="Custom-modal">
+                                    <div className="content-without-title">
+                                        <p>
+                                            <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
+                                        </p>
+                                        <p>{modalMsg}</p>
+                                    </div>
+                                    <div className="button-wrap">
+                                        <button className="alert-type green" onClick={this.closeErrorModal}>
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </ReactTransitionGroup>
+                        ) : (
+                            <ReactTransitionGroup
+                                transitionName={"Custom-modal-anim"}
+                                transitionEnterTimeout={200}
+                                transitionLeaveTimeout={200}
+                            />
+                        )}
                     </div>
                 </CardBody>
             </Card>
@@ -103,6 +210,8 @@ class FormList extends Component{
 
 export default connect(
     (state) => ({
+      toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
+      logInfoListCheckCnt: state.viewList.get('logInfoListCheckCnt'),
       toolInfoList: state.viewList.get('toolInfoList'),
       logInfoList: state.viewList.get('logInfoList'),
       requestList: state.searchList.get('requestList'),

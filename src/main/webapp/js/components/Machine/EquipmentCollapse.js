@@ -25,16 +25,9 @@ class EquipmentCollapse extends Component {
         const { isOpened } = this.state;
         const { machineList, checkMachineItem } = this.props;
 
-        const titleStyle = {
-            border: "1px solid rgba(171, 140, 228, 0.3)",
-            borderRadius: "3px 3px 0 0",
-            padding: "0.5rem",
-            backgroundColor: "rgba(171, 140, 228, 0.1)",
-            cursor: "pointer"
-        };
         return (
             <>
-                <div style={titleStyle} onClick={this.toggle}>
+                <div className="machinelist-collapse-title" onClick={this.toggle}>
                     <FontAwesomeIcon icon={faBars} /> {this.props.structId}
                 </div>
                 <Collapse isOpened={isOpened}>
