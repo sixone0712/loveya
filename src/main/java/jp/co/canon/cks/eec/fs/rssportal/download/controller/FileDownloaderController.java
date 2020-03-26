@@ -124,7 +124,7 @@ public class FileDownloaderController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(Files.size(Paths.get(dlPath)));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            response.setHeader("Content-Disposition", "attachment; filename="+"test.zip");
+            response.setHeader("Content-Disposition", "attachment; filename="+createZipFilename(dlId));
             return new ResponseEntity(isr, headers, HttpStatus.OK);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -135,7 +135,9 @@ public class FileDownloaderController {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
-
+    private String createZipFilename(String downloadId) {
+        return downloadId+".zip";
+    }
 
     private void addDownloadItem(final Map map, final String machine, final String category, final String file, final String size, final String date) {
 
