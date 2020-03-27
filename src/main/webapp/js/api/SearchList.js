@@ -160,7 +160,7 @@ export const setDownload = (props) => {
 };
 
 export const setWatchDlStatus = (requestId, modalFunc) => {
-    const interval = setInterval(async (props, requestId, modalFunc) => {
+    const interval = setInterval(async (requestId, modalFunc) => {
         const downloadStatus = modalFunc.getDownloadStatus();
         let { func } = downloadStatus;
         if(func === null) return;

@@ -105,7 +105,7 @@ class DownloadConfirmModal extends Component {
 
         // Download Status 요청
         if(requestId !== "") {
-            const intervalFunc = await API.setWatchDlStatus(this.props, requestId, modalFunc);
+            const intervalFunc = await API.setWatchDlStatus(requestId, modalFunc);
             searchListActions.searchSetDlStatus({func: intervalFunc});
         }
     };
