@@ -161,31 +161,44 @@ export const setDownload = (props) => {
 
 export const setWatchDlStatus = (props, requestId, modalFunc) => {
     const interval = setInterval(async (props, requestId, modalFunc) => {
+        const { searchListActions } = props;
+        let { func } = props.downloadStatus;
+
+        console.log("setWatchDlStatus");
+        console.log("func", func);
+        if(func === null) return;
+
         const res = await services.axiosAPI.get("/dl/status?dlId=" + requestId)
             .then(res => res)
-            .catch(res => {let newRes;  newRes.data.status = "error"; return newRes});
+            .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
 
-        const { searchListActions } = props;
-        const { func } = props.downloadStatus;
+        console.log("res", res);
+        console.log("res.data.status", res.data.status)
 
-        if(res.data.status === "done" || res.data.status ==="error" || res.data === null) {
+        if(res.data.status === "done" || res.data.status ==="error" || res.data.status === "timeOut" || res.data === null) {
+            console.log("func", func);
             clearInterval(func);
+            func = null;
             modalFunc.closeProcessModal();
             if(res.data.status === "done") {
                 modalFunc.openCompleteModal();
             } else {
                 // 1. 네트워크 에러로 상태를 취득 할 수 없는 경우(axios.get에러)
-                // 2. dl/status에서 error를 응답한 경우
+                // 2. dl/status에서 error를 응답한 경우openErrorModal
                 // 2. dl/status에서 error로 인하여 null을 응답한 경우
+                modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
                 modalFunc.openErrorModal();
             }
         }
 
         searchListActions.searchSetDlStatus({
+            func: func,
             dlId: res.data.dlId,
             status: res.data.status,
             totalFiles: res.data.totalFiles,
-            downloadFiles: res.data.downloadFiles });
+            downloadFiles: res.data.downloadFiles
+        });
+
     }, 500, props, requestId, modalFunc);
 
     return interval;
@@ -193,7 +206,7 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
 
 export const setWatchSearchStatus = (intervalProps) => {
     const interval = setInterval( (intervalProps) => {
-        const { closeProcessModal, getIntervalFunc, setIntervalFunc, getResStatus, openErrorModal} = intervalProps;
+        const { closeProcessModal, getIntervalFunc, setIntervalFunc, getResStatus, openErrorModal, onSetErrorState } = intervalProps;
         const intervalFunc = getIntervalFunc();
         const resStatus = getResStatus();
         console.log("resStatus", resStatus);
@@ -203,6 +216,7 @@ export const setWatchSearchStatus = (intervalProps) => {
             closeProcessModal();
             // 네트워크에 문제가 생겼을 경우 에러 팝업을 Open
             if(resStatus === "error") {
+                onSetErrorState(Define.SEARCH_FAIL_SERVER_ERROR);
                 openErrorModal();
             }
         }

@@ -47,10 +47,8 @@ class FormList extends Component{
         return status;
     };
 
-    onSearch = async () => {
+    onSetErrorState = (errCode) => {
         let msg = "";
-        // Seacrh Request 데이터 저장
-        const errCode = await API.setSearchList(this.props);
 
         switch (errCode) {
             case Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY:
@@ -58,6 +56,9 @@ class FormList extends Component{
                 break;
             case Define.SEARCH_FAIL_DATE:
                 msg = "Please set the start time before the end time.";
+                break;
+            case Define.SEARCH_FAIL_SERVER_ERROR:
+                msg = "Network connection error.";
                 break;
             default:
                 break;
@@ -67,9 +68,21 @@ class FormList extends Component{
             this.setState({
                 modalMsg: msg
             });
+            return true;
+        }
+        return false;
+    };
+
+    onSearch = async () => {
+        let msg = "";
+        // Seacrh Request 데이터 저장
+        const errCode = await API.setSearchList(this.props);
+
+        if (this.onSetErrorState(errCode)) {
             this.openErrorModal();
             return;
         }
+
         this.openProcessModal();
 
         API.startSearchList(this.props);
@@ -80,7 +93,8 @@ class FormList extends Component{
             getIntervalFunc : this.getIntervalFunc,
             setIntervalFunc: this.setIntervalFunc,
             getResStatus: this.getResStatus,
-            openErrorModal: this.openErrorModal
+            openErrorModal: this.openErrorModal,
+            onSetErrorState: this.onSetErrorState
         };
 
         const interval = API.setWatchSearchStatus(intervalProps);

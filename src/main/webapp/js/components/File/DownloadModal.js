@@ -26,16 +26,27 @@ class DownloadConfirmModal extends Component {
             processModalOpen: false,
             cancelModalOpen: false,
             completeModalOpen: false,
-            errorModalOpen: false
+            errorModalOpen: false,
+            modalMsg: ""
         };
     }
+
+    setErrorMsg = (errCode) => {
+        const  msg = API.getErrorMsg(errCode);
+        if (msg.toString().length > 0) {
+            this.setState({
+                modalMsg: msg
+            });
+            return true;
+        }
+        return false;
+    };
 
     openParentModal = () => {
         if(this.props.downloadCnt <= 0) {
             this.props.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
-            //API.dispAlert(Define.FILE_FAIL_NO_ITEM);
+            this.setErrorMsg(Define.FILE_FAIL_NO_ITEM);
             this.openErrorModal();
-            return;
         } else {
             this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.setState({
@@ -51,6 +62,16 @@ class DownloadConfirmModal extends Component {
             parentModalOpen: false
         });
     };
+
+    getDownloadStatus = () => {
+        return this.props.downloadStatus.toJS();
+    }
+
+    setSearchListActions = (values) => {
+        const { searchListActions }  = this.props;
+        searchListActions.searchSetDlStatus({...values});
+    }
+
 
     openProcessModal = async () => {
         this.closeParentModal();
@@ -69,14 +90,15 @@ class DownloadConfirmModal extends Component {
 
         // Download Request 요청
         const requestId = await API.requestDownload(this.props);
-        searchListActions.searchSetDlStatus({dlId: requestId});
         console.log("requestId", requestId);
+        searchListActions.searchSetDlStatus({dlId: requestId});
 
         // SetInterval에서 사용할 Modal Func 추가
         const modalFunc = {
             closeProcessModal: this.closeProcessModal,
             openCompleteModal: this.openCompleteModal,
             closeCompleteModal: this.closeCompleteModal,
+            setErrorMsg: this.setErrorMsg,
             openErrorModal: this.openErrorModal
         };
 
@@ -84,7 +106,6 @@ class DownloadConfirmModal extends Component {
         if(requestId !== "") {
             const intervalFunc = await API.setWatchDlStatus(this.props, requestId, modalFunc);
             searchListActions.searchSetDlStatus({func: intervalFunc});
-            this.props.setErrorStatus(Define.RSS_FAIL);
         }
     };
 
@@ -188,7 +209,8 @@ class DownloadConfirmModal extends Component {
             processModalOpen,
             cancelModalOpen,
             completeModalOpen,
-            errorModalOpen
+            errorModalOpen,
+            modalMsg
         } = this.state;
 
         const { totalFiles, downloadFiles} = this.props.downloadStatus.toJS();
@@ -374,7 +396,7 @@ class DownloadConfirmModal extends Component {
                                 <p>
                                     <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
                                 </p>
-                                <p>Please choose a file.</p>
+                                <p>{this.state.modalMsg}</p>
                             </div>
                             <div className="button-wrap">
                                 <button className="alert-type secondary" onClick={this.closeErrorModal}>

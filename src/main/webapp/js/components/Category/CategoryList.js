@@ -260,7 +260,7 @@ class CategoryList extends Component {
                   }
                   onClick={this.handleGenreToggle}
               >
-                Select Genre
+                Genre
               </ButtonToggle>
             </div>
           </CardBody>

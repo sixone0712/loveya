@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import { Card, CardBody, Table, ButtonToggle, Button, Input } from "reactstrap";
+import { Card, CardBody, Table, ButtonToggle, Input } from "reactstrap";
 import PaginationComponent from "react-reactstrap-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faExclamationCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import CheckBox from "../Common/CheckBox";
 import DownloadConfirmModal from "./DownloadModal"
