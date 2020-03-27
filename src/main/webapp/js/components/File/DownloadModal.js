@@ -65,13 +65,12 @@ class DownloadConfirmModal extends Component {
 
     getDownloadStatus = () => {
         return this.props.downloadStatus.toJS();
-    }
+    };
 
     setSearchListActions = (values) => {
         const { searchListActions }  = this.props;
         searchListActions.searchSetDlStatus({...values});
-    }
-
+    };
 
     openProcessModal = async () => {
         this.closeParentModal();
@@ -99,7 +98,9 @@ class DownloadConfirmModal extends Component {
             openCompleteModal: this.openCompleteModal,
             closeCompleteModal: this.closeCompleteModal,
             setErrorMsg: this.setErrorMsg,
-            openErrorModal: this.openErrorModal
+            openErrorModal: this.openErrorModal,
+            getDownloadStatus: this.getDownloadStatus,
+            setSearchListActions: this.setSearchListActions
         };
 
         // Download Status 요청

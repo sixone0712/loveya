@@ -159,24 +159,17 @@ export const setDownload = (props) => {
     return jsonList;
 };
 
-export const setWatchDlStatus = (props, requestId, modalFunc) => {
+export const setWatchDlStatus = (requestId, modalFunc) => {
     const interval = setInterval(async (props, requestId, modalFunc) => {
-        const { searchListActions } = props;
-        let { func } = props.downloadStatus;
-
-        console.log("setWatchDlStatus");
-        console.log("func", func);
+        const downloadStatus = modalFunc.getDownloadStatus();
+        let { func } = downloadStatus;
         if(func === null) return;
 
         const res = await services.axiosAPI.get("/dl/status?dlId=" + requestId)
             .then(res => res)
             .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
 
-        console.log("res", res);
-        console.log("res.data.status", res.data.status)
-
         if(res.data.status === "done" || res.data.status ==="error" || res.data.status === "timeOut" || res.data === null) {
-            console.log("func", func);
             clearInterval(func);
             func = null;
             modalFunc.closeProcessModal();
@@ -191,7 +184,7 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
             }
         }
 
-        searchListActions.searchSetDlStatus({
+        modalFunc.setSearchListActions({
             func: func,
             dlId: res.data.dlId,
             status: res.data.status,
@@ -199,7 +192,7 @@ export const setWatchDlStatus = (props, requestId, modalFunc) => {
             downloadFiles: res.data.downloadFiles
         });
 
-    }, 500, props, requestId, modalFunc);
+    }, 500, requestId, modalFunc);
 
     return interval;
 };
