@@ -247,11 +247,15 @@
 .datepicker-item-area {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .datepicker-item-area .datepicker-item {
-  width: 200px;
+  width: 100%;
+}
+
+.datepicker-item-area .datepicker-item:first-child {
+  margin-right: 10px;
 }
 
 .datepicker-item-area .datepicker-item label {
@@ -262,7 +266,7 @@
 .datetime-picker {
   border: none;
   font-size: 13px;
-  width: 200px;
+  width: 100%;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -294,8 +298,8 @@
 }
 
 .datetime-picker .time .sliders {
-  flex: 0 1 112px;
-  max-width: 112px;
+  flex: 0 1 125px;
+  max-width: 125px;
 }
 
 .datetime-picker .time .sliders .slider .handle {
