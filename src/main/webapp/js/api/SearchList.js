@@ -160,7 +160,7 @@ export const setDownload = (props) => {
 };
 
 export const setWatchDlStatus = (requestId, modalFunc) => {
-    const interval = setInterval(async (requestId, modalFunc) => {
+    const timeoutVal = setTimeout(async (requestId, modalFunc) => {
         const downloadStatus = modalFunc.getDownloadStatus();
         let { func } = downloadStatus;
         if(func === null) return;
@@ -170,15 +170,15 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
             .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
 
         if(res.data.status === "done" || res.data.status ==="error" || res.data.status === "timeOut" || res.data === null) {
-            clearInterval(func);
+            clearTimeout(func);
             func = null;
             modalFunc.closeProcessModal();
             if(res.data.status === "done") {
                 modalFunc.openCompleteModal();
             } else {
-                // 1. 네트워크 에러로 상태를 취득 할 수 없는 경우(axios.get에러)
-                // 2. dl/status에서 error를 응답한 경우openErrorModal
-                // 2. dl/status에서 error로 인하여 null을 응답한 경우
+                // 1. axios timeout
+                // 2. Respond error from /dl/status
+                // 3. Respond null from /dl/status
                 modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
                 modalFunc.openErrorModal();
             }
@@ -192,28 +192,34 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
             downloadFiles: res.data.downloadFiles
         });
 
+        setWatchDlStatus(requestId, modalFunc);
     }, 500, requestId, modalFunc);
 
-    return interval;
+    return timeoutVal;
 };
 
-export const setWatchSearchStatus = (intervalProps) => {
-    const interval = setInterval( (intervalProps) => {
-        const { closeProcessModal, getIntervalFunc, setIntervalFunc, getResStatus, openErrorModal, onSetErrorState } = intervalProps;
+export const setWatchSearchStatus = (props) => {
+    const timeoutVal = setTimeout( (props) => {
+        const { closeProcessModal, getIntervalFunc, setIntervalFunc, getResStatus, openErrorModal, onSetErrorState } = props;
         const intervalFunc = getIntervalFunc();
         const resStatus = getResStatus();
+
+        // when setTimeout is null
+        if(intervalFunc == null) return;
+
         console.log("resStatus", resStatus);
         if(resStatus === "success" || resStatus === "error") {
-            clearInterval(intervalFunc);
+            clearTimeout(intervalFunc);
             setIntervalFunc(null);
             closeProcessModal();
-            // 네트워크에 문제가 생겼을 경우 에러 팝업을 Open
+            // when response status is error, open error popup
             if(resStatus === "error") {
                 onSetErrorState(Define.SEARCH_FAIL_SERVER_ERROR);
                 openErrorModal();
             }
         }
-    }, 200, intervalProps);
+        setWatchSearchStatus(props);
+    }, 200, props);
 
-    return interval;
+    return timeoutVal;
 };
