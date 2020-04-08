@@ -3,12 +3,14 @@ import { Map, List, fromJS, Record } from 'immutable';
 import { pender , applyPenders } from 'redux-pender';
 import services from '../services';
 
+const GENRE_INIT_ALL_LIST = "genreList/GENRE_INIT_ALL_LIST";
 const GENRE_LOAD_LIST = "genreList/GENRE_LOAD_LIST";
 const GENRE_ADD_LIST = "genreList/GENRE_ADD_LIST";
 const GENRE_DELETE_LIST = "genreList/GENRE_DELETE_LIST";
 const GENRE_EDIT_LIST = "genreList/GENRE_EDIT_LIST";
 const GENRE_SET_DB_LIST = "genreList/GENRE_SET_DB_LIST";
 
+export const genreInitAllList = createAction(GENRE_INIT_ALL_LIST);
 export const genreLoadList = createAction(GENRE_LOAD_LIST, services.axiosAPI.get); 	// { genreList }
 export const genreAddList = createAction(GENRE_ADD_LIST); 	// { mode, logInfoList}}
 export const genreDeleteList = createAction(GENRE_DELETE_LIST); 	// { mode, logInfoList}}
@@ -72,6 +74,10 @@ export default handleActions({
             },
             // 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
         }),
+
+    [GENRE_INIT_ALL_LIST]: (state, action) => {
+        return initialState;
+    },
 
     [GENRE_ADD_LIST]: (state, action) => {
         

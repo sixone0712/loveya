@@ -5,6 +5,7 @@ import services from "../services";
 import moment from "moment";
 import * as  API from "../api";
 
+const SEARCH_SET_INIT_ALL_LIST = 'searchList/SEARCH_SET_INIT_ALL_LIST';
 const SEARCH_SET_REQUEST_LIST= 'searchList/SEARCH_SET_REQUEST_LIST';
 const SEARCH_SET_REQEUST_START_DATE= 'searchList/SEARCH_SET_REQEUST_START_DATE';
 const SEARCH_SET_REQUEST_END_DATE= 'searchList/SEARCH_SET_REQUEST_END_DATE';
@@ -14,13 +15,8 @@ const SEARCH_CHECK_RESPONSE_LIST = 'searchList/SEARCH_CHECK_RESPONSE_LIST';
 const SEARCH_CHECK_ALL_RESPONSE_LIST = 'searchList/SEARCH_CHECK_ALL_RESPONSE_LIST';
 const SEARCH_SET_RESPONSE_PERPAGE= 'searchList/SEARCH_SET_RESPONSE_PERPAGE';
 const SEARCH_SET_DL_STATUS= 'searchList/SEARCH_SET_DL_STATUS';
-/*
-const SEARCH_SET_DL_ID= 'searchList/SEARCH_SET_DOWNLAD_ID';
-const SEARCH_SET_DL_STATUS= 'searchList/SEARCH_SET_DL_STATUS';
-const SEARCH_SET_DL_TOTAL_FILES= 'searchList/SEARCH_SET_DL_TOTAL_FILES';
-const SEARCH_SET_DL_DOWNLOAD_FILES= 'searchList/SEARCH_SET_DL_DOWNLOAD_FILES';
-*/
 
+export const searchSetInitAllList = createAction(SEARCH_SET_INIT_ALL_LIST);
 export const searchSetRequestList = createAction(SEARCH_SET_REQUEST_LIST); 	// toolList
 export const searchSetRequestStartDate = createAction(SEARCH_SET_REQEUST_START_DATE); 	// toolList
 export const searchSetRequestEndDate = createAction(SEARCH_SET_REQUEST_END_DATE); 	// toolList
@@ -132,6 +128,10 @@ export default handleActions({
             },
             // 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
         }),
+
+    [SEARCH_SET_INIT_ALL_LIST]: (state, action) => {
+        return initialState;
+    },
 
     [SEARCH_SET_REQEUST_START_DATE]: (state, action) => {
 

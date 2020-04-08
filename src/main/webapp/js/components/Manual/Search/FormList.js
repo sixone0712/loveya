@@ -5,10 +5,10 @@ import ScaleLoader from "react-spinners/ScaleLoader";
 import DatePicker from "./DatePicker";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as viewListActions from "../../modules/viewList";
-import * as searchListActions from "../../modules/searchList";
-import * as API from "../../api";
-import * as Define from "../../define";
+import * as viewListActions from "../../../modules/viewList";
+import * as searchListActions from "../../../modules/searchList";
+import * as API from "../../../api";
+import * as Define from "../../../define";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 

@@ -8,15 +8,15 @@ import {
   Input,
   Collapse
 } from "reactstrap";
-import CheckBox from "../Common/CheckBox";
+import CheckBox from "../../Common/CheckBox";
 import InputModal from "./InputModal";
 import ConfirmModal from "./ConfirmModal";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as viewListActions from "../../modules/viewList";
-import * as genreListActions from "../../modules/genreList";
-import * as API from '../../api'
-import * as Define from "../../define";
+import * as viewListActions from "../../../modules/viewList";
+import * as genreListActions from "../../../modules/genreList";
+import * as API from '../../../api'
+import * as Define from "../../../define";
 
 class CategoryList extends Component {
   constructor(props) {

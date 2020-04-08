@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { Card, CardBody, Col, FormGroup, ButtonToggle } from "reactstrap";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as viewListActions from "../../modules/viewList";
-import * as API from '../../api'
+import * as viewListActions from "../../../modules/viewList";
+import * as API from '../../../api'
 import EquipmentCollapse from "./EquipmentCollapse";
 
 class MachineList extends Component {

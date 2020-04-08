@@ -4,14 +4,14 @@ import PaginationComponent from "react-reactstrap-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
-import CheckBox from "../Common/CheckBox";
+import CheckBox from "../../Common/CheckBox";
 import DownloadConfirmModal from "./DownloadModal"
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as searchListActions from "../../modules/searchList";
-import * as API from "../../api";
-import {setRowsPerPage} from "../../api";
-import * as Define from '../../define';
+import * as searchListActions from "../../../modules/searchList";
+import * as API from "../../../api";
+import {setRowsPerPage} from "../../../api";
+import * as Define from '../../../define';
 
 class FileList extends Component {
   constructor(props) {

@@ -1,4 +1,4 @@
-package jp.co.canon.cks.eec.fs.rssportal.download.controller;
+package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;

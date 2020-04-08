@@ -4,11 +4,16 @@ import { bindActionCreators } from 'redux';
 import * as viewListActions from './modules/viewList';
 import * as genreListActions from './modules/genreList';
 import * as searchListActions from './modules/searchList';
+import * as loginActions from './modules/login';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
 import Navbar from "./components/Navbar";
-import Manual from "./components/Manual";
+import Manual from "./components/Manual/Manual";
+import Auto from "./components/Auto/Auto";
+import Login from "./components/User/Login";
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import * as Define from "./define";
 
 class App extends Component {
 
@@ -16,30 +21,40 @@ class App extends Component {
         super(props);
     }
 
+    onMovePage = (url) => {
+        this.props.history.push(url);
+    };
+
     componentDidMount() {
+        const isLoggedInStorage = window.sessionStorage.getItem('isLoggedIn');
+
         console.log("componentDidMount");
-        const { viewListActions } = this.props;
-        const { genreListActions } = this.props;
-        viewListActions.viewLoadToolInfoList("/api/createToolList");
-        viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
-        genreListActions.genreLoadList("/api/getGenre");
+        console.log("this.props.isLoggedIn", this.props.isLoggedIn);
+        console.log("isLoggedInStorage", isLoggedInStorage);
+
+        if(isLoggedInStorage === null || isLoggedInStorage === false) {
+            API.setLoginIsLoggedIn(this.props, false);
+            //this.props.history.push("/rss/login");
+            this.onMovePage(Define.PAGE_LOGIN);
+        } else {
+            API.setLoginIsLoggedIn(this.props, true);
+            //this.props.history.push("/rss/manual");
+            this.onMovePage(Define.PAGE_MANUAL);
+        }
     }
 
     render() {
-
-        const { logTypeSuccess, toolInfoSuccess } = this.props;
-        const isSuccess = logTypeSuccess && true && toolInfoSuccess;
-        console.log("isSuccess", isSuccess);
+        const isLoggedIn = API.getLoginIsLoggedIn(this.props);
+        console.log("isLoggedIn", isLoggedIn);
+        console.log("this.props.history", this.props.history);
         return (
                 <>
-                    { isSuccess && true &&
-                        (
-                            <>
-                            <Navbar />
-                            <Manual />
-                            </>
-                        )
-                    }
+                    {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}
+                    <Switch>
+                        <Route path={Define.PAGE_LOGIN} component={Login} />
+                        <Route path={Define.PAGE_MANUAL} component={Manual} />
+                        <Route path={Define.PAGE_AUTO} component={Auto} />
+                    </Switch>
                 </>
         );
     }
@@ -57,13 +72,15 @@ export default connect(
         startDate: state.searchList.get('startDate'),
         endDate: state.searchList.get('endDate'),
         logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],
-        toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST']
+        toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST'],
+        loginInfo : state.login.get('loginInfo'),
     }),
     (dispatch) => ({
         // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
         viewListActions: bindActionCreators(viewListActions, dispatch),
         //selectListActions: bindActionCreators(selectListActions, dispatch),
         genreListActions: bindActionCreators(genreListActions, dispatch),
-        searchListActions: bindActionCreators(searchListActions, dispatch)
+        searchListActions: bindActionCreators(searchListActions, dispatch),
+        loginActions: bindActionCreators(loginActions, dispatch),
     })
 )(App);

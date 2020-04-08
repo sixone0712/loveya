@@ -13,11 +13,4 @@ public class MyController {
         model.addAttribute("pageName", name);
         return "page";
     }
-
-    @GetMapping("/rss")
-    public String rss(Model model) {
-        model.addAttribute("pageName", "index");
-        return "page";
-    }
- 
 }

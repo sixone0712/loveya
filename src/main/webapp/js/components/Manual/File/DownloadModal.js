@@ -6,10 +6,10 @@ import {faBan, faChevronCircleDown, faDownload, faExclamationCircle} from "@fort
 import ScaleLoader from "react-spinners/ScaleLoader";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as searchListActions from "../../modules/searchList";
-import * as API from "../../api";
-import * as Define from "../../define";
-import services from "../../services";
+import * as searchListActions from "../../../modules/searchList";
+import * as API from "../../../api";
+import * as Define from "../../../define";
+import services from "../../../services";
 import axios from 'axios';
 import moment from "moment";
 

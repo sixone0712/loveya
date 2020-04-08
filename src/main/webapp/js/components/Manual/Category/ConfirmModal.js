@@ -3,8 +3,8 @@ import {Button} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
-import * as API from "../../api";
-import * as Define from "../../define";
+import * as API from "../../../api";
+import * as Define from "../../../define";
 
 class ConfirmModal extends Component {
     constructor(props) {

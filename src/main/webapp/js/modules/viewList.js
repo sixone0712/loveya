@@ -3,6 +3,7 @@ import { Map, List, fromJS } from 'immutable';
 import { pender } from 'redux-pender';
 import services from '../services';
 
+const VIEW_INIT_ALL_LIST= 'viewList/VIEW_INIT_ALL_LIST';
 const VIEW_LOAD_TOOLINFO_LIST= 'viewList/VIEW_LOAD_TOOLINFO_LIST';
 const VIEW_LOAD_LOGTYPE_LIST= 'viewList/VIEW_LOAD_LOGTYPE_LIST';
 const VIEW_CHECK_TOOL_LIST = 'viewList/VIEW_CHECK_TOOL_LIST';
@@ -11,6 +12,7 @@ const VIEW_CHECK_LOGTYPE_LIST= 'viewList/VIEW_CHECK_LOGTYPE_LIST';
 const VIEW_CHECK_ALL_LOGTYPE_LIST= 'viewList/VIEW_CHECK_ALL_LOGTYPE_LIST';
 const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
 
+export const viewInitAllList = createAction(VIEW_INIT_ALL_LIST);
 export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);	// getURL
 export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.get);		// getURL
 export const viewCheckToolList = createAction(VIEW_CHECK_TOOL_LIST); 	// index
@@ -125,6 +127,10 @@ export default handleActions({
 		}
 		// 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
 	}),
+
+	[VIEW_INIT_ALL_LIST]: (state, action) => {
+		return initialState;
+	},
 
 	[VIEW_CHECK_TOOL_LIST]: (state, action) => {
 		console.log("handleActions[VIEW_CHECK_TOOL_LIST]");
