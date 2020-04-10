@@ -12,7 +12,7 @@ import Navbar from "./components/Navbar";
 import Manual from "./components/Manual/Manual";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
 
 class App extends Component {
@@ -34,11 +34,9 @@ class App extends Component {
 
         if(isLoggedInStorage === null || isLoggedInStorage === false) {
             API.setLoginIsLoggedIn(this.props, false);
-            //this.props.history.push("/rss/login");
             this.onMovePage(Define.PAGE_LOGIN);
         } else {
             API.setLoginIsLoggedIn(this.props, true);
-            //this.props.history.push("/rss/manual");
             this.onMovePage(Define.PAGE_MANUAL);
         }
     }
@@ -54,6 +52,14 @@ class App extends Component {
                         <Route path={Define.PAGE_LOGIN} component={Login} />
                         <Route path={Define.PAGE_MANUAL} component={Manual} />
                         <Route path={Define.PAGE_AUTO} component={Auto} />
+                        <Redirect to={Define.PAGE_MANUAL} component={Manual} />
+
+                        {/* How to pass props */}
+                        {/*
+                        <Route path={Define.PAGE_LOGIN} render={() => <Login {...this.props} />} />
+                        <Route path={Define.PAGE_MANUAL} render={() => <Manual {...this.props} />} />
+                        <Route path={Define.PAGE_AUTO} render={() => <Auto {...this.props} />} />
+                        */}
                     </Switch>
                 </>
         );
@@ -76,9 +82,8 @@ export default connect(
         loginInfo : state.login.get('loginInfo'),
     }),
     (dispatch) => ({
-        // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
+        // bindActionCreators automatically bind action functions.
         viewListActions: bindActionCreators(viewListActions, dispatch),
-        //selectListActions: bindActionCreators(selectListActions, dispatch),
         genreListActions: bindActionCreators(genreListActions, dispatch),
         searchListActions: bindActionCreators(searchListActions, dispatch),
         loginActions: bindActionCreators(loginActions, dispatch),

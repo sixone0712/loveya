@@ -11,7 +11,6 @@ import "rc-datetime-picker/dist/picker.css";
 import "../css/styles.css";
 import "../css/modal.scss";
 import {BrowserRouter, Route} from "react-router-dom";
-import Login from "./components/User/Login";
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
