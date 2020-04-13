@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="users">
+
+    <select id="selectAll" resultType="UserVo">
+        select * from rsss."users" where validity is true
+    </select>
+
+    <select id="select" resultType="UserVo">
+        select * from rsss."users"
+        where
+            validity is true
+            <if test="id!=null and id!=''">
+                and id = #{id}
+            </if>
+            <if test="username!=null and username!=''">
+                and username = #{username}
+            </if>
+    </select>
+
+    <insert id="insert" parameterType="UserVo">
+        insert into rsss."users" (
+                username,
+                password
+            ) values (
+                #{username},
+                #{password}
+            )
+    </insert>
+
+    <update id="update" parameterType="UserVo">
+        update rsss."permissions" set
+            password = #{password},
+            modified = now(),
+            permissions = #{permissions},
+            validity = #{validity}
+            where id = #{id}
+    </update>
+
+</mapper>

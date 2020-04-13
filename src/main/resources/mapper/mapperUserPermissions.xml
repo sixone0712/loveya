@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="userperm">
+
+    <select id="selectAll" resultType="UserPermissionVo">
+        select * from rsss."permissions" where validity is true
+    </select>
+
+    <insert id="insert" parameterType="String">
+        insert into rsss."permissions" (
+               permname,
+               validity
+            ) values (
+                #{permname},
+                true
+            )
+    </insert>
+
+    <select id="select" resultType="UserPermissionVo">
+        select * from rsss."permissions" where id=#{id} and validity is true
+    </select>
+
+    <update id="update" parameterType="UserPermissionVo">
+        update rsss."permissions" set
+            permname = #{permname},
+            validity = #{validity}
+            where id = #{id}
+    </update>
+
+</mapper>
