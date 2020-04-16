@@ -21,21 +21,31 @@
 
     <insert id="insert" parameterType="UserVo">
         insert into rsss."users" (
-                username,
-                password
+                username
+                ,password
+                <if test="permissions!=null">
+                ,permissions
+                </if>
             ) values (
-                #{username},
-                #{password}
-            )
+                #{username}
+                ,#{password}
+                <if test="permissions!=null">
+                <foreach collection="permissions" item="item" open=", array [" close="]" separator=",">
+                    #{item}
+                </foreach>
+                </if>
+        )
     </insert>
 
+    <!--
     <update id="update" parameterType="UserVo">
-        update rsss."permissions" set
+        update rsss."users" set
             password = #{password},
             modified = now(),
             permissions = #{permissions},
             validity = #{validity}
             where id = #{id}
     </update>
+    -->
 
 </mapper>

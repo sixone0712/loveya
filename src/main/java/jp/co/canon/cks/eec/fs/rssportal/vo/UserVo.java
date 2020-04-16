@@ -10,7 +10,7 @@ public class UserVo {
     private Date created;
     private Date modified;
     private boolean validity;
-    private String permissions;
+    private int[] permissions;
 
     public int getId() {
         return id;
@@ -60,11 +60,11 @@ public class UserVo {
         this.validity = validity;
     }
 
-    public String getPermissions() {
+    public int[] getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(String permissions) {
+    public void setPermissions(int[] permissions) {
         this.permissions = permissions;
     }
 
