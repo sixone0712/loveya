@@ -16,16 +16,23 @@ import java.util.Map;
 @RequestMapping("/test")
 public class TestController {
 
-
-
     @RequestMapping("/download")
     public ModelAndView download(@RequestParam Map<String, Object> param) {
 
-        log.warn("test download feature");
+        log.info("test download feature");
         ModelAndView mav = new ModelAndView();
         mav.setViewName("test/download");
         return mav;
     }
+
+    @RequestMapping("/login")
+    public ModelAndView loginDummy() {
+        log.info("loginDummy");
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("login");
+        return mav;
+    }
+
 
     private final Log log = LogFactory.getLog(getClass());
 }

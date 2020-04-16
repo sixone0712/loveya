@@ -3,8 +3,10 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
+import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -28,7 +31,12 @@ import java.util.Map;
 @Controller
 public class FileDownloaderController {
 
-    private final Log log = LogFactory.getLog(getClass());
+    private final HttpSession session;
+
+    @Autowired
+    public FileDownloaderController(HttpSession session) {
+        this.session = session;
+    }
 
     @RequestMapping(value="dl/request")
     @ResponseBody
@@ -159,6 +167,5 @@ public class FileDownloaderController {
         form.addFile(file, Long.parseLong(size), date);
     }
 
-
-
+    private final Log log = LogFactory.getLog(getClass());
 }

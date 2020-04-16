@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -19,11 +20,13 @@ import java.util.Map;
 @RequestMapping("/dbtest")
 public class DatabaseTestController {
 
+    private final HttpSession httpSession;
     private final UserService serviceUser;
     private final UserPermissionService serviceUserPerm;
 
     @Autowired
-    public DatabaseTestController(UserService serviceUser, UserPermissionService serviceUserPerm) {
+    public DatabaseTestController(HttpSession httpSession, UserService serviceUser, UserPermissionService serviceUserPerm) {
+        this.httpSession = httpSession;
         this.serviceUser = serviceUser;
         this.serviceUserPerm = serviceUserPerm;
     }
