@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.connect.postgresql;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserPermissionVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.ArrayTypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -28,6 +29,10 @@ public class PostgresSqlSessionFactory {
             factoryBean.setTypeAliases(
                     UserPermissionVo.class,
                     UserVo.class);
+            /*factoryBean.setTypeHandlers(
+                    new ArrayTypeHandler()
+            );*/
+
             sqlSessionFactory = factoryBean.getObject();
         } catch (Exception e) {
             e.printStackTrace();

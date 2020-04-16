@@ -70,6 +70,17 @@
             });
     }
 
+    function viewUser() {
+        console.log("request to view user");
+        let url = '/dbtest/user/list';
+        $.ajax({
+            url: url,
+            type: 'get',
+            async: true,
+            success: resp=>console.log(resp),
+            error: resp=>console.log(resp)
+        });
+    }
 
 </script>
 
@@ -90,5 +101,6 @@
         username : <input type="text" id="new-user" /> <br>
         password : <input type="password" id="user-password" /> <br>
         <input type="button" value="Add" onclick="addUser();" />
+        <input type="button" value="View" onclick="viewUser();" />
     </form>
 </div>

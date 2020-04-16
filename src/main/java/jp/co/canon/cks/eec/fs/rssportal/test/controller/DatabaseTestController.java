@@ -86,5 +86,13 @@ public class DatabaseTestController {
         return newbie.toString();
     }
 
+    @RequestMapping("/user/list")
+    @ResponseBody
+    public String getUser() {
+        log.info("/user/list");
+        List<UserVo> list = serviceUser.getUserList();
+        return list.toString();
+    }
+
     private final Log log = LogFactory.getLog(getClass());
 }

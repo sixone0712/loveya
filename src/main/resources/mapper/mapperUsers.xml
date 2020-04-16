@@ -30,9 +30,7 @@
                 #{username}
                 ,#{password}
                 <if test="permissions!=null">
-                <foreach collection="permissions" item="item" open=", array [" close="]" separator=",">
-                    #{item}
-                </foreach>
+                ,#{permissions}
                 </if>
         )
     </insert>

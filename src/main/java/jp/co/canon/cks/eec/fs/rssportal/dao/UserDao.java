@@ -11,5 +11,4 @@ public interface UserDao {
     UserVo find(Map<String, Object> param);
     boolean add(UserVo user);
     boolean modify(UserVo user);
-
 }

@@ -51,4 +51,5 @@ public class UserDaoImpl implements UserDao {
         session.commit();
         return true;
     }
+
 }
