@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="colplan">
+    <select id="selectAll" resultType="CollectPlanVo">
+        select
+            id,
+            tool,
+            logtype,
+            description,
+            collecttype as collectionType,
+            cinterval as interval,
+            ownerid as owner,
+            expired,
+            tscreated as created,
+            tsstart as start,
+            tsend as end,
+            tslastcollect as lastCollect,
+            tsnext as nextAction
+        from rsss."collection_plan"
+    </select>
+
+    <select id="selectAllOptions" parameterType="hashmap" resultType="CollectPlanVo">
+        select
+            id,
+            tool,
+            logtype,
+            description,
+            collecttype as collectionType,
+            cinterval as interval,
+            ownerid as owner,
+            expired,
+            tscreated as created,
+            tsstart as start,
+            tsend as end,
+            tslastcollect as lastCollect,
+            tsnext as nextAction
+        from rsss."collection_plan" as t_collect
+        where
+            expired is false
+            and tsnext is not null
+        <if test="order!=null and order==true">
+        order by t_collect.tsnext
+        </if>
+        <if test="limit!=null">
+        limit #{limit}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="CollectPlanVo">
+        insert into rsss."collection_plan" (
+            tool,
+            logtype,
+            tscreated,
+            description,
+            collecttype,
+            cinterval,
+            tsstart,
+            tsend,
+            ownerid,
+            tsnext
+        ) values (
+            #{tool},
+            #{logType},
+            now(),
+            #{description},
+            #{collectionType},
+            #{interval},
+            #{start},
+            #{end},
+            #{owner},
+            #{nextAction}
+        )
+    </insert>
+
+    <update id="update" parameterType="CollectPlanVo">
+        update rsss."collection_plan" set
+            tslastcollect = #{lastCollect},
+            tsnext = #{nextAction},
+            expired = #{expired}
+        where id = #{id}
+    </update>
+</mapper>

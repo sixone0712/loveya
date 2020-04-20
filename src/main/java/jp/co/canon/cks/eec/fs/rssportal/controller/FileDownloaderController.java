@@ -32,10 +32,12 @@ import java.util.Map;
 public class FileDownloaderController {
 
     private final HttpSession session;
+    private final FileDownloader fileDownloader;
 
     @Autowired
-    public FileDownloaderController(HttpSession session) {
+    public FileDownloaderController(HttpSession session, FileDownloader fileDownloader) {
         this.session = session;
+        this.fileDownloader = fileDownloader;
     }
 
     @RequestMapping(value="dl/request")
@@ -74,7 +76,7 @@ public class FileDownloaderController {
         map.forEach((m, submap)->submap.forEach((c, dlForm)->targetList.add(dlForm)));
 
         log.warn("targetList size="+targetList.size());
-        String dlId = FileDownloader.getInstance().addRequest(targetList);
+        String dlId = fileDownloader.addRequest(targetList);
         return dlId;
     }
 
@@ -90,11 +92,10 @@ public class FileDownloaderController {
 
         log.trace("getStatus(dlId="+dlId+")");
 
-        FileDownloader dl = FileDownloader.getInstance();
-        if(dl.isValidId(dlId)==false) {
+        if(fileDownloader.isValidId(dlId)==false) {
             return null;
         }
-        return new DownloadStatusResponseBody(dlId);
+        return new DownloadStatusResponseBody(fileDownloader, dlId);
     }
 
     @RequestMapping("dl/download")
@@ -107,17 +108,16 @@ public class FileDownloaderController {
         }
         log.warn("download(dlId="+dlId+")");
 
-        FileDownloader dl = FileDownloader.getInstance();
-        if(dl.isValidId(dlId)==false) {
+        if(fileDownloader.isValidId(dlId)==false) {
             log.warn("invalid dlId");
             return null;
         }
-        if(dl.getStatus(dlId).equals("done")==false) {
+        if(fileDownloader.getStatus(dlId).equals("done")==false) {
             log.warn("in-progress");
             return null;
         }
 
-        String dlPath = dl.getDownloadInfo(dlId);
+        String dlPath = fileDownloader.getDownloadInfo(dlId);
         log.warn("download path="+dlPath);
 
         try {

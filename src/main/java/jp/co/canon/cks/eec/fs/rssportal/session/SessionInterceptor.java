@@ -34,13 +34,6 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             return true;
         }
 
-        /*
-        SessionContext context = (SessionContext) session.getAttribute("context");
-        if(context==null) {
-            initSession(session);
-        }
-        */
-
         // Check session timeout.
         long current = System.currentTimeMillis();
         if((current-session.getLastAccessedTime())>SESSION_TIMEOUT) {

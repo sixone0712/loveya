@@ -29,6 +29,7 @@ public class UserPermissionDaoImpl implements UserPermissionDao {
         for(UserPermissionVo perm: permissions) {
             log.info("name="+perm.getPermname());
         }
+        session.close();
         return permissions;
     }
 
@@ -36,21 +37,22 @@ public class UserPermissionDaoImpl implements UserPermissionDao {
     public UserPermissionVo getPermission(int id) {
         SqlSession session = sessionFactory.openSession();
         UserPermissionVo perm = session.selectOne("userperm.select", id);
+        session.close();
         return perm;
     }
 
     @Override
     public void setPermission(@NonNull String permname) {
-        SqlSession session = sessionFactory.openSession();
+        SqlSession session = sessionFactory.openSession(true);
         session.insert("userperm.insert", permname);
-        session.commit();
+        session.close();
     }
 
     @Override
     public void updatePermission(@NonNull UserPermissionVo perm) {
-        SqlSession session = sessionFactory.openSession();
+        SqlSession session = sessionFactory.openSession(true);
         session.update("userperm.update", perm);
-        session.commit();
+        session.close();
     }
 
     private final Log log = LogFactory.getLog(getClass());

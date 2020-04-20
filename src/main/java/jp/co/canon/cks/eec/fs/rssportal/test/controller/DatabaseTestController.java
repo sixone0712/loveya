@@ -1,7 +1,9 @@
 package jp.co.canon.cks.eec.fs.rssportal.test.controller;
 
+import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserPermissionService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
+import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserPermissionVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
@@ -13,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/dbtest")
@@ -23,12 +24,17 @@ public class DatabaseTestController {
     private final HttpSession httpSession;
     private final UserService serviceUser;
     private final UserPermissionService serviceUserPerm;
+    private final CollectPlanService serviceCollectionPlan;
 
     @Autowired
-    public DatabaseTestController(HttpSession httpSession, UserService serviceUser, UserPermissionService serviceUserPerm) {
+    public DatabaseTestController(HttpSession httpSession,
+                                  UserService serviceUser,
+                                  UserPermissionService serviceUserPerm,
+                                  CollectPlanService serviceCollectionPlan) {
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
         this.serviceUserPerm = serviceUserPerm;
+        this.serviceCollectionPlan = serviceCollectionPlan;
     }
 
     @RequestMapping("/main")
@@ -91,6 +97,48 @@ public class DatabaseTestController {
     public String getUser() {
         log.info("/user/list");
         List<UserVo> list = serviceUser.getUserList();
+        return list.toString();
+    }
+
+    @RequestMapping("/plan/add")
+    @ResponseBody
+    public String addPlan() {
+        log.info("/plan/add");
+
+        final long millis_per_minute = 60000;
+        final long millis_per_hour = millis_per_minute * 60;
+        final long millis_per_day = millis_per_hour * 24;
+
+        long cur = System.currentTimeMillis();
+
+        List<String> tools1 = Arrays.asList("tool4", "tool5", "tool6");
+        List<String> logTypes1 = Arrays.asList("logType1", "logType2", "logType3");
+        Date start1 = new Date(cur+10000);
+        Date end1 = new Date(start1.getTime()+millis_per_hour);
+        long interval1 = millis_per_minute;
+
+        serviceCollectionPlan.addPlan(tools1, logTypes1, start1, end1, "cycle",
+                interval1, "1min-cycle");
+
+        List<String> tools2 = Arrays.asList("tool1", "tool2", "tool3");
+        List<String> logTypes2 = Arrays.asList("logType4", "logType5", "logType6");
+        Date start2 = new Date(cur+10000);
+        Date end2 = new Date(start1.getTime()+millis_per_hour);
+        long interval2 = 30000;
+
+        serviceCollectionPlan.addPlan(tools2, logTypes2, start2, end2, "cycle",
+                interval2, "30sec-cycle");
+
+        return "okay";
+    }
+
+
+
+    @RequestMapping("/plan/list")
+    @ResponseBody
+    public String getPlans() {
+        log.info("/plan/list");
+        List<CollectPlanVo> list = serviceCollectionPlan.getAllPlans();
         return list.toString();
     }
 

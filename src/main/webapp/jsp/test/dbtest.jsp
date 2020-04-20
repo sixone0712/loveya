@@ -82,6 +82,30 @@
         });
     }
 
+    function addPlan() {
+        console.log('request to add plan');
+        let url = '/dbtest/plan/add';
+        $.ajax({
+            url: url,
+            type: 'get',
+            async: true,
+            success: resp=>console.log(resp),
+            error: resp=>console.log(resp)
+        });
+    }
+
+    function viewPlan() {
+        console.log('request to view plan');
+        let url = '/dbtest/plan/list';
+        $.ajax({
+            url: url,
+            type: 'get',
+            async: true,
+            success: resp=>console.log(resp),
+            error: resp=>console.log(resp)
+        });
+    }
+
 </script>
 
 <h1>데이터베이스 테스트 페이지 (디버깅 모드)</h1>
@@ -102,5 +126,13 @@
         password : <input type="password" id="user-password" /> <br>
         <input type="button" value="Add" onclick="addUser();" />
         <input type="button" value="View" onclick="viewUser();" />
+    </form>
+</div>
+
+<div>
+    <form>
+        <h2>수집플랜</h2>
+        <input type="button" value="Add" onclick="addPlan();" />
+        <input type="button" value="View" onclick="viewPlan();" />
     </form>
 </div>

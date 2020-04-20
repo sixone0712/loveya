@@ -3,15 +3,23 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndViewDefiningException;
 
 import javax.xml.rpc.ServiceException;
 import java.util.HashMap;
 import java.util.List;
 
-public class FileDownloader {
+@Component
+public class FileDownloader extends Thread {
 
     private static final int MAX_THREADS_AT_ONCE = 5;
 
@@ -21,21 +29,18 @@ public class FileDownloader {
     private static final String STS_ERROR = "error";
     private static final String STS_DONE = "done";
 
-    private final Log log = LogFactory.getLog(getClass());
-
     private HashMap<String, FileDownloadExecutor> mHolders;
     private FileServiceManage mServiceManager;
-    private static FileDownloader instance = null;
 
-    static {
-        instance = new FileDownloader();
-    }
+    private final CollectPlanService serviceCollectPlan;
 
-    public static FileDownloader getInstance() {
-        return instance;
-    }
+    @Autowired
+    private FileDownloader(CollectPlanService serviceCollectPlan) {
 
-    private FileDownloader() {
+        log.info("initialize FileDownloader");
+
+        this.serviceCollectPlan = serviceCollectPlan;
+
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
             mServiceManager = serviceLocator.getFileServiceManage();
@@ -43,6 +48,10 @@ public class FileDownloader {
             e.printStackTrace();
         }
         mHolders = new HashMap<>();
+
+        if(serviceCollectPlan==null) {
+            throw new BeanInitializationException("couldn't find CollectPlanService bean");
+        }
     }
 
 
@@ -132,4 +141,5 @@ public class FileDownloader {
         return mHolders.get(dlId).getDownloadFiles();
     }
 
+    private final Log log = LogFactory.getLog(getClass());
 }

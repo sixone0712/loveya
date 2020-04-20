@@ -7,6 +7,7 @@ public class SessionContext {
     private String desc;
     private boolean authorized = false;
     private UserVo user;
+    
 
     public String getDesc() {
         return desc;

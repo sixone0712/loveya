@@ -14,17 +14,16 @@ public class DownloadStatusResponseBody {
     private int downloadFiles = -1;
     private List<String> totalFileList = null;
 
-    public DownloadStatusResponseBody(@NonNull final String dlId) {
+    public DownloadStatusResponseBody(@NonNull FileDownloader fileDownloader, @NonNull final String dlId) {
         this.dlId = dlId;
-        FileDownloader dl = FileDownloader.getInstance();
-        if(dl.isValidId(dlId)==false) {
+        if(fileDownloader.isValidId(dlId)==false) {
             status = "invalid-id";
             return;
         }
-        status = dl.getStatus(dlId);
+        status = fileDownloader.getStatus(dlId);
         //totalFileList = dl.getTotalFileList(dlId);
-        totalFiles = dl.getTotalFiles(dlId);
-        downloadFiles = dl.getDownloadFiles(dlId);
+        totalFiles = fileDownloader.getTotalFiles(dlId);
+        downloadFiles = fileDownloader.getDownloadFiles(dlId);
     }
 
     public String getDlId() {
