@@ -32,14 +32,9 @@ public class FileDownloader extends Thread {
     private HashMap<String, FileDownloadExecutor> mHolders;
     private FileServiceManage mServiceManager;
 
-    private final CollectPlanService serviceCollectPlan;
-
     @Autowired
-    private FileDownloader(CollectPlanService serviceCollectPlan) {
-
+    private FileDownloader() {
         log.info("initialize FileDownloader");
-
-        this.serviceCollectPlan = serviceCollectPlan;
 
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
@@ -48,10 +43,6 @@ public class FileDownloader extends Thread {
             e.printStackTrace();
         }
         mHolders = new HashMap<>();
-
-        if(serviceCollectPlan==null) {
-            throw new BeanInitializationException("couldn't find CollectPlanService bean");
-        }
     }
 
 

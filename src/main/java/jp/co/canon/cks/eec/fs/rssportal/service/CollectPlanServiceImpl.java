@@ -75,6 +75,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         plan.setStart(new Timestamp(start.getTime()));
         plan.setEnd(new Timestamp(end.getTime()));
         plan.setNextAction(new Timestamp(start.getTime()));
+        plan.setLastPoint(new Timestamp(start.getTime()-(3600*1000)));
 
         if(description!=null) {
             plan.setDescription(description);

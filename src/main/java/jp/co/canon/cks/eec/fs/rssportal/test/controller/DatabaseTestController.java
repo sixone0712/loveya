@@ -111,8 +111,8 @@ public class DatabaseTestController {
 
         long cur = System.currentTimeMillis();
 
-        List<String> tools1 = Arrays.asList("tool4", "tool5", "tool6");
-        List<String> logTypes1 = Arrays.asList("logType1", "logType2", "logType3");
+        List<String> tools1 = Arrays.asList("EQVM88", "EQVM87");
+        List<String> logTypes1 = Arrays.asList("001", "002", "003");
         Date start1 = new Date(cur+10000);
         Date end1 = new Date(start1.getTime()+millis_per_hour);
         long interval1 = millis_per_minute;
@@ -120,8 +120,8 @@ public class DatabaseTestController {
         serviceCollectionPlan.addPlan(tools1, logTypes1, start1, end1, "cycle",
                 interval1, "1min-cycle");
 
-        List<String> tools2 = Arrays.asList("tool1", "tool2", "tool3");
-        List<String> logTypes2 = Arrays.asList("logType4", "logType5", "logType6");
+        List<String> tools2 = Arrays.asList("EQVM88");
+        List<String> logTypes2 = Arrays.asList("004", "005");
         Date start2 = new Date(cur+10000);
         Date end2 = new Date(start1.getTime()+millis_per_hour);
         long interval2 = 30000;

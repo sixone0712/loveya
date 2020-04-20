@@ -48,8 +48,13 @@ public class FileDownloadExecutor implements DownloadConfig {
     private DownloadMonitor downloadMonitor;
     private int totalFiles = -1;
     private String mPath = null;
+    private boolean compress;
 
     public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request) {
+        this(serviceManager, request, false);
+    }
+
+    public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request, boolean compress) {
         status = Status.idle;
         mServiceManager = serviceManager;
         mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
@@ -60,6 +65,7 @@ public class FileDownloadExecutor implements DownloadConfig {
         downloadForms = request;
         downloadContexts = new ArrayList<>();
         baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
+        this.compress = compress;
     }
 
     private void initialize() {
@@ -349,7 +355,9 @@ public class FileDownloadExecutor implements DownloadConfig {
                 e.printStackTrace();
             }
         }*/
-        compress();
+        if(compress) {
+            compress();
+        }
         wrapup();
     };
 
