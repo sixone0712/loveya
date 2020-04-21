@@ -12,6 +12,7 @@ import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -26,9 +27,8 @@ import java.util.zip.ZipInputStream;
 
 public class FileDownloadExecutor implements DownloadConfig {
 
-    private final Log log = LogFactory.getLog(getClass());
+    private final Log log;
     private static final String file_format = "%s/%s/%s";
-
     private static final String user_name = "eecAdmin";     // FIXME
 
     private enum Status {
@@ -48,13 +48,38 @@ public class FileDownloadExecutor implements DownloadConfig {
     private DownloadMonitor downloadMonitor;
     private int totalFiles = -1;
     private String mPath = null;
-    private boolean compress;
 
-    public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request) {
-        this(serviceManager, request, false);
+    private boolean attrCompression;
+    private boolean attrEmptyAllPathBeforeDownload;
+    private boolean attrReplaceFileForSameFileName;
+    private boolean attrDownloadFilesViaMultiSessions;
+
+    public FileDownloadExecutor(
+            @NonNull final FileServiceManage serviceManager,
+            @NonNull final List<DownloadForm> request) {
+        this(null, serviceManager, request);
     }
 
-    public FileDownloadExecutor(@NonNull final FileServiceManage serviceManager, @NonNull final List<DownloadForm> request, boolean compress) {
+    public FileDownloadExecutor(
+            @Nullable final String desc,
+            @NonNull final FileServiceManage serviceManager,
+            @NonNull final List<DownloadForm> request) {
+        this(desc, serviceManager, request, false);
+    }
+
+    public FileDownloadExecutor(
+            @Nullable final String desc,
+            @NonNull final FileServiceManage serviceManager,
+            @NonNull final List<DownloadForm> request,
+            boolean compress) {
+
+        if(desc==null) {
+            log = LogFactory.getLog(getClass());
+        } else {
+            String fmt = "%s:%s";
+            log = LogFactory.getLog(String.format(fmt, getClass().toString(), desc));
+        }
+
         status = Status.idle;
         mServiceManager = serviceManager;
         mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
@@ -65,7 +90,11 @@ public class FileDownloadExecutor implements DownloadConfig {
         downloadForms = request;
         downloadContexts = new ArrayList<>();
         baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
-        this.compress = compress;
+
+        this.attrCompression = compress;
+        this.attrEmptyAllPathBeforeDownload = true;
+        this.attrReplaceFileForSameFileName = false;
+        this.attrDownloadFilesViaMultiSessions = false;
     }
 
     private void initialize() {
@@ -337,25 +366,32 @@ public class FileDownloadExecutor implements DownloadConfig {
 
         status = Status.download;
         new Thread(downloadMonitor).start();
-        downloadContexts.forEach(context->{
-            // Temporarily, downloading works sequentially.
-            // There is performance issue on soap service when it works as entire multi-threading.
-            AsyncProc proc = new AsyncProc(context);
-            new Thread(proc).start();
-            while(proc.isCompleted()==false);
-        });
 
-        /*while(downloadFiles!=totalFiles) {
-            if(status==Status.error) {
-                return;
-            }
+        List<AsyncProc> procs = new ArrayList<>();
+        downloadContexts.forEach(context->{
             try {
-                Thread.sleep(50);
+                AsyncProc proc = new AsyncProc(context);
+                procs.add(proc);
+                new Thread(proc).start();
+                if(attrDownloadFilesViaMultiSessions==false) {
+                    while (proc.isCompleted() == false)
+                        Thread.sleep(100);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }*/
-        if(compress) {
+        });
+
+        try {
+            for(AsyncProc proc: procs) {
+                while(proc.isCompleted()==false)
+                    Thread.sleep(100);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if(attrCompression) {
             compress();
         }
         wrapup();
@@ -441,5 +477,37 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     public String getErrString() {
         return errString;
+    }
+
+    public boolean isAttrCompression() {
+        return attrCompression;
+    }
+
+    public void setAttrCompression(boolean attrCompression) {
+        this.attrCompression = attrCompression;
+    }
+
+    public boolean isAttrEmptyAllPathBeforeDownload() {
+        return attrEmptyAllPathBeforeDownload;
+    }
+
+    public void setAttrEmptyAllPathBeforeDownload(boolean attrEmptyAllPathBeforeDownload) {
+        this.attrEmptyAllPathBeforeDownload = attrEmptyAllPathBeforeDownload;
+    }
+
+    public boolean isAttrReplaceFileForSameFileName() {
+        return attrReplaceFileForSameFileName;
+    }
+
+    public void setAttrReplaceFileForSameFileName(boolean attrReplaceFileForSameFileName) {
+        this.attrReplaceFileForSameFileName = attrReplaceFileForSameFileName;
+    }
+
+    public boolean isAttrDownloadFilesViaMultiSessions() {
+        return attrDownloadFilesViaMultiSessions;
+    }
+
+    public void setAttrDownloadFilesViaMultiSessions(boolean attrDownloadFilesViaMultiSessions) {
+        this.attrDownloadFilesViaMultiSessions = attrDownloadFilesViaMultiSessions;
     }
 }
