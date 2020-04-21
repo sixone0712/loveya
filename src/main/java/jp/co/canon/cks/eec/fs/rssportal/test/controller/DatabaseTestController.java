@@ -124,7 +124,7 @@ public class DatabaseTestController {
         List<String> logTypes2 = Arrays.asList("004", "005");
         Date start2 = new Date(cur+10000);
         Date end2 = new Date(start1.getTime()+millis_per_hour);
-        long interval2 = 30000;
+        long interval2 = millis_per_minute*3;
 
         serviceCollectionPlan.addPlan(tools2, logTypes2, start2, end2, "cycle",
                 interval2, "30sec-cycle");

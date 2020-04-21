@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -39,10 +40,31 @@ public class AutoCollector extends Thread {
         service.addNotifier(notifyUpdate);
         service.scheduleAllPlans();
 
-        FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-        fileServiceManage = serviceLocator.getFileServiceManage();
+        fileServiceManage = getFileServiceManage();
+        if(fileServiceManage instanceof VirtualFileServiceManagerImpl) {
+            createVirtualFiles();
+        }
 
         this.start();
+    }
+
+    private FileServiceManage getFileServiceManage() throws ServiceException {
+        if(false) {
+            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+            return serviceLocator.getFileServiceManage();
+        } else {
+            return new VirtualFileServiceManagerImpl();
+        }
+    }
+
+    private void createVirtualFiles() {
+        long cur = System.currentTimeMillis();
+        Date from = new Date(cur);
+        Date to = new Date(cur+(24*3600*1000));
+        String[] tools = {"EQVM88", "EQVM87"};
+        String[] types = {"001", "002", "003", "004", "005"};
+
+        ((VirtualFileServiceManagerImpl)fileServiceManage).createVfs(from, to, 60000, tools, types);
     }
 
     @Override
@@ -78,10 +100,10 @@ public class AutoCollector extends Thread {
         List<DownloadForm> downloadList = createDownloadList(plan);
 
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
-        if(totalFiles!=0) {
+        /*if(totalFiles!=0) {
             FileDownloadExecutor executor = new FileDownloadExecutor(fileServiceManage, downloadList);
             executor.start();
-        }
+        }*/
         service.updateLastCollect(plan);
         service.schedulePlan(plan);
         return false;
@@ -96,17 +118,17 @@ public class AutoCollector extends Thread {
         long lastTime = plan.getLastPoint().getTime();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
+        Calendar from = Calendar.getInstance();
+        from.setTimeInMillis(lastTime-1000);
+        Calendar to = Calendar.getInstance();
+        to.setTimeInMillis(System.currentTimeMillis());
+
         for(String tool: tools) {
             tool = tool.trim();
             for(String type: types) {
                 type = type.trim();
                 DownloadForm form = new DownloadForm(tool, type);
                 downloadList.add(form);
-
-                Calendar from = Calendar.getInstance();
-                from.setTimeInMillis(lastTime-1000);
-                Calendar to = Calendar.getInstance();
-                to.setTimeInMillis(System.currentTimeMillis());
 
                 FileInfoModel[] fileInfos = fileServiceManage.createFileList(tool, type, from, to, "", "");
                 for(FileInfoModel file: fileInfos) {
@@ -120,11 +142,12 @@ public class AutoCollector extends Thread {
 
                     form.addFile(file.getName(), file.getSize(), time);
                 }
-                log.info("tool="+tool+" type="+type+": "+fileInfos.length+" files");
                 downloadList.add(form);
             }
         }
-        log.info("lastpoint="+new Timestamp(lastTime).toString());
+        int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        log.info("totalFiles="+totalFiles+" lastpoint="+new Timestamp(lastTime).toString());
+        plan.setLastPoint(new Timestamp(lastTime));
         return downloadList;
     }
 
@@ -142,7 +165,6 @@ public class AutoCollector extends Thread {
     }
 
     private Runnable notifyUpdate = ()->{
-        System.out.println("notifyUpdate()");
         planUpdated = true;
     };
 

@@ -36,6 +36,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     };
 
     private static int mUniqueKey = 1;
+    private String desc;
     private String downloadId;
     private Status status;
     private String errString;
@@ -91,6 +92,7 @@ public class FileDownloadExecutor implements DownloadConfig {
         downloadContexts = new ArrayList<>();
         baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
 
+        this.desc = desc==null?"noname":desc;
         this.attrCompression = compress;
         this.attrEmptyAllPathBeforeDownload = true;
         this.attrReplaceFileForSameFileName = false;
@@ -416,17 +418,17 @@ public class FileDownloadExecutor implements DownloadConfig {
         errString = error;
     }
 
-    private void dumpFileList() {
-        if(downloadForms !=null) {
-            for(DownloadForm form: downloadForms) {
-                log.warn(String.format("tool: %s logType: %s", form.getTool(), form.getLogType()));
-                for(FileInfo file: form.getFiles()) {
-                    log.warn(String.format("  %s (%d)", file.getName(), file.getSize()));
-                }
-            }
-        } else {
-            log.error("null dlList");
-        }
+    private void printExecutorInfo() {
+
+        log.info("FileDownloadExecutor(desc="+desc+", id="+downloadId+")");
+        log.info("attr."+attrCompression);
+        log.info("    .DownloadFilesViaMultiSessions="+attrDownloadFilesViaMultiSessions);
+        log.info("    .EmptyAllPathBeforeDownload"+attrEmptyAllPathBeforeDownload);
+        log.info("    .ReplaceFileForSameFileName"+attrReplaceFileForSameFileName);
+        log.info("path.base="+baseDir);
+        log.info("download");
+        for(DownloadForm form: downloadForms)
+            log.info("    "+form.getTool()+" / "+form.getLogType()+" ("+form.getFiles().size()+" files)");
     }
 
     public String getId() {
@@ -435,7 +437,7 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     public void start() {
         log.warn("file download start ("+ downloadForms.size()+")");
-        dumpFileList();
+        printExecutorInfo();
         (new Thread(runner)).start();
     }
 
