@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="genres">
+
+    <select id="selectAll" resultType="GenreVo">
+        select * from rsss."genres" where validity is true order by id asc
+    </select>
+
+    <insert id="insert" parameterType="GenreVo">
+        insert into rsss."genres" (
+        name,
+        category,
+        created,
+        modified,
+        validity
+        ) values (
+        #{name},
+        #{category},
+        now(),
+        now(),
+        true
+        )
+    </insert>
+
+    <select id="selectById" resultType="GenreVo">
+        select * from rsss."genres"
+        where
+        validity is true
+        <if test="id!=null and id!=''">
+            and id = #{id}
+        </if>
+    </select>
+
+    <select id="selectByName" resultType="GenreVo">
+        select * from rsss."genres"
+        where
+        validity is true
+        <if test="name!=null and name!=''">
+            and name = #{name}
+        </if>
+    </select>
+
+    <update id="update" parameterType="GenreVo">
+        update rsss."genres"
+            set name = #{name},
+                category = #{category},
+                modified = now()
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete
+            from rsss."genres"
+            where id = #{id}
+    </delete>
+
+    <select id="selectUpdate" resultType="Date">
+        select update from rsss."genreUpdate"
+    </select>
+
+    <update id="updateUpdate" parameterType="Date">
+        update rsss."genreUpdate" set update = now()
+    </update>
+
+
+
+
+
+
+
+
+    <!--
+    <select id="selectAll" resultType="GenreVo">
+        select * from rsss."genres" where validity is true
+    </select>
+    -->
+
+
+    <!--
+    <insert id="insert" parameterType="GenreVo">
+        insert into rsss."genres" (
+        name,
+        category,
+        created,
+        modified,
+        validity
+        ) values (
+        #{name},
+        <foreach collection='category' item='item' separator=',' open='array [' close='],'>
+            #{item}
+        </foreach>
+        now(),
+        now(),
+        true
+        )
+    </insert>
+    -->
+
+    <!--
+    <insert id="insert" parameterType="java.util.HashMap">
+        insert into rsss."genres" (
+        name,
+        category,
+        created,
+        modified,
+        validity
+        ) values (
+        #{name},
+        #{category},
+        now(),
+        now(),
+        true
+        )
+    </insert>
+-->
+
+
+<!--
+
+    <update id="update" parameterType="GenreVo">
+        update rsss."genres" set
+            name = #{name},
+            category =
+            <foreach collection='category' item='item' separator=',' open='array [' close='],'>
+               #{item}
+            </foreach>
+
+            modified = now(),
+            &#45;&#45; validity = #{validity},
+            validity = true,
+            where id = #{id}
+    </update>
+-->
+
+</mapper>

@@ -5,6 +5,9 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import * as API from "../../../api";
 import * as Define from "../../../define";
+import * as genreListActions from "../../../modules/genreList";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
 
 class ConfirmModal extends Component {
     constructor(props) {
@@ -12,7 +15,24 @@ class ConfirmModal extends Component {
         this.state = {
             confirmOpen: false,
             alertOpen: false,
+            errMsg: "",
         };
+      }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        console.log("getDerivedStateFromProps");
+        const { genreList } = nextProps;
+        const { isServerErr } = genreList.toJS();
+        console.log("isServerErr", isServerErr);
+        console.log("nextProps.nowAction", nextProps.nowAction);
+        if(isServerErr && nextProps.nowAction == nextProps.openbtn) {
+            return {
+                confirmOpen: false,
+                alertOpen: true,
+                errMsg: API.convertErrMsg(Define.GENRE_SET_FAIL_SEVER_ERROR),
+              }
+        }
+        return prevState;
     }
 
     openConfirmModal = () => {
@@ -36,36 +56,50 @@ class ConfirmModal extends Component {
         });
     };
 
-    closeAlertModal = () => {
-        this.setState({
+    closeAlertModal = async () => {
+        console.log("closeAlertModal Start", this.state.alertOpen);
+        const { genreListActions } = this.props;
+        await genreListActions.genreInitServerError();
+        await this.setState({
             ...this.state,
             alertOpen: false
         });
+        console.log("closeAlertModal end", this.state.alertOpen);
     };
 
-    canOpenModal = () => {
-        if(this.props.selectedKeyName === "selectGenre") {
-            this.props.setErrorStatus(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
-            //API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+    canOpenModal = async (openbtn) => {
+        await this.props.setNowAction(openbtn);
+        if(this.props.selectedGenre === 0) {
+            await this.setState({
+                errMsg : API.convertErrMsg(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE)
+            })
             this.openAlertModal();
             return;
         }
-
         this.openConfirmModal();
     };
 
     actionFunc = async () => {
-        console.log("###actionFuncStart");
+        console.log("[ConfirmModel.js] actionFunc");
         //call async functionn
-        const result = await this.props.confirmFunc(this.props.selectedKeyName);
-        console.log("actionFunc=>confirmFunc=>result", result);
+        const result = await this.props.confirmFunc(this.props.selectedGenre);
+        console.log("result", result);
+
         if(result === Define.RSS_SUCCESS){
-            this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.closeConfirmModal();
-            this.props.handleSelectBoxChange("selectGenre");
+            this.props.handleSelectBoxChange(0);
         } else {
-            this.props.setErrorStatus(result);
-            API.dispAlert(result);
+            await this.setState({
+                errMsg : API.convertErrMsg(result)
+            })
+
+            if(result === Define.GENRE_SET_FAIL_NOT_EXIST_GENRE) {
+                const { genreListActions } = this.props;
+                await genreListActions.genreGetDbList("/db/genre/get");
+            }
+            this.closeConfirmModal();
+            this.openAlertModal();
+            this.props.handleSelectBoxChange(0);
         }
         console.log("###actionFuncEnd");
     };
@@ -73,6 +107,7 @@ class ConfirmModal extends Component {
     render() {
         const { openbtn, message, leftbtn, rightbtn } = this.props;
         const { confirmOpen, alertOpen } = this.state;
+
         return (
             <>
                 <Button
@@ -80,7 +115,7 @@ class ConfirmModal extends Component {
                     size="sm"
                     color="info"
                     className="catlist-btn"
-                    onClick={this.canOpenModal}
+                    onClick={() => this.canOpenModal(openbtn)}
                 >
                     {openbtn}
                 </Button>
@@ -133,7 +168,8 @@ class ConfirmModal extends Component {
                                 <p>
                                     <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
                                 </p>
-                                <p>Please choose a genre.</p>
+                                {/*<p>Please choose a genre.</p>*/}
+                                <p>{this.state.errMsg}</p>
                             </div>
                             <div className="button-wrap">
                                 <button
@@ -157,4 +193,11 @@ class ConfirmModal extends Component {
     }
 }
 
-export default ConfirmModal;
+export default connect(
+    (state) => ({
+        genreList: state.genreList.get('genreList'),
+    }),
+    (dispatch) => ({
+        genreListActions: bindActionCreators(genreListActions, dispatch),
+    })
+)(ConfirmModal);

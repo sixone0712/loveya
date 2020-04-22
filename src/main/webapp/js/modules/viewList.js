@@ -69,6 +69,7 @@ export default handleActions({
 			onSuccess: (state, action) => { // 성공했을때 해야 할 작업이 따로 없으면 이 함수 또한 생략해도 됩니다.
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
 				const lists = action.payload.data;
+				console.log("lists", lists);
 
 				const equipLists = lists.map((list => list.structId));
 
@@ -207,43 +208,29 @@ export default handleActions({
 		console.log("handleActions[VIEW_APPLY_GENRE_LIST]");
 
 		const logInfoList = state.get("logInfoList");
-		const { genreList, keyName } = action.payload;
+		const { genreList, id } = action.payload;
 
-		console.log("genreList", genreList.toJS());
-
-		const selectedGenre =  genreList.toJS().filter(list => list.keyName === keyName);
-		console.log("selectedGenre", selectedGenre);
+		// find selected genre list
+		const selectedGenre =  genreList.get("list").find(item => {
+			return item.get("id") == id;
+		});
 
 		let logInfoListCheckCnt = 0;
+		// get category list
+		const fileCat = selectedGenre.get("category");
 
-		/*
-		genreList
-		{
-			"dispName": "ymkwon",
-			"keyName": "ymwon",
-			"machine": [0, 1, 2, 3],
-			"fileCat": [4, 5, 6, 7]
-		}
-		*/
-
-		const fileCat = selectedGenre[0].fileCat;
-		console.log("fileCat", fileCat);
-
-
+		// all loginfo list init -> unchecked
 		const initLogInfoList = logInfoList.map(list => list.set("checked", false));
-		console.log("initLogInfoList", initLogInfoList);
 
+		// check genre list
 		const newLogInfoList = fileCat.reduce((pre, cur) => {
-			//return pre.update(cur, list => list.set("checked", true));
-			return pre.update(cur, list => {
+			const findList = initLogInfoList.find(item => item.get("logCode") == cur);
+			return pre.update(findList.get("keyIndex"), list => {
 				logInfoListCheckCnt++;
 				return list.set("checked", true);});
 		}, initLogInfoList);
 
-		console.log("newLogInfoList", newLogInfoList.toJS());
-
 		return state.set("logInfoList", newLogInfoList)
 					.set("logInfoListCheckCnt", logInfoListCheckCnt);
 	}
-	
 }, initialState)

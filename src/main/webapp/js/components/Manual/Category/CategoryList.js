@@ -16,27 +16,18 @@ import {bindActionCreators} from "redux";
 import * as viewListActions from "../../../modules/viewList";
 import * as genreListActions from "../../../modules/genreList";
 import * as API from '../../../api'
-import * as Define from "../../../define";
 
 class CategoryList extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      nowAction: "",
       ItemsChecked: false,
       showGenre: false,
-      selectedGenre: "selectGenre",
-      selectedKeyName: "selectGenre",
-      genreName: "",
-      isError: Define.RSS_SUCCESS
+      selectedGenre: 0,
+      selectedGenreName: "",
     };
   }
-
-  setErrorStatus = (error) => {
-    this.setState({
-      ...this.state,
-      isError: error
-    })
-  };
 
   handleGenreToggle = () => {
     this.setState({
@@ -44,27 +35,34 @@ class CategoryList extends Component {
     });
   };
 
-  handleSelectBoxChange = async (dispName) => {
+  handleSelectBoxChange = async (id) => {
     console.log("handleSelectBoxChange");
-    let genreName = dispName === "selectGenre" ? "" : dispName;
-    API.selectGenreList(this.props, dispName);
+    await API.selectGenreList(this.props, id);
+    const genreList = await API.getGenreList(this.props).list;
+    let name = "";
+    if(id !== 0) {
+      const findGenre = genreList.find(item => item.id == id);
+      name = findGenre.name;
+    }
+    console.log("name", name);
+
     await this.setState({
         ...this.state,
-        selectedGenre: dispName,
-        selectedKeyName: dispName,
-        genreName: genreName,
-
-    });
-    console.log("selectedGenre", this.state.selectedGenre);
-    console.log("selectedKeyName", this.state.selectedKeyName);
-  };
-
-  onChangeGenreName = (genreName) => {
-    this.setState({
-      ...this.state,
-      genreName: genreName
+        selectedGenre: id,
+        selectedGenreName : name
     });
   };
+
+  getSelectedIdByName = (name) => {
+    const genreList = API.getGenreList(this.props);
+    console.log("getSelectedIdByName.genreList", genreList);
+    const findList = genreList.list.find(item => {
+      console.log(item.name, name);
+      return item.name == name
+    });
+    console.log("getSelectedIdByName.findList", findList);
+    return findList.id;
+  }
 
   checkCategoryItem = (e) => {
     const idx = e.target.id.split('_')[1];
@@ -79,68 +77,44 @@ class CategoryList extends Component {
     API.checkAllLogInfoList(this.props, checked);
   };
 
-  addGenreList = async (dispName, keyName) => {
-    console.log("###addGenreListCate Start");
-    let result = await API.addGenreList(this.props, dispName, keyName);
-
-    if(result === Define.RSS_SUCCESS) {
-      console.log("=========");
-      result = await API.setGenreList(this.props).then(result => {
-        console.log("setGenreList/return");
-        return result;
-      });
-    }
-    console.log("addGenreList/return")
-    console.log("###addGenreListCate End");
+  addGenreList = async (id, name) => {
+    console.log("[CategoryList] addGenreList");
+    const result = await API.addGenreList(this.props, name);
+    console.log("result", result);
     return result;
   };
 
 
-  editGenreList = async (dispName, keyName) => {
-    let result =  await API.editGenreList(this.props, dispName, keyName);
-
-    if(result === Define.RSS_SUCCESS) {
-      console.log("=========");
-      result = await API.setGenreList(this.props).then(result => {
-        console.log("setGenreList/return");
-        return result;
-      });
-    }
-    console.log("editGenreList/return")
-    console.log("###editGenreList End");
+  editGenreList = async (id, name) => {
+    console.log("[CategoryList] editGenreList");
+    const result = await API.editGenreList(this.props, id, name);
+    console.log("result", result);
     return result;
   };
 
-  deleteGenreList = async (keyName) => {
-    console.log("###deleteGenreList Start");
-    let result =  await API.deleteGenreList(this.props, keyName);
-    console.log("deleteGenreList=>deleteGenreList=>result", result);
-
-    if(result === Define.RSS_SUCCESS) {
-      console.log("=========");
-      result = await API.setGenreList(this.props).then(result => {
-        console.log("deleteGenreList/return", result);
-        return result;
-      });
-    }
-    console.log("deleteGenreList/return");
-    console.log("###deleteGenreList End");
+  deleteGenreList = async (id, name) => {
+    console.log("[CategoryList] deleteGenreList");
+    const result =  await API.deleteGenreList(this.props, id);
+    console.log("result", result);
     return result;
+  };
+
+  setNowAction = async (name) => {
+    await this.setState({
+      ...this.state,
+      nowAction: name
+    })
   };
 
   render() {
     const {
       showGenre,
       ItemsChecked,
-      selectedKeyName
     } = this.state;
 
     const categorylist = API.getLogInfoList(this.props);
     const genreList = API.getGenreList(this.props);
-    const genreCnt = API.getGenreCnt(this.props);
-    console.log("categorylist", categorylist);
-    console.log("genreList", genreList);
-    console.log("genreCnt", genreCnt);
+    console.log("chpark_genreList", genreList);
 
     return (
         <Card className="ribbon-wrapper catlist-custom">
@@ -159,21 +133,12 @@ class CategoryList extends Component {
                         className="catlist-select"
                         value={this.state.selectedGenre}
                         onChange={(e) => this.handleSelectBoxChange(e.target.value)}
-
                     >
-                      {/*<option value="0" disabled hidden>*/}
-                      {/*  Select Genre*/}
-                      {/*</option>*/}
-                      {/*<option value="1">1</option>*/}
-                      {/*<option value="2">2</option>*/}
-                      {/*<option value="3">3</option>*/}
-                      {/*<option value="4">4</option>*/}
-                      {/*<option value="5">5</option>*/}
-                    <option value="selectGenre" disabled hidden>
+                    <option key={0} value={0} disabled hidden>
                       Select Genre
                     </option>
-                      { genreCnt > 0 &&
-                        genreList.map((list, idx) => <option key={idx+1} value={list.keyName}>{list.dispName}</option>)
+                      { genreList.totalCnt > 0 &&
+                        genreList.list.map((list, idx) => <option key={idx+1} value={list.id}>{list.name}</option>)
                       }
                     </Input>
 
@@ -184,15 +149,14 @@ class CategoryList extends Component {
                         inputpholder={"Enter Genre Name"}
                         leftbtn={"Create"}
                         rightbtn={"Cancel"}
-                        inputValue={this.state.selectedKeyName}
+                        nowAction={this.state.nowAction}
+                        setNowAction={this.setNowAction}
                         confirmFunc={this.addGenreList}
-                        selectedKeyName={selectedKeyName}
+                        selectedGenre={this.state.selectedGenre}
+                        selectedGenreName={this.state.selectedGenreName}
                         logInfoListCheckCnt={this.props.logInfoListCheckCnt}
                         handleSelectBoxChange={this.handleSelectBoxChange}
-                        genreName={this.state.genreName}
-                        onChangeGenreName={this.onChangeGenreName}
-                        isError={this.state.isError}
-                        setErrorStatus={this.setErrorStatus}
+                        getSelectedIdByName={this.getSelectedIdByName}
                     />
                     <InputModal
                         title={"Edit Genre"}
@@ -201,26 +165,27 @@ class CategoryList extends Component {
                         inputpholder={"Edit Genre Name"}
                         leftbtn={"Edit"}
                         rightbtn={"Cancel"}
-                        inputValue={this.state.selectedKeyName}
+                        nowAction={this.state.nowAction}
+                        setNowAction={this.setNowAction}
                         confirmFunc={this.editGenreList}
-                        selectedKeyName={selectedKeyName}
+                        selectedGenre={this.state.selectedGenre}
+                        selectedGenreName={this.state.selectedGenreName}
                         logInfoListCheckCnt={this.props.logInfoListCheckCnt}
                         handleSelectBoxChange={this.handleSelectBoxChange}
-                        genreName={this.state.genreName}
-                        onChangeGenreName={this.onChangeGenreName}
-                        isError={this.state.isError}
-                        setErrorStatus={this.setErrorStatus}
-                    />
+                        getSelectedIdByName={this.getSelectedIdByName}
+                     />
                     <ConfirmModal
                         openbtn={"Delete"}
                         message={"Do you want to delete the selected genre?"}
                         leftbtn={"Delete"}
                         rightbtn={"Cancel"}
+                        nowAction={this.state.nowAction}
+                        setNowAction={this.setNowAction}
                         confirmFunc={this.deleteGenreList}
-                        selectedKeyName={selectedKeyName}
+                        selectedGenre={this.state.selectedGenre}
+                        selectedGenreName={this.state.selectedGenreName}
                         handleSelectBoxChange={this.handleSelectBoxChange}
-                        isError={this.state.isError}
-                        setErrorStatus={this.setErrorStatus}
+                        getSelectedIdByName={this.getSelectedIdByName}
                     />
                   </div>
                 </Collapse>
@@ -274,10 +239,8 @@ export default connect(
       logInfoList: state.viewList.get('logInfoList'),
       logInfoListCheckCnt: state.viewList.get('logInfoListCheckCnt'),
       genreList: state.genreList.get('genreList'),
-      genreCnt: state.genreList.get('genreCnt'),
     }),
     (dispatch) => ({
-      // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
       viewListActions: bindActionCreators(viewListActions, dispatch),
       genreListActions: bindActionCreators(genreListActions, dispatch),
     })

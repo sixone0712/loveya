@@ -5,6 +5,10 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import * as Define from '../../../define';
 import * as API from "../../../api";
+import services from '../../../services'
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as genreListActions from "../../../modules/genreList";
 
 class InputModal extends Component {
     constructor(props) {
@@ -13,10 +17,28 @@ class InputModal extends Component {
         this.state = {
             inputOpen: false,
             alertOpen: false,
-            CompleteOpen: false,
             errMsg: "",
-            alertMsg: ""
+            alertMsg: "",
+            genreName: ""
         };
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        console.log("getDerivedStateFromProps");
+        const { genreList } = nextProps;
+        const { isServerErr } = genreList.toJS();
+        console.log("isServerErr", isServerErr);
+        console.log("nextProps.nowAction", nextProps.nowAction);
+        if(isServerErr && nextProps.nowAction == nextProps.openbtn) {
+            return {
+                ...prevState,
+                inputOpen: false,
+                alertOpen: true,
+                errMsg: "",
+                alertMsg: API.convertErrMsg(Define.GENRE_SET_FAIL_SEVER_ERROR)
+            }
+        }
+        return prevState;
     }
 
     openInputModal = () => {
@@ -33,70 +55,63 @@ class InputModal extends Component {
         });
     };
 
-    openAlertModal = (val) => {
-        let msg = "";
-
-        switch(val) {
-            case Define.GENRE_SET_FAIL_NO_ITEM: msg = "Please choose a category."; break;
-            case Define.GENRE_SET_FAIL_NOT_SELECT_GENRE: msg = "Please choose a genre."; break;
-            default: msg="what's error : " + error; break;
-        }
-
-        this.setState({
+    openAlertModal = async (val) => {
+        await this.setState({
             ...this.state,
-            alertMsg: msg,
             alertOpen: true
         });
     };
 
-    closeAlertModal = () => {
-        this.setState({
+    closeAlertModal = async () => {
+        const { genreListActions } = this.props;
+        await genreListActions.genreInitServerError();
+        await this.setState({
             ...this.state,
             alertOpen: false
         });
     };
 
-    canOpenModal = (openbtn) => {
+    canOpenModal = async (openbtn) => {
         console.log("canOpenModal");
-        console.log("openbtn", openbtn);
-        console.log("this.props.logInfoListCheckCnt", this.props.logInfoListCheckCnt);
+        await this.props.setNowAction(openbtn)
         if(openbtn === "Create") {
             if(this.props.logInfoListCheckCnt <= 0){
-                this.props.setErrorStatus(Define.GENRE_SET_FAIL_NO_ITEM);
-                //API.dispAlert(Define.GENRE_SET_FAIL_NO_ITEM);
-                //return;
-                this.openAlertModal(Define.GENRE_SET_FAIL_NO_ITEM);
+                await this.setState({
+                    ...this.state,
+                    alertMsg: API.convertErrMsg(Define.GENRE_SET_FAIL_NO_ITEM)
+                });
+                this.openAlertModal();
                 return;
             }
-            this.props.onChangeGenreName("");
+            await this.setState({
+                genreName: ""
+            })
         } else if(openbtn === "Edit") {
-            console.log("#############################");
-            console.log("this.props.selectedKeyName", this.props.selectedKeyName );
-            if(this.props.selectedKeyName === "selectGenre") {
-                this.props.setErrorStatus(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
-                //API.dispAlert(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
-                this.openAlertModal(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE);
+            if(this.props.selectedGenre === 0) {
+                await this.setState({
+                    ...this.state,
+                    alertMsg: API.convertErrMsg(Define.GENRE_SET_FAIL_NOT_SELECT_GENRE)
+                });
+                this.openAlertModal();
                 return;
             }
+            await this.setState({
+                genreName: this.props.selectedGenreName
+            })
         }
         this.openInputModal();
     };
 
     actionFunc = async (openbtn) => {
-        let selectedKeyName = "";
-
-        if(openbtn === "Create"){
-            selectedKeyName = this.props.genreName;
-        } else if(openbtn === "Edit"){
-            selectedKeyName = this.props.selectedKeyName;
-        }
-
         //call async function
-        const result = await this.props.confirmFunc(this.props.genreName, selectedKeyName);
+        const genreName = this.state.genreName;
+        const id = this.props.selectedGenre;
+        const result = await this.props.confirmFunc(id, genreName);
+        let alertMsg = "";
         if(result === Define.RSS_SUCCESS){
-            this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.closeInputModal();
-            this.props.handleSelectBoxChange(this.props.genreName);
+            const id = this.props.getSelectedIdByName(genreName);
+            this.props.handleSelectBoxChange(id);
         } else {
             let msg = "";
 
@@ -109,14 +124,16 @@ class InputModal extends Component {
                 default: msg="what's error : " + error; break;
             }
 
-            this.setState({
+            await this.setState({
                 ...this.state,
-                errMsg: msg
+                errMsg: API.convertErrMsg(result),
+                alertMsg: alertMsg
             });
 
             this.errRef.current.classList.remove('modal-err-msg-hidden');
-
-            //API.dispAlert(result);
+            if(genreList.needUpdate) {
+                this.openAlertModal();
+            }
         }
     };
 
@@ -156,10 +173,11 @@ class InputModal extends Component {
                                     <Input
                                         type="text"
                                         name={inputname}
-                                        value={this.props.genreName}
+                                        value={this.state.genreName}
                                         placeholder={inputpholder}
                                         className="catlist-input"
-                                        onChange={(e) => this.props.onChangeGenreName(e.target.value)}
+                                        //onChange={(e) => this.props.onChangeGenreName(e.target.value)}
+                                        onChange={(e) => this.setState({...this.state, genreName: e.target.value})}
                                     />
                                     <p className="modal-err-msg modal-err-msg-hidden" ref={this.errRef}>{errMsg}</p>
                                 </FormGroup>
@@ -222,5 +240,11 @@ class InputModal extends Component {
         );
     }
 }
-
-export default InputModal;
+export default connect(
+    (state) => ({
+        genreList: state.genreList.get('genreList'),
+    }),
+    (dispatch) => ({
+        genreListActions: bindActionCreators(genreListActions, dispatch),
+    })
+)(InputModal);
