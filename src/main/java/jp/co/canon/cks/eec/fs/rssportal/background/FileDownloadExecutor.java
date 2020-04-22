@@ -7,8 +7,8 @@ import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
+import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
-import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -57,20 +57,23 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     public FileDownloadExecutor(
             @NonNull final FileServiceManage serviceManager,
+            @NonNull final FileServiceModel serviceModel,
             @NonNull final List<DownloadForm> request) {
-        this(null, serviceManager, request);
+        this(null, serviceManager, serviceModel, request);
     }
 
     public FileDownloadExecutor(
             @Nullable final String desc,
             @NonNull final FileServiceManage serviceManager,
+            @NonNull final FileServiceModel serviceModel,
             @NonNull final List<DownloadForm> request) {
-        this(desc, serviceManager, request, false);
+        this(desc, serviceManager, serviceModel, request, false);
     }
 
     public FileDownloadExecutor(
             @Nullable final String desc,
             @NonNull final FileServiceManage serviceManager,
+            @NonNull final FileServiceModel serviceModel,
             @NonNull final List<DownloadForm> request,
             boolean compress) {
 
@@ -83,7 +86,11 @@ public class FileDownloadExecutor implements DownloadConfig {
 
         status = Status.idle;
         mServiceManager = serviceManager;
-        mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
+        if(false) {
+            mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
+        } else {
+            mService = serviceModel;
+        }
         downloadMonitor = new DownloadMonitor();
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -154,7 +161,7 @@ public class FileDownloadExecutor implements DownloadConfig {
                     context.getFileSizes(),
                     context.getFileDates());
 
-            log.warn("requestNo="+request);
+            log.info("requestNo="+request);
             context.setRequestNo(request);
         }
 
@@ -186,7 +193,11 @@ public class FileDownloadExecutor implements DownloadConfig {
                 String achieveUrl = mServiceManager.download(user_name, context.getSystem(), context.getTool(),
                         context.getRequestNo(), reqInfo.getArchiveFileName());
                 log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
-                context.setAchieveUrl(achieveUrl);
+                if(mServiceManager instanceof VirtualFileServiceManagerImpl) {
+                    context.setLocalFilePath(achieveUrl);
+                } else {
+                    context.setAchieveUrl(achieveUrl);
+                }
                 break;
             }
         }
@@ -194,19 +205,49 @@ public class FileDownloadExecutor implements DownloadConfig {
         private void transfer() {
 
             log.info("transfer()");
-            CustomURL url = context.getAchieveUrl();
+            if(mServiceManager instanceof VirtualFileServiceManagerImpl) {
+                log.info("using virtual file service");
+                File inFile = new File(context.getLocalFilePath());
+                if(inFile.exists()==false || inFile.isDirectory()) {
+                    log.error("couldn't find a achieve file");
+                    return;
+                }
 
-            FtpWorker worker = new FtpWorker(url.getHost(), url.getPort(), url.getLoginUser(),
-                    url.getLoginPassword(), url.getFtpMode());
+                File outDir = new File(context.getOutPath());
+                outDir.mkdirs();
 
-            worker.open();
+                String lastName = inFile.getName();
+                Path outPath = Paths.get(context.getOutPath(), lastName);
 
-            Path path = Paths.get(context.getOutPath(), url.getLastFileName());
-            if(worker.transfer(url.getFile(), path.toString())) {
-                context.setFtpProcComplete(true);
+                byte[] buf = new byte[1024];
+                try {
+                    InputStream is = new FileInputStream(inFile);
+                    OutputStream os = new FileOutputStream(outPath.toFile());
+                    while((is.read(buf))>0) {
+                        os.write(buf);
+                        os.flush();
+                    }
+                    os.close();
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                log.info("transfer done [filename="+lastName+"]");
+            } else {
+                CustomURL url = context.getAchieveUrl();
+
+                FtpWorker worker = new FtpWorker(url.getHost(), url.getPort(), url.getLoginUser(),
+                        url.getLoginPassword(), url.getFtpMode());
+
+                worker.open();
+
+                Path path = Paths.get(context.getOutPath(), url.getLastFileName());
+                if (worker.transfer(url.getFile(), path.toString())) {
+                    context.setFtpProcComplete(true);
+                }
+
+                worker.close();
             }
-
-            worker.close();
         }
 
         private void extract() {
@@ -333,6 +374,7 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
 
         public void add(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
+            log.info("monitor.add(system="+system+" tool="+tool+" reqNo="+requestNo+")");
             if(getTarget(system, tool, requestNo)==null) {
                 try {
                     RequestListBean requestList = mService.createDownloadList(system, tool, requestNo);

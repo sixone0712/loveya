@@ -2,6 +2,8 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import org.apache.commons.logging.Log;
@@ -30,12 +32,14 @@ public class FileDownloader extends Thread {
     private static final String STS_DONE = "done";
 
     private HashMap<String, FileDownloadExecutor> mHolders;
+    private FileServiceModel mService;
     private FileServiceManage mServiceManager;
 
     @Autowired
     private FileDownloader() {
         log.info("initialize FileDownloader");
 
+        mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
             mServiceManager = serviceLocator.getFileServiceManage();
@@ -56,7 +60,7 @@ public class FileDownloader extends Thread {
             }
         }
 
-        FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, dlList);
+        FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, mService, dlList);
         mHolders.put(holder.getId(), holder);
 
         holder.start();

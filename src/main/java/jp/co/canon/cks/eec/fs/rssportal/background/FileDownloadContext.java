@@ -33,6 +33,7 @@ public class FileDownloadContext implements DownloadConfig {
     private boolean downloadComplete;
     private boolean ftpProcComplete;
     private CustomURL achieveUrl;
+    private String localFilePath;
 
     private File rootDir;
     private File outFile;
@@ -77,6 +78,14 @@ public class FileDownloadContext implements DownloadConfig {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getLocalFilePath() {
+        return localFilePath;
+    }
+
+    public void setLocalFilePath(String localFilePath) {
+        this.localFilePath = localFilePath;
     }
 
     public void setOutFile(@NonNull final File outFile) {

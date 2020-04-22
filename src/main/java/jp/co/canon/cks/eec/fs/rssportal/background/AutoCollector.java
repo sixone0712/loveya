@@ -3,7 +3,10 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
+import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -25,8 +28,10 @@ import java.util.List;
 @Component
 public class AutoCollector extends Thread {
 
+    private static final boolean useVirtualFileService = true;
     private final CollectPlanService service;
-    private FileServiceManage fileServiceManage;
+    private final FileServiceManage fileServiceManage;
+    private final FileServiceModel fileService;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
 
@@ -40,31 +45,31 @@ public class AutoCollector extends Thread {
         service.addNotifier(notifyUpdate);
         service.scheduleAllPlans();
 
-        fileServiceManage = getFileServiceManage();
-        if(fileServiceManage instanceof VirtualFileServiceManagerImpl) {
+        if(useVirtualFileService) {
+            fileService = new VirtualFileServiceModelImpl();
+            fileServiceManage = new VirtualFileServiceManagerImpl();
             createVirtualFiles();
+        } else {
+            fileService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
+            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+            fileServiceManage = serviceLocator.getFileServiceManage();
         }
-
         this.start();
     }
 
-    private FileServiceManage getFileServiceManage() throws ServiceException {
-        if(false) {
-            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-            return serviceLocator.getFileServiceManage();
-        } else {
-            return new VirtualFileServiceManagerImpl();
-        }
-    }
 
     private void createVirtualFiles() {
-        long cur = System.currentTimeMillis();
-        Date from = new Date(cur);
-        Date to = new Date(cur+(24*3600*1000));
-        String[] tools = {"EQVM88", "EQVM87"};
-        String[] types = {"001", "002", "003", "004", "005"};
+        if(fileServiceManage instanceof VirtualFileServiceManagerImpl) {
+            long cur = System.currentTimeMillis();
+            Date from = new Date(cur);
+            Date to = new Date(cur + (24 * 3600 * 1000));
+            String[] tools = {"EQVM88", "EQVM87"};
+            String[] types = {"001", "002", "003", "004", "005"};
 
-        ((VirtualFileServiceManagerImpl)fileServiceManage).createVfs(from, to, 60000, tools, types);
+            ((VirtualFileServiceManagerImpl) fileServiceManage).createVfs(from, to, 60000, tools, types);
+        } else {
+            throw new BeanInitializationException("couldn't resolve fileService type");
+        }
     }
 
     @Override
@@ -100,10 +105,10 @@ public class AutoCollector extends Thread {
         List<DownloadForm> downloadList = createDownloadList(plan);
 
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
-        /*if(totalFiles!=0) {
-            FileDownloadExecutor executor = new FileDownloadExecutor(fileServiceManage, downloadList);
+        if(totalFiles!=0) {
+            FileDownloadExecutor executor = new FileDownloadExecutor(fileServiceManage, fileService, downloadList);
             executor.start();
-        }*/
+        }
         service.updateLastCollect(plan);
         service.schedulePlan(plan);
         return false;

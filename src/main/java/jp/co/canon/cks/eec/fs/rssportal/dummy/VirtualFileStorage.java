@@ -79,6 +79,25 @@ public class VirtualFileStorage {
         return null;
     }
 
+    public void clearCache() {
+        if(isReady()) {
+            File file = new File(base);
+            File[] contents = file.listFiles();
+            for(File f: contents)
+                f.delete();
+        }
+    }
+
+    private void deleteDir(@NonNull File file) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
+    }
+
     public int createVirtualFiles(@NonNull Date from, @NonNull Date to, long interval /* millis */, @Nullable String prefix) {
 
         if(isReady()==false) {

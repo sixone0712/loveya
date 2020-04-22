@@ -1,26 +1,36 @@
 package jp.co.canon.cks.eec.fs.rssportal.dummy;
 
 import jp.co.canon.cks.eec.fs.manage.*;
+import jp.co.canon.cks.eec.fs.rssportal.background.Compressor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class VirtualFileServiceManagerImpl implements FileServiceManage {
+
+    private static final String fileCachePath = "virt-cache";
+    private static final AtomicInteger keySource = new AtomicInteger(1);
 
     private VirtualFileStorage vfs;
 
     public void createVfs(@NonNull Date from, @NonNull Date to, long interval, @NonNull String[] tools, @NonNull String[] types) {
         log.info("create virtual-file-storage");
-        vfs = new VirtualFileStorage();
-        vfs.setBase("vfs-cache-dum");
+        String vfsCacheDir = "vfs-cache-dum";
 
+        Path path = Paths.get(vfsCacheDir);
+        deleteDir(path.toFile());
+        vfs = new VirtualFileStorage();
+        vfs.setBase(vfsCacheDir);
         for(String tool:tools) {
             for(String type: types) {
                 vfs.createVirtualFiles(from, to, interval, tool+"_"+type);
@@ -82,9 +92,37 @@ public class VirtualFileServiceManagerImpl implements FileServiceManage {
     }
 
     @Override
-    public String registRequest(String system, String user, String tool, String comment, String logType, String[] fileNames, long[] fileSizes, Calendar[] fileTimestamps) throws RemoteException {
-        log.warn("nop DummyFileServiceManagerImpl.registRequest");
-        return null;
+    public String registRequest(String system, String user, String tool, String comment, String logType,
+                                String[] fileNames, long[] fileSizes, Calendar[] fileTimestamps) throws RemoteException {
+        log.info("virt.registRequest");
+
+        if(fileNames.length==0 || fileNames.length!=fileSizes.length || fileNames.length!=fileTimestamps.length) {
+            log.error("input array length error");
+            return null;
+        }
+
+        String reqNo = createKeyString(system, user, tool, logType);
+        String cache = getCachePath(reqNo);
+        byte[] buf = new byte[1024];
+        for(int i=0; i<fileNames.length; ++i) {
+            try {
+                InputStream is = vfs.getFile(fileNames[i], fileSizes[i],
+                        new Date(fileTimestamps[i].getTimeInMillis()));
+                Path path = Paths.get(cache, fileNames[i]);
+                OutputStream os = new FileOutputStream(path.toFile());
+
+                while((is.read(buf)>0)) {
+                    os.write(buf);
+                    os.flush();
+                }
+                os.close();
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        vfs.clearCache();
+        return reqNo;
     }
 
     @Override
@@ -101,19 +139,70 @@ public class VirtualFileServiceManagerImpl implements FileServiceManage {
 
     @Override
     public DownloadListModel createDownloadList(String system, String tool, String reqNo) throws RemoteException {
-        log.warn("nop DummyFileServiceManagerImpl.createDownloadList");
+        log.warn("virt.createDownloadList");
         return null;
     }
 
     @Override
-    public String download(String user, String system, String tool, String reqNo, String fileName) throws RemoteException {
-        log.warn("nop DummyFileServiceManagerImpl.download");
-        return null;
+    public String download(String user, String system, String tool, @NonNull String reqNo, @NonNull String fileName) throws RemoteException {
+        log.info("virt.download");
+        Path path = Paths.get(fileCachePath, fileName);
+        File file = path.toFile();
+        if(file.exists()==false || file.isDirectory()) {
+            log.error("no file to download");
+            return null;
+        }
+        return path.toString();
     }
 
     @Override
     public void logout(String user) throws RemoteException {
         log.warn("nop DummyFileServiceManagerImpl.logout");
+    }
+
+    private void deleteDir(@NonNull String dir) {
+        File file = new File(dir);
+        if(file!=null && file.exists()) {
+            deleteDir(file);
+        }
+    }
+
+    private void deleteDir(@NonNull File file) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
+    }
+
+    private String createKeyString(@NonNull String system, @NonNull String user, @NonNull String tool, @NonNull String logType) {
+        return system+"_"+user+"_"+tool+"_"+logType+"_"+System.currentTimeMillis()+"_"+keySource.getAndIncrement();
+    }
+
+    private String getCachePath(@NonNull String subPath) {
+        File root = new File(fileCachePath);
+        if(root.exists()) {
+            if(root.isFile()) {
+                log.error("cache-path is not directory");
+                return null;
+            }
+        } else {
+            root.mkdirs();
+        }
+
+        Path path = Paths.get(fileCachePath, subPath);
+        File cacheFile = path.toFile();
+        if(cacheFile.exists()) {
+            if(cacheFile.isFile()) {
+                cacheFile.delete();
+            } else {
+                return cacheFile.getPath();
+            }
+        }
+        cacheFile.mkdirs();
+        return cacheFile.getPath();
     }
 
     private final Log log = LogFactory.getLog(getClass());
