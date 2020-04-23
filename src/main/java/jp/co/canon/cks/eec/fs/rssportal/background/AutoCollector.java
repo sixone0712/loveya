@@ -32,15 +32,16 @@ public class AutoCollector extends Thread {
     private final CollectPlanService service;
     private final FileServiceManage fileServiceManage;
     private final FileServiceModel fileService;
+    private final DownloadMonitor monitor;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
 
-
     @Autowired
-    private AutoCollector(CollectPlanService service) throws ServiceException {
+    private AutoCollector(DownloadMonitor monitor, CollectPlanService service) throws ServiceException {
         if(service==null) {
             throw new BeanInitializationException("service injection failed");
         }
+        this.monitor = monitor;
         this.service = service;
         service.addNotifier(notifyUpdate);
         service.scheduleAllPlans();
@@ -106,7 +107,14 @@ public class AutoCollector extends Thread {
 
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
-            FileDownloadExecutor executor = new FileDownloadExecutor(fileServiceManage, fileService, downloadList);
+            FileDownloadExecutor executor = new FileDownloadExecutor(
+                    "auto",
+                    "",
+                    fileServiceManage,
+                    fileService,
+                    downloadList,
+                    false);
+            executor.setMonitor(monitor);
             executor.start();
         }
         service.updateLastCollect(plan);

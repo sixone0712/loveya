@@ -15,7 +15,5 @@ public class RssportalApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(RssportalApplication.class, args);
-//        org.apache.ibatis.logging.LogFactory.useStdOutLogging();
-        org.apache.ibatis.logging.LogFactory.useLog4JLogging();
     }
 }

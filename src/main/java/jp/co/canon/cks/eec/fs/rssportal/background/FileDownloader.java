@@ -31,14 +31,15 @@ public class FileDownloader extends Thread {
     private static final String STS_ERROR = "error";
     private static final String STS_DONE = "done";
 
+    private final DownloadMonitor monitor;
     private HashMap<String, FileDownloadExecutor> mHolders;
     private FileServiceModel mService;
     private FileServiceManage mServiceManager;
 
     @Autowired
-    private FileDownloader() {
+    private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
-
+        this.monitor = monitor;
         mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
@@ -60,7 +61,8 @@ public class FileDownloader extends Thread {
             }
         }
 
-        FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, mService, dlList);
+        FileDownloadExecutor holder = new FileDownloadExecutor("manual","", mServiceManager, mService, dlList, true);
+        holder.setMonitor(monitor);
         mHolders.put(holder.getId(), holder);
 
         holder.start();

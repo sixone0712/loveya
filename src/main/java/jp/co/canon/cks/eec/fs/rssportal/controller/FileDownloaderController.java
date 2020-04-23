@@ -103,22 +103,22 @@ public class FileDownloaderController {
             @RequestParam(value="dlId", defaultValue="") String dlId,
             HttpServletResponse response) {
         if(dlId.isEmpty()) {
-            log.warn("invalid param");
+            log.error("invalid param");
             return null;
         }
-        log.warn("download(dlId="+dlId+")");
+        log.info("download(dlId="+dlId+")");
 
         if(fileDownloader.isValidId(dlId)==false) {
-            log.warn("invalid dlId");
+            log.error("invalid dlId");
             return null;
         }
         if(fileDownloader.getStatus(dlId).equals("done")==false) {
-            log.warn("in-progress");
+            log.error("in-progress");
             return null;
         }
 
         String dlPath = fileDownloader.getDownloadInfo(dlId);
-        log.warn("download path="+dlPath);
+        log.info("download path="+dlPath);
 
         try {
             InputStream is = new FileInputStream(new File(dlPath));
