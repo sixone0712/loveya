@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DownloadForm {
-    private final String mSystem = "FS_P"; // FS_P fixed
-    private String mTool;   // Machine
-    private String mLogType; // Category
+    private final String mSystem;
+    private String mTool;
+    private String mLogType;
     private List<FileInfo> mFiles;
 
     public DownloadForm(String tool, String logType) {
+        this("FS_P", tool, logType);
+    }
+
+    public DownloadForm(String system, String tool, String logType) {
+        this.mSystem = system;
         mTool = tool;
         mLogType = logType;
         mFiles = new ArrayList<>();

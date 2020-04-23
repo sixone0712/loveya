@@ -16,7 +16,8 @@
             tsstart as start,
             tsend as end,
             tslastcollect as lastCollect,
-            tsnext as nextAction
+            tsnext as nextAction,
+            tslastpoint as lastPoint
         from rsss."collection_plan"
     </select>
 
@@ -34,7 +35,8 @@
             tsstart as start,
             tsend as end,
             tslastcollect as lastCollect,
-            tsnext as nextAction
+            tsnext as nextAction,
+            tslastpoint as lastPoint
         from rsss."collection_plan" as t_collect
         where
             expired is false
@@ -58,7 +60,8 @@
             tsstart,
             tsend,
             ownerid,
-            tsnext
+            tsnext,
+            tslastpoint
         ) values (
             #{tool},
             #{logType},
@@ -69,7 +72,8 @@
             #{start},
             #{end},
             #{owner},
-            #{nextAction}
+            #{nextAction},
+            #{lastPoint}
         )
     </insert>
 
@@ -77,7 +81,8 @@
         update rsss."collection_plan" set
             tslastcollect = #{lastCollect},
             tsnext = #{nextAction},
-            expired = #{expired}
+            expired = #{expired},
+            tslastpoint = #{lastPoint}
         where id = #{id}
     </update>
 </mapper>

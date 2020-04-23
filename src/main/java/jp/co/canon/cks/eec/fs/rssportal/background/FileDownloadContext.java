@@ -1,6 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.springframework.lang.NonNull;
@@ -15,6 +17,7 @@ import java.util.Calendar;
 
 public class FileDownloadContext implements DownloadConfig {
 
+    private final String jobType;
     private final String id;
     private final String user;
     private final String comment;
@@ -29,10 +32,14 @@ public class FileDownloadContext implements DownloadConfig {
 
     private final DownloadForm downloadForm;
 
+    private FileServiceManage fileManager;
+    private FileServiceModel fileService;
+
     private String requestNo;
     private boolean downloadComplete;
     private boolean ftpProcComplete;
     private CustomURL achieveUrl;
+    private String localFilePath;
 
     private File rootDir;
     private File outFile;
@@ -40,14 +47,15 @@ public class FileDownloadContext implements DownloadConfig {
 
     private int downloadFiles;
 
-    public FileDownloadContext(@NonNull String id, @NonNull DownloadForm form) {
+    public FileDownloadContext(@NonNull String jobType, @NonNull String id, @NonNull DownloadForm form) {
 
+        this.jobType = jobType;
         this.downloadForm = form;
         this.id = id;
         this.system = form.getSystem();
         this.tool = form.getTool();
         this.logType = form.getLogType();
-        this.user = null;
+        this.user = "eecAdmin";
         this.comment = "";
 
         files = form.getFiles().size();
@@ -77,6 +85,14 @@ public class FileDownloadContext implements DownloadConfig {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getLocalFilePath() {
+        return localFilePath;
+    }
+
+    public void setLocalFilePath(String localFilePath) {
+        this.localFilePath = localFilePath;
     }
 
     public void setOutFile(@NonNull final File outFile) {
@@ -162,6 +178,26 @@ public class FileDownloadContext implements DownloadConfig {
 
     public void setDownloadFiles(int downloadFiles) {
         this.downloadFiles = downloadFiles;
+    }
+
+    public FileServiceManage getFileManager() {
+        return fileManager;
+    }
+
+    public void setFileManager(FileServiceManage fileManager) {
+        this.fileManager = fileManager;
+    }
+
+    public FileServiceModel getFileService() {
+        return fileService;
+    }
+
+    public void setFileService(FileServiceModel fileService) {
+        this.fileService = fileService;
+    }
+
+    public String getJobType() {
+        return jobType;
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {

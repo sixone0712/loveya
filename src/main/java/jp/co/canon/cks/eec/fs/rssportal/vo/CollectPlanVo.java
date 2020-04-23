@@ -17,6 +17,7 @@ public class CollectPlanVo {
     private Timestamp end;
     private int owner;
     private Timestamp nextAction;
+    private Timestamp lastPoint;
     private boolean expired;
 
     @Override
@@ -133,5 +134,13 @@ public class CollectPlanVo {
 
     public void setNextAction(Timestamp nextAction) {
         this.nextAction = nextAction;
+    }
+
+    public Timestamp getLastPoint() {
+        return lastPoint;
+    }
+
+    public void setLastPoint(Timestamp lastPoint) {
+        this.lastPoint = lastPoint;
     }
 }

@@ -2,6 +2,8 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
+import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import org.apache.commons.logging.Log;
@@ -29,18 +31,16 @@ public class FileDownloader extends Thread {
     private static final String STS_ERROR = "error";
     private static final String STS_DONE = "done";
 
+    private final DownloadMonitor monitor;
     private HashMap<String, FileDownloadExecutor> mHolders;
+    private FileServiceModel mService;
     private FileServiceManage mServiceManager;
 
-    private final CollectPlanService serviceCollectPlan;
-
     @Autowired
-    private FileDownloader(CollectPlanService serviceCollectPlan) {
-
+    private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
-
-        this.serviceCollectPlan = serviceCollectPlan;
-
+        this.monitor = monitor;
+        mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
             mServiceManager = serviceLocator.getFileServiceManage();
@@ -48,10 +48,6 @@ public class FileDownloader extends Thread {
             e.printStackTrace();
         }
         mHolders = new HashMap<>();
-
-        if(serviceCollectPlan==null) {
-            throw new BeanInitializationException("couldn't find CollectPlanService bean");
-        }
     }
 
 
@@ -65,7 +61,8 @@ public class FileDownloader extends Thread {
             }
         }
 
-        FileDownloadExecutor holder = new FileDownloadExecutor(mServiceManager, dlList);
+        FileDownloadExecutor holder = new FileDownloadExecutor("manual","", mServiceManager, mService, dlList, true);
+        holder.setMonitor(monitor);
         mHolders.put(holder.getId(), holder);
 
         holder.start();
