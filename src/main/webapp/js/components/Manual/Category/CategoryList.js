@@ -8,6 +8,9 @@ import {
   Input,
   Collapse
 } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import Select from "react-select";
 import CheckBox from "../../Common/CheckBox";
 import InputModal from "./InputModal";
 import ConfirmModal from "./ConfirmModal";
@@ -16,6 +19,58 @@ import {bindActionCreators} from "redux";
 import * as viewListActions from "../../../modules/viewList";
 import * as genreListActions from "../../../modules/genreList";
 import * as API from '../../../api'
+import {element, object} from "prop-types";
+
+const customSelectStyles = {
+  option: (styles, { isFocused, isSelected }) => {
+    return {
+      ...styles,
+      backgroundColor: isSelected
+          ? "rgba(255, 169, 77, 0.5)"
+          : isFocused
+              ? "rgba(255, 169, 77, 0.3)"
+              : null,
+      color: "black",
+      ":active": {
+        ...styles[":active"],
+        backgroundColor: isSelected
+            ? "rgba(255, 169, 77, 0.9)"
+            : isFocused
+                ? "rgba(255, 169, 77, 0.7)"
+                : null
+      }
+    };
+  },
+  control: () => ({
+    display: "flex",
+    border: "1px solid #ffa94d",
+    borderRadius: "3px",
+    transition:
+        "color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out",
+    ":hover": {
+      outline: "0",
+      boxShadow: "0 0 0 0.2em rgba(255, 169, 77, 0.5)"
+    }
+  }),
+  dropdownIndicator: styles => ({
+    ...styles,
+    color: "rgba(255, 169, 77, 0.6)",
+    ":hover": {
+      ...styles[":hover"],
+      color: "rgba(255, 169, 77, 1)"
+    }
+  }),
+  indicatorSeparator: styles => ({
+    ...styles,
+    backgroundColor: "rgba(255, 169, 77, 0.6)"
+  }),
+  menu: styles => ({
+    ...styles,
+    borderRadius: "3px",
+    boxShadow:
+        "0 0 0 1px rgba(255, 169, 77, 0.6), 0 4px 11px rgba(255, 169, 77, 0.6)"
+  })
+};
 
 class CategoryList extends Component {
   constructor(props) {
@@ -24,23 +79,67 @@ class CategoryList extends Component {
       nowAction: "",
       ItemsChecked: false,
       showGenre: false,
+      showSearch: false,
+      query: "",
       selectedGenre: 0,
-      selectedGenreName: "",
+      selectedGenreName: ""
     };
   }
 
   handleGenreToggle = () => {
-    this.setState({
-      showGenre: !this.state.showGenre
-    });
+    if (this.state.showSearch) {
+      this.setState({
+        showSearch: !this.state.showSearch,
+        query: ""
+      });
+
+      setTimeout(() => {
+        this.setState({
+          showGenre: !this.state.showGenre
+        });
+      }, 400);
+    } else {
+      this.setState({
+        showGenre: !this.state.showGenre
+      });
+    }
   };
 
-  handleSelectBoxChange = async (id) => {
-    console.log("handleSelectBoxChange");
-    await API.selectGenreList(this.props, id);
-    const genreList = await API.getGenreList(this.props).list;
+  handleSearchToggle = () => {
+    if (this.state.showGenre) {
+      this.setState({
+        showGenre: false
+      });
+
+      setTimeout(() => {
+        this.setState({
+          showSearch: !this.state.showSearch,
+          query: ""
+        });
+      }, 400);
+    } else {
+      this.setState({
+        showSearch: !this.state.showSearch,
+        query: ""
+      });
+    }
+  };
+
+  handleSelectBoxChange = async (genre) => {
+    let id = 0;
     let name = "";
-    if(id !== 0) {
+
+    if (typeof(genre) === "object") {
+      id = genre === null ? 0 : genre.value;
+    } else {
+      id = genre;
+    }
+
+    console.log("handleSelectBoxChange");
+
+    if (id !== 0) {
+      await API.selectGenreList(this.props, id);
+      const genreList = await API.getGenreList(this.props).list;
       const findGenre = genreList.find(item => item.id == id);
       name = findGenre.name;
     }
@@ -84,7 +183,6 @@ class CategoryList extends Component {
     return result;
   };
 
-
   editGenreList = async (id, name) => {
     console.log("[CategoryList] editGenreList");
     const result = await API.editGenreList(this.props, id, name);
@@ -99,6 +197,14 @@ class CategoryList extends Component {
     return result;
   };
 
+  handleSearch = e => {
+    const query = e.target.value;
+
+    this.setState({
+      query: query
+    });
+  };
+
   setNowAction = async (name) => {
     await this.setState({
       ...this.state,
@@ -109,16 +215,22 @@ class CategoryList extends Component {
   render() {
     const {
       showGenre,
+      showSearch,
       ItemsChecked,
+      selectedGenre,
+      query
     } = this.state;
 
-    const categorylist = API.getLogInfoList(this.props);
+    const categorylist  = API.getLogInfoList(this.props);
     const genreList = API.getGenreList(this.props);
+    const filteredData = categorylist.filter(element => {
+      return element.logName.toLowerCase().includes(query.toLowerCase());
+    });
     console.log("chpark_genreList", genreList);
 
     return (
-        <Card className="ribbon-wrapper catlist-custom">
-          <CardBody className="custom-scrollbar card-body-custom card-body-catlist">
+        <Card className="ribbon-wrapper catlist-card">
+          <CardBody className="custom-scrollbar manual-card-body">
             <div className="ribbon ribbon-clip ribbon-secondary">
               File Category
             </div>
@@ -126,84 +238,113 @@ class CategoryList extends Component {
               <FormGroup className="catlist-form-group">
                 <Collapse isOpen={showGenre}>
                   <div className="catlist-genre-area">
-                    <Input
-                        type="select"
-                        name="genreSel"
-                        id="genreSel"
-                        className="catlist-select"
-                        value={this.state.selectedGenre}
-                        onChange={(e) => this.handleSelectBoxChange(e.target.value)}
-                    >
-                    <option key={0} value={0} disabled hidden>
-                      Select Genre
-                    </option>
-                      { genreList.totalCnt > 0 &&
-                        genreList.list.map((list, idx) => <option key={idx+1} value={list.id}>{list.name}</option>)
-                      }
-                    </Input>
-
-                    <InputModal
-                        title={"Create Genre"}
-                        openbtn={"Create"}
-                        inputname={"genName"}
-                        inputpholder={"Enter Genre Name"}
-                        leftbtn={"Create"}
-                        rightbtn={"Cancel"}
-                        nowAction={this.state.nowAction}
-                        setNowAction={this.setNowAction}
-                        confirmFunc={this.addGenreList}
-                        selectedGenre={this.state.selectedGenre}
-                        selectedGenreName={this.state.selectedGenreName}
-                        logInfoListCheckCnt={this.props.logInfoListCheckCnt}
-                        handleSelectBoxChange={this.handleSelectBoxChange}
-                        getSelectedIdByName={this.getSelectedIdByName}
-                    />
-                    <InputModal
-                        title={"Edit Genre"}
-                        openbtn={"Edit"}
-                        inputname={"genName"}
-                        inputpholder={"Edit Genre Name"}
-                        leftbtn={"Edit"}
-                        rightbtn={"Cancel"}
-                        nowAction={this.state.nowAction}
-                        setNowAction={this.setNowAction}
-                        confirmFunc={this.editGenreList}
-                        selectedGenre={this.state.selectedGenre}
-                        selectedGenreName={this.state.selectedGenreName}
-                        logInfoListCheckCnt={this.props.logInfoListCheckCnt}
-                        handleSelectBoxChange={this.handleSelectBoxChange}
-                        getSelectedIdByName={this.getSelectedIdByName}
-                     />
-                    <ConfirmModal
-                        openbtn={"Delete"}
-                        message={"Do you want to delete the selected genre?"}
-                        leftbtn={"Delete"}
-                        rightbtn={"Cancel"}
-                        nowAction={this.state.nowAction}
-                        setNowAction={this.setNowAction}
-                        confirmFunc={this.deleteGenreList}
-                        selectedGenre={this.state.selectedGenre}
-                        selectedGenreName={this.state.selectedGenreName}
-                        handleSelectBoxChange={this.handleSelectBoxChange}
-                        getSelectedIdByName={this.getSelectedIdByName}
-                    />
+                    <div style={{ width: "55%" }}>
+                      <Select
+                          isSearchable
+                          onChange={this.handleSelectBoxChange}
+                          options={ genreList.totalCnt > 0 &&
+                            genreList.list.map((list) => {
+                              return { value: list.id, label: list.name };
+                            })
+                          }
+                          placeholder={"Select genre..."}
+                          styles={customSelectStyles}
+                          noOptionsMessage={() => "Genre not found."}
+                      />
+                    </div>
+                    <div style={{ width: "42%", display: "flex", justifyContent: "space-between" }}>
+                      <InputModal
+                          title={"Create Genre"}
+                          openbtn={"Create"}
+                          inputname={"genName"}
+                          inputpholder={"Enter Genre Name"}
+                          leftbtn={"Create"}
+                          rightbtn={"Cancel"}
+                          nowAction={this.state.nowAction}
+                          setNowAction={this.setNowAction}
+                          confirmFunc={this.addGenreList}
+                          selectedGenre={this.state.selectedGenre}
+                          selectedGenreName={this.state.selectedGenreName}
+                          logInfoListCheckCnt={this.props.logInfoListCheckCnt}
+                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          getSelectedIdByName={this.getSelectedIdByName}
+                      />
+                      <InputModal
+                          title={"Edit Genre"}
+                          openbtn={"Edit"}
+                          inputname={"genName"}
+                          inputpholder={"Edit Genre Name"}
+                          leftbtn={"Edit"}
+                          rightbtn={"Cancel"}
+                          nowAction={this.state.nowAction}
+                          setNowAction={this.setNowAction}
+                          confirmFunc={this.editGenreList}
+                          selectedGenre={this.state.selectedGenre}
+                          selectedGenreName={this.state.selectedGenreName}
+                          logInfoListCheckCnt={this.props.logInfoListCheckCnt}
+                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          getSelectedIdByName={this.getSelectedIdByName}
+                       />
+                      <ConfirmModal
+                          openbtn={"Delete"}
+                          message={"Do you want to delete the selected genre?"}
+                          leftbtn={"Delete"}
+                          rightbtn={"Cancel"}
+                          nowAction={this.state.nowAction}
+                          setNowAction={this.setNowAction}
+                          confirmFunc={this.deleteGenreList}
+                          selectedGenre={this.state.selectedGenre}
+                          selectedGenreName={this.state.selectedGenreName}
+                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          getSelectedIdByName={this.getSelectedIdByName}
+                      />
+                    </div>
                   </div>
                 </Collapse>
-                {categorylist.map((cat, key) => {
-                  return (
-                      <CheckBox
-                          key={key}
-                          index={cat.keyIndex}
-                          name={cat.logName}
-                          isChecked={cat.checked}
-                          handleCheckboxClick={this.checkCategoryItem}
-                          labelClass="catlist-label"
-                      />
-                  );
-                })}
+                <Collapse isOpen={showSearch}>
+                  <FormGroup>
+                    <Input
+                        type="text"
+                        className="catlist-search-input"
+                        placeholder="Enter the category name to search."
+                        value={query}
+                        onChange={this.handleSearch}
+                    />
+                  </FormGroup>
+                </Collapse>
+                {filteredData.length > 0 ? (
+                    filteredData.map((cat, key) => {
+                      return (
+                          <CheckBox
+                              key={key}
+                              index={cat.keyIndex}
+                              name={cat.logName}
+                              isChecked={cat.checked}
+                              handleCheckboxClick={this.checkCategoryItem}
+                              labelClass="catlist-label"
+                          />
+                      );
+                    })
+                ) : (
+                    <div>
+                      <p style={{ marginTop: "6rem", textAlign: "center" }}>
+                        <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
+                      </p>
+                      <p style={{ textAlign: "center" }}>Category not found.</p>
+                    </div>
+                )}
               </FormGroup>
             </Col>
-            <div className="manual-btn-area">
+            <div className="card-btn-area">
+              <ButtonToggle
+                  outline
+                  size="sm"
+                  color="info"
+                  className={"catlist-btn catlist-btn-toggle" + (showSearch ? " active" : "")}
+                  onClick={this.handleSearchToggle}
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </ButtonToggle>{" "}
               <ButtonToggle
                   outline
                   size="sm"

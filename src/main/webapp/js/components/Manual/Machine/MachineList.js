@@ -33,8 +33,8 @@ class MachineList extends Component {
     const machineList = API.getToolInfoList(this.props);
 
     return (
-      <Card className="ribbon-wrapper machinelist-custom">
-        <CardBody className="custom-scrollbar card-body-custom card-body-machinelist">
+      <Card className="ribbon-wrapper machinelist-card">
+        <CardBody className="custom-scrollbar manual-card-body">
           <div className="ribbon ribbon-clip ribbon-primary">Machine</div>
           <Col>
             <FormGroup className="machinelist-form-group">
@@ -51,7 +51,7 @@ class MachineList extends Component {
               })}
             </FormGroup>
           </Col>
-          <div className="manual-btn-area">
+          <div className="card-btn-area">
             <ButtonToggle
               outline
               size="sm"

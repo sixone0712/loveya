@@ -8,9 +8,9 @@ import * as loginActions from './modules/login';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/common/Navbar";
 import Manual from "./components/Manual/Manual";
-import Auto from "./components/Auto/Auto";
+import Auto from "./components/Auto/AutoRegist";
 import Login from "./components/User/Login";
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import * as Define from "./define";

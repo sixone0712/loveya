@@ -175,7 +175,7 @@ class InputModal extends Component {
                                         name={inputname}
                                         value={this.state.genreName}
                                         placeholder={inputpholder}
-                                        className="catlist-input"
+                                        className="catlist-modal-input"
                                         //onChange={(e) => this.props.onChangeGenreName(e.target.value)}
                                         onChange={(e) => this.setState({...this.state, genreName: e.target.value})}
                                     />

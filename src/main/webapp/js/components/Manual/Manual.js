@@ -10,11 +10,10 @@ import Machinelist from "./Machine/MachineList";
 import Categorylist from "./Category/CategoryList";
 import Formlist from "./Search/FormList";
 import Filelist from "./File/FileList";
-import Footer from "../Footer";
+import Footer from "../common/Footer";
 import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
-import Navbar from "../Navbar";
 
 class Manual extends Component {
 
@@ -51,7 +50,7 @@ class Manual extends Component {
             <>
                 {isSuccess &&
                 <>
-                    <Container className="manual-container" fluid={true}>
+                    <Container className="rss-container" fluid={true}>
                         <Row>
                             <Col>
                                 <Machinelist/>

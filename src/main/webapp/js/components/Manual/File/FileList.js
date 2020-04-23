@@ -1,8 +1,10 @@
 import React, { Component } from "react";
-import { Card, CardBody, Table, ButtonToggle, Input } from "reactstrap";
+import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
 import PaginationComponent from "react-reactstrap-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
+import Select from "react-select";
 import _ from "lodash";
 import CheckBox from "../../Common/CheckBox";
 import DownloadConfirmModal from "./DownloadModal"
@@ -13,6 +15,70 @@ import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
 
+const customSelectStyles = {
+  container: styles => ({
+    ...styles,
+    width: "85px",
+    fontSize: "14px",
+    marginLeft: "10px",
+    marginRight: "20px"
+  }),
+  option: (styles, { isFocused, isSelected }) => {
+    return {
+      ...styles,
+      backgroundColor: isSelected
+        ? "rgba(133, 164, 179, 0.5)"
+        : isFocused
+        ? "rgba(133, 164, 179, 0.3)"
+        : null,
+      color: "black",
+      ":active": {
+        ...styles[":active"],
+        backgroundColor: isSelected
+          ? "rgba(133, 164, 179, 0.9)"
+          : isFocused
+          ? "rgba(133, 164, 179, 0.7)"
+          : null
+      }
+    };
+  },
+  control: () => ({
+    display: "flex",
+    border: "1px solid #85a4b3",
+    borderRadius: "3px",
+    caretColor: "transparent",
+    transition: "color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out",
+    ":hover": {
+      outline: "0",
+      boxShadow: "0 0 0 0.2em rgba(133, 164, 179, 0.5)"
+    }
+  }),
+  dropdownIndicator: styles => ({
+    ...styles,
+    color: "rgba(133, 164, 179, 0.6)",
+    ":hover": {
+      ...styles[":hover"],
+      color: "rgba(133, 164, 179, 1)"
+    }
+  }),
+  indicatorSeparator: styles => ({
+    ...styles,
+    backgroundColor: "rgba(133, 164, 179, 0.6)"
+  }),
+  menu: styles => ({
+    ...styles,
+    borderRadius: "3px",
+    boxShadow: "0 0 0 1px rgba(133, 164, 179, 0.6), 0 4px 11px rgba(133, 164, 179, 0.6)"
+  })
+};
+
+const optionList = [
+  { value: 10, label: "10" },
+  { value: 30, label: "30" },
+  { value: 50, label: "50" },
+  { value: 100, label: "100" }
+];
+
 class FileList extends Component {
   constructor(props) {
     super(props);
@@ -20,6 +86,8 @@ class FileList extends Component {
       itemsChecked: true,
       pageSize: this.props.responsePerPage,
       currentPage: 1,
+      sortDirection: "",
+      sortKey: "",
       isError: Define.RSS_SUCCESS
     };
   }
@@ -38,12 +106,12 @@ class FileList extends Component {
     });
   };
 
-  onChangeRowsPerPage = (e) => {
-    setRowsPerPage(this.props, e.target.value);
+  onChangeRowsPerPage = (option) => {
+    setRowsPerPage(this.props, option.value);
     this.setState(
         {
           ...this.state,
-          pageSize: parseInt(e.target.value),
+          pageSize: parseInt(option.value),
           currentPage: 1
         }
     )
@@ -52,6 +120,12 @@ class FileList extends Component {
   checkFileItem = (e) => {
     const idx = e.target.id.split('_')[1];
     API.checkResponseList(this.props, idx);
+  };
+
+  handleTrClick = e => {
+    const id = e.target.parentElement.getAttribute("cbinfo");
+    API.checkResponseList(this.props, id);
+    e.stopPropagation();
   };
 
   checkAllFileItem = (checked) => {
@@ -64,6 +138,29 @@ class FileList extends Component {
     API.checkAllResponseList(this.props, checked);
   };
 
+  handleThClick = key => {
+    const { sortKey, sortDirection } = this.state;
+    let changeDirection = "asc";
+
+    if (sortKey === key && sortDirection === "asc") {
+      changeDirection = "desc";
+    }
+
+    this.setState({
+      sortDirection: changeDirection,
+      sortKey: key,
+    });
+  };
+
+  sortIconRender = name => {
+    const { sortKey, sortDirection } = this.state;
+    const style = "sort-icon";
+
+    console.log(name);
+
+    return sortKey === name ? style + " sort-active " + sortDirection : style;
+  };
+
   render() {
     const responseList = API.getResponseList(this.props);
     const count = API.getResponseListCnt(this.props);
@@ -71,7 +168,9 @@ class FileList extends Component {
       itemsChecked,
       pageSize,
       currentPage,
-      isError
+      isError,
+      sortKey,
+      sortDirection
     } = this.state;
 
     console.log("responseList", responseList);
@@ -82,8 +181,8 @@ class FileList extends Component {
     if (count === 0 || this.props.resError || this.props.resPending) {
       return (
         <div className="filelist-container">
-          <Card className="ribbon-wrapper card-filelist">
-            <CardBody className="card-body-filelist">
+          <Card className="ribbon-wrapper filelist-card">
+            <CardBody className=".filelist-card-body">
               <div className="ribbon ribbon-clip ribbon-info">File</div>
               <div className="filelist-no-search">
                 <p>
@@ -96,11 +195,24 @@ class FileList extends Component {
         </div>
       );
     } else {
-      const files = filePaginate(responseList, currentPage, pageSize);
+      const tempKey = sortKey === "" ? "targetName" : sortKey;
+      const tempDirection = sortDirection === "" ? "asc" : sortDirection;
+
+      const sortedList = responseList.sort((a, b) => {
+        const preVal = a[tempKey].toLowerCase();
+        const nextVal = b[tempKey].toLowerCase();
+
+        if (tempDirection === "asc") {
+          return preVal.localeCompare(nextVal, "en", { numeric: true });
+        } else {
+          return nextVal.localeCompare(preVal, "en", { numeric: true });
+        }
+      });
+      const files = filePaginate(sortedList, currentPage, pageSize);
       return (
         <div className="filelist-container">
-          <Card className="ribbon-wrapper card-filelist">
-            <CardBody className="card-body-filelist">
+          <Card className="ribbon-wrapper filelist-card">
+            <CardBody className="filelist-card-body">
               <div className="ribbon ribbon-clip ribbon-info">File</div>
               <Table>
                 <thead>
@@ -121,18 +233,47 @@ class FileList extends Component {
                         </ButtonToggle>
                       </div>
                     </th>
-                    <th>Machine</th>
-                    <th>Category</th>
-                    <th>File Name</th>
-                    <th>Date</th>
-                    <th>Size</th>
+                    <th onClick={() => this.handleThClick("targetName")}>
+                      <span className="sortLabel-root">
+                        Machine
+                        <span className={this.sortIconRender("targetName")}>➜</span>
+                      </span>
+                    </th>
+                    <th onClick={() => this.handleThClick("logName")}>
+                      <span className="sortLabel-root">
+                        Category
+                        <span className={this.sortIconRender("logName")}>➜</span>
+                      </span>
+                    </th>
+                    <th onClick={() => this.handleThClick("fileName")}>
+                      <span className="sortLabel-root">
+                        File Name
+                        <span className={this.sortIconRender("fileName")}>➜</span>
+                      </span>
+                    </th>
+                    <th onClick={() => this.handleThClick("fileDate")}>
+                      <span className="sortLabel-root">
+                        Date
+                        <span className={this.sortIconRender("fileDate")}>➜</span>
+                      </span>
+                    </th>
+                    <th onClick={() => this.handleThClick("sizeKB")}>
+                      <span className="sortLabel-root">
+                        Size
+                        <span className={this.sortIconRender("sizeKB")}>➜</span>
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                  <tbody>
                 {files.map((file, key) => {
                   const convFileDate = API.convertDateFormat(file.fileDate);
                   return (
-                      <tr key={key}>
+                      <tr
+                          key={key}
+                          onClick={(e) => this.handleTrClick(e)}
+                          cbinfo={file.keyIndex}
+                      >
                         <td>
                           <CheckBox
                               key={key}
@@ -145,7 +286,10 @@ class FileList extends Component {
                         </td>
                         <td>{file.targetName}</td>
                         <td>{file.logName}</td>
-                        <td>{file.fileName}</td>
+                        <td>
+                          <FontAwesomeIcon icon={faFileAlt} />{" "}
+                          {file.fileName}
+                        </td>
                         <td>{convFileDate}</td>
                         <td>{file.sizeKB}</td>
                       </tr>
@@ -164,18 +308,12 @@ class FileList extends Component {
             </div>
             <div className="filelist-item-area">
               <label>Rows per page:</label>
-              <Input
-                type="select"
-                name="dispSize"
-                id="dispSize"
-                className="filelist-select"
-                onChange={this.onChangeRowsPerPage}
-              >
-                <option value="10">10</option>
-                <option value="30">30</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </Input>
+              <Select
+                  onChange={this.onChangeRowsPerPage}
+                  options={optionList}
+                  styles={customSelectStyles}
+                  defaultValue={optionList[0]}
+              />
               <DownloadConfirmModal
                 openbtn={"Download"}
                 message={"Do you want to download the selected file?"}

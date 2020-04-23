@@ -15,11 +15,29 @@ import {
 import {NavLink as RRNavLink } from "react-router-dom";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as loginActions from "../modules/login";
-import * as API from "../api";
-import * as Define from "../define";
+import * as loginActions from "../../modules/login";
+import * as API from "../../api";
+import * as Define from "../../define";
 
 class RSSNavbar extends Component{
+  constructor() {
+    super();
+    this.state = {
+      currentPage: "Manual"
+    };
+  }
+
+  getClassName = page => {
+    const { currentPage } = this.state;
+
+    return currentPage === page ? "nav-item-custom-select" : null;
+  };
+
+  handlePageChange = page => {
+    this.setState({
+      currentPage: page
+    });
+  };
 
   onLogout = () => {
     window.sessionStorage.removeItem('isLoggedIn');
@@ -38,13 +56,25 @@ class RSSNavbar extends Component{
               RSS
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
-              <NavItem>
-                <NavLink tag={RRNavLink} to={Define.PAGE_MANUAL} activeClassName="nav-item-custom-select">Manual
-                  Download</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink tag={RRNavLink} to={Define.PAGE_AUTO} activeClassName="nav-item-custom-select">Auto Download</NavLink>
-              </NavItem>
+              <NavLink tag={RRNavLink} to={Define.PAGE_MANUAL}
+                       className={this.getClassName("Manual")}
+                       onClick={() => this.handlePageChange("Manual")}>
+                Manual Download
+              </NavLink>
+              <UncontrolledDropdown nav inNavbar className={this.getClassName("Auto")}>
+                <DropdownToggle nav>
+                  Auto Download
+                </DropdownToggle>
+                <DropdownMenu>
+                  <DropdownItem tag={RRNavLink} to={Define.PAGE_AUTO} onClick={() => this.handlePageChange("Auto")}>
+                    Add New Plan
+                  </DropdownItem>
+                  <DropdownItem divider />
+                  <DropdownItem tag={RRNavLink} to={Define.PAGE_AUTO} onClick={() => this.handlePageChange("Auto")}>
+                    Plan Status
+                  </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
             </Nav>
             <Nav className="ml-auto" navbar>
               <UncontrolledDropdown nav inNavbar>

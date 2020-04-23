@@ -132,15 +132,15 @@ class FormList extends Component{
         const { isProcessOpen, isErrorOpen, modalMsg } = this.state;
 
         return (
-            <Card className="ribbon-wrapper formlist-custom">
-                <CardBody className="custom-scrollbar card-body-custom card-body-formlist">
+            <Card className="ribbon-wrapper formlist-card">
+                <CardBody className="custom-scrollbar manual-card-body">
                     <div className="ribbon ribbon-clip ribbon-success">Date</div>
                     <Col>
                         <FormGroup className="formlist-form-group">
                             <DatePicker/>
                         </FormGroup>
                     </Col>
-                    <div className="manual-btn-area">
+                    <div className="card-btn-area">
                         <Button
                             outline size="sm"
                             color="info"

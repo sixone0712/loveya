@@ -10,7 +10,7 @@ class EquipmentCollapse extends Component {
         super(props);
         this.toggle = this.toggle.bind(this);
         this.state = {
-            isOpened: false
+            isOpened: true
         };
     }
 
