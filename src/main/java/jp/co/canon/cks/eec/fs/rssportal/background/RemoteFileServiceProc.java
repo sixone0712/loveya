@@ -16,10 +16,10 @@ import java.rmi.RemoteException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class ManualFileServiceProc extends FileServiceProc {
+public class RemoteFileServiceProc extends FileServiceProc {
 
-    public ManualFileServiceProc(@NonNull FileDownloadContext context) {
-        super(context, ManualFileServiceProc.class);
+    public RemoteFileServiceProc(@NonNull FileDownloadContext context) {
+        super(context, RemoteFileServiceProc.class);
     }
 
     @Override
@@ -76,11 +76,7 @@ public class ManualFileServiceProc extends FileServiceProc {
                 String achieveUrl = manager.download(context.getUser(), context.getSystem(), context.getTool(),
                         context.getRequestNo(), reqInfo.getArchiveFileName());
                 log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
-                if(manager instanceof VirtualFileServiceManagerImpl) {
-                    context.setLocalFilePath(achieveUrl);
-                } else {
-                    context.setAchieveUrl(achieveUrl);
-                }
+                setUrl(achieveUrl);
                 break;
             }
         } catch (InterruptedException e) {
@@ -95,59 +91,28 @@ public class ManualFileServiceProc extends FileServiceProc {
     @Override
     void transfer() {
         log.info("transfer()");
-        FileServiceManage manager = context.getFileManager();
-        if(manager instanceof VirtualFileServiceManagerImpl) {
-            log.info("using virtual file service");
-            File inFile = new File(context.getLocalFilePath());
-            if(inFile.exists()==false || inFile.isDirectory()) {
-                log.error("couldn't find a achieve file");
-                return;
-            }
+        CustomURL url = context.getAchieveUrl();
 
-            File outDir = new File(context.getOutPath());
-            outDir.mkdirs();
+        FtpWorker worker = new FtpWorker(url.getHost(), url.getPort(), url.getLoginUser(),
+                url.getLoginPassword(), url.getFtpMode());
 
-            String lastName = inFile.getName();
-            Path outPath = Paths.get(context.getOutPath(), lastName);
+        worker.open();
 
-            byte[] buf = new byte[1024];
-            try {
-                InputStream is = new FileInputStream(inFile);
-                OutputStream os = new FileOutputStream(outPath.toFile());
-                while((is.read(buf))>0) {
-                    os.write(buf);
-                    os.flush();
-                }
-                os.close();
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            log.info("transfer done [filename="+lastName+"]");
-        } else {
-            CustomURL url = context.getAchieveUrl();
-
-            FtpWorker worker = new FtpWorker(url.getHost(), url.getPort(), url.getLoginUser(),
-                    url.getLoginPassword(), url.getFtpMode());
-
-            worker.open();
-
-            Path path = Paths.get(context.getOutPath(), url.getLastFileName());
-            if (worker.transfer(url.getFile(), path.toString())) {
-                context.setFtpProcComplete(true);
-            }
-            worker.close();
+        Path path = Paths.get(context.getOutPath(), url.getLastFileName());
+        if (worker.transfer(url.getFile(), path.toString())) {
+            context.setFtpProcComplete(true);
         }
+        worker.close();
     }
 
     @Override
     void extract() {
-        log.info("extract(achieve="+context.getAchieveUrl().getLastFileName()+")");
-        String achieve = Paths.get(context.getOutPath(), context.getAchieveUrl().getLastFileName()).toString();
-        File zipFile = new File(achieve);
+        Path achieve = Paths.get(context.getOutPath(), getUrl());
+        log.info("extract [achieve="+achieve.toString()+")");
+        File zipFile = achieve.toFile();
 
         if(achieve.endsWith(".zip")) {
-            String dir = parseDir(achieve);
+            String dir = parseDir(achieve.toString());
             if(zipFile.exists()==false || zipFile.isDirectory()) {
                 log.error("wrong achieve file");
                 return;
@@ -176,7 +141,15 @@ public class ManualFileServiceProc extends FileServiceProc {
         }
     }
 
-    private String parseDir(@NonNull final String file) {
+    protected void setUrl(@NonNull String url) {
+        context.setAchieveUrl(url);
+    }
+
+    protected String getUrl() {
+        return context.getAchieveUrl().getLastFileName();
+    }
+
+    protected String parseDir(@NonNull final String file) {
         String sep = File.separator;
         int idx = file.lastIndexOf(sep);
         if(idx==-1) {

@@ -107,8 +107,9 @@ public class AutoCollector extends Thread {
 
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
+            String jobType = useVirtualFileService?"virtual":"auto";
             FileDownloadExecutor executor = new FileDownloadExecutor(
-                    "auto",
+                    jobType,
                     "",
                     fileServiceManage,
                     fileService,

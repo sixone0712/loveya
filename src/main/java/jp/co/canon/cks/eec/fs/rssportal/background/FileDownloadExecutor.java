@@ -19,7 +19,6 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     private final Log log;
     private static final String file_format = "%s/%s/%s";
-    private static final String user_name = "eecAdmin";     // FIXME
 
     private enum Status {
         idle, init, download, compress, complete, error
@@ -114,10 +113,9 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     private Runnable runner = () -> {
-
-        initialize();
-
         try {
+
+            initialize();
             List<FileServiceProc> procs = new ArrayList<>();
             status = Status.download;
             downloadContexts.forEach(context->{
@@ -125,10 +123,11 @@ public class FileDownloadExecutor implements DownloadConfig {
                     FileServiceProc proc = null;
                     switch (context.getJobType()) {
                         case "manual":
-                            proc = new ManualFileServiceProc(context);
-                            break;
                         case "auto":
-                            // todo
+                            proc = new RemoteFileServiceProc(context);
+                            break;
+                        case "virtual":
+                            proc = new VirtualFileServiceProc(context);
                             break;
                         default:
                             throw new IllegalArgumentException("invalid jobType");
@@ -137,29 +136,25 @@ public class FileDownloadExecutor implements DownloadConfig {
                     proc.start();
                     procs.add(proc);
 
-                    if(attrDownloadFilesViaMultiSessions==false) {
-                        while(proc.isCompleted()==false) {
+                    if(attrDownloadFilesViaMultiSessions==false)
+                        while(proc.isCompleted()==false)
                             Thread.sleep(100);
-                        }
-                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             });
 
-            for(FileServiceProc proc:procs) {
-                while(proc.isCompleted()==false) {
+            for(FileServiceProc proc:procs)
+                while(proc.isCompleted()==false)
                     Thread.sleep(100);
-                }
-            }
+
+            if(attrCompression)
+                compress();
+
+            wrapup();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        if(attrCompression) {
-            compress();
-        }
-        wrapup();
     };
 
     private void printExecutorInfo() {
