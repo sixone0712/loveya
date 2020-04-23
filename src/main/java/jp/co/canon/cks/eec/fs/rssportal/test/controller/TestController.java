@@ -47,6 +47,14 @@ public class TestController {
         return mav;
     }
 
+    @RequestMapping("/plan")
+    public ModelAndView testPlan() {
+        log.info("testPlan");
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("test/plan");
+        return mav;
+    }
+
     @RequestMapping("/vfs1")
     @ResponseBody
     public String testVirtualFile1() {

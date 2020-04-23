@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-public class AutoCollector extends Thread {
+public class CollectPlanner extends Thread {
 
     private static final boolean useVirtualFileService = true;
     private final CollectPlanService service;
@@ -37,7 +37,7 @@ public class AutoCollector extends Thread {
     private boolean planUpdated = true;
 
     @Autowired
-    private AutoCollector(DownloadMonitor monitor, CollectPlanService service) throws ServiceException {
+    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service) throws ServiceException {
         if(service==null) {
             throw new BeanInitializationException("service injection failed");
         }
