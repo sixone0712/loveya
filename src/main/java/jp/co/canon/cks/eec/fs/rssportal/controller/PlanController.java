@@ -131,21 +131,24 @@ public class PlanController {
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        /*
+        File zip = collector.getZipPath(id);
+        if(zip==null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        String downloadFileName = zip.getName();
         try {
-            InputStream is = new FileInputStream(new File(dlPath));
+            InputStream is = new FileInputStream(zip);
             InputStreamResource isr = new InputStreamResource(is);
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentLength(Files.size(Paths.get(dlPath)));
+            headers.setContentLength(Files.size(zip.toPath()));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            response.setHeader("Content-Disposition", "attachment; filename="+createZipFilename(dlId));
+            response.setHeader("Content-Disposition", "attachment; filename="+downloadFileName);
             return new ResponseEntity(isr, headers, HttpStatus.OK);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-*/
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 

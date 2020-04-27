@@ -273,6 +273,23 @@ public class CollectPlanner extends Thread {
         planUpdated = true;
     };
 
+    public File getZipPath(int planId) {
+        CollectPlanVo plan = service.getPlan(planId);
+        if(plan==null || plan.getLastCollect()==null)
+            return null;
+
+        File zip = null;
+        File[] files = Paths.get(planRootDir, String.valueOf(plan.getId())).toFile().listFiles();
+        for(File file: files) {
+            if(file.isFile() && file.getName().endsWith(".zip")) {
+                zip = file;
+                break;
+            }
+        }
+        if(zip==null)
+            return null;
+        return zip;
+    }
 
     private final Log log = LogFactory.getLog(getClass());
 }

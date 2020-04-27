@@ -57,12 +57,6 @@ public interface CollectPlanService {
     void addNotifier(Runnable notifier);
 
     /**
-     * Pack collected logs into a zip file.
-     * @param planId
-     */
-    void zipCollections(int planId);
-
-    /**
      * Set the last operation status
      * @param planId
      * @param status    "ok" or "error"

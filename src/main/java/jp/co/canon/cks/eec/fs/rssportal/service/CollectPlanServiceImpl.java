@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -121,7 +122,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public CollectPlanVo getPlan(int id) {
-        return null;
+        return dao.find(id);
     }
 
     @Override
@@ -196,12 +197,6 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setLastStatus("error");
         }
         dao.updatePlan(plan);
-    }
-
-    @Override
-    public void zipCollections(int planId) {
-        log.info("zipCollections [planId="+planId+"]");
-
     }
 
     @Override

@@ -116,6 +116,27 @@
             error: () => console.log('Error')
         });
     }
+
+    function requestDownload() {
+        let id = $('#downloadId').val();
+        console.log('downloadId='+id);
+        if(id==undefined || id=='') {
+            console.log('invalid id');
+            return;
+        }
+        $.ajax({
+            url:'/plan/download?id='+id,
+            type:"get",
+            // data: JSON.stringify(data),
+            contentType: 'application/json',
+            async:true,
+            success: resp => {
+                console.log('Success');
+                console.log(resp);
+            },
+            error: () => console.log('Error')
+        });
+    }
 </script>
 
 정기 수집 요청 <br>
@@ -136,7 +157,10 @@
 <input type="text" id="deleteId" />
 <input type="button" value="delete" onclick="requestDelete();" />
 
+<br><hr>
+
+다운로드<br>
+<input type="text" id="downloadId" />
+<input type="button" value="download" onclick="requestDownload();" />
+
 <hr>
-Rest
-<hr>
-<input type="button" value="add" onclick="requestRestAddPlan();" />
