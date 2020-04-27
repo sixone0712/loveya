@@ -70,7 +70,11 @@
     </select>
 
     <insert id="insert" parameterType="CollectPlanVo">
+        <selectKey keyProperty="id" resultType="Integer" order="BEFORE">
+            select nextval('rsss.collection_plan_id_seq')
+        </selectKey>
         insert into rsss."collection_plan" (
+            id,
             tool,
             logtype,
             tscreated,
@@ -83,6 +87,7 @@
             tsnext,
             tslastpoint
         ) values (
+            #{id},
             #{tool},
             #{logType},
             now(),

@@ -7,6 +7,8 @@ import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,13 +46,15 @@ public class PlanController {
 
     @RequestMapping("/add")
     @ResponseBody
-    public String addPlan(@RequestBody Map<String, Object> param) throws ModelAndViewDefiningException {
+    public ResponseEntity<Integer> addPlan(@RequestBody Map<String, Object> param) throws ModelAndViewDefiningException {
         log.info("request \"/plan/add\"");
         if(checkSession()==false) {
-            resendToLogin("unauthorized session");
+            log.error("unauthorized session");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         if(param==null) {
-            resendToError("null param");
+            log.error("no param");
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -72,25 +76,28 @@ public class PlanController {
             Date toDate = toDate(toStr);
             long interval = Long.valueOf(intervalStr);
 
-            if(true)
-                service.addPlan(tools, logTypes, fromDate, toDate, collectType, interval, description);
+            int id = service.addPlan(tools, logTypes, fromDate, toDate, collectType, interval, description);
 
-            return "okay";
+            return new ResponseEntity(id, HttpStatus.OK);
 
         } catch (ParseException e) {
             resendToError("parse date error");
         }
-        return "failed";
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping("/list")
     @ResponseBody
-    public List<CollectPlanVo> listPlan(@RequestParam Map<String, Object> param) throws ModelAndViewDefiningException {
+    public ResponseEntity<List<CollectPlanVo>> listPlan(@RequestParam Map<String, Object> param) throws ModelAndViewDefiningException {
         log.info("request \"/plan/list\"");
-        if(checkSession()==false)
-            resendToLogin("unauthorized session");
-        if(param==null)
-            resendToError("null param");
+        if(checkSession()==false) {
+            log.error("unauthorized session");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(param==null) {
+            log.error("no param");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         String withExpired = (String) (param.containsKey("withExpired")?param.get("withExpired"):"");
         List<CollectPlanVo> list;
@@ -98,19 +105,19 @@ public class PlanController {
             list = service.getAllPlansBySchedulePriority();
         else
             list = service.getAllPlans();
-        return list;
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @RequestMapping("/delete")
     @ResponseBody
-    public String deletePlan(@RequestParam(name="id") int id) throws ModelAndViewDefiningException{
+    public ResponseEntity deletePlan(@RequestParam(name="id") int id) throws ModelAndViewDefiningException{
         log.info("request \"plan/delete\" [id="+id+"]");
         if(checkSession()==false)
             resendToLogin("unauthorized error");
         boolean ret = service.deletePlan(id);
         if(ret)
-            return "success";
-        return "invalid-id";
+            return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
     private Date toDate(@NonNull String str) throws ParseException {

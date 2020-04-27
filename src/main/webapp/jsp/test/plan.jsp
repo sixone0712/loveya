@@ -29,7 +29,24 @@
             },
             error: () => console.log('Error')
         });
+    }
 
+    function requestAddPlanWithoutParam() {
+        $.ajax({
+            url:'/plan/add',
+            type:"post",
+            //data: JSON.stringify(data),
+            contentType: 'application/json',
+            async:true,
+            success: resp => {
+                console.log('Success');
+                console.log(resp);
+            },
+            error: resp => {
+                console.log('Error');
+                console.log(resp);
+            }
+        });
     }
 
     function requestRestAddPlan() {
@@ -103,6 +120,7 @@
 정기 수집 요청 <br>
 
 <input type="button" value="add" onclick="requestAddPlan();" />
+<input type="button" value="Error" onclick="requestAddPlanWithoutParam();" />
 
 <br>
 레퍼런스 코드는 이 페이지의 js를 참고하여 주시기 바랍니다.

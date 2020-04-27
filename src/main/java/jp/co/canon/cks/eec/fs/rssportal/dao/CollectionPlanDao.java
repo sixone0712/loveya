@@ -10,7 +10,7 @@ public interface CollectionPlanDao {
     List<CollectPlanVo> findAll();
     List<CollectPlanVo> findAll(boolean ordering, int limit);
     CollectPlanVo find(int id);
-    boolean addPlan(CollectPlanVo plan);
+    int addPlan(CollectPlanVo plan);
     boolean updatePlan(@NonNull CollectPlanVo plan);
     boolean deletePlan(int id);
 }

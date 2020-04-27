@@ -37,13 +37,13 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    public boolean addPlan(@NonNull List<String> tools,
-                           @NonNull List<String> logTypes,
-                           @NonNull Date start,
-                           @NonNull Date end,
-                           @NonNull String collectType,
-                           @NonNull long interval,
-                           @Nullable String description) {
+    public int addPlan(@NonNull List<String> tools,
+                       @NonNull List<String> logTypes,
+                       @NonNull Date start,
+                       @NonNull Date end,
+                       @NonNull String collectType,
+                       @NonNull long interval,
+                       @Nullable String description) {
 
         SessionContext context = null;
         if(session!=null) {
@@ -60,7 +60,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
                 break;
             default:
                 log.error("invalid collectionType "+collectType);
-                return false;
+                return -1;
         }
 
         CollectPlanVo plan = new CollectPlanVo();
@@ -70,7 +70,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         plan.setInterval(interval);
         if(start.after(end)) {
             log.error("start must be before end (start="+start.toString()+" end="+end.toString());
-            return false;
+            return -1;
         }
         plan.setStart(new Timestamp(start.getTime()));
         plan.setEnd(new Timestamp(end.getTime()));
@@ -87,11 +87,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setOwner(context.getUser().getId());
         }
 
-        boolean ret = dao.addPlan(plan);
-        if(ret==true) {
-            notifyChanges();
-        }
-        return ret;
+        return dao.addPlan(plan);
     }
 
     @Override

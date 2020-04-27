@@ -54,11 +54,11 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
     }
 
     @Override
-    public boolean addPlan(@NonNull CollectPlanVo plan) {
+    public int addPlan(@NonNull CollectPlanVo plan) {
         SqlSession session = sessionFactory.openSession(true);
         session.insert("colplan.insert", plan);
         session.close();
-        return true;
+        return plan.getId();
     }
 
     @Override

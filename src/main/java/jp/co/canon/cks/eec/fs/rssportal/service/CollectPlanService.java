@@ -9,13 +9,24 @@ import java.util.List;
 
 public interface CollectPlanService {
 
-    boolean addPlan(@NonNull List<String> tools,
-                    @NonNull List<String> logTypes,
-                    @NonNull Date start,
-                    @NonNull Date end,
-                    @NonNull String collectType,
-                    @NonNull long interval,
-                    @Nullable String description);
+    /**
+     * Add a new plan.
+     * @param tools
+     * @param logTypes
+     * @param start
+     * @param end
+     * @param collectType   "cycle" or "continuous"
+     * @param interval      milliseconds. it has to be 60000 over.
+     * @param description
+     * @return
+     */
+    int addPlan(@NonNull List<String> tools,
+                @NonNull List<String> logTypes,
+                @NonNull Date start,
+                @NonNull Date end,
+                @NonNull String collectType,
+                @NonNull long interval,
+                @Nullable String description);
 
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);
@@ -26,7 +37,7 @@ public interface CollectPlanService {
     void scheduleAllPlans();
 
     /**
-     * Schedule the specific plan and update next action time for the plan.
+     * Schedule the specified plan and update next action time for the plan.
      * @param plan
      */
     void schedulePlan(CollectPlanVo plan);
