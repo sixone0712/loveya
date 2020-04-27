@@ -49,6 +49,26 @@
         </if>
     </select>
 
+    <select id="selectId" parameterType="Integer" resultType="CollectPlanVo">
+        select
+            id,
+            tool,
+            logtype,
+            description,
+            collecttype as collectionType,
+            cinterval as interval,
+            ownerid as owner,
+            expired,
+            tscreated as created,
+            tsstart as start,
+            tsend as end,
+            tslastcollect as lastCollect,
+            tsnext as nextAction,
+            tslastpoint as lastPoint
+        from rsss."collection_plan"
+        where id=#{id}
+    </select>
+
     <insert id="insert" parameterType="CollectPlanVo">
         insert into rsss."collection_plan" (
             tool,
@@ -80,9 +100,15 @@
     <update id="update" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
             tslastcollect = #{lastCollect},
+            <if test="nextAction!=null">
             tsnext = #{nextAction},
+            </if>
             expired = #{expired},
             tslastpoint = #{lastPoint}
         where id = #{id}
     </update>
+
+    <delete id="delete" parameterType="Integer">
+        delete from rsss."collection_plan" where id=#{id}
+    </delete>
 </mapper>

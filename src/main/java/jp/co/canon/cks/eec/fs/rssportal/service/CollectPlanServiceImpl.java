@@ -96,7 +96,13 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public boolean deletePlan(int planId) {
-        return false;
+        CollectPlanVo plan = dao.find(planId);
+        if(plan==null) {
+            log.error("invalid planId "+planId);
+            return false;
+        }
+        dao.deletePlan(planId);
+        return true;
     }
 
     @Override
@@ -113,6 +119,11 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     @Override
     public List<CollectPlanVo> getAllPlansBySchedulePriority() {
         return dao.findAll(true, 0);
+    }
+
+    @Override
+    public CollectPlanVo getPlan(int id) {
+        return null;
     }
 
     @Override

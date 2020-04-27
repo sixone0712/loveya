@@ -21,6 +21,7 @@ public interface CollectPlanService {
     boolean deletePlan(CollectPlanVo plan);
     List<CollectPlanVo> getAllPlans();
     List<CollectPlanVo> getAllPlansBySchedulePriority();
+    CollectPlanVo getPlan(int id);
     CollectPlanVo getNextPlan();
     void scheduleAllPlans();
 

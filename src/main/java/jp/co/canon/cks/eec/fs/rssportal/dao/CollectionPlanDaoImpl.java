@@ -46,6 +46,14 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
     }
 
     @Override
+    public CollectPlanVo find(int id) {
+        SqlSession session = sessionFactory.openSession();
+        CollectPlanVo plan = session.selectOne("selectId", id);
+        session.close();
+        return plan;
+    }
+
+    @Override
     public boolean addPlan(@NonNull CollectPlanVo plan) {
         SqlSession session = sessionFactory.openSession(true);
         session.insert("colplan.insert", plan);
@@ -62,7 +70,10 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
     }
 
     @Override
-    public boolean deletePlan(CollectPlanVo plan) {
-        return false;
+    public boolean deletePlan(int id) {
+        SqlSession session = sessionFactory.openSession(true);
+        session.delete("colplan.delete", id);
+        session.close();
+        return true;
     }
 }

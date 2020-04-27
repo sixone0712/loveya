@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
+import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
@@ -79,6 +81,36 @@ public class PlanController {
             resendToError("parse date error");
         }
         return "failed";
+    }
+
+    @RequestMapping("/list")
+    @ResponseBody
+    public List<CollectPlanVo> listPlan(@RequestParam Map<String, Object> param) throws ModelAndViewDefiningException {
+        log.info("request \"/plan/list\"");
+        if(checkSession()==false)
+            resendToLogin("unauthorized session");
+        if(param==null)
+            resendToError("null param");
+
+        String withExpired = (String) (param.containsKey("withExpired")?param.get("withExpired"):"");
+        List<CollectPlanVo> list;
+        if(withExpired.equals(""))
+            list = service.getAllPlansBySchedulePriority();
+        else
+            list = service.getAllPlans();
+        return list;
+    }
+
+    @RequestMapping("/delete")
+    @ResponseBody
+    public String deletePlan(@RequestParam(name="id") int id) throws ModelAndViewDefiningException{
+        log.info("request \"plan/delete\" [id="+id+"]");
+        if(checkSession()==false)
+            resendToLogin("unauthorized error");
+        boolean ret = service.deletePlan(id);
+        if(ret)
+            return "success";
+        return "invalid-id";
     }
 
     private Date toDate(@NonNull String str) throws ParseException {
