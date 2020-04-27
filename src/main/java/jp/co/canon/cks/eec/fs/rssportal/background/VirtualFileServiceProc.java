@@ -11,8 +11,12 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class VirtualFileServiceProc extends RemoteFileServiceProc {
+
+    private File achFile;
 
     public VirtualFileServiceProc(FileDownloadContext context) {
         super(context);
@@ -57,5 +61,41 @@ public class VirtualFileServiceProc extends RemoteFileServiceProc {
             e.printStackTrace();
         }
         log.info("transfer done [filename="+outPath.toString()+"]");
+        achFile = outPath.toFile();
+    }
+
+    @Override
+    void extract() {
+        log.info("extract [achieve="+achFile.getAbsolutePath()+")");
+        File zipFile = achFile;
+
+        if(zipFile.toString().endsWith(".zip")) {
+            String dir = parseDir(zipFile.toString());
+            if(zipFile.exists()==false || zipFile.isDirectory()) {
+                log.error("wrong achieve file");
+                return;
+            }
+
+            try {
+                byte[] buf = new byte[1024];
+                ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+                ZipEntry entry = zis.getNextEntry();
+                while(entry!=null) {
+                    File tmpFile = new File(dir, entry.getName());
+                    FileOutputStream fos = new FileOutputStream(tmpFile);
+                    while(zis.read(buf)>0) {
+                        fos.write(buf);
+                    }
+                    fos.close();
+                    entry = zis.getNextEntry();
+                }
+                zis.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            zipFile.delete();
+        }
     }
 }

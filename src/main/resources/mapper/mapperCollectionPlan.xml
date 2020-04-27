@@ -81,6 +81,7 @@
             description,
             collecttype,
             cinterval,
+            tscollectstart,
             tsstart,
             tsend,
             ownerid,
@@ -94,6 +95,7 @@
             #{description},
             #{collectionType},
             #{interval},
+            #{collectStart},
             #{start},
             #{end},
             #{owner},
@@ -107,6 +109,9 @@
             tslastcollect = #{lastCollect},
             <if test="nextAction!=null">
             tsnext = #{nextAction},
+            </if>
+            <if test="lastStatus!=null">
+            laststatus = #{lastStatus},
             </if>
             expired = #{expired},
             tslastpoint = #{lastPoint}

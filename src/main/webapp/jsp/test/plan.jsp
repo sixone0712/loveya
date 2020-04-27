@@ -5,16 +5,17 @@
     function requestAddPlan() {
         let data = {
             tools: [
-                "eeee", "aaa", "41424"
+                "EQVM87", "EQVM88"
             ],
             logTypes: [
-                "type1", "type2"
+                "001", "002"
             ],
-            from: "2020-04-23 12:34:45",
-            to: "2020-04-24 12:34:45",
+            collectStart: "2020-04-25 12:34:45",
+            from: "2020-04-25 12:34:45",
+            to: "2020-04-28 12:34:45",
             collectType: "cycle",
-            interval: "3600000",
-            description: "des------"
+            interval: "120000",
+            description: "test1"
         };
 
         $.ajax({

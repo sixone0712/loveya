@@ -13,12 +13,14 @@ public class CollectPlanVo {
     private int collectionType;
     private Timestamp lastCollect;
     private long interval;
+    private Timestamp collectStart;
     private Timestamp start;
     private Timestamp end;
     private int owner;
     private Timestamp nextAction;
     private Timestamp lastPoint;
     private boolean expired;
+    private String lastStatus;
 
     @Override
     public String toString() {
@@ -112,6 +114,14 @@ public class CollectPlanVo {
         this.lastCollect = lastCollect;
     }
 
+    public Timestamp getCollectStart() {
+        return collectStart;
+    }
+
+    public void setCollectStart(Timestamp collectStart) {
+        this.collectStart = collectStart;
+    }
+
     public Timestamp getStart() {
         return start;
     }
@@ -142,5 +152,13 @@ public class CollectPlanVo {
 
     public void setLastPoint(Timestamp lastPoint) {
         this.lastPoint = lastPoint;
+    }
+
+    public String getLastStatus() {
+        return lastStatus;
+    }
+
+    public void setLastStatus(String lastStatus) {
+        this.lastStatus = lastStatus;
     }
 }

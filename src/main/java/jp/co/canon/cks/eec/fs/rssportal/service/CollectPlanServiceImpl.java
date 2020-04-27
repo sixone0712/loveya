@@ -39,6 +39,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     @Override
     public int addPlan(@NonNull List<String> tools,
                        @NonNull List<String> logTypes,
+                       @NonNull Date collectStart,
                        @NonNull Date start,
                        @NonNull Date end,
                        @NonNull String collectType,
@@ -72,6 +73,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             log.error("start must be before end (start="+start.toString()+" end="+end.toString());
             return -1;
         }
+        plan.setCollectStart(new Timestamp(collectStart.getTime()));
         plan.setStart(new Timestamp(start.getTime()));
         plan.setEnd(new Timestamp(end.getTime()));
         plan.setNextAction(new Timestamp(start.getTime()));
@@ -181,9 +183,30 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public void updateLastCollect(@NonNull CollectPlanVo plan) {
-        plan.setLastCollect(new Timestamp(System.currentTimeMillis()));
-        log.info("updateLastCollect: planId="+plan.getId()+" lastCollect="+plan.getLastCollect().toString());
+        updateLastCollect(plan, false);
+    }
+
+    @Override
+    public void updateLastCollect(CollectPlanVo plan, boolean isFailed) {
+        log.info("updateLastCollect: planId="+plan.getId()+" lastCollect="+plan.getLastCollect());
+        if(isFailed==false) {
+            plan.setLastCollect(new Timestamp(System.currentTimeMillis()));
+            plan.setLastStatus("ok");
+        } else {
+            plan.setLastStatus("error");
+        }
         dao.updatePlan(plan);
+    }
+
+    @Override
+    public void zipCollections(int planId) {
+        log.info("zipCollections [planId="+planId+"]");
+
+    }
+
+    @Override
+    public void setLastStatus(int planId, String status) {
+
     }
 
     @Override

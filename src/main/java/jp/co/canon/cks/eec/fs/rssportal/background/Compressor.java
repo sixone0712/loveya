@@ -41,7 +41,7 @@ public class Compressor {
             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(dest));
             Path srcPath = Paths.get(sourceDir);
             Files.walk(srcPath)
-                    .filter(path->Files.isDirectory(path)==false)
+                    .filter(path->Files.isDirectory(path)==false && path.toFile().equals(dest)==false)
                     .forEach(path->{
                         ZipEntry entry = new ZipEntry(srcPath.relativize(path).toString());
                         try {

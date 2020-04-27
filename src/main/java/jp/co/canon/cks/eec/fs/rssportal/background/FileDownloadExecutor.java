@@ -62,14 +62,10 @@ public class FileDownloadExecutor implements DownloadConfig {
         this.jobType = jobType;
         status = Status.idle;
         mServiceManager = serviceManager;
-        if(false) {
-            mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
-        } else {
-            mService = serviceModel;
-        }
+        mService = serviceModel;
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        downloadId = "DL"+(mUniqueKey++)+String.valueOf(stamp.getTime());
+        downloadId = "DL"+(mUniqueKey++)+stamp.getTime();
         downloadForms = request;
         downloadContexts = new ArrayList<>();
         baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
@@ -200,6 +196,10 @@ public class FileDownloadExecutor implements DownloadConfig {
             });
         }
         return list;
+    }
+
+    public String getBaseDir() {
+        return baseDir;
     }
 
     public String getDownloadPath() {

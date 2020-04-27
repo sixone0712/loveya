@@ -117,7 +117,7 @@ public class DatabaseTestController {
         Date end1 = new Date(start1.getTime()+millis_per_hour);
         long interval1 = millis_per_minute;
 
-        serviceCollectionPlan.addPlan(tools1, logTypes1, start1, end1, "cycle",
+        serviceCollectionPlan.addPlan(tools1, logTypes1, start1, start1, end1, "cycle",
                 interval1, "1min-cycle");
 
         List<String> tools2 = Arrays.asList("EQVM88");
@@ -126,7 +126,7 @@ public class DatabaseTestController {
         Date end2 = new Date(start1.getTime()+millis_per_hour);
         long interval2 = millis_per_minute*3;
 
-        serviceCollectionPlan.addPlan(tools2, logTypes2, start2, end2, "cycle",
+        serviceCollectionPlan.addPlan(tools2, logTypes2, start2, start2, end2, "cycle",
                 interval2, "30sec-cycle");
 
         return "okay";

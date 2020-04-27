@@ -22,6 +22,7 @@ public interface CollectPlanService {
      */
     int addPlan(@NonNull List<String> tools,
                 @NonNull List<String> logTypes,
+                @NonNull Date collectStart,
                 @NonNull Date start,
                 @NonNull Date end,
                 @NonNull String collectType,
@@ -47,10 +48,24 @@ public interface CollectPlanService {
      * @param plan
      */
     void updateLastCollect(CollectPlanVo plan);
+    void updateLastCollect(CollectPlanVo plan, boolean isFailed);
 
     /**
      * Add a notifier that is called when changes occur.
      * @param notifier
      */
     void addNotifier(Runnable notifier);
+
+    /**
+     * Pack collected logs into a zip file.
+     * @param planId
+     */
+    void zipCollections(int planId);
+
+    /**
+     * Set the last operation status
+     * @param planId
+     * @param status    "ok" or "error"
+     */
+    void setLastStatus(int planId, String status);
 }
