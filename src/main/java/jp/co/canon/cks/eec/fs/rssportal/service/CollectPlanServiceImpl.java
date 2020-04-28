@@ -52,17 +52,10 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             context = (SessionContext) session.getAttribute("context");
         }
 
-        int colType;
-        switch (collectType) {
-            case "cycle":
-                colType = COLLECTTYPE_CYCLE;
-                break;
-            case "continuous":
-                colType = COLLECTTYPE_CONTINUOUS;
-                break;
-            default:
-                log.error("invalid collectionType "+collectType);
-                return -1;
+        int colType = toCollectTypeInteger(collectType);
+        if (colType<0) {
+            log.error("invalid collectionType "+collectType);
+            return -1;
         }
 
         CollectPlanVo plan = new CollectPlanVo();
@@ -91,6 +84,60 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         }
 
         return dao.addPlan(plan);
+    }
+
+    private int toCollectTypeInteger(@NonNull String collectType) {
+        switch (collectType) {
+            case "cycle":
+                return COLLECTTYPE_CYCLE;
+            case "continuous":
+                return COLLECTTYPE_CONTINUOUS;
+            default:
+                return -1;
+        }
+    }
+
+    @Override
+    @Deprecated
+    public boolean modifyPlan(int planId,
+                              List<String> tools,
+                              List<String> logTypes,
+                              Date collectStart,
+                              Date start,
+                              Date end,
+                              String collectType,
+                              long interval,
+                              String description) {
+
+        CollectPlanVo plan = getPlan(planId);
+        if(plan==null) {
+            log.error("invalid planId="+planId);
+            return false;
+        }
+        if(tools!=null)
+            plan.setTool(toSingleString(tools));
+        if(logTypes!=null)
+            plan.setLogType(toSingleString(logTypes));
+        if(collectStart!=null)
+            plan.setCollectStart(new Timestamp(collectStart.getTime()));
+        if(start!=null)
+            plan.setStart(new Timestamp(start.getTime()));
+        if(end!=null)
+            plan.setEnd(new Timestamp(end.getTime()));
+        if(collectType!=null) {
+            int iCollectType = toCollectTypeInteger(collectType);
+            if(iCollectType<0) {
+                log.error("invalid collectionType "+collectType);
+                return false;
+            }
+            plan.setCollectionType(iCollectType);
+        }
+        if(interval!=plan.getInterval())
+            plan.setInterval(interval);
+        if(description!=null)
+            plan.setDescription(description);
+
+        return false;
     }
 
     @Override

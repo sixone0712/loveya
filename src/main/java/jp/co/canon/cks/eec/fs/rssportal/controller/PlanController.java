@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,31 +60,11 @@ public class PlanController {
         }
 
         try {
-            List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
-            List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
-            String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
-            String fromStr = param.containsKey("from")?(String)param.get("from"):null;
-            String toStr = param.containsKey("to")?(String)param.get("to"):null;
-            String collectType = param.containsKey("collectType")?(String)param.get("collectType"):null;
-            String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
-            String description = param.containsKey("description")?(String)param.get("description"):null;
-
-            if(tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
-                    collectType==null || intervalStr==null)
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
-            if(collectType.equalsIgnoreCase("cycle")==false &&
-                    collectType.equalsIgnoreCase("continuous")==false)
-                return new ResponseEntity(HttpStatus.BAD_REQUEST);
-
-            Date collectStartDate = toDate(collectStartStr);
-            Date fromDate = toDate(fromStr);
-            Date toDate = toDate(toStr);
-            long interval = Long.valueOf(intervalStr);
-
-            int id = service.addPlan(tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
-
+            int id = addPlanProc(param);
+            if(id<0) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity(id, HttpStatus.OK);
-
         } catch (ParseException e) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
@@ -119,6 +98,7 @@ public class PlanController {
         log.info("request \"plan/delete\" [id="+id+"]");
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
         boolean ret = service.deletePlan(id);
         if(ret)
             return new ResponseEntity(HttpStatus.OK);
@@ -150,6 +130,60 @@ public class PlanController {
             e.printStackTrace();
         }
         return new ResponseEntity(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping("/modify")
+    @ResponseBody
+    public ResponseEntity<Integer> modify(@RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
+        log.info("request \"plan/modify\" [id="+id+"]");
+        CollectPlanVo plan = service.getPlan(id);
+        if(plan==null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        boolean ret = service.deletePlan(id);
+        if(!ret) {
+            log.error("invalid planId="+id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            int newId = addPlanProc(param);
+            if(id<0) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity(newId, HttpStatus.OK);
+        } catch (ParseException e) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private int addPlanProc(@NonNull Map<String, Object> param) throws ParseException {
+
+        List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
+        List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
+        String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
+        String fromStr = param.containsKey("from")?(String)param.get("from"):null;
+        String toStr = param.containsKey("to")?(String)param.get("to"):null;
+        String collectType = param.containsKey("collectType")?(String)param.get("collectType"):null;
+        String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
+        String description = param.containsKey("description")?(String)param.get("description"):null;
+
+        if(tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
+                collectType==null || intervalStr==null)
+            return -1;
+        if(collectType.equalsIgnoreCase("cycle")==false &&
+                collectType.equalsIgnoreCase("continuous")==false)
+            return -1;
+
+        Date collectStartDate = toDate(collectStartStr);
+        Date fromDate = toDate(fromStr);
+        Date toDate = toDate(toStr);
+        long interval = Long.valueOf(intervalStr);
+
+        int id = service.addPlan(tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
+        if(id<0)
+            return -2;
+        return id;
     }
 
     private Date toDate(@NonNull String str) throws ParseException {
