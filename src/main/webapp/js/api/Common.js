@@ -16,6 +16,13 @@ export const convertErrMsg = (error) => {
         case Define.SEARCH_FAIL_DATE: msg = "Please set the start time before the end time."; break;
         case Define.SEARCH_FAIL_SERVER_ERROR: msg = "Network connection error."; break;
         case Define.FILE_FAIL_NO_ITEM: msg = "Please choose a file."; break;
+        case Define.LOGIN_FAIL_NO_REGISTER_USER: msg = "No such user."; break;
+        case Define.LOGIN_FAIL_NO_USERNAME_PASSWORD: msg = "Username or Password field is empty"; break;
+        case Define.LOGIN_FAIL_INCORRECT_PASSWORD: msg = "Login failed for a invalid password."; break;
+        case Define.LOGIN_FAIL_EMPTY_USER_PASSWORD: msg = "Username or Password field is empty"; break;
+        case Define.CHANGE_PW_FAIL_EMPTY_PASSWORD: msg = "Current or new or Confirm Password field is empty"; break;
+        case Define.CHANGE_PW_FAIL_INCCORECT_CURRNET_PASSWORD: msg = "Current Password is incorrect"; break;
+        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "new and Confirm Password is not match"; break;
         default: msg="what's error : " + error; break;
     }
     return msg;
@@ -37,6 +44,14 @@ export const getErrorMsg = (error) => {
         case Define.SEARCH_FAIL_SERVER_ERROR: msg = "Network connection error."; break;
         case Define.FILE_FAIL_NO_ITEM: msg = "Please choose a file."; break;
         case Define.FILE_FAIL_SERVER_ERROR: msg = "Network connection error."; break;
+        case Define.LOGIN_FAIL_NO_REGISTER_USER: msg = "No such user."; break;
+        case Define.LOGIN_FAIL_NO_USERNAME_PASSWORD: msg = "Username or Password field is empty"; break;
+        case Define.LOGIN_FAIL_INCORRECT_PASSWORD: msg = "Login failed for a invalid password."; break;
+        case Define.LOGIN_FAIL_EMPTY_USER_PASSWORD: msg = "Username or Password field is empty"; break;
+        case Define.CHANGE_PW_FAIL_EMPTY_PASSWORD: msg = "Current or new or Confirm Password field is empty"; break;
+        case Define.CHANGE_PW_FAIL_INCCORECT_CURRNET_PASSWORD: msg = "Current Password is incorrect"; break;
+        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "new and Confirm Password is not match"; break;
+        case Define.DB_UPDATE_ERROR_NO_SUCH_USER: msg = "Update fail. No such user"; break;
         default: break;
     }
 

@@ -104,6 +104,14 @@
     button.green:active {
       background-color: #40c057;
     }
+
+    button.gray {
+      background-color: #1a202c;
+    }
+    button.gray:hover,
+    button.gray:active {
+      background-color: #718096;
+    }
     button.alert-type {
       width: 100%;
       border-radius: 0 0 10px 10px;

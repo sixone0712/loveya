@@ -44,3 +44,33 @@ export const setLoginAuth = (props, value) => {
     const { loginActions } = props;
     loginActions.loginSetAuth(value);
 };
+
+export const getErrCode = (props) => {
+    const { loginInfo } = props;
+    return loginInfo.toJS().errCode;
+};
+
+export const setErrCode = (props, value) => {
+    const { loginActions } = props;
+    loginActions.loginSetErrCode(value);
+};
+
+export const startLoginAuth = (props, url) => {
+    const { loginActions } = props;
+    return loginActions.loginCheckAuth(url);
+};
+
+export const startLogout = (props, url) => {
+    const { loginActions } = props;
+    return loginActions.loginSetLogOff(url);
+};
+
+export const changePassword = (props, url) => {
+    const { loginActions } = props;
+    return loginActions.changeUserPassword(url);
+};
+
+export const changePermission = (props, url) => {
+    const { loginActions } = props;
+    return loginActions.changeUserPermission(url);
+};

@@ -70,12 +70,12 @@ public class UserServiceImpl implements UserService {
     public int verify(@NonNull String username, @NonNull String password) {
         UserVo user = getUser(username);
         if(user==null) {
-            return -1;
+            return 33; // LOGIN_FAIL_NO_REGISTER_USER
         }
         if(user.getPassword().equals(password)) {
             return user.getId();
         }
-        return -1;
+        return 34; // LOGIN_FAIL_INCORRECT_PASSWORD
     }
 
     @Override

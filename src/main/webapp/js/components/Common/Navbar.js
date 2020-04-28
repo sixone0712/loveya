@@ -18,12 +18,17 @@ import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
 import * as API from "../../api";
 import * as Define from "../../define";
+import LogOutModal from "../User/LogOut";
+import ChangePwModal from "../User/ChangePw";
+import ChangeAuthModal from "../User/ChangeAuth";
 
 class RSSNavbar extends Component{
   constructor() {
     super();
     this.state = {
-      currentPage: "Manual"
+      currentPage: "Manual",
+            isModalOpen : false,
+            isMode:"",
     };
   }
 
@@ -38,6 +43,15 @@ class RSSNavbar extends Component{
       currentPage: page
     });
   };
+  
+  openModal =async (sMode) => {
+  	await this.setState(() => ({isModalOpen: true, isMode:sMode}));
+  }
+  
+  closeModal = async () => {
+  	await this.setState(() => ({isModalOpen: false,isMode:''}));
+  }
+
 
   onLogout = () => {
     window.sessionStorage.removeItem('isLoggedIn');
@@ -75,20 +89,37 @@ class RSSNavbar extends Component{
                   </DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
+              {
+                (window.sessionStorage.getItem('auth') ==='100')
+               ?  <NavLink tag={RRNavLink} to={Define.PAGE_ADMIN} className={this.getClassName("admin")}
+                         onClick={() => this.handlePageChange("admin")}>  Administrator  </NavLink>
+               : null
+              }
             </Nav>
             <Nav className="ml-auto" navbar>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav>
-                  <FontAwesomeIcon icon={faUserCircle} size="lg"/> ymkwon
+                  <FontAwesomeIcon icon={faUserCircle} size="lg"/> {window.sessionStorage.getItem('username')}
                 </DropdownToggle>
                 <DropdownMenu right>
-                  <DropdownItem>Change Password</DropdownItem>
+                  <DropdownItem onClick={() => this.openModal("password")}>Change Password</DropdownItem>
                   <DropdownItem divider/>
-                  <DropdownItem onClick={() => this.onLogout()}>Logout</DropdownItem>
+                  <DropdownItem onClick={() => this.openModal("permission")}>Change Permission</DropdownItem>
+                  <DropdownItem divider/>
+                  <DropdownItem onClick={() => this.openModal("logout")}>Logout</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Nav>
           </Navbar>
+        {
+            this.state.isMode ==='logout'
+            ?<LogOutModal isOpen={this.state.isModalOpen } left={this.onLogout} right={this.closeModal} />
+            : this.state.isMode ==='password'
+                ? <ChangePwModal isOpen={this.state.isModalOpen } right={this.closeModal} />
+                : this.state.isMode ==='permission'
+                    ? <ChangeAuthModal isOpen={this.state.isModalOpen } right={this.closeModal} />
+                :null
+        }
         </div>
     );
   }

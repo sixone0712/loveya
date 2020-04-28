@@ -35,7 +35,6 @@
         )
     </insert>
 
-    <!--
     <update id="update" parameterType="UserVo">
         update rsss."users" set
             password = #{password},
@@ -44,6 +43,5 @@
             validity = #{validity}
             where id = #{id}
     </update>
-    -->
 
 </mapper>
