@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Col, FormGroup, ButtonToggle, Input, Collapse } from "reactstrap";
+import { Col, FormGroup, ButtonToggle, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -7,11 +7,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import CheckBox from "../Common/CheckBox";
 
+const SECTION_DISPLAY_ITEM = 10;
+
 class RSSautoTargetlist extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      targetlist: [
+      targetList: [
         {
           id: "tg1",
           name: "Target 1",
@@ -61,9 +63,60 @@ class RSSautoTargetlist extends Component {
           id: "tg10",
           name: "Target 10",
           value: 10
+        },
+        {
+          id: "tg11",
+          name: "Target 11",
+          value: 11
+        },
+        {
+          id: "tg12",
+          name: "Target 12",
+          value: 12
+        },
+        {
+          id: "tg13",
+          name: "Target 13",
+          value: 13
+        },
+        {
+          id: "tg14",
+          name: "Target 14",
+          value: 14
+        },
+        {
+          id: "tg15",
+          name: "Target 15",
+          value: 15
+        },
+        {
+          id: "tg16",
+          name: "Target 16",
+          value: 16
+        },
+        {
+          id: "tg17",
+          name: "Target 17",
+          value: 17
+        },
+        {
+          id: "tg18",
+          name: "Target 18",
+          value: 18
+        },
+        {
+          id: "tg19",
+          name: "Target 19",
+          value: 19
+        },
+        {
+          id: "tg20",
+          name: "Target 20",
+          value: 20
         }
       ],
       checkedList: [],
+      sectionList: [],
       filteredData: [],
       query: "",
       ItemsChecked: false,
@@ -72,14 +125,10 @@ class RSSautoTargetlist extends Component {
   }
 
   handleSearchToggle = () => {
-    const { showSearch } = this.state;
+    const { showSearch, targetList } = this.state;
 
     if (showSearch === true) {
-      const { targetlist } = this.state;
-
-      this.setState({
-        filteredData: targetlist
-      });
+      this.createFilteredData(targetList);
     }
 
     this.setState({
@@ -89,11 +138,11 @@ class RSSautoTargetlist extends Component {
   };
 
   selectItem = () => {
-    const { ItemsChecked, targetlist } = this.state;
+    const { ItemsChecked, targetList } = this.state;
     const collection = [];
 
     if (!ItemsChecked) {
-      for (const cat of targetlist) {
+      for (const cat of targetList) {
         collection.push(cat.value);
       }
     }
@@ -109,38 +158,85 @@ class RSSautoTargetlist extends Component {
 
     if (checked) {
       this.setState(prevState => ({
-        checkedList: [...prevState.checkedList, value * 1]
+        checkedList: [...prevState.checkedList, parseInt(value, 10)]
       }));
     } else {
       this.setState(prevState => ({
-        checkedList: prevState.checkedList.filter(item => item != value)
+        checkedList: prevState.checkedList.filter(
+            item => item !== parseInt(value, 10)
+        )
       }));
     }
   };
 
   handleSearch = e => {
+    const { targetList } = this.state;
     const query = e.target.value;
+    const filteredData = targetList.filter(element => {
+      return element.name.toLowerCase().includes(query.toLowerCase());
+    });
 
-    this.setState(prevState => {
-      const filteredData = prevState.targetlist.filter(element => {
-        return element.name.toLowerCase().includes(query.toLowerCase());
-      });
+    this.setState({
+      query: query
+    });
 
-      return { query, filteredData };
+    this.createFilteredData(filteredData);
+  };
+
+  createFilteredData = list => {
+    const sectionList = this.createTargetSection(list);
+    const targetList = [];
+    let sectionIdx = 0;
+    let writeCount = 1;
+
+    for (let targetIdx = 0; targetIdx < list.length; targetIdx++) {
+      let title = sectionList[sectionIdx].title;
+
+      const tempData = {
+        title: title,
+        id: list[targetIdx].id,
+        name: list[targetIdx].name,
+        value: list[targetIdx].value
+      };
+
+      targetList.push(tempData);
+      writeCount++;
+
+      if (writeCount > 10) {
+        sectionIdx++;
+        writeCount = 1;
+      }
+    }
+
+    this.setState({
+      sectionList: sectionList,
+      filteredData: targetList
     });
   };
 
-  componentDidMount() {
-    const { targetlist } = this.state;
+  createTargetSection = list => {
+    const count =
+        list.length < SECTION_DISPLAY_ITEM
+            ? 1
+            : Math.ceil(list.length / SECTION_DISPLAY_ITEM);
+    const targetSection = [];
 
-    this.setState({
-      filteredData: targetlist
-    });
+    for (let idx = 1; idx <= count; idx++) {
+      const tempData = { title: "section" + idx };
+      targetSection.push(tempData);
+    }
+
+    return targetSection;
+  };
+
+  componentDidMount() {
+    this.createFilteredData(this.state.targetList);
   }
 
   render() {
     const {
       showSearch,
+      sectionList,
       filteredData,
       query,
       checkedList,
@@ -150,35 +246,24 @@ class RSSautoTargetlist extends Component {
     return (
         <div className="form-section targetlist">
           <Col className="pdl-10 pdr-0">
-            <div className="form-section-header">
-              <div className="form-section-title">
+            <div className="form-header-section">
+              <div className="form-title-section">
                 Target List
                 <p>Select a target from the list.</p>
               </div>
-              <div>
-                <ButtonToggle
-                    outline
-                    size="sm"
-                    color="info"
-                    className={"form-btn" + (showSearch ? " active" : "")}
-                    onClick={this.handleSearchToggle}
+              <div className="form-btn-section dis-flex">
+                <div
+                    className={"search-btn-area" + (showSearch ? " active" : "")}
                 >
-                  <FontAwesomeIcon icon={faSearch} />
-                </ButtonToggle>{" "}
-                <ButtonToggle
-                    outline
-                    size="sm"
-                    color="info"
-                    className={"form-btn" + (ItemsChecked ? " active" : "")}
-                    onClick={this.selectItem}
-                >
-                  All
-                </ButtonToggle>
-              </div>
-            </div>
-            <FormGroup className="custom-scrollbar auto-plan-form-group targetlist pd-5">
-              <Collapse isOpen={showSearch}>
-                <FormGroup>
+                  <ButtonToggle
+                      outline
+                      size="sm"
+                      color="info"
+                      className={"form-btn" + (showSearch ? " active" : "")}
+                      onClick={this.handleSearchToggle}
+                  >
+                    <FontAwesomeIcon icon={faSearch} />
+                  </ButtonToggle>
                   <Input
                       type="text"
                       className="form-search-input"
@@ -186,24 +271,37 @@ class RSSautoTargetlist extends Component {
                       value={query}
                       onChange={this.handleSearch}
                   />
-                </FormGroup>
-              </Collapse>
+                </div>
+                <ButtonToggle
+                    outline
+                    size="sm"
+                    color="info"
+                    className={"form-btn" + (ItemsChecked ? " active" : "")}
+                    onClick={this.selectItem}
+                    style={{ zIndex: "2" }}
+                >
+                  All
+                </ButtonToggle>
+              </div>
+            </div>
+            <FormGroup className="custom-scrollbar auto-plan-form-group targetlist pd-5">
               {filteredData.length > 0 ? (
-                  filteredData.map(cat => {
+                  sectionList.map(section => {
                     return (
-                        <CheckBox
-                            item={cat}
-                            key={cat.value}
-                            isChecked={checkedList.includes(cat.value)}
-                            handleCheckboxClick={this.handleCheckboxClick}
-                            labelClass="form-check-label"
-                        />
+                        <div key={section.title} className="checkbox-section">
+                          <CreateCheckBox
+                              title={section.title}
+                              list={filteredData}
+                              checkedList={checkedList}
+                              handleCheckboxClick={this.handleCheckboxClick}
+                          />
+                        </div>
                     );
                   })
               ) : (
-                  <div>
-                    <p style={{ marginTop: "3em", textAlign: "center" }}>
-                      <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
+                  <div style={{ alignSelf: "center", flex: "auto" }}>
+                    <p style={{ textAlign: "center" }}>
+                      <FontAwesomeIcon icon={faExclamationCircle} size="8x" />
                     </p>
                     <p style={{ textAlign: "center" }}>Target not found.</p>
                   </div>
@@ -214,5 +312,29 @@ class RSSautoTargetlist extends Component {
     );
   }
 }
+
+const CreateCheckBox = props => {
+  const { title, list, checkedList, handleCheckboxClick } = props;
+
+  return (
+      <>
+        {list.map(item => {
+          if (item.title === title) {
+            return (
+                <CheckBox
+                    item={item}
+                    key={item.value}
+                    isChecked={checkedList.includes(item.value)}
+                    handleCheckboxClick={handleCheckboxClick}
+                    labelClass="form-check-label"
+                />
+            );
+          } else {
+            return "";
+          }
+        })}
+      </>
+  );
+};
 
 export default RSSautoTargetlist;

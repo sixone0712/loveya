@@ -5,11 +5,19 @@ import {
   CardHeader,
   CardBody,
   CardFooter,
-  Button
+  Button,
+  Carousel,
+  CarouselItem
 } from "reactstrap";
 import Machine from "./MachineList";
 import Target from "./TargetList";
 import Option from "./OptionList";
+import Check from "./CheckSetting";
+
+const STEP_MACHINE = 1;
+const STEP_TARGET = 2;
+const STEP_OPTION = 3;
+const STEP_CHECK = 4;
 
 class RSSautoplanwizard extends Component {
   constructor(props) {
@@ -31,6 +39,7 @@ class RSSautoplanwizard extends Component {
 
   handleNext = () => {
     const currentStep = this.state.currentStep + 1;
+
     this.setState(prevState => ({
       completeStep: [...prevState.completeStep, currentStep - 1],
       currentStep: currentStep
@@ -40,6 +49,7 @@ class RSSautoplanwizard extends Component {
   handlePrev = () => {
     const currentStep =
         this.state.currentStep <= 1 ? 1 : this.state.currentStep - 1;
+
     this.setState(prevState => ({
       completeStep: prevState.completeStep.filter(item => item !== currentStep),
       currentStep: currentStep
@@ -103,26 +113,9 @@ class RSSautoplanwizard extends Component {
     );
   };
 
-  handleTitleClick = step => {
+  render() {
     const { currentStep } = this.state;
 
-    if (currentStep === step) {
-      return;
-    } else {
-      const tempArray = [];
-
-      for (let idx = 1; idx < step; idx++) {
-        tempArray.push(idx);
-      }
-
-      this.setState({
-        currentStep: step,
-        completeStep: tempArray
-      });
-    }
-  };
-
-  render() {
     return (
         <Card className="auto-plan-box-shadow">
           <CardHeader className="auto-plan-card-header">
@@ -132,52 +125,54 @@ class RSSautoplanwizard extends Component {
             </p>
           </CardHeader>
           <CardBody className="auto-plan-card-body">
-            <Col sm={{ size: 3 }} className="pdl-0 bd-right">
+            <Col sm={{ size: 3 }} className="step-indicator pdl-0 bd-right">
               <ul>
                 <li>
-                  <a
-                      href="#/"
-                      onClick={() => this.handleTitleClick(1)}
-                      className={this.getClassName(1)}
-                  >
+                  <div className={this.getClassName(1)}>
                     <div className="step-number">{this.completeCheck(1)}</div>
                     <div className="step-label">Machine</div>
-                  </a>
+                  </div>
                 </li>
                 <li>
-                  <a
-                      href="#/"
-                      onClick={() => this.handleTitleClick(2)}
-                      className={this.getClassName(2)}
-                  >
+                  <div className={this.getClassName(2)}>
                     <div className="step-number">{this.completeCheck(2)}</div>
                     <div className="step-label">Target</div>
-                  </a>
+                  </div>
                 </li>
                 <li>
-                  <a
-                      href="#/"
-                      onClick={() => this.handleTitleClick(3)}
-                      className={this.getClassName(3)}
-                  >
+                  <div className={this.getClassName(3)}>
                     <div className="step-number">{this.completeCheck(3)}</div>
                     <div className="step-label">Detail Options</div>
-                  </a>
+                  </div>
                 </li>
                 <li>
-                  <a
-                      href="#/"
-                      onClick={() => this.handleTitleClick(4)}
-                      className={this.getClassName(4)}
-                  >
+                  <div className={this.getClassName(4)}>
                     <div className="step-number">{this.completeCheck(4)}</div>
-                    <div className="step-label">Confirm</div>
-                  </a>
+                    <div className="step-label">Check Settings</div>
+                  </div>
                 </li>
               </ul>
             </Col>
             <Col sm={{ size: 9 }} className="pdr-0 pdl-5">
-              <Option />
+              <Carousel
+                  activeIndex={currentStep - 1}
+                  next={this.handleNext}
+                  previous={this.handlePrev}
+                  interval={false}
+              >
+                <CarouselItem key={STEP_MACHINE}>
+                  <Machine />
+                </CarouselItem>
+                <CarouselItem key={STEP_TARGET}>
+                  <Target />
+                </CarouselItem>
+                <CarouselItem key={STEP_OPTION}>
+                  <Option />
+                </CarouselItem>
+                <CarouselItem key={STEP_CHECK}>
+                  <Check />
+                </CarouselItem>
+              </Carousel>
             </Col>
           </CardBody>
           <CardFooter className="auto-plan-card-footer">

@@ -350,20 +350,22 @@ class RSSautomachinelist extends Component {
     return (
         <div className="form-section machinelist">
           <Col className="pd-0">
-            <div className="form-section-header">
-              <div className="form-section-title">
+            <div className="form-header-section">
+              <div className="form-title-section">
                 Machine List
                 <p>Select a machine from the list.</p>
               </div>
-              <ButtonToggle
-                  outline
-                  size="sm"
-                  color="info"
-                  className={"form-btn" + (ItemsChecked ? " active" : "")}
-                  onClick={this.selectItem}
-              >
-                All
-              </ButtonToggle>
+              <div className="form-btn-section">
+                <ButtonToggle
+                    outline
+                    size="sm"
+                    color="info"
+                    className={"form-btn" + (ItemsChecked ? " active" : "")}
+                    onClick={this.selectItem}
+                >
+                  All
+                </ButtonToggle>
+              </div>
             </div>
             <FormGroup className="custom-scrollbar auto-plan-form-group machinelist">
               {titleList.map((title, index) => {

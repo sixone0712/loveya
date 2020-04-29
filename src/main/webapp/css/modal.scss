@@ -11,20 +11,20 @@
     opacity: 0;
     transition: all 0.2s;
   }
-  &.Custom-modal-anim-enter-active {
+  &.Custom-modal-anim-enter.Custom-modal-anim-enter-active {
     opacity: 1;
   }
   &.Custom-modal-anim-leave {
     opacity: 1;
     transition: all 0.2s;
   }
-  &.Custom-modal-anim-leave-active {
+  &.Custom-modal-anim-leave.Custom-modal-anim-leave-active {
     opacity: 0;
   }
 }
 
 .Custom-modal {
-  z-index: 1000;
+  z-index: 1001;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -46,6 +46,136 @@
     color: #333;
     margin-bottom: 4px
   }
+  .auto-plan-calendar-modal {
+    display: flex;
+    justify-content: center;
+  }
+  .auto-plan-calendar-modal .form-group {
+    margin-top: 1rem;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .fa-angle-left::before {
+    font-style: normal;
+    content: "\25c0";
+    color: rgb(92, 124, 250);
+    cursor: pointer;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .fa-angle-right::before {
+    font-style: normal;
+    content: "\25b6";
+    color: rgb(92, 124, 250);
+    cursor: pointer;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item {
+    width: 100%;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .datepicker-item:first-child {
+    margin-right: 10px;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item label {
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .datetime-picker {
+    border: none;
+    font-size: 12px;
+    width: 250px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  .calendar-nav
+  .current-date,
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  .calendar-nav
+  button,
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td {
+    transition: all 0.2s;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  .calendar-nav
+  .current-date:hover,
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  .calendar-nav
+  button:hover,
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  table
+  tbody
+  tr
+  td:hover {
+    background-color: rgb(230, 230, 230);
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  table
+  tbody
+  tr
+  td.selected {
+    background-color: rgb(92, 124, 250);
+    color: white !important;
+    font-weight: 400;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  table
+  tbody
+  tr
+  td.selected:hover {
+    background-color: rgba(92, 124, 250, 0.7);
+    color: white;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .calendar
+  table
+  tbody
+  tr
+  td.now {
+    color: rgb(92, 124, 250);
+    font-weight: 400;
+  }
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .show-time {
+    font-size: 14px;
+    margin: 0 10px;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .time
+  .sliders
+  .slider
+  .handle:focus,
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .time
+  .sliders
+  .slider
+  .handle:active {
+    background-color: rgb(92, 124, 250);
+    border-color: rgb(92, 124, 250);
+  }
+  .auto-plan-optionlist-form-group .datetime-picker .time .sliders {
+    flex: 0 1 100%;
+  }
+  .auto-plan-calendar-modal .form-group
+  .datetime-picker
+  .time
+  .sliders
+  .slider
+  .handle {
+    top: 3px;
+  }
   .content-with-title {
     border-top: 1px solid #ffa94d;
   }
@@ -64,11 +194,6 @@
     p:first-child {
       margin-top: 1rem;
     }
-  }
-
-  .no-margin-no-padding {
-    margin: 0 !important;
-    padding: 0 !important;
   }
 
   .button-wrap {
@@ -104,7 +229,13 @@
     button.green:active {
       background-color: #40c057;
     }
-
+    button.auto-plan {
+      background-color: rgb(92, 124, 250);
+    }
+    button.auto-plan:hover,
+    button.auto-plan:active {
+      background-color: rgba(92, 124, 250, 0.7);
+    }
     button.gray {
       background-color: #1a202c;
     }
@@ -128,22 +259,34 @@
   }
   &.Custom-modal-anim-enter {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.7);
     transition: all 0.2s;
   }
-  &.Custom-modal-anim-enter-active {
+  &.Custom-modal-anim-enter.Custom-modal-anim-enter-active {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
   &.Custom-modal-anim-leave {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1);
     transition: all 0.2s;
   }
-  &.Custom-modal-anim-leave-active {
+  &.Custom-modal-anim-leave.Custom-modal-anim-leave-active {
     opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.7);
   }
+}
+
+.Custom-modal.auto-plan-calendar-modal {
+  width: 300px;
+}
+
+.Custom-modal.auto-plan-calendar-modal .content-with-title {
+  border-top: 1px solid rgb(92, 124, 250);
+}
+
+.Custom-modal.auto-plan-calendar-modal .button-wrap {
+  margin: 0;
 }
 
 .child-overlay {
