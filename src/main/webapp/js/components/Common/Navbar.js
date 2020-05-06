@@ -75,8 +75,8 @@ class RSSNavbar extends Component{
                        onClick={() => this.handlePageChange("Manual")}>
                 Manual Download
               </NavLink>
-              <UncontrolledDropdown nav inNavbar className={this.getClassName("Auto")}>
-                <DropdownToggle nav>
+              <UncontrolledDropdown nav inNavbar>
+                <DropdownToggle nav className={this.getClassName("Auto")}>
                   Auto Download
                 </DropdownToggle>
                 <DropdownMenu>

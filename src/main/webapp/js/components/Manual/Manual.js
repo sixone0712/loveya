@@ -24,10 +24,10 @@ class Manual extends Component {
         searchListActions.searchSetInitAllList();
         genreListActions.genreInitAllList();
         viewListActions.viewInitAllList();
-        viewListActions.viewLoadToolInfoList("/api/createToolList");
-        viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
-        //viewListActions.viewLoadToolInfoList("/test/createToolList");
-        //viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
+        //viewListActions.viewLoadToolInfoList("/api/createToolList");
+        //viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
+        viewListActions.viewLoadToolInfoList("/test/createToolList");
+        viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
         genreListActions.genreLoadDbList("/db/genre/get");
     }
 

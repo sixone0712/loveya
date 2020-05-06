@@ -7,7 +7,12 @@ import {
     faStop,
     faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
+import ReactTransitionGroup from "react-addons-css-transition-group";
 import Select from "react-select";
+
+const PAGE_STATUS = 1;
+const PAGE_EDIT = 2;
+const PAGE_DOWNLOAD = 3;
 
 const customSelectStyles = {
     container: styles => ({
@@ -76,9 +81,31 @@ const optionList = [
 ];
 
 class RSSautoplanlist extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isOpen: false
+        };
+    }
+
+    openModal = () => {
+        this.setState({
+            isOpen: true
+        });
+    };
+
+    closeModal = () => {
+        this.setState({
+            isOpen: false
+        });
+    };
+
     render() {
+        const { isOpen } = this.state;
+        const { pageChanger } = this.props;
+
         return (
-            <Card className="auto-plan-box-shadow">
+            <Card className="auto-plan-box">
                 <CardHeader className="auto-plan-card-header">
                     Plan Status
                     <p>
@@ -111,7 +138,14 @@ class RSSautoplanlist extends Component {
                             </thead>
                             <tbody>
                             <tr>
-                                <td>Plan 1</td>
+                                <td>
+                                    <div
+                                        className="plan-id-area"
+                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
+                                    >
+                                        Plan 1
+                                    </div>
+                                </td>
                                 <td>default collection plan</td>
                                 <td>3</td>
                                 <td>2020-04-20 00:00 ~ 2020-04-27 23:59</td>
@@ -121,18 +155,28 @@ class RSSautoplanlist extends Component {
                                 <td>2020-04-27 15:37</td>
                                 <td>Completed</td>
                                 <td>
-                                    <div className="icon-area move-left">
+                                    <div
+                                        className="icon-area move-left"
+                                        onClick={() => pageChanger(PAGE_EDIT)}
+                                    >
                                         <FontAwesomeIcon icon={faEdit} />
                                     </div>
                                 </td>
                                 <td>
-                                    <div className="icon-area">
+                                    <div className="icon-area" onClick={this.openModal}>
                                         <FontAwesomeIcon icon={faTrashAlt} />
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Plan 2</td>
+                                <td>
+                                    <div
+                                        className="plan-id-area"
+                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
+                                    >
+                                        Plan 2
+                                    </div>
+                                </td>
                                 <td>gtpark's plan</td>
                                 <td>14</td>
                                 <td>2019-01-24 00:22 ~ 2019-05-31 23:59</td>
@@ -142,12 +186,15 @@ class RSSautoplanlist extends Component {
                                 <td>2019-06-04 00:00</td>
                                 <td>Failed</td>
                                 <td>
-                                    <div className="icon-area move-left">
+                                    <div
+                                        className="icon-area move-left"
+                                        onClick={() => pageChanger(PAGE_EDIT)}
+                                    >
                                         <FontAwesomeIcon icon={faEdit} />
                                     </div>
                                 </td>
                                 <td>
-                                    <div className="icon-area">
+                                    <div className="icon-area" onClick={this.openModal}>
                                         <FontAwesomeIcon icon={faTrashAlt} />
                                     </div>
                                 </td>
@@ -156,6 +203,43 @@ class RSSautoplanlist extends Component {
                         </Table>
                     </Col>
                 </CardBody>
+                {isOpen ? (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    >
+                        <div className="Custom-modal-overlay" onClick={this.closeModal} />
+                        <div className="Custom-modal">
+                            <div className="content-without-title">
+                                <p>
+                                    <FontAwesomeIcon icon={faTrashAlt} size="6x" />
+                                </p>
+                                <p>Are you sure you want to delete this collection plan?</p>
+                            </div>
+                            <div className="button-wrap">
+                                <button
+                                    className="primary form-type left-btn"
+                                    onClick={this.closeModal}
+                                >
+                                    OK
+                                </button>
+                                <button
+                                    className="primary form-type right-btn"
+                                    onClick={this.closeModal}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </ReactTransitionGroup>
+                ) : (
+                    <ReactTransitionGroup
+                        transitionName={"Custom-modal-anim"}
+                        transitionEnterTimeout={200}
+                        transitionLeaveTimeout={200}
+                    />
+                )}
             </Card>
         );
     }

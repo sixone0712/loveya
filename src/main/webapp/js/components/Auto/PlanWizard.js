@@ -18,12 +18,15 @@ const STEP_MACHINE = 1;
 const STEP_TARGET = 2;
 const STEP_OPTION = 3;
 const STEP_CHECK = 4;
+const STEP_MAX = 5;
 
 class RSSautoplanwizard extends Component {
   constructor(props) {
     super(props);
+    const { isNew } = this.props;
     this.state = {
-      currentStep: 1,
+      isNew,
+      currentStep: STEP_MACHINE,
       completeStep: [],
       machineList: [],
       targetList: [],
@@ -83,7 +86,7 @@ class RSSautoplanwizard extends Component {
   drawPrevButton = () => {
     const { currentStep } = this.state;
 
-    if (currentStep !== 1 && currentStep !== 5) {
+    if (currentStep !== STEP_MACHINE && currentStep !== STEP_MAX) {
       return (
           <Button className="footer-btn" onClick={this.handlePrev}>
             Previous
@@ -95,13 +98,17 @@ class RSSautoplanwizard extends Component {
   };
 
   drawNextButton = () => {
-    const { currentStep } = this.state;
+    const { currentStep, isNew } = this.state;
     let buttonName = "";
 
-    if (currentStep < 4) {
+    if (currentStep < STEP_CHECK) {
       buttonName = "Next";
-    } else if (currentStep === 4) {
-      buttonName = "Add Plan";
+    } else if (currentStep === STEP_CHECK) {
+      if (isNew) {
+        buttonName = "Add Plan";
+      } else {
+        buttonName = "Edit Plan";
+      }
     } else {
       return null;
     }
@@ -117,7 +124,7 @@ class RSSautoplanwizard extends Component {
     const { currentStep } = this.state;
 
     return (
-        <Card className="auto-plan-box-shadow">
+        <Card className="auto-plan-box">
           <CardHeader className="auto-plan-card-header">
             Plan Settings
             <p>
@@ -128,26 +135,34 @@ class RSSautoplanwizard extends Component {
             <Col sm={{ size: 3 }} className="step-indicator pdl-0 bd-right">
               <ul>
                 <li>
-                  <div className={this.getClassName(1)}>
-                    <div className="step-number">{this.completeCheck(1)}</div>
+                  <div className={this.getClassName(STEP_MACHINE)}>
+                    <div className="step-number">
+                      {this.completeCheck(STEP_MACHINE)}
+                    </div>
                     <div className="step-label">Machine</div>
                   </div>
                 </li>
                 <li>
-                  <div className={this.getClassName(2)}>
-                    <div className="step-number">{this.completeCheck(2)}</div>
+                  <div className={this.getClassName(STEP_TARGET)}>
+                    <div className="step-number">
+                      {this.completeCheck(STEP_TARGET)}
+                    </div>
                     <div className="step-label">Target</div>
                   </div>
                 </li>
                 <li>
-                  <div className={this.getClassName(3)}>
-                    <div className="step-number">{this.completeCheck(3)}</div>
+                  <div className={this.getClassName(STEP_OPTION)}>
+                    <div className="step-number">
+                      {this.completeCheck(STEP_OPTION)}
+                    </div>
                     <div className="step-label">Detail Options</div>
                   </div>
                 </li>
                 <li>
-                  <div className={this.getClassName(4)}>
-                    <div className="step-number">{this.completeCheck(4)}</div>
+                  <div className={this.getClassName(STEP_CHECK)}>
+                    <div className="step-number">
+                      {this.completeCheck(STEP_CHECK)}
+                    </div>
                     <div className="step-label">Check Settings</div>
                   </div>
                 </li>
