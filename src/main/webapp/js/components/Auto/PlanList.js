@@ -1,18 +1,34 @@
 import React, { Component } from "react";
-import { Col, Card, CardHeader, CardBody, Spinner, Table } from "reactstrap";
+import { Col, Card, CardHeader, CardBody, Table } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faExclamationCircle,
     faEdit,
+    faPlay,
     faStop,
+    faCheck,
+    faTimes,
     faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
-import ReactTransitionGroup from "react-addons-css-transition-group";
 import Select from "react-select";
+import { filePaginate, RenderPagination } from "../common/pagination";
+import ConfirmModal from "./confirmmodal";
 
-const PAGE_STATUS = 1;
 const PAGE_EDIT = 2;
 const PAGE_DOWNLOAD = 3;
+const MODAL_MESSAGE = "Are you sure you want to delete this collection plan?";
+
+const STATUS_RUNNING = 1;
+const STATUS_STOPPED = 2;
+
+const DETAIL_COMPLETE = 1;
+const DETAIL_FAILED = 2;
+
+const optionList = [
+    { value: 10, label: "10" },
+    { value: 30, label: "30" },
+    { value: 50, label: "50" },
+    { value: 100, label: "100" }
+];
 
 const customSelectStyles = {
     container: styles => ({
@@ -46,8 +62,7 @@ const customSelectStyles = {
         border: "1px solid rgb(92, 124, 250)",
         borderRadius: "3px",
         caretColor: "transparent",
-        transition:
-            "color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out",
+        transition: "all .15s ease-in-out",
         ":hover": {
             outline: "0",
             boxShadow: "0 0 0 0.2em rgba(92, 124, 250, 0.5)"
@@ -58,7 +73,7 @@ const customSelectStyles = {
         color: "rgba(92, 124, 250, 0.6)",
         ":hover": {
             ...styles[":hover"],
-            color: "rgba(92, 124, 250, 1)"
+            color: "rgb(92, 124, 250)"
         }
     }),
     indicatorSeparator: styles => ({
@@ -73,175 +88,339 @@ const customSelectStyles = {
     })
 };
 
-const optionList = [
-    { value: 10, label: "10" },
-    { value: 30, label: "30" },
-    { value: 50, label: "50" },
-    { value: 100, label: "100" }
-];
-
 class RSSautoplanlist extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isOpen: false
+            registeredList: [
+                {
+                    planId: "Plan 1",
+                    planDescription: "default Plan",
+                    planTarget: "3",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 2",
+                    planDescription: "gtpark's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 3",
+                    planDescription: "chpark's Plan",
+                    planTarget: "33",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 4",
+                    planDescription: "ymkwon's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 5",
+                    planDescription: "gtpark's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 6",
+                    planDescription: "chpark's Plan",
+                    planTarget: "33",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 7",
+                    planDescription: "ymkwon's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 8",
+                    planDescription: "gtpark's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 9",
+                    planDescription: "chpark's Plan",
+                    planTarget: "33",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 10",
+                    planDescription: "ymkwon's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 11",
+                    planDescription: "gtpark's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 12",
+                    planDescription: "chpark's Plan",
+                    planTarget: "33",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 13",
+                    planDescription: "ymkwon's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 14",
+                    planDescription: "gtpark's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                },
+                {
+                    planId: "Plan 15",
+                    planDescription: "chpark's Plan",
+                    planTarget: "33",
+                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
+                    planStatus: STATUS_RUNNING,
+                    planLastRun: "2020-04-27 15:37",
+                    planDetail: DETAIL_COMPLETE
+                },
+                {
+                    planId: "Plan 16",
+                    planDescription: "ymkwon's Plan",
+                    planTarget: "14",
+                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
+                    planStatus: STATUS_STOPPED,
+                    planLastRun: "2019-06-04 00:00",
+                    planDetail: DETAIL_FAILED
+                }
+            ],
+            pageSize: 10,
+            currentPage: 1,
+            isConfirmOpen: false
         };
     }
 
     openModal = () => {
         this.setState({
-            isOpen: true
+            isConfirmOpen: true
         });
     };
 
     closeModal = () => {
         this.setState({
-            isOpen: false
+            isConfirmOpen: false
+        });
+    };
+
+    handlePaginationChange = page => {
+        this.setState({
+            currentPage: page
+        });
+    };
+
+    handleSelectBoxChange = newValue => {
+        this.setState({
+            pageSize: newValue.value
         });
     };
 
     render() {
-        const { isOpen } = this.state;
-        const { pageChanger } = this.props;
+        const { registeredList } = this.state;
+        const { length: count } = registeredList;
 
-        return (
-            <Card className="auto-plan-box">
-                <CardHeader className="auto-plan-card-header">
-                    Plan Status
-                    <p>
-                        Check the status of the <span>registered collection plan.</span>
-                    </p>
-                    <div className="select-area">
-                        <label>Rows per page : </label>
-                        <Select
-                            options={optionList}
-                            styles={customSelectStyles}
-                            defaultValue={optionList[0]}
-                        />
-                    </div>
-                </CardHeader>
-                <CardBody className="auto-plan-card-body">
-                    <Col className="auto-plan-collection-list">
-                        <Table>
-                            <thead>
-                            <tr>
-                                <th>Plan ID</th>
-                                <th>Description</th>
-                                <th>Target</th>
-                                <th>Collection Period</th>
-                                <th>Status</th>
-                                <th>Last Run Time</th>
-                                <th>Detail</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <div
-                                        className="plan-id-area"
-                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
-                                    >
-                                        Plan 1
-                                    </div>
-                                </td>
-                                <td>default collection plan</td>
-                                <td>3</td>
-                                <td>2020-04-20 00:00 ~ 2020-04-27 23:59</td>
-                                <td>
-                                    <Spinner size="sm" className="spinner-color" /> Running
-                                </td>
-                                <td>2020-04-27 15:37</td>
-                                <td>Completed</td>
-                                <td>
-                                    <div
-                                        className="icon-area move-left"
-                                        onClick={() => pageChanger(PAGE_EDIT)}
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="icon-area" onClick={this.openModal}>
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div
-                                        className="plan-id-area"
-                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
-                                    >
-                                        Plan 2
-                                    </div>
-                                </td>
-                                <td>gtpark's plan</td>
-                                <td>14</td>
-                                <td>2019-01-24 00:22 ~ 2019-05-31 23:59</td>
-                                <td>
-                                    <FontAwesomeIcon icon={faStop} /> Stopped
-                                </td>
-                                <td>2019-06-04 00:00</td>
-                                <td>Failed</td>
-                                <td>
-                                    <div
-                                        className="icon-area move-left"
-                                        onClick={() => pageChanger(PAGE_EDIT)}
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="icon-area" onClick={this.openModal}>
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </Table>
-                    </Col>
-                </CardBody>
-                {isOpen ? (
-                    <ReactTransitionGroup
-                        transitionName={"Custom-modal-anim"}
-                        transitionEnterTimeout={200}
-                        transitionLeaveTimeout={200}
-                    >
-                        <div className="Custom-modal-overlay" onClick={this.closeModal} />
-                        <div className="Custom-modal">
-                            <div className="content-without-title">
-                                <p>
-                                    <FontAwesomeIcon icon={faTrashAlt} size="6x" />
-                                </p>
-                                <p>Are you sure you want to delete this collection plan?</p>
+        if (count === 0) {
+            return (
+                <Card className="auto-plan-box">
+                    <CardHeader className="auto-plan-card-header">
+                        Plan Status
+                        <p>
+                            Check the status of the <span>registered collection plan.</span>
+                        </p>
+                    </CardHeader>
+                    <CardBody className="auto-plan-card-body">
+                        <Col className="auto-plan-collection-list" />
+                    </CardBody>
+                </Card>
+            );
+        } else {
+            const { currentPage, pageSize, isConfirmOpen } = this.state;
+            const { pageChanger } = this.props;
+
+            const plans = filePaginate(registeredList, currentPage, pageSize);
+            const pagination = RenderPagination(
+                pageSize,
+                count,
+                this.handlePaginationChange,
+                "custom-pagination"
+            );
+
+            const renderConfirmModal = ConfirmModal(
+                isConfirmOpen,
+                faTrashAlt,
+                MODAL_MESSAGE,
+                this.closeModal
+            );
+
+            return (
+                <>
+                    {renderConfirmModal}
+                    <Card className="auto-plan-box">
+                        <CardHeader className="auto-plan-card-header">
+                            Plan Status
+                            <p>
+                                Check the status of the <span>registered collection plan.</span>
+                            </p>
+                            <div className="select-area">
+                                <label>Rows per page : </label>
+                                <Select
+                                    options={optionList}
+                                    styles={customSelectStyles}
+                                    defaultValue={optionList[0]}
+                                    onChange={this.handleSelectBoxChange}
+                                />
                             </div>
-                            <div className="button-wrap">
-                                <button
-                                    className="primary form-type left-btn"
-                                    onClick={this.closeModal}
-                                >
-                                    OK
-                                </button>
-                                <button
-                                    className="primary form-type right-btn"
-                                    onClick={this.closeModal}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </ReactTransitionGroup>
-                ) : (
-                    <ReactTransitionGroup
-                        transitionName={"Custom-modal-anim"}
-                        transitionEnterTimeout={200}
-                        transitionLeaveTimeout={200}
-                    />
-                )}
-            </Card>
-        );
+                        </CardHeader>
+                        <CardBody className="auto-plan-card-body">
+                            <Col className="auto-plan-collection-list">
+                                <Table>
+                                    <thead>
+                                    <tr>
+                                        <th>Plan ID</th>
+                                        <th>Description</th>
+                                        <th>Target</th>
+                                        <th>Collection Period</th>
+                                        <th>Status</th>
+                                        <th>Last Run Time</th>
+                                        <th>Detail</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {plans.map((plan, idx) => {
+                                        return (
+                                            <tr key={idx}>
+                                                <td>
+                                                    <div
+                                                        className="plan-id-area"
+                                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
+                                                    >
+                                                        {plan.planId}
+                                                    </div>
+                                                </td>
+                                                <td>{plan.planDescription}</td>
+                                                <td>{plan.planTarget}</td>
+                                                <td>{plan.planPeriod}</td>
+                                                <td>{CreateStatus(plan.planStatus)}</td>
+                                                <td>{plan.planLastRun}</td>
+                                                <td>{CreateDetail(plan.planDetail)}</td>
+                                                <td>
+                                                    <div
+                                                        className="icon-area move-left"
+                                                        onClick={() => pageChanger(PAGE_EDIT)}
+                                                    >
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="icon-area" onClick={this.openModal}>
+                                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    </tbody>
+                                </Table>
+                            </Col>
+                        </CardBody>
+                        {pagination}
+                    </Card>
+                </>
+            );
+        }
+    }
+}
+
+function CreateStatus(status) {
+    switch (status) {
+        case STATUS_RUNNING:
+        default:
+            return (
+                <>
+                    <FontAwesomeIcon className="running" icon={faPlay} /> Running
+                </>
+            );
+
+        case STATUS_STOPPED:
+            return (
+                <>
+                    <FontAwesomeIcon className="stopped" icon={faStop} /> Stopped
+                </>
+            );
+    }
+}
+
+function CreateDetail(detail) {
+    switch (detail) {
+        case DETAIL_COMPLETE:
+        default:
+            return (
+                <>
+                    <FontAwesomeIcon className="completed" icon={faCheck} /> Completed
+                </>
+            );
+
+        case DETAIL_FAILED:
+            return (
+                <>
+                    <FontAwesomeIcon className="failed" icon={faTimes} /> Falied
+                </>
+            );
     }
 }
 

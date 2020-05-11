@@ -14,6 +14,7 @@ import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
+import { filePaginate, RenderPagination } from "../../Common/pagination";
 
 const customSelectStyles = {
   container: styles => ({
@@ -209,6 +210,12 @@ class FileList extends Component {
         }
       });
       const files = filePaginate(sortedList, currentPage, pageSize);
+      const pagination = RenderPagination(
+          pageSize,
+          count,
+          this.handlePageChange,
+          "custom-pagination"
+      );
       return (
         <div className="filelist-container">
           <Card className="ribbon-wrapper filelist-card">
@@ -298,11 +305,7 @@ class FileList extends Component {
                 </tbody>
               </Table>
             </CardBody>
-            <FilePagination
-              pageSize={pageSize}
-              itemsCount={count}
-              onPageChange={this.handlePageChange}
-            />
+            {pagination}
             <div className="filelist-info-area">
               <label>{this.props.downloadCnt} File Selected</label>
             </div>
@@ -329,39 +332,6 @@ class FileList extends Component {
     }
   }
 }
-
-function filePaginate(items, pageNumber, pageSize) {
-  const startIndex = (pageNumber - 1) * pageSize;
-
-  return _(items)
-    .slice(startIndex)
-    .take(pageSize)
-    .value();
-}
-
-const FilePagination = props => {
-  const { itemsCount, pageSize, onPageChange } = props;
-  const pageCount = Math.ceil(itemsCount / pageSize);
-
-  if (pageCount === 1) {
-    return null;
-  }
-
-  return (
-    <div className="filelist-pagination">
-      <PaginationComponent
-        totalItems={itemsCount}
-        pageSize={pageSize}
-        onSelect={onPageChange}
-        maxPaginationNumbers={10}
-        firstPageText={"«"}
-        previousPageText={"‹"}
-        nextPageText={"›"}
-        lastPageText={"»"}
-      />
-    </div>
-  );
-};
 
 export default connect(
     (state) => ({

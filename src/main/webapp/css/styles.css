@@ -73,6 +73,11 @@ a:hover {
     width: 50%;
 }
 
+.custom-pagination {
+    margin: 0 auto;
+    font-size: 14px;
+}
+
 .custom-checkbox .custom-control-input,
 .custom-radio .custom-control-input {
     z-index: 0;
@@ -711,14 +716,15 @@ a:hover {
     font-weight: 300;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
-}
-
-.navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item:active {
     color: black;
 }
 
-.navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item:focus,
 .navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item:active,
+.navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item.active {
+    background-color: white;
+}
+
+.navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item:focus,
 .navbar .navbar-nav .dropdown .dropdown-menu .dropdown-item:hover {
     background-color: rgb(228, 228, 228);
 }
@@ -768,13 +774,20 @@ a:hover {
 /* footer style end */
 
 /* manual body style start */
-.card-btn-area {
+.manual-card-body {
+    overflow-y: auto;
+    margin-top: 20px;
+    height: 400px;
+    padding: 0.25em 1.25em 0.75em 1.25em;
+}
+
+.manual-card-body .card-btn-area {
     position: absolute;
     top: 17px;
     right: 20px;
 }
 
-.card-btn-area .btn + .btn {
+.manual-card-body .card-btn-area .btn + .btn {
     margin-left: 4px;
 }
 /* manual body style end */
@@ -872,25 +885,6 @@ a:hover {
     padding: 16px;
 }
 /* spinner style end */
-
-/* cart style start */
-/*.card {
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}*/
-/* card style end */
-
-/* card body style */
-.manual-card-body {
-    overflow-y: auto;
-    margin-top: 20px;
-    height: 400px;
-    padding: 0.25em 1.25em 0.75em 1.25em;
-}
-/* card body style end */
 
 /* datepicker style start */
 .datepicker-item-area {
@@ -1010,25 +1004,23 @@ td.selected:hover {
     box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.1);
 }
 
-.machinelist-btn,
-.machinelist-btn:hover {
+.machinelist-btn {
     color: rgb(171, 140, 228);
     background-color: white;
     border-color: rgb(171, 140, 228);
 }
 
 .machinelist-btn:not(:disabled):not(.disabled):active,
-.machinelist-btn:not(:disabled):not(.disabled).active {
+.machinelist-btn:not(:disabled):not(.disabled).active,
+.machinelist-btn:hover {
     color: white;
     background-color: rgb(171, 140, 228);
     border-color: rgb(171, 140, 228);
 }
 
 .machinelist-btn:focus,
-.machinelist-btn:not(:disabled):not(.disabled):active:focus,
-.machinelist-btn:not(:disabled):not(.disabled).active:focus,
 .machinelist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(171, 140, 228, 0.5);
+    box-shadow: 0 0 0 0.2em rgba(171, 140, 228, 0.5) !important;
 }
 
 .machinelist-form-group {
@@ -1136,10 +1128,8 @@ td.selected:hover {
 }
 
 .catlist-card .catlist-btn:focus,
-.catlist-card .catlist-btn:not(:disabled):not(.disabled):active:focus,
-.catlist-card .catlist-btn:not(:disabled):not(.disabled).active:focus,
 .catlist-card .catlist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5);
+    box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5) !important;
 }
 
 .catlist-form-group {
@@ -1305,10 +1295,8 @@ td.selected:hover {
 }
 
 .filelist-card .filelist-btn:focus,
-.filelist-card .filelist-btn:not(:disabled):not(.disabled):active:focus,
-.filelist-card .filelist-btn:not(:disabled):not(.disabled).active:focus,
 .filelist-card .filelist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5);
+    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5) !important;
 }
 
 .filelist-card .filelist-item-area {
@@ -1326,6 +1314,33 @@ td.selected:hover {
     font-size: 14px;
     font-weight: 300;
     margin-bottom: 0;
+}
+
+.filelist-card .custom-pagination .page-item .page-link {
+    color: rgb(133, 164, 179);
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+.filelist-card .custom-pagination .page-item.active .page-link {
+    color: white;
+    background-color: rgb(133, 164, 179);
+    border-color: rgb(133, 164, 179);
+}
+
+.filelist-card .custom-pagination .page-item .page-link:focus {
+    border-radius: 3px;
+    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5);
+}
+
+.filelist-card .custom-pagination .page-item.active .page-link:hover {
+    border-color: rgb(175, 199, 210);
+    background-color: rgb(175, 199, 210);
+}
+
+.filelist-card .custom-pagination .page-item:not(.active) .page-link:hover {
+    border-color: rgb(220, 220, 220);
+    background-color: rgb(220, 220, 220);
 }
 
 .filelist-card-body {
@@ -1398,28 +1413,6 @@ td.selected:hover {
     border-color: rgb(133, 164, 179);
 }
 
-/*
-.filelist-container:hover {
-  animation: flAnimation 0.3s;
-  animation-iteration-count: 3;
-}
-
-@keyframes flAnimation {
-  25% {
-    transform: translateX(-4px);
-  }
-  50% {
-    transform: translateX(4px);
-  }
-  75% {
-    transform: translateX(-4px);
-  }
-  100% {
-    transform: translateX(4px);
-  }
-}
-*/
-
 .filelist-card-body table {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
     margin: 0.5em 0;
@@ -1463,8 +1456,8 @@ td.selected:hover {
 
 .filelist-card-body table tbody tr {
     height: 45px;
-    -webkit-transition: background-color 0.3s;
-    transition: background-color 0.3s;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
 }
 
 .filelist-card-body table tbody tr:hover {
@@ -1525,37 +1518,6 @@ td.selected:hover {
     transform: rotate(90deg);
 }
 
-.filelist-pagination {
-    margin: 0 auto;
-    font-size: 14px;
-}
-
-.filelist-pagination .page-item .page-link {
-    color: rgb(133, 164, 179);
-    -webkit-transition: background-color 0.2s, border-color 0.2s;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-.filelist-pagination .page-item.active .page-link {
-    color: white;
-    background-color: rgb(133, 164, 179);
-    border-color: rgb(133, 164, 179);
-}
-
-.filelist-pagination .page-item .page-link:focus {
-    border-radius: 3px;
-    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5);
-}
-
-.filelist-pagination .page-item.active .page-link:hover {
-    border-color: rgb(175, 199, 210);
-    background-color: rgb(175, 199, 210);
-}
-
-.filelist-pagination .page-item:not(.active) .page-link:hover {
-    border-color: rgb(220, 220, 220);
-    background-color: rgb(220, 220, 220);
-}
 /* filelist end */
 
 /* auto download style start */
@@ -1598,6 +1560,33 @@ td.selected:hover {
     animation-name: changeOpacity;
     -webkit-animation-duration: 1s;
     animation-duration: 1s;
+}
+
+.auto-plan-box .custom-pagination .page-item .page-link {
+    color: rgb(92, 124, 250);
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+.auto-plan-box .custom-pagination .page-item.active .page-link {
+    color: white;
+    background-color: rgb(92, 124, 250);
+    border-color: rgb(92, 124, 250);
+}
+
+.auto-plan-box .custom-pagination .page-item .page-link:focus {
+    border-radius: 3px;
+    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+}
+
+.auto-plan-box .custom-pagination .page-item.active .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.7);
+    background-color: rgba(92, 124, 250, 0.7);
+}
+
+.auto-plan-box .custom-pagination .page-item:not(.active) .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.3);
+    background-color: rgba(92, 124, 250, 0.3);
 }
 
 .auto-plan-card-header {
@@ -1731,8 +1720,8 @@ td.selected:hover {
     height: 100%;
     position: absolute;
     /* transition: height 0.6s ease, bottom 0.6s ease; */
-    -webkit-transition: background-color 0.6s;
-    transition: background-color 0.6s;
+    -webkit-transition: all 0.6s;
+    transition: all 0.6s;
     width: 6px;
 }
 
@@ -1740,23 +1729,6 @@ td.selected:hover {
     opacity: 1;
     background: rgb(92, 124, 250);
 }
-
-/*
-.auto-plan-card-body ul li > div.active:hover:after {
-  background-color: rgba(92, 124, 250, 0.6);
-}
-
-.auto-plan-card-body ul li a.active:hover:after,
-.auto-plan-card-body ul li a:not(.active).complete:hover:after,
-.auto-plan-card-body ul li a:not(.active):not(.complete):hover:after {
-  height: 100%;
-  bottom: 0;
-}
-
-.auto-plan-card-body ul li > div:not(.active):not(.complete):hover {
-  color: rgb(122, 123, 151);
-}
-*/
 
 .auto-plan-card-body ul li > div .step-number {
     width: 38px;
@@ -1785,40 +1757,12 @@ td.selected:hover {
     border: 2px solid rgba(122, 123, 151, 0.7);
 }
 
-/*
-.auto-plan-card-body ul li > div.active:hover .step-number {
-  background-color: rgba(92, 124, 250, 0.6);
-}
-
-.auto-plan-card-body ul li > div.complete:hover .step-number {
-  background-color: rgba(115, 181, 93, 0.6);
-}
-
-.auto-plan-card-body
-  ul
-  li
-  > div:not(.active):not(.complete):hover
-  .step-number {
-  border-color: rgb(122, 123, 151);
-}
-*/
-
 .auto-plan-card-body ul li > div .step-label {
     padding: 0 10px;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
     cursor: inherit;
 }
-
-/*
-.auto-plan-card-body ul li > div.active:hover .step-label {
-  color: rgba(92, 124, 250, 0.6);
-}
-
-.auto-plan-card-body ul li > div.complete:hover .step-label {
-  color: rgba(115, 181, 93, 0.6);
-}
-*/
 
 .auto-plan-card-body .ribbon {
     border-radius: 3px;
@@ -1846,20 +1790,6 @@ td.selected:hover {
 }
 
 .auto-plan-card-body .form-header-section .form-btn-section .form-btn,
-.auto-plan-card-body .form-header-section .form-btn-section .form-btn:hover {
-    color: rgb(92, 124, 250);
-    background-color: white;
-    border-color: rgb(92, 124, 250);
-}
-
-.auto-plan-card-body
-.form-header-section
-.form-btn-section
-.form-btn:not(:disabled):not(.disabled):active,
-.auto-plan-card-body
-.form-header-section
-.form-btn-section
-.form-btn:not(:disabled):not(.disabled).active,
 .auto-plan-card-footer .footer-btn,
 .auto-plan-card-footer .footer-btn:not(:disabled):not(.disabled):active,
 .auto-plan-card-footer .footer-btn:not(:disabled):not(.disabled).active,
@@ -1875,25 +1805,34 @@ td.selected:hover {
 .auto-plan-collection-list.download-list
 .content-section.header
 .download-btn:not(:disabled):not(.disabled).active {
+    color: rgb(92, 124, 250);
+    background-color: white;
+    border-color: rgb(92, 124, 250);
+}
+
+.auto-plan-card-body
+.form-header-section
+.form-btn-section
+.form-btn:not(:disabled):not(.disabled):active,
+.auto-plan-card-body .form-header-section .form-btn-section .form-btn:hover,
+.auto-plan-card-body
+.form-header-section
+.form-btn-section
+.form-btn:not(:disabled):not(.disabled).active,
+.auto-plan-card-footer .footer-btn:hover,
+.auto-plan-card-body
+.auto-plan-collection-list.download-list
+.content-section.header
+.download-btn:hover {
     color: white;
     background-color: rgb(92, 124, 250);
     border-color: rgb(92, 124, 250);
 }
 
 .auto-plan-card-body .form-header-section .form-btn:focus,
-.auto-plan-card-body
-.form-header-section
-.form-btn-section
-.form-btn:not(:disabled):not(.disabled):active:focus,
-.auto-plan-card-body
-.form-header-section
-.form-btn-section
-.form-btn:not(:disabled):not(.disabled).active:focus,
 .auto-plan-card-body .form-header-section .form-btn:hover,
 .auto-plan-card-footer .footer-btn:hover,
 .auto-plan-card-footer .footer-btn:focus,
-.auto-plan-card-footer .footer-btn:not(:disabled):not(.disabled):active:focus,
-.auto-plan-card-footer .footer-btn:not(:disabled):not(.disabled).active:focus,
 .auto-plan-card-body
 .auto-plan-collection-list.download-list
 .content-section.header
@@ -1901,16 +1840,8 @@ td.selected:hover {
 .auto-plan-card-body
 .auto-plan-collection-list.download-list
 .content-section.header
-.download-btn:focus,
-.auto-plan-card-body
-.auto-plan-collection-list.download-list
-.content-section.header
-.download-btn:not(:disabled):not(.disabled):active:focus,
-.auto-plan-card-body
-.auto-plan-collection-list.download-list
-.content-section.header
-.download-btn:not(:disabled):not(.disabled).active:focus {
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+.download-btn:focus {
+    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5) !important;
 }
 
 .auto-plan-card-body
@@ -2034,6 +1965,11 @@ td.selected:hover {
     height: 390px;
 }
 
+.auto-plan-optionlist-form-group .form-group > label {
+    position: relative;
+    margin-left: 0.8em;
+}
+
 .auto-plan-optionlist-form-group .period-section {
     display: flex;
     justify-content: space-between;
@@ -2143,6 +2079,7 @@ td.selected:hover {
     width: 90px;
 }
 
+.auto-plan-optionlist-form-group .form-group > label::before,
 .auto-plan-checklist-form-group label::before {
     position: absolute;
     top: 7px;
@@ -2217,8 +2154,8 @@ td.selected:hover {
 
 .auto-plan-collection-list table tbody tr {
     height: 45px;
-    -webkit-transition: background-color 0.3s;
-    transition: background-color 0.3s;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
 }
 
 .auto-plan-collection-list table tbody tr th,
@@ -2282,7 +2219,20 @@ td.selected:hover {
     left: 1px;
 }
 
-.auto-plan-collection-list table .spinner-color {
-    color: rgb(92, 124, 250);
+.auto-plan-collection-list table tbody tr td > svg.stopped,
+.auto-plan-collection-list table tbody tr td > svg.failed {
+    color: rgb(201, 42, 42);
+}
+
+.auto-plan-collection-list table tbody tr td > svg.running,
+.auto-plan-collection-list table tbody tr td > svg.completed {
+    color: rgb(47, 158, 68);
+}
+
+.auto-plan-collection-list table tbody tr td > svg.running {
+    -webkit-animation: changeOpacity 0.7s infinite;
+    animation: changeOpacity 0.7s infinite;
+    -webkit-animation-direction: alternate;
+    animation-direction: alternate;
 }
 /* auto download style end */
