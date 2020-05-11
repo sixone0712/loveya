@@ -1,4 +1,11 @@
 import React, { Component } from "react";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as viewListActions from "../../modules/viewList";
+import * as API from '../../api'
+import services from '../../services';
+import * as DEFINE from "../../define"
+
 import {
   Col,
   Card,
@@ -13,6 +20,7 @@ import Machine from "./MachineList";
 import Target from "./TargetList";
 import Option from "./OptionList";
 import Check from "./CheckSetting";
+import moment from "moment";
 
 const STEP_MACHINE = 1;
 const STEP_TARGET = 2;
@@ -40,8 +48,64 @@ class RSSautoplanwizard extends Component {
     };
   }
 
+
+  calculateTime = (collectType, interval, intervalUnit) => {
+    const intervalInt = Number(interval);
+    let millisec = 0;
+
+    if(collectType =  DEFINE.AUTO_MODE_CYCLE) {
+      switch (intervalUnit) {
+        case DEFINE.AUTO_UNIT_MINUTE:
+          millisec = intervalInt * 60 * 1000;
+          break;
+        case DEFINE.AUTO_UNIT_HOUR:
+          millisec = intervalInt * 60 * 60 * 1000;
+          break;
+        case DEFINE.AUTO_UNIT_DAY:
+          millisec = intervalInt * 60 * 60 * 24 * 1000;
+          break;
+      }
+    }
+    return String(millisec);
+  }
+
+  handleRequestAutoPlan = async () => {
+    const { autoPlan, toolInfoList, logInfoList } = this.props;
+    const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
+    const convInterval = this.calculateTime(collectType, interval, intervalUnit);
+    const toolInfoListJS = toolInfoList.toJS();
+    const logInfoListJS = logInfoList.toJS();
+    const newToolInfoList = toolInfoListJS.filter(item => item.checked === true);
+    const newLogInfoList = logInfoListJS.filter(item => item.checked === true);
+
+    const tools = newToolInfoList.map(item => item.targetname);
+    const logTypes = newLogInfoList.map(item => item.logCode);
+    const logNames = newLogInfoList.map(item => item.logName);
+
+    const reqData = {
+      planId: planId,
+      tools: tools,
+      logTypes: logTypes,
+      logNames: logNames,
+      collectStart: moment(collectStart).format("YYYY-MM-DD HH:mm:ss"),
+      from: moment(from).format("YYYY-MM-DD HH:mm:ss"),
+      to: moment(to).format("YYYY-MM-DD HH:mm:ss"),
+      collectType: collectType,
+      interval: convInterval,
+      description: description,
+    };
+
+    console.log("reqData", reqData);
+    const res = await services.axiosAPI.postByJson("/plan/add", reqData);
+    console.log(res);
+  }
+
   handleNext = () => {
     const currentStep = this.state.currentStep + 1;
+
+    if(currentStep === STEP_MAX) {
+      this.handleRequestAutoPlan();
+    }
 
     this.setState(prevState => ({
       completeStep: [...prevState.completeStep, currentStep - 1],
@@ -122,8 +186,14 @@ class RSSautoplanwizard extends Component {
 
   render() {
     const { currentStep } = this.state;
+    const { logTypeSuccess,
+            toolInfoSuccess,
+            logTypeFailure,
+            toolInfoFailure } = this.props;
 
     return (
+        <>
+          {toolInfoSuccess && logTypeSuccess &&
         <Card className="auto-plan-box">
           <CardHeader className="auto-plan-card-header">
             Plan Settings
@@ -195,8 +265,29 @@ class RSSautoplanwizard extends Component {
             {this.drawNextButton()}
           </CardFooter>
         </Card>
+        }
+        { logTypeFailure && toolInfoFailure &&
+          <div style={{fontsize: 40, marginTop: 400, textAlign: "center"}}>Network Connection Error</div>
+        }
+      </>
     );
   }
 }
 
-export default RSSautoplanwizard;
+export default connect(
+    (state) => ({
+      equipmentList: state.viewList.get('equipmentList'),
+      toolInfoList: state.viewList.get('toolInfoList'),
+      logInfoList: state.viewList.get('logInfoList'),
+      autoPlan: state.autoPlan.get('autoPlan'),
+
+
+      logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],
+      toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST'],
+      logTypeFailure: state.pender.failure['viewList/VIEW_LOAD_TOOLINFO_LIST'],
+      toolInfoFailure: state.pender.failure['viewList/VIEW_LOAD_LOGTYPE_LIST'],
+    }),
+    (dispatch) => ({
+      viewListActions: bindActionCreators(viewListActions, dispatch),
+    })
+)(RSSautoplanwizard);

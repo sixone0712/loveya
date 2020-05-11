@@ -16,6 +16,7 @@ import {NavLink as RRNavLink } from "react-router-dom";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
+import * as viewListActions from "../../modules/viewList"
 import * as API from "../../api";
 import * as Define from "../../define";
 import LogOutModal from "../User/LogOut";
@@ -52,6 +53,12 @@ class RSSNavbar extends Component{
   	await this.setState(() => ({isModalOpen: false,isMode:''}));
   }
 
+  initViewListCheck = async () => {
+    await API.checkAllToolInfoList(this.props, false);
+    await API.checkAllLogInfoList(this.props, false);
+    return true;
+  }
+
 
   onLogout = () => {
     window.sessionStorage.removeItem('isLoggedIn');
@@ -80,7 +87,13 @@ class RSSNavbar extends Component{
                   Auto Download
                 </DropdownToggle>
                 <DropdownMenu>
-                  <DropdownItem tag={RRNavLink} to={Define.PAGE_AUTO} onClick={() => this.handlePageChange("Auto")}>
+                  <DropdownItem
+                      tag={RRNavLink}
+                      to={Define.PAGE_AUTO}
+                      onClick={async () => {
+                        await this.initViewListCheck();
+                        this.handlePageChange("Auto");
+                      }}>
                     Add New Plan
                   </DropdownItem>
                   <DropdownItem divider />
@@ -131,5 +144,6 @@ export default connect(
     }),
     (dispatch) => ({
       loginActions: bindActionCreators(loginActions, dispatch),
+      viewListActions: bindActionCreators(viewListActions, dispatch),
     })
 )(RSSNavbar);

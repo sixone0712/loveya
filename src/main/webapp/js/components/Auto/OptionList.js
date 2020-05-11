@@ -1,4 +1,9 @@
 import React, { Component } from "react";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as autoPlanActions from "../../modules/autoPlan";
+import * as API from '../../api'
+
 import { Col, FormGroup, Input, Label, CustomInput } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
@@ -6,52 +11,33 @@ import { DatetimePicker } from "rc-datetime-picker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import moment from "moment";
 import { Select } from "antd";
+import * as DEFINE from "../../define";
 
 const { Option } = Select;
-
-const MODE_CONTINUE = "Continue";
-const MODE_CYCLE = "cycle";
-const DATE_PERIOD_FROM = 1;
-const DATE_PERIOD_TO = 2;
-const DATE_START_FROM = 3;
 
 class RSSautoformlist extends Component {
   constructor() {
     super();
     this.state = {
-      modeValue: MODE_CONTINUE,
-      period_from: moment()
-          .hour(0)
-          .minute(0),
-      period_to: moment()
-          .hour(23)
-          .minute(59),
-      start_from: moment()
-          .hour(0)
-          .minute(0),
       currentModal: 0,
       modalOpen: false
     };
   }
 
   handleDateChange = (idx, moment) => {
+    const { autoPlanActions } = this.props;
+
     switch (idx) {
-      case DATE_PERIOD_FROM:
-        this.setState({
-          period_from: moment
-        });
+      case DEFINE.AUTO_DATE_PERIOD_FROM:
+        autoPlanActions.autoPlanSetFrom(moment);
         break;
 
-      case DATE_PERIOD_TO:
-        this.setState({
-          period_to: moment
-        });
+      case DEFINE.AUTO_DATE_PERIOD_TO:
+        autoPlanActions.autoPlanSetTo(moment);
         break;
 
-      case DATE_START_FROM:
-        this.setState({
-          start_from: moment
-        });
+      case DEFINE.AUTO_DATE_COLLECT_START:
+        autoPlanActions.autoPlanSetCollectStart(moment);
         break;
 
       default:
@@ -60,15 +46,16 @@ class RSSautoformlist extends Component {
   };
 
   getDateValue = idx => {
+    const { autoPlan } = this.props;
     switch (idx) {
-      case DATE_PERIOD_FROM:
-        return this.state.period_from;
+      case DEFINE.AUTO_DATE_PERIOD_FROM:
+        return autoPlan.get("from");
 
-      case DATE_PERIOD_TO:
-        return this.state.period_to;
+      case DEFINE.AUTO_DATE_PERIOD_TO:
+        return autoPlan.get("to");
 
-      case DATE_START_FROM:
-        return this.state.start_from;
+      case DEFINE.AUTO_DATE_COLLECT_START:
+        return autoPlan.get("collectStart");
 
       default:
         return;
@@ -89,20 +76,39 @@ class RSSautoformlist extends Component {
   };
 
   handleModeChange = mode => {
-    this.setState({
-      modeValue: mode
-    });
+    const { autoPlanActions } = this.props;
+    autoPlanActions.autoPlanSetCollectType(mode);
   };
+
+  handlePlanIdChange = e => {
+    const { autoPlanActions } = this.props;
+    autoPlanActions.autoPlanSetPlanId(e.target.value);
+  }
+
+  handleIntervalChange = e => {
+    const { autoPlanActions } = this.props;
+    autoPlanActions.autoPlanSetInterval(e.target.value);
+  }
+
+  handleIntervalUnitChange = value => {
+    const { autoPlanActions } = this.props;
+    autoPlanActions.autoPlanSetIntervalUnit(value);
+  }
+
+  handleDiscriptionChange = e => {
+    const { autoPlanActions } = this.props;
+    autoPlanActions.autoPlanSetDescription(e.target.value);
+  }
+
 
   render() {
     const {
-      modeValue,
-      period_from,
-      period_to,
-      start_from,
       currentModal,
       modalOpen
     } = this.state;
+
+    const { autoPlan } = this.props;
+    const { planId, collectType, interval, from, to, collectStart, description } = autoPlan.toJS();
 
     return (
         <div className="form-section optionlist">
@@ -124,6 +130,8 @@ class RSSautoformlist extends Component {
                       id="plan_id"
                       bsSize="sm"
                       className="half-width"
+                      value={planId}
+                      onChange={this.handlePlanIdChange}
                   />
                 </FormGroup>
                 <FormGroup>
@@ -134,9 +142,9 @@ class RSSautoformlist extends Component {
                     <Input
                         type="text"
                         bsSize="sm"
-                        value={period_from.format("YYYY-MM-DD HH:mm")}
+                        value={from.format("YYYY-MM-DD HH:mm")}
                         onClick={() =>
-                            this.openModal(DATE_PERIOD_FROM, period_from)
+                            this.openModal(DEFINE.AUTO_DATE_PERIOD_FROM)
                         }
                         readOnly
                     />
@@ -144,8 +152,8 @@ class RSSautoformlist extends Component {
                     <Input
                         type="text"
                         bsSize="sm"
-                        value={period_to.format("YYYY-MM-DD HH:mm")}
-                        onClick={() => this.openModal(DATE_PERIOD_TO, period_to)}
+                        value={to.format("YYYY-MM-DD HH:mm")}
+                        onClick={() => this.openModal(DEFINE.AUTO_DATE_PERIOD_TO)}
                         readOnly
                     />
                   </FormGroup>
@@ -157,8 +165,8 @@ class RSSautoformlist extends Component {
                   <Input
                       type="text"
                       bsSize="sm"
-                      value={start_from.format("YYYY-MM-DD HH:mm")}
-                      onClick={() => this.openModal(DATE_START_FROM, start_from)}
+                      value={collectStart.format("YYYY-MM-DD HH:mm")}
+                      onClick={() => this.openModal(DEFINE.AUTO_DATE_COLLECT_START)}
                       readOnly
                       className="half-width"
                   />
@@ -173,8 +181,8 @@ class RSSautoformlist extends Component {
                         id="mode_continue"
                         name="collection_mode"
                         label="Continuous"
-                        checked={modeValue === MODE_CONTINUE ? true : false}
-                        onChange={() => this.handleModeChange(MODE_CONTINUE)}
+                        checked={collectType === DEFINE.AUTO_MODE_CONTINUOUS ? true : false}
+                        onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CONTINUOUS)}
                     />
                     <CustomInput
                         type="radio"
@@ -182,20 +190,28 @@ class RSSautoformlist extends Component {
                         name="collection_mode"
                         label="Cycle"
                         className="mode-cycle"
-                        checked={modeValue === MODE_CYCLE ? true : false}
-                        onChange={() => this.handleModeChange(MODE_CYCLE)}
+                        checked={collectType === DEFINE.AUTO_MODE_CYCLE ? true : false}
+                        onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CYCLE)}
                     />
                     <div
                         className={
                           "sub-option " +
-                          (modeValue === MODE_CONTINUE ? "hidden" : "show")
+                          (collectType === DEFINE.AUTO_MODE_CONTINUOUS ? "hidden" : "show")
                         }
                     >
-                      <Input type="text" bsSize="sm" />
-                      <Select defaultValue="1">
-                        <Option value="1">Minute</Option>
-                        <Option value="2">Hour</Option>
-                        <Option value="3">Day</Option>
+                      <Input
+                          type="text"
+                          bsSize="sm"
+                          value={interval}
+                          onChange={this.handleIntervalChange}
+                      />
+                      <Select
+                          defaultValue="minute"
+                          onChange={this.handleIntervalUnitChange}
+                      >
+                        <Option value="minute">Minute</Option>
+                        <Option value="hour">Hour</Option>
+                        <Option value="day">Day</Option>
                       </Select>
                     </div>
                   </FormGroup>
@@ -204,7 +220,13 @@ class RSSautoformlist extends Component {
                   <Label for="plan_desc" className="input-label">
                     Description
                   </Label>
-                  <Input type="text" id="plan_desc" bsSize="sm" />
+                  <Input
+                      type="text"
+                      id="plan_desc"
+                      bsSize="sm"
+                      value={description}
+                      onChange={this.handleDiscriptionChange}
+                  />
                 </FormGroup>
               </FormGroup>
             </div>
@@ -250,29 +272,24 @@ class RSSautoformlist extends Component {
 }
 
 class CreateDatetimePicker extends Component {
-  constructor(props) {
-    super(props);
-    const { moment } = this.props;
-    this.state = {
-      moment
-    };
-  }
 
   handleChange = moment => {
     const { idx, changer } = this.props;
-
-    this.setState({
-      moment: moment
-    });
-
     changer(idx, moment);
   };
 
   render() {
-    const { moment } = this.state;
+    const { moment } = this.props;
 
     return <DatetimePicker moment={moment} onChange={this.handleChange} />;
   }
 }
 
-export default RSSautoformlist;
+export default connect(
+    (state) => ({
+      autoPlan: state.autoPlan.get('autoPlan'),
+    }),
+    (dispatch) => ({
+      autoPlanActions: bindActionCreators(autoPlanActions, dispatch),
+    })
+)(RSSautoformlist);

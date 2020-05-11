@@ -1,4 +1,8 @@
 import React, { Component } from "react";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as viewListActions from "../../modules/viewList";
+import * as API from '../../api'
 import { Col, FormGroup, ButtonToggle, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,112 +16,29 @@ const SECTION_DISPLAY_ITEM = 10;
 class RSSautoTargetlist extends Component {
   constructor(props) {
     super(props);
+
+    const logInfoList = API.getLogInfoList(props);
+    const sectionList = this.createTargetSection(logInfoList);
+    let sectionIdx = 0;
+    let writeCount = 1;
+    const targetList = logInfoList.map(item => {
+      let title = sectionList[sectionIdx].title;
+      writeCount++;
+      if (writeCount > 10) {
+        sectionIdx++;
+        writeCount = 1;
+      }
+      return {
+        title: title,
+        ...item,
+      }
+    })
+
     this.state = {
-      targetList: [
-        {
-          id: "tg1",
-          name: "Target 1",
-          value: 1
-        },
-        {
-          id: "tg2",
-          name: "Target 2",
-          value: 2
-        },
-        {
-          id: "tg3",
-          name: "Target 3",
-          value: 3
-        },
-        {
-          id: "tg4",
-          name: "Target 4",
-          value: 4
-        },
-        {
-          id: "tg5",
-          name: "Target 5",
-          value: 5
-        },
-        {
-          id: "tg6",
-          name: "Target 6",
-          value: 6
-        },
-        {
-          id: "tg7",
-          name: "Target 7",
-          value: 7
-        },
-        {
-          id: "tg8",
-          name: "Target 8",
-          value: 8
-        },
-        {
-          id: "tg9",
-          name: "Target 9",
-          value: 9
-        },
-        {
-          id: "tg10",
-          name: "Target 10",
-          value: 10
-        },
-        {
-          id: "tg11",
-          name: "Target 11",
-          value: 11
-        },
-        {
-          id: "tg12",
-          name: "Target 12",
-          value: 12
-        },
-        {
-          id: "tg13",
-          name: "Target 13",
-          value: 13
-        },
-        {
-          id: "tg14",
-          name: "Target 14",
-          value: 14
-        },
-        {
-          id: "tg15",
-          name: "Target 15",
-          value: 15
-        },
-        {
-          id: "tg16",
-          name: "Target 16",
-          value: 16
-        },
-        {
-          id: "tg17",
-          name: "Target 17",
-          value: 17
-        },
-        {
-          id: "tg18",
-          name: "Target 18",
-          value: 18
-        },
-        {
-          id: "tg19",
-          name: "Target 19",
-          value: 19
-        },
-        {
-          id: "tg20",
-          name: "Target 20",
-          value: 20
-        }
-      ],
-      checkedList: [],
-      sectionList: [],
-      filteredData: [],
+      //sectionList: [],
+      //filteredData: [],
+      sectionList: sectionList,
+      filteredData: targetList,
       query: "",
       ItemsChecked: false,
       showSearch: false
@@ -125,88 +46,84 @@ class RSSautoTargetlist extends Component {
   }
 
   handleSearchToggle = () => {
-    const { showSearch, targetList } = this.state;
-
-    if (showSearch === true) {
-      this.createFilteredData(targetList);
-    }
+    const { showSearch } = this.state;
 
     this.setState({
       showSearch: !showSearch,
       query: ""
-    });
-  };
-
-  selectItem = () => {
-    const { ItemsChecked, targetList } = this.state;
-    const collection = [];
-
-    if (!ItemsChecked) {
-      for (const cat of targetList) {
-        collection.push(cat.value);
+    }, () => {
+      if (showSearch === true) {
+        this.createFilteredData(API.getLogInfoList(this.props));
       }
-    }
-
-    this.setState({
-      checkedList: collection,
-      ItemsChecked: !ItemsChecked
     });
   };
 
-  handleCheckboxClick = e => {
-    const { value, checked } = e.target;
+  selectAllItem = async () => {
+    const { ItemsChecked } = this.state;
+    const newFilterData = this.state.filteredData.map(item => {
+      item.checked = !ItemsChecked;
+      return item;
+    });
 
-    if (checked) {
-      this.setState(prevState => ({
-        checkedList: [...prevState.checkedList, parseInt(value, 10)]
-      }));
-    } else {
-      this.setState(prevState => ({
-        checkedList: prevState.checkedList.filter(
-            item => item !== parseInt(value, 10)
-        )
-      }));
-    }
+    await this.setState({
+      ...this.state,
+      ItemsChecked: !ItemsChecked,
+      filteredData: newFilterData,
+    }, () => {
+      API.checkAllLogInfoList(this.props, !ItemsChecked);
+    })
   };
+
+  handleCheckboxClick = async e => {
+    const idx = e.target.id.split('_')[1];
+
+    const newFilterData = this.state.filteredData.map(item => {
+      if(item.keyIndex === parseInt(idx)) {
+        item.checked = !item.checked;
+      }
+      return item;
+    });
+
+    await this.setState({
+      ...this.state,
+      filteredData: newFilterData,
+    }, () => {
+      API.checkLogInfoList(this.props, idx);
+    })
+  }
 
   handleSearch = e => {
-    const { targetList } = this.state;
+    const targetList = API.getLogInfoList(this.props);
     const query = e.target.value;
     const filteredData = targetList.filter(element => {
-      return element.name.toLowerCase().includes(query.toLowerCase());
+      return element.logName.toLowerCase().includes(query.toLowerCase());
     });
 
     this.setState({
+      ...this.state,
       query: query
+    }, () => {
+      this.createFilteredData(filteredData);
     });
-
-    this.createFilteredData(filteredData);
   };
 
   createFilteredData = list => {
     const sectionList = this.createTargetSection(list);
-    const targetList = [];
     let sectionIdx = 0;
     let writeCount = 1;
 
-    for (let targetIdx = 0; targetIdx < list.length; targetIdx++) {
+    const targetList = list.map(item => {
       let title = sectionList[sectionIdx].title;
-
-      const tempData = {
-        title: title,
-        id: list[targetIdx].id,
-        name: list[targetIdx].name,
-        value: list[targetIdx].value
-      };
-
-      targetList.push(tempData);
       writeCount++;
-
       if (writeCount > 10) {
         sectionIdx++;
         writeCount = 1;
       }
-    }
+      return {
+        title: title,
+        ...item,
+      }
+    })
 
     this.setState({
       sectionList: sectionList,
@@ -230,10 +147,11 @@ class RSSautoTargetlist extends Component {
   };
 
   componentDidMount() {
-    this.createFilteredData(this.state.targetList);
+    //this.createFilteredData(API.getLogInfoList(this.props));
   }
 
   render() {
+    console.log("render");
     const {
       showSearch,
       sectionList,
@@ -277,7 +195,7 @@ class RSSautoTargetlist extends Component {
                     size="sm"
                     color="info"
                     className={"form-btn" + (ItemsChecked ? " active" : "")}
-                    onClick={this.selectItem}
+                    onClick={this.selectAllItem}
                     style={{ zIndex: "2" }}
                 >
                   All
@@ -292,7 +210,6 @@ class RSSautoTargetlist extends Component {
                           <CreateCheckBox
                               title={section.title}
                               list={filteredData}
-                              checkedList={checkedList}
                               handleCheckboxClick={this.handleCheckboxClick}
                           />
                         </div>
@@ -314,17 +231,18 @@ class RSSautoTargetlist extends Component {
 }
 
 const CreateCheckBox = props => {
-  const { title, list, checkedList, handleCheckboxClick } = props;
+  const { title, list, handleCheckboxClick } = props;
 
   return (
       <>
-        {list.map(item => {
+        {list.map((item, key) => {
           if (item.title === title) {
             return (
                 <CheckBox
-                    item={item}
-                    key={item.value}
-                    isChecked={checkedList.includes(item.value)}
+                    key={key}
+                    index={item.keyIndex}
+                    name={item.logName}
+                    isChecked={item.checked}
                     handleCheckboxClick={handleCheckboxClick}
                     labelClass="form-check-label"
                 />
@@ -337,4 +255,11 @@ const CreateCheckBox = props => {
   );
 };
 
-export default RSSautoTargetlist;
+export default connect(
+    (state) => ({
+      logInfoList: state.viewList.get('logInfoList'),
+    }),
+    (dispatch) => ({
+      viewListActions: bindActionCreators(viewListActions, dispatch),
+    })
+)(RSSautoTargetlist);
