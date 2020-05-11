@@ -106,7 +106,7 @@ public class FtpWorker {
             OutputStream os = new FileOutputStream(outFile);
 
             while((size=is.read(buf))>0) {
-                os.write(buf);
+                os.write(buf, 0, size);
                 os.flush();
             }
             is.close();
