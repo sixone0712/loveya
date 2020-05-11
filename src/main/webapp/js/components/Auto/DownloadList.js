@@ -7,8 +7,8 @@ import {
     faCheck,
     faExclamation
 } from "@fortawesome/free-solid-svg-icons";
-import { filePaginate, RenderPagination } from "../common/pagination";
-import ConfirmModal from "./confirmmodal";
+import { filePaginate, RenderPagination } from "../common/Pagination";
+import ConfirmModal from "./ConfirmModal";
 
 const MODAL_MESSAGE = "Are you sure you want to delete this request id?";
 

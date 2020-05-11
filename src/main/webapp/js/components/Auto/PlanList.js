@@ -10,8 +10,8 @@ import {
     faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
-import { filePaginate, RenderPagination } from "../common/pagination";
-import ConfirmModal from "./confirmmodal";
+import { filePaginate, RenderPagination } from "../common/Pagination";
+import ConfirmModal from "./ConfirmModal";
 
 const PAGE_EDIT = 2;
 const PAGE_DOWNLOAD = 3;

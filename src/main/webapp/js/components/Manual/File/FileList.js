@@ -14,7 +14,7 @@ import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
-import { filePaginate, RenderPagination } from "../../Common/pagination";
+import { filePaginate, RenderPagination } from "../../Common/Pagination";
 
 const customSelectStyles = {
   container: styles => ({
