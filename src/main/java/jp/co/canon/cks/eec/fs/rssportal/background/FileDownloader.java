@@ -137,6 +137,12 @@ public class FileDownloader extends Thread {
         }
         return mHolders.get(dlId).getDownloadFiles();
     }
+    
+    public List<String> getFabs(@NonNull final String dlId) {
+        if(!isValidId(dlId))
+            return null;
+        return mHolders.get(dlId).getFabs();
+    }
 
     private final Log log = LogFactory.getLog(getClass());
 }

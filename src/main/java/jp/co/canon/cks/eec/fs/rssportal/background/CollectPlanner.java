@@ -161,7 +161,7 @@ public class CollectPlanner extends Thread {
             tool = tool.trim();
             for(String type: types) {
                 type = type.trim();
-                DownloadForm form = new DownloadForm(tool, type);
+                DownloadForm form = new DownloadForm("undefined", tool, type);
                 downloadList.add(form);
 
                 FileInfoModel[] fileInfos = fileServiceManage.createFileList(tool, type, from, to, "", "");

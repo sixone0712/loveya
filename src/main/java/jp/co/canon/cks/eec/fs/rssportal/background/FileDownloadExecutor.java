@@ -220,6 +220,17 @@ public class FileDownloadExecutor implements DownloadConfig {
         this.monitor = monitor;
     }
 
+    public List<String> getFabs() {
+        List<String> fabs = new ArrayList<>();
+        for(DownloadForm form: downloadForms) {
+            String fab = form.getFab();
+            if(!fabs.contains(fab))
+                fabs.add(fab);
+        }
+        return fabs;
+    }
+
+    /* Attributes */
     public boolean isAttrCompression() {
         return attrCompression;
     }

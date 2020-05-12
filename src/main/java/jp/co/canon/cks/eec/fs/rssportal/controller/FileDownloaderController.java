@@ -23,10 +23,8 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 public class FileDownloaderController {
@@ -52,11 +50,11 @@ public class FileDownloaderController {
         }
 
         Map<String, Map<String, DownloadForm>> map = new HashMap<>();
-
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("list");
-        for(Map item: downloadList) {
 
+        for(Map item: downloadList) {
             boolean checkItem = true;
+            checkItem &= item.containsKey("structId");
             checkItem &= item.containsKey("machine");
             checkItem &= item.containsKey("category");
             checkItem &= item.containsKey("file");
@@ -64,7 +62,7 @@ public class FileDownloaderController {
             checkItem &= item.containsKey("date");
 
             if(checkItem) {
-                addDownloadItem(map, (String)item.get("machine"), (String)item.get("category"),
+                addDownloadItem(map, (String)item.get("structId"), (String)item.get("machine"), (String)item.get("category"),
                         (String)item.get("file"), (String)item.get("filesize"), (String)item.get("date"));
             } else {
                 log.error("parameter failed");
@@ -138,10 +136,48 @@ public class FileDownloaderController {
     }
 
     private String createZipFilename(String downloadId) {
+        // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
+
+        if(session==null) {
+            log.error("null session");
+            return null;
+        }
+
+        /*
+        SessionContext context = (SessionContext)session.getAttribute("context");
+        if(context==null || context.isAuthorized()==false) {
+            log.error("unauthorized download request");
+            return null;
+        }
+        String username = context.getUser().getUsername();
+        if(username==null) {
+            log.error("no username");
+            return null;
+        }
+        */
+        String username = "guest";
+
+        List<String> fabs = fileDownloader.getFabs(downloadId);
+        if(fabs==null || fabs.size()==0) {
+            log.error("no fab info");
+            return null;
+        }
+        String fab = fabs.get(0);
+        if(fabs.size()>1) {
+            for(int i=1; i<fabs.size(); ++i)
+                fab += "_"+fabs.get(i);
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String cur = dateFormat.format(new Date(System.currentTimeMillis()));
+
+        String fileName = String.format("%s_%s_%s.zip", username, fab, cur);
+        log.info("filename = "+fileName);
         return downloadId+".zip";
     }
 
-    private void addDownloadItem(final Map map, final String machine, final String category, final String file, final String size, final String date) {
+    private void addDownloadItem(final Map map, String fab, String machine, String category, String file,
+                                 String size, String date) {
 
         DownloadForm form;
 
@@ -150,11 +186,11 @@ public class FileDownloaderController {
             if(submap.containsKey(category)) {
                 form = submap.get(category);
             } else {
-                form = new DownloadForm(machine, category);
+                form = new DownloadForm(fab, machine, category);
                 submap.put(category, form);
             }
         } else {
-            form = new DownloadForm(machine, category);
+            form = new DownloadForm(fab, machine, category);
             Map<String, DownloadForm> submap = new HashMap<>();
             submap.put(category, form);
             map.put(machine, submap);
