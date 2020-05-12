@@ -143,7 +143,6 @@ public class FileDownloaderController {
             return null;
         }
 
-        /*
         SessionContext context = (SessionContext)session.getAttribute("context");
         if(context==null || context.isAuthorized()==false) {
             log.error("unauthorized download request");
@@ -154,8 +153,6 @@ public class FileDownloaderController {
             log.error("no username");
             return null;
         }
-        */
-        String username = "guest";
 
         List<String> fabs = fileDownloader.getFabs(downloadId);
         if(fabs==null || fabs.size()==0) {
