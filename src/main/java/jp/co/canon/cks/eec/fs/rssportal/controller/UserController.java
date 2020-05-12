@@ -51,16 +51,11 @@ public class UserController {
         {
             int userId = serviceUser.verify(username, password);
             if(userId >= 10000) {
-                SessionContext context = (SessionContext) this.httpSession.getAttribute("context");
+                SessionContext context = new SessionContext();
                 UserVo LoginUser = serviceUser.getUser(userId);
-                if(context != null)
-                {
-                    context.setAuthorized(true);
-                    context.setUser(LoginUser);
-                }else
-                {
-                    log.info("Session context is null");
-                }
+                context.setUser(LoginUser);
+                context.setAuthorized(true);
+                httpSession.setAttribute("context", context);
                 res= 0;
             }
             else {
