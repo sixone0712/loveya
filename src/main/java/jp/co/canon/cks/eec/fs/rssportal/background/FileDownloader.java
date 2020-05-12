@@ -5,16 +5,11 @@ import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
-import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.ModelAndViewDefiningException;
 
 import javax.xml.rpc.ServiceException;
 import java.util.HashMap;
@@ -78,30 +73,6 @@ public class FileDownloader extends Thread {
         holder.stop();
         return true;
     }
-
-    /*
-    public List<String> getTotalFileList(@NonNull final String dlId) {
-        if(mHolders.containsKey(dlId)==false) {
-            return null;
-        }
-        return mHolders.get(dlId).getFileList();
-    }
-
-    public List<String> getCompletedFileList(final String dlId) {
-        if(mHolders.containsKey(dlId)==false) {
-            return null;
-        }
-        FileDownloadExecutor holder = mHolders.get(dlId);
-        // FIXME
-        return null;
-    }
-
-
-    public int getCompletedFileCount() {
-        // FIXME
-        return 1000;
-    }
-    */
 
     public String getStatus(@NonNull final String dlId) {
 

@@ -2,7 +2,6 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +20,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     private static final String file_format = "%s/%s/%s";
 
     private enum Status {
-        idle, init, download, compress, complete, error
+        idle, init, download, compress, complete, stop, error
     };
 
     private static int mUniqueKey = 1;
@@ -92,11 +91,12 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     private void compress() {
-        if(status==Status.error) {
-            return;
-        }
-        status = Status.compress;
         log.info(downloadId+": compress()");
+
+        if(status==Status.error || status==Status.stop)
+            return;
+        status = Status.compress;
+
         Compressor comp = new Compressor();
         String zipDir = Paths.get(DownloadConfig.ZIP_PATH, downloadId, "test.zip").toString();
         if(comp.compress(baseDir, zipDir)) {
@@ -109,13 +109,22 @@ public class FileDownloadExecutor implements DownloadConfig {
         status = Status.complete;
     }
 
+    private void cleanup() {
+        log.info(downloadId+": cleanup()");
+
+    }
+
     private Runnable runner = () -> {
         try {
-
             initialize();
-            List<FileServiceProc> procs = new ArrayList<>();
+            if(status==Status.stop)
+                return;
+
             status = Status.download;
-            downloadContexts.forEach(context->{
+            List<FileServiceProc> procs = new ArrayList<>();
+            for(FileDownloadContext context: downloadContexts) {
+                if(status==Status.stop)
+                    break;
                 try {
                     FileServiceProc proc = null;
                     switch (context.getJobType()) {
@@ -139,11 +148,14 @@ public class FileDownloadExecutor implements DownloadConfig {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
+            }
 
             for(FileServiceProc proc:procs)
                 while(proc.isCompleted()==false)
                     Thread.sleep(100);
+
+            if(status==Status.stop)
+                return;
 
             if(attrCompression)
                 compress();
@@ -153,6 +165,29 @@ public class FileDownloadExecutor implements DownloadConfig {
             e.printStackTrace();
         }
     };
+
+    public String getId() {
+        return downloadId;
+    }
+
+    public void start() {
+        log.info("file download start ("+ downloadForms.size()+")");
+        printExecutorInfo();
+        (new Thread(runner)).start();
+    }
+
+    public void stop() {
+        log.info("stop downloading");
+        status = Status.stop;
+    }
+
+    public boolean isRunning() {
+        return (status==Status.complete || status==Status.error || status==Status.stop)?false:true;
+    }
+
+    public String getStatus() {
+        return status.toString();
+    }
 
     private void printExecutorInfo() {
 
@@ -167,30 +202,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             log.info("    "+form.getTool()+" / "+form.getLogType()+" ("+form.getFiles().size()+" files)");
     }
 
-    public String getId() {
-        return downloadId;
-    }
-
-    public void start() {
-        log.info("file download start ("+ downloadForms.size()+")");
-        printExecutorInfo();
-        (new Thread(runner)).start();
-    }
-
-    public void stop() {
-        log.info("stop downloading");
-        stop = true;
-    }
-
-    public boolean isRunning() {
-        return (status==Status.complete || status==Status.error)?false:true;
-    }
-
-    public String getStatus() {
-        return status.toString();
-    }
-
-    public List<String> getFileList() {
+    /*public List<String> getFileList() {
         List<String> list = new ArrayList<>();
         for(DownloadForm form: downloadForms) {
             form.getFiles().forEach(fileInfo -> {
@@ -198,7 +210,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             });
         }
         return list;
-    }
+    }*/
 
     public String getBaseDir() {
         return baseDir;

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class RssController {
-    @RequestMapping(value={"", "*"})
+    @RequestMapping(value={"", "*", "rss/*"})
     public String rss(Model model) {
         model.addAttribute("pageName", "index");
         return "page";

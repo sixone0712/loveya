@@ -1,13 +1,10 @@
 package jp.co.canon.cks.eec.fs.rssportal.session;
 
-import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.ModelAndViewDefiningException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,16 +18,10 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private static final long SESSION_TIMEOUT = 3600*1000;
 
-    private static final String[] GUEST_PERMITTED_PAGES = {
-            "/",
-            "/error",
-            "/user/login",
-            "/dbtest"
-    };
-
     private static final String[] allowedRegex = {
             "/",
             "/error",
+            "/rss/login",
             "/user/login",
             "/dbtest",
             "/build/react/[\\w.]*"
@@ -48,14 +39,11 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             return true;
         }
 
-        log.info("> user-permitted request");
-
         // Check session has been authorized.
         SessionContext context = (SessionContext)session.getAttribute("context");
-        log.info("sessionContext="+context);
         if(context==null) {
             log.warn("invalid access. redirect login page");
-            //response.sendRedirect("/test/login");
+            //response.sendRedirect("/test/login"); // TODO
             return false;
         }
 
@@ -63,7 +51,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         if((current-session.getLastAccessedTime())>SESSION_TIMEOUT) {
             log.info("session timeout");
             session.invalidate();
-            //response.sendRedirect("/test/login");
+            //response.sendRedirect("/test/login"); // TODO
             return false;
         }
         return true;
