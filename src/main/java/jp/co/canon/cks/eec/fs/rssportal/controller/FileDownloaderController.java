@@ -135,6 +135,15 @@ public class FileDownloaderController {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
+    @RequestMapping("/dl/cancel")
+    @ResponseBody
+    public ResponseEntity<String> cancelDownload(@RequestParam(value="dlId") String downloadId) {
+        log.info("request \"/dl/cancel\" ("+"(dlId="+downloadId+")");
+        if(!fileDownloader.cancelRequest(downloadId))
+            return new ResponseEntity("invalid download id", HttpStatus.NOT_FOUND);
+        return new ResponseEntity("ok", HttpStatus.OK);
+    }
+
     private String createZipFilename(String downloadId) {
         // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
 

@@ -50,9 +50,8 @@ public class FileDownloader extends Thread {
         mHolders = new HashMap<>();
     }
 
-
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
-        log.warn("addRequest( request-size="+dlList.size()+")");
+        log.info("addRequest( request-size="+dlList.size()+")");
 
         if(false) {
             if (mHolders.size() >= MAX_THREADS_AT_ONCE) {
@@ -70,6 +69,17 @@ public class FileDownloader extends Thread {
         return holder.getId();
     }
 
+    public boolean cancelRequest(@NonNull final String downloadId) {
+        if(!isValidId(downloadId)) {
+            log.error("cancelRequest/ invalid downloadId "+downloadId);
+            return false;
+        }
+        FileDownloadExecutor holder = mHolders.get(downloadId);
+        holder.stop();
+        return true;
+    }
+
+    /*
     public List<String> getTotalFileList(@NonNull final String dlId) {
         if(mHolders.containsKey(dlId)==false) {
             return null;
@@ -86,10 +96,12 @@ public class FileDownloader extends Thread {
         return null;
     }
 
+
     public int getCompletedFileCount() {
         // FIXME
         return 1000;
     }
+    */
 
     public String getStatus(@NonNull final String dlId) {
 

@@ -38,6 +38,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     private DownloadMonitor monitor;
     private int totalFiles = -1;
     private String mPath = null;
+    private boolean stop = false;
 
     private boolean attrCompression;
     private boolean attrEmptyAllPathBeforeDownload;
@@ -171,13 +172,14 @@ public class FileDownloadExecutor implements DownloadConfig {
     }
 
     public void start() {
-        log.warn("file download start ("+ downloadForms.size()+")");
+        log.info("file download start ("+ downloadForms.size()+")");
         printExecutorInfo();
         (new Thread(runner)).start();
     }
 
     public void stop() {
-        // TBD
+        log.info("stop downloading");
+        stop = true;
     }
 
     public boolean isRunning() {
