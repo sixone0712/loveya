@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
-import PaginationComponent from "react-reactstrap-pagination";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
 import Select from "react-select";
-import _ from "lodash";
 import CheckBox from "../../Common/CheckBox";
 import DownloadConfirmModal from "./DownloadModal"
 import {connect} from "react-redux";
@@ -14,7 +12,7 @@ import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
-import { filePaginate, RenderPagination } from "../../Common/Pagination";
+import { filePaginate, renderPagination } from "../../Common/Pagination";
 
 const customSelectStyles = {
   container: styles => ({
@@ -210,7 +208,7 @@ class FileList extends Component {
         }
       });
       const files = filePaginate(sortedList, currentPage, pageSize);
-      const pagination = RenderPagination(
+      const pagination = renderPagination(
           pageSize,
           count,
           this.handlePageChange,

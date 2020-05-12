@@ -10,8 +10,9 @@ import {
     faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
-import { filePaginate, RenderPagination } from "../common/Pagination";
+import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "./ConfirmModal";
+import * as DEFINE from "../../define";
 
 const PAGE_EDIT = 2;
 const PAGE_DOWNLOAD = 3;
@@ -288,10 +289,8 @@ class RSSautoplanlist extends Component {
             );
         } else {
             const { currentPage, pageSize, isConfirmOpen } = this.state;
-            const { pageChanger } = this.props;
-
             const plans = filePaginate(registeredList, currentPage, pageSize);
-            const pagination = RenderPagination(
+            const pagination = renderPagination(
                 pageSize,
                 count,
                 this.handlePaginationChange,
@@ -347,7 +346,7 @@ class RSSautoplanlist extends Component {
                                                 <td>
                                                     <div
                                                         className="plan-id-area"
-                                                        onClick={() => pageChanger(PAGE_DOWNLOAD)}
+                                                        onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_DOWNLOAD) }
                                                     >
                                                         {plan.planId}
                                                     </div>
@@ -361,7 +360,7 @@ class RSSautoplanlist extends Component {
                                                 <td>
                                                     <div
                                                         className="icon-area move-left"
-                                                        onClick={() => pageChanger(PAGE_EDIT)}
+                                                        onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }
                                                     >
                                                         <FontAwesomeIcon icon={faEdit} />
                                                     </div>

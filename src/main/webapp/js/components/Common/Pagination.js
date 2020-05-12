@@ -1,17 +1,12 @@
 import React from "react";
 import PaginationComponent from "react-reactstrap-pagination";
-import _ from "lodash";
 
-export function filePaginate(items, pageNumber, pageSize) {
-    const startIndex = (pageNumber - 1) * pageSize;
-
-    return _(items)
-        .slice(startIndex)
-        .take(pageSize)
-        .value();
+ export function filePaginate(items, pageNumber, pageSize) {
+     const startIndex = (pageNumber - 1) * pageSize;
+     return items.slice( startIndex, startIndex +  pageSize);
 }
 
-export function RenderPagination(
+export function renderPagination(
     pageSize,
     itemsCount,
     onPageChange,

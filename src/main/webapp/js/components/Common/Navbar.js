@@ -89,7 +89,7 @@ class RSSNavbar extends Component{
                 <DropdownMenu>
                   <DropdownItem
                       tag={RRNavLink}
-                      to={Define.PAGE_AUTO}
+                      to={Define.PAGE_AUTO_PLAN_ADD}
                       onClick={async () => {
                         await this.initViewListCheck();
                         this.handlePageChange("Auto");
@@ -97,7 +97,11 @@ class RSSNavbar extends Component{
                     Add New Plan
                   </DropdownItem>
                   <DropdownItem divider />
-                  <DropdownItem tag={RRNavLink} to={Define.PAGE_AUTO} onClick={() => this.handlePageChange("Auto")}>
+                  <DropdownItem
+                      tag={RRNavLink}
+                      to={Define.PAGE_AUTO_STATUS}
+                      onClick={() => this.handlePageChange("Auto")}
+                  >
                     Plan Status
                   </DropdownItem>
                 </DropdownMenu>

@@ -7,7 +7,7 @@ import {
     faCheck,
     faExclamation
 } from "@fortawesome/free-solid-svg-icons";
-import { filePaginate, RenderPagination } from "../common/Pagination";
+import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "./ConfirmModal";
 
 const MODAL_MESSAGE = "Are you sure you want to delete this request id?";
@@ -185,7 +185,7 @@ class RSSAutoDownloadList extends Component {
         const { length: count } = requestList;
 
         const requests = filePaginate(requestList, currentPage, pageSize);
-        const pagination = RenderPagination(
+        const pagination = renderPagination(
             pageSize,
             count,
             this.handlePaginationChange,

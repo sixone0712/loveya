@@ -1,21 +1,42 @@
-import React from "react";
-import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import React, {Component} from "react";
+import { Row, Col } from "reactstrap";
 import Wizard from "./PlanWizard";
+import * as DEFINE from "../../define";
 
-export default function RSSAutoRegist() {
-  return (
-      <>
-        <Container className="rss-container" fluid={true}>
-          <Breadcrumb className="auto-plan-topic-path">
-            <BreadcrumbItem>Auto Download</BreadcrumbItem>
-            <BreadcrumbItem active>Add New Plan</BreadcrumbItem>
-          </Breadcrumb>
-          <Row className="pd-0">
-            <Col>
-              <Wizard isNew={true}/>
-            </Col>
-          </Row>
-        </Container>
-      </>
-  );
+class RSSAutoRegist extends Component {
+
+    constructor() {
+        super();
+        this.state = {
+            isNew: true
+        }
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        let isNew = true;
+
+        if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_PLAN_EDIT)) {
+            isNew = false;
+        }
+
+        return {
+            ...prevState,
+            isNew: isNew
+        };
+    }
+
+    render() {
+        const { isNew } = this.state;
+        return (
+        <>
+            <Row className="pd-0">
+                <Col>
+                <Wizard isNew={isNew}/>
+                </Col>
+            </Row>
+        </>
+      );
+    }
 }
+
+export default RSSAutoRegist;

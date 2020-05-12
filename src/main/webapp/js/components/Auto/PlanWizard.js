@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
-import * as API from '../../api'
 import services from '../../services';
 import * as DEFINE from "../../define"
 
@@ -98,6 +97,10 @@ class RSSautoplanwizard extends Component {
     console.log("reqData", reqData);
     const res = await services.axiosAPI.postByJson("/plan/add", reqData);
     console.log(res);
+
+    const res2 = await services.axiosAPI.get("/plan/list");
+    console.log(res2)
+
   }
 
   handleNext = () => {
@@ -280,8 +283,6 @@ export default connect(
       toolInfoList: state.viewList.get('toolInfoList'),
       logInfoList: state.viewList.get('logInfoList'),
       autoPlan: state.autoPlan.get('autoPlan'),
-
-
       logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],
       toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST'],
       logTypeFailure: state.pender.failure['viewList/VIEW_LOAD_TOOLINFO_LIST'],
