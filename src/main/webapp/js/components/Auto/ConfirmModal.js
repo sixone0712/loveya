@@ -2,7 +2,7 @@ import React from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function ConfirmModal(isOpen, icon, message, closer) {
+export default function ConfirmModal(isOpen, icon, message, closer, selectedPlanId) {
     return (
         <>
             {isOpen ? (
@@ -20,12 +20,12 @@ export default function ConfirmModal(isOpen, icon, message, closer) {
                             <p>{message}</p>
                         </div>
                         <div className="button-wrap">
-                            <button className="auto-plan form-type left-btn" onClick={closer}>
+                            <button className="auto-plan form-type left-btn" onClick={ () => closer(true, selectedPlanId) }>
                                 OK
                             </button>
                             <button
                                 className="auto-plan form-type right-btn"
-                                onClick={closer}
+                                onClick={ () => closer(false, selectedPlanId) }
                             >
                                 Cancel
                             </button>

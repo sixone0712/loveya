@@ -16,7 +16,6 @@ const SECTION_DISPLAY_ITEM = 10;
 class RSSautoTargetlist extends Component {
   constructor(props) {
     super(props);
-
     const logInfoList = API.getLogInfoList(props);
     const sectionList = this.createTargetSection(logInfoList);
     let sectionIdx = 0;
@@ -35,20 +34,19 @@ class RSSautoTargetlist extends Component {
     })
 
     this.state = {
-      //sectionList: [],
-      //filteredData: [],
       sectionList: sectionList,
       filteredData: targetList,
       query: "",
       ItemsChecked: false,
       showSearch: false
     };
-  }
+ }
 
   handleSearchToggle = () => {
     const { showSearch } = this.state;
 
     this.setState({
+      ...this.state,
       showSearch: !showSearch,
       query: ""
     }, () => {
@@ -146,12 +144,7 @@ class RSSautoTargetlist extends Component {
     return targetSection;
   };
 
-  componentDidMount() {
-    //this.createFilteredData(API.getLogInfoList(this.props));
-  }
-
   render() {
-    console.log("render");
     const {
       showSearch,
       sectionList,

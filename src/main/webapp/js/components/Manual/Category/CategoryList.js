@@ -82,7 +82,7 @@ class CategoryList extends Component {
       showSearch: false,
       query: "",
       selectedGenre: 0,
-      selectedGenreName: ""
+      selectedGenreName: "Select genre..."
     };
   }
 
@@ -127,7 +127,7 @@ class CategoryList extends Component {
 
   handleSelectBoxChange = async (genre) => {
     let id = 0;
-    let name = "";
+    let name = "Select genre...";
 
     if (typeof(genre) === "object") {
       id = genre === null ? 0 : genre.value;
@@ -135,15 +135,14 @@ class CategoryList extends Component {
       id = genre;
     }
 
-    console.log("handleSelectBoxChange");
-
     if (id !== 0) {
       await API.selectGenreList(this.props, id);
       const genreList = await API.getGenreList(this.props).list;
       const findGenre = genreList.find(item => item.id == id);
       name = findGenre.name;
+    } else {
+      await API.selectGenreList(this.props, 0);
     }
-    console.log("name", name);
 
     await this.setState({
         ...this.state,
@@ -247,6 +246,7 @@ class CategoryList extends Component {
                               return { value: list.id, label: list.name };
                             })
                           }
+                          value={ {value: this.state.selectedGenre, label:this.state.selectedGenreName} }
                           placeholder={"Select genre..."}
                           styles={customSelectStyles}
                           noOptionsMessage={() => "Genre not found."}
@@ -266,7 +266,7 @@ class CategoryList extends Component {
                           selectedGenre={this.state.selectedGenre}
                           selectedGenreName={this.state.selectedGenreName}
                           logInfoListCheckCnt={this.props.logInfoListCheckCnt}
-                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          handleSelectBoxChange={(selectedGenre) => this.handleSelectBoxChange(selectedGenre)}
                           getSelectedIdByName={this.getSelectedIdByName}
                       />
                       <InputModal
@@ -282,7 +282,7 @@ class CategoryList extends Component {
                           selectedGenre={this.state.selectedGenre}
                           selectedGenreName={this.state.selectedGenreName}
                           logInfoListCheckCnt={this.props.logInfoListCheckCnt}
-                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          handleSelectBoxChange={(selectedGenre) => this.handleSelectBoxChange(selectedGenre)}
                           getSelectedIdByName={this.getSelectedIdByName}
                        />
                       <ConfirmModal
@@ -295,7 +295,7 @@ class CategoryList extends Component {
                           confirmFunc={this.deleteGenreList}
                           selectedGenre={this.state.selectedGenre}
                           selectedGenreName={this.state.selectedGenreName}
-                          handleSelectBoxChange={() => this.handleSelectBoxChange(selectedGenre)}
+                          handleSelectBoxChange={(selectedGenre) => this.handleSelectBoxChange(selectedGenre)}
                           getSelectedIdByName={this.getSelectedIdByName}
                       />
                     </div>

@@ -2,7 +2,7 @@ import { createAction, handleActions } from 'redux-actions';
 import { Map, List, fromJS, Record } from 'immutable';
 import { pender , applyPenders } from 'redux-pender';
 import services from '../services';
-import * as Define from '../define';
+import * as DEFINE from '../define';
 import moment from "moment";
 
 const AUTO_PLAN_INIT = "autoPlan/AUTO_PLAN_INIT";
@@ -14,6 +14,7 @@ const AUTO_PLAN_SET_COLLECT_TYPE = "autoPlan/AUTO_PLAN_SET_COLLECT_TYPE";
 const AUTO_PLAN_SET_INTERVAL = "autoPlan/AUTO_PLAN_SET_INTERVAL";
 const AUTO_PLAN_SET_INTERVAL_UNIT = "autoPlan/AUTO_PLAN_SET_INTERVAL_UNIT";
 const AUTO_PLAN_SET_DESCRIPTION = "autoPlan/AUTO_PLAN_SET_DESCRIPTION";
+const AUTO_PLAN_SET_EDIT_PLAN_LIST = "autoPlan/AUTO_PLAN_SET_EDIT_PLAN_LIST";
 
 export const autoPlanInit = createAction(AUTO_PLAN_INIT);
 export const autoPlanSetPlanId = createAction(AUTO_PLAN_SET_PLAN_ID);
@@ -24,6 +25,7 @@ export const autoPlanSetCollectType = createAction(AUTO_PLAN_SET_COLLECT_TYPE);
 export const autoPlanSetInterval = createAction(AUTO_PLAN_SET_INTERVAL);
 export const autoPlanSetIntervalUnit = createAction(AUTO_PLAN_SET_INTERVAL_UNIT);
 export const autoPlanSetDescription = createAction(AUTO_PLAN_SET_DESCRIPTION);
+export const autoPlanSetEditPlanList = createAction(AUTO_PLAN_SET_EDIT_PLAN_LIST);
 
 const initialState = Map({
     autoPlan: Map({
@@ -31,9 +33,9 @@ const initialState = Map({
         collectStart: moment().utc().startOf('day'),
         from: moment().utc().startOf('day'),
         to : moment().utc().endOf('day'),
-        collectType: "continue",
+        collectType: DEFINE.AUTO_MODE_CONTINUOUS,
         interval: "",
-        intervalUnit: "minute",
+        intervalUnit: DEFINE.AUTO_UNIT_MINUTE,
         description: ""
     })
 });
@@ -73,6 +75,38 @@ const reducer =  handleActions({
     [AUTO_PLAN_SET_DESCRIPTION] : (state, action) => {
         const description = action.payload;
         return state.setIn(["autoPlan", "description"], description);
+    },
+    [AUTO_PLAN_SET_EDIT_PLAN_LIST] : (state, action) => {
+        const { planId, collectStart, from, to, collectType, interval, description } = action.payload;
+        const intervalInt = Number(interval);
+        let convInterval = ""
+        let intervalUnit = "";
+
+        const minutes = (intervalInt / (1000 * 60)).toFixed(0);
+        const hours = (intervalInt / (1000 * 60 * 60)).toFixed(0);
+        const days = (intervalInt / (1000 * 60 * 60 * 24)).toFixed(0);
+
+        if(days > 0) {
+            intervalUnit = DEFINE.AUTO_UNIT_DAY;
+            convInterval = String(days);
+        } else if( hours > 0) {
+            intervalUnit = DEFINE.AUTO_UNIT_HOUR;
+            convInterval = String(hours);
+        } else {
+            intervalUnit = DEFINE.AUTO_UNIT_MINUTE;
+            convInterval = String(minutes);
+        }
+
+        return state.setIn(["autoPlan", "planId"], planId)
+                    .setIn(["autoPlan", "planId"], planId)
+                    .setIn(["autoPlan", "collectStart"], moment(collectStart))
+                    .setIn(["autoPlan", "from"], moment(from))
+                    .setIn(["autoPlan", "to"], moment(to))
+                    .setIn(["autoPlan", "collectType"], collectType)
+                    .setIn(["autoPlan", "interval"], convInterval)
+                    .setIn(["autoPlan", "intervalUnit"], intervalUnit)
+                    .setIn(["autoPlan", "description"], description);
+
     },
 
 }, initialState);

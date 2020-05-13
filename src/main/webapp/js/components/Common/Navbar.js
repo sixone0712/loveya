@@ -53,13 +53,6 @@ class RSSNavbar extends Component{
   	await this.setState(() => ({isModalOpen: false,isMode:''}));
   }
 
-  initViewListCheck = async () => {
-    await API.checkAllToolInfoList(this.props, false);
-    await API.checkAllLogInfoList(this.props, false);
-    return true;
-  }
-
-
   onLogout = () => {
     window.sessionStorage.removeItem('isLoggedIn');
     window.sessionStorage.removeItem('username');
@@ -77,9 +70,11 @@ class RSSNavbar extends Component{
               RSS
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
-              <NavLink tag={RRNavLink} to={Define.PAGE_MANUAL}
-                       className={this.getClassName("Manual")}
-                       onClick={() => this.handlePageChange("Manual")}>
+              <NavLink
+                  tag={RRNavLink}
+                  to={Define.PAGE_MOVE + Define.GO_PAGE_MANUAL}
+                  className={this.getClassName("Manual")}
+                  onClick={() => this.handlePageChange("Manual")}>
                 Manual Download
               </NavLink>
               <UncontrolledDropdown nav inNavbar>
@@ -89,17 +84,14 @@ class RSSNavbar extends Component{
                 <DropdownMenu>
                   <DropdownItem
                       tag={RRNavLink}
-                      to={Define.PAGE_AUTO_PLAN_ADD}
-                      onClick={async () => {
-                        await this.initViewListCheck();
-                        this.handlePageChange("Auto");
-                      }}>
+                      to={Define.PAGE_MOVE + Define.GO_PAGE_AUTO_PLAN_ADD}
+                      onClick={ () => this.handlePageChange("Auto") }>
                     Add New Plan
                   </DropdownItem>
                   <DropdownItem divider />
                   <DropdownItem
                       tag={RRNavLink}
-                      to={Define.PAGE_AUTO_STATUS}
+                      to={Define.PAGE_MOVE + Define.GO_PAGE_AUTO_STATUS}
                       onClick={() => this.handlePageChange("Auto")}
                   >
                     Plan Status

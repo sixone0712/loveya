@@ -20,6 +20,8 @@ import Target from "./TargetList";
 import Option from "./OptionList";
 import Check from "./CheckSetting";
 import moment from "moment";
+import * as API from "../../api";
+import * as autoPlanActions from "../../modules/autoPlan";
 
 const STEP_MACHINE = 1;
 const STEP_TARGET = 2;
@@ -30,9 +32,10 @@ const STEP_MAX = 5;
 class RSSautoplanwizard extends Component {
   constructor(props) {
     super(props);
-    const { isNew } = this.props;
+    const { isNew, editId } = this.props;
     this.state = {
       isNew,
+      editId,
       currentStep: STEP_MACHINE,
       completeStep: [],
       machineList: [],
@@ -43,10 +46,9 @@ class RSSautoplanwizard extends Component {
       startDate: "",
       planMode: "",
       cycleOption: { count: "", unit: "" },
-      planDescription: ""
+      planDescription: "",
     };
   }
-
 
   calculateTime = (collectType, interval, intervalUnit) => {
     const intervalInt = Number(interval);
@@ -68,7 +70,7 @@ class RSSautoplanwizard extends Component {
     return String(millisec);
   }
 
-  handleRequestAutoPlan = async () => {
+  handleRequestAutoPlanAdd = async () => {
     const { autoPlan, toolInfoList, logInfoList } = this.props;
     const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
     const convInterval = this.calculateTime(collectType, interval, intervalUnit);
@@ -97,17 +99,13 @@ class RSSautoplanwizard extends Component {
     console.log("reqData", reqData);
     const res = await services.axiosAPI.postByJson("/plan/add", reqData);
     console.log(res);
-
-    const res2 = await services.axiosAPI.get("/plan/list");
-    console.log(res2)
-
   }
 
   handleNext = () => {
     const currentStep = this.state.currentStep + 1;
 
-    if(currentStep === STEP_MAX) {
-      this.handleRequestAutoPlan();
+    if(this.state.isNew && currentStep === STEP_MAX) {
+      this.handleRequestAutoPlanAdd();
     }
 
     this.setState(prevState => ({
@@ -188,7 +186,7 @@ class RSSautoplanwizard extends Component {
   };
 
   render() {
-    const { currentStep } = this.state;
+    const { currentStep, isNew } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,
             logTypeFailure,
@@ -249,16 +247,16 @@ class RSSautoplanwizard extends Component {
                   interval={false}
               >
                 <CarouselItem key={STEP_MACHINE}>
-                  <Machine />
+                  <Machine isNew={isNew} />
                 </CarouselItem>
                 <CarouselItem key={STEP_TARGET}>
-                  <Target />
+                  <Target isNew={isNew} />
                 </CarouselItem>
                 <CarouselItem key={STEP_OPTION}>
-                  <Option />
+                  <Option isNew={isNew} />
                 </CarouselItem>
                 <CarouselItem key={STEP_CHECK}>
-                  <Check />
+                  <Check isNew={isNew} />
                 </CarouselItem>
               </Carousel>
             </Col>
@@ -290,5 +288,6 @@ export default connect(
     }),
     (dispatch) => ({
       viewListActions: bindActionCreators(viewListActions, dispatch),
+      autoPlanActions: bindActionCreators(autoPlanActions, dispatch),
     })
 )(RSSautoplanwizard);
