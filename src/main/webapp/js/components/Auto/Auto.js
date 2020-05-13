@@ -2,11 +2,11 @@ import React, {Component} from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { NavLink } from "react-router-dom";
 import * as DEFINE from "../../define";
-import AutoPlan from "./AutoRegist";
+import AutoPlanAdd from "./AutoRegistAdd";
+import AutoPlanEdit from "./AutoRegistEdit";
 import AutoStatus from "./AutoPlanStatus";
 import AutoDownload from "./DownloadList"
 import {Breadcrumb, BreadcrumbItem, Container } from "reactstrap";
-import queryString from 'query-string';
 
 class Auto extends Component {
 
@@ -23,11 +23,8 @@ class Auto extends Component {
             page = DEFINE.AUTO_CUR_PAGE_STATUS;
         } else if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_DOWNLOAD)) {
             page = DEFINE.AUTO_CUR_PAGE_DOWNLOAD;
-        } else if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_PLAN)) {
-            const query = queryString.parse(nextProps.location.search);
-            if(query.mode == "edit") {
-                page = DEFINE.AUTO_CUR_PAGE_EDIT;
-            }
+        } else if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_PLAN_EDIT)) {
+            page = DEFINE.AUTO_CUR_PAGE_EDIT;
         }
 
         return {
@@ -44,7 +41,8 @@ class Auto extends Component {
                 <Container className="rss-container" fluid={true}>
                     <CreateBreadCrumb page={page}/>
                     <Switch>
-                        <Route path={DEFINE.PAGE_AUTO_PLAN} component={AutoPlan}/>
+                        <Route path={DEFINE.PAGE_AUTO_PLAN_ADD} component={AutoPlanAdd}/>
+                        <Route path={DEFINE.PAGE_AUTO_PLAN_EDIT} component={AutoPlanEdit}/>
                         <Route path={DEFINE.PAGE_AUTO_STATUS} component={AutoStatus}/>
                         <Route path={DEFINE.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
                     </Switch>

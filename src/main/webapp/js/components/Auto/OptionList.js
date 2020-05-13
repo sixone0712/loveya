@@ -100,7 +100,6 @@ class RSSautoformlist extends Component {
     autoPlanActions.autoPlanSetDescription(e.target.value);
   }
 
-
   render() {
     const {
       currentModal,
@@ -108,7 +107,7 @@ class RSSautoformlist extends Component {
     } = this.state;
 
     const { autoPlan } = this.props;
-    const { planId, collectType, interval, from, to, collectStart, description } = autoPlan.toJS();
+    const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
 
     return (
         <div className="form-section optionlist">
@@ -206,12 +205,12 @@ class RSSautoformlist extends Component {
                           onChange={this.handleIntervalChange}
                       />
                       <Select
-                          defaultValue="minute"
+                          defaultValue= {intervalUnit}
                           onChange={this.handleIntervalUnitChange}
                       >
-                        <Option value="minute">Minute</Option>
-                        <Option value="hour">Hour</Option>
-                        <Option value="day">Day</Option>
+                        <Option value={DEFINE.AUTO_UNIT_MINUTE}>Minute</Option>
+                        <Option value={DEFINE.AUTO_UNIT_HOUR}>Hour</Option>
+                        <Option value={DEFINE.AUTO_UNIT_DAY}>Day</Option>
                       </Select>
                     </div>
                   </FormGroup>

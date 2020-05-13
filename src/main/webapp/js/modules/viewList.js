@@ -2,6 +2,7 @@ import { createAction, handleActions } from 'redux-actions';
 import { Map, List, fromJS } from 'immutable';
 import { pender } from 'redux-pender';
 import services from '../services';
+import moment from "moment";
 
 const VIEW_INIT_ALL_LIST= 'viewList/VIEW_INIT_ALL_LIST';
 const VIEW_LOAD_TOOLINFO_LIST= 'viewList/VIEW_LOAD_TOOLINFO_LIST';
@@ -11,6 +12,7 @@ const VIEW_CHECK_ALL_TOOL_LIST = 'viewList/VIEW_CHECK_ALL_TOOL_LIST';
 const VIEW_CHECK_LOGTYPE_LIST= 'viewList/VIEW_CHECK_LOGTYPE_LIST';
 const VIEW_CHECK_ALL_LOGTYPE_LIST= 'viewList/VIEW_CHECK_ALL_LOGTYPE_LIST';
 const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
+const VIEW_SET_EDIT_PLAN_LIST= 'viewList/VIEW_SET_EDIT_PLAN_LIST';
 
 export const viewInitAllList = createAction(VIEW_INIT_ALL_LIST);
 export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);	// getURL
@@ -20,6 +22,7 @@ export const viewCheckAllToolList = createAction(VIEW_CHECK_ALL_TOOL_LIST);		// 
 export const viewCheckLogTypeList = createAction(VIEW_CHECK_LOGTYPE_LIST); 	// index
 export const viewCheckAllLogTypeList = createAction(VIEW_CHECK_ALL_LOGTYPE_LIST);		// check
 export const viewApplyGenreList = createAction(VIEW_APPLY_GENRE_LIST); 	// { index, genrelist }
+export const viewSetEditPlanList = createAction(VIEW_SET_EDIT_PLAN_LIST);
 
 const initialState = Map({
 	gotReady: false,	// flag for loaded data
@@ -54,7 +57,21 @@ const initialState = Map({
 			fileListForwarding: null,
 			checked: false
 		})
-	])
+	]),
+
+	editPlanList: Map({
+		id: "",
+		planId: "",
+		planDescription: "",
+		planTarget: "",
+		planPeriod: "",
+		planStatus: "",
+		planLastRun: "",
+		planDetail: "",
+		tool: List([]),
+		logType: List([]),
+	})
+
 });
 
 export default handleActions({
@@ -232,5 +249,50 @@ export default handleActions({
 
 		return state.set("logInfoList", newLogInfoList)
 					.set("logInfoListCheckCnt", logInfoListCheckCnt);
+	},
+	[VIEW_SET_EDIT_PLAN_LIST] : (state, action) => {
+		console.log("handleActions[VIEW_SET_EDIT_PLAN_LIST]");
+		console.log("action.payload", action.payload);
+		const { tool, logCode } = action.payload;
+		console.log("tool", tool);
+		console.log("logCode", logCode);
+		const toolArray = tool.split(",");
+		const logArray = logCode.split(",");
+
+		console.log("toolArray", toolArray);
+		console.log("logArray", logArray);
+
+		const toolInfoList = state.get("toolInfoList");
+		const logInfoList = state.get("logInfoList");
+		let logInfoListCheckCnt = 0;
+		let toolInfoListCheckCnt = 0;
+
+		// all toolinfo list init -> unchecked
+		const initToolInfoList = toolInfoList.map(list => list.set("checked", false));
+		// check Edit list
+		const newToolInfoList = toolArray.reduce((pre, cur) => {
+			const findList = initToolInfoList.find(item => item.get("targetname") == cur);
+			return pre.update(findList.get("keyIndex"), list => {
+				toolInfoListCheckCnt++;
+				return list.set("checked", true);});
+		}, initToolInfoList);
+
+
+		// all loginfo list init -> unchecked
+		const initLogInfoList = logInfoList.map(list => list.set("checked", false));
+
+		// check Edit list
+		const newLogInfoList = logArray.reduce((pre, cur) => {
+			const findList = initLogInfoList.find(item => item.get("logCode") == cur);
+			return pre.update(findList.get("keyIndex"), list => {
+				logInfoListCheckCnt++;
+				return list.set("checked", true);});
+		}, initLogInfoList);
+
+
+		return state.set("logInfoList", newLogInfoList)
+					.set("logInfoListCheckCnt", logInfoListCheckCnt)
+					.set("toolInfoList", newToolInfoList)
+					.set("toolInfoListCheckCnt", toolInfoListCheckCnt);
 	}
 }, initialState)

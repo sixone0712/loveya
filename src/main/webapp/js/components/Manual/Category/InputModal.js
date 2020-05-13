@@ -105,13 +105,13 @@ class InputModal extends Component {
     actionFunc = async (openbtn) => {
         //call async function
         const genreName = this.state.genreName;
-        const id = this.props.selectedGenre;
-        const result = await this.props.confirmFunc(id, genreName);
+        const selectedId = this.props.selectedGenre;
+        const result = await this.props.confirmFunc(selectedId, genreName);
         let alertMsg = "";
         if(result === Define.RSS_SUCCESS){
             this.closeInputModal();
-            const id = this.props.getSelectedIdByName(genreName);
-            this.props.handleSelectBoxChange(id);
+            const reflectingID = this.props.getSelectedIdByName(genreName);
+            this.props.handleSelectBoxChange(reflectingID);
         } else {
             let msg = "";
 

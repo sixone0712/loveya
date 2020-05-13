@@ -13,6 +13,12 @@ import Select from "react-select";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "./ConfirmModal";
 import * as DEFINE from "../../define";
+import services from "../../services"
+import moment from "moment";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as autoPlanActions from "../../modules/autoPlan";
+import * as viewListActions from "../../modules/viewList"
 
 const PAGE_EDIT = 2;
 const PAGE_DOWNLOAD = 3;
@@ -94,6 +100,7 @@ class RSSautoplanlist extends Component {
         super(props);
         this.state = {
             registeredList: [
+                /*
                 {
                     planId: "Plan 1",
                     planDescription: "default Plan",
@@ -102,169 +109,107 @@ class RSSautoplanlist extends Component {
                     planStatus: STATUS_RUNNING,
                     planLastRun: "2020-04-27 15:37",
                     planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 2",
-                    planDescription: "gtpark's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 3",
-                    planDescription: "chpark's Plan",
-                    planTarget: "33",
-                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
-                    planStatus: STATUS_RUNNING,
-                    planLastRun: "2020-04-27 15:37",
-                    planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 4",
-                    planDescription: "ymkwon's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 5",
-                    planDescription: "gtpark's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 6",
-                    planDescription: "chpark's Plan",
-                    planTarget: "33",
-                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
-                    planStatus: STATUS_RUNNING,
-                    planLastRun: "2020-04-27 15:37",
-                    planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 7",
-                    planDescription: "ymkwon's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 8",
-                    planDescription: "gtpark's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 9",
-                    planDescription: "chpark's Plan",
-                    planTarget: "33",
-                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
-                    planStatus: STATUS_RUNNING,
-                    planLastRun: "2020-04-27 15:37",
-                    planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 10",
-                    planDescription: "ymkwon's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 11",
-                    planDescription: "gtpark's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 12",
-                    planDescription: "chpark's Plan",
-                    planTarget: "33",
-                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
-                    planStatus: STATUS_RUNNING,
-                    planLastRun: "2020-04-27 15:37",
-                    planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 13",
-                    planDescription: "ymkwon's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 14",
-                    planDescription: "gtpark's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
-                },
-                {
-                    planId: "Plan 15",
-                    planDescription: "chpark's Plan",
-                    planTarget: "33",
-                    planPeriod: "2020-04-20 00:00 ~ 2020-04-27 23:59",
-                    planStatus: STATUS_RUNNING,
-                    planLastRun: "2020-04-27 15:37",
-                    planDetail: DETAIL_COMPLETE
-                },
-                {
-                    planId: "Plan 16",
-                    planDescription: "ymkwon's Plan",
-                    planTarget: "14",
-                    planPeriod: "2019-01-24 00:22 ~ 2019-05-31 23:59",
-                    planStatus: STATUS_STOPPED,
-                    planLastRun: "2019-06-04 00:00",
-                    planDetail: DETAIL_FAILED
                 }
+                */
             ],
             pageSize: 10,
             currentPage: 1,
-            isConfirmOpen: false
+            isConfirmOpen: false,
+            selectedPlanId: "",
         };
     }
 
-    openModal = () => {
+    componentDidMount() {
+        this.loadPlanList();
+    }
+
+    loadPlanList = async () => {
+        const res =  await services.axiosAPI.get("/plan/list");
+        console.log("res", res);
+        const { data } = res;
+
+        const newData = data.map(item => {
+            const targetArray = item.logType.split(",")
+            return (
+                {
+                    planId: "Plan " + item.id,
+                    planDescription: item.description,
+                    planTarget: targetArray.length,
+                    planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
+                    planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
+                    planStatus: STATUS_RUNNING,     // 수정필요
+                    planLastRun: moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),    // 수정필요
+                    planDetail: DETAIL_COMPLETE,    // 수정필요
+                    id: item.id,
+                    tool: item.tool,
+                    logType: item.logType,
+                    interval: item.interval,
+                    collectStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),    //수정필요
+                }
+            );
+        })
+
         this.setState({
-            isConfirmOpen: true
+            ...this.state,
+            registeredList: newData
+        })
+
+    }
+
+    setEditPlanList = (id) => {
+        const { registeredList } = this.state;
+        const findList = registeredList.find(item => item.id == id);
+
+        const { viewListActions } = this.props;
+        viewListActions.viewSetEditPlanList({ tool: findList.tool, logCode: findList.logType });
+
+        const { autoPlanActions } = this.props;
+        autoPlanActions.autoPlanSetEditPlanList({
+            planId: findList.planId,
+            collectStart: findList.collectStart,
+            from: findList.planPeriodStart,
+            to: findList.planPeriodEnd,
+            collectType: DEFINE.AUTO_MODE_CYCLE,       // 수정필요
+            interval: findList.interval,
+            description: findList.planDescription
+        });
+        //this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT+ "?editId=" + id);
+        this.props.history.push(DEFINE.PAGE_MOVE + DEFINE.GO_PAGE_AUTO_PLAN_EDIT +  "?editId=" + id);
+    }
+
+    openModal = async (planId) => {
+        await this.setState({
+            ...this.state,
+            isConfirmOpen: true,
+            selectedPlanId: planId,
         });
     };
 
-    closeModal = () => {
-        this.setState({
-            isConfirmOpen: false
+    closeModal = async (deleting, selectedPlanId) => {
+        let res;
+        if(deleting) {
+            res = await services.axiosAPI.get('/plan/delete?id='+selectedPlanId);
+        }
+
+        await this.setState({
+            ...this.state,
+            isConfirmOpen: false,
+            selectedPlanId: ""
         });
+
+        setTimeout(this.loadPlanList, 300);
     };
 
     handlePaginationChange = page => {
         this.setState({
+            ...this.state,
             currentPage: page
         });
     };
 
     handleSelectBoxChange = newValue => {
         this.setState({
+            ...this.state,
             pageSize: newValue.value
         });
     };
@@ -288,7 +233,7 @@ class RSSautoplanlist extends Component {
                 </Card>
             );
         } else {
-            const { currentPage, pageSize, isConfirmOpen } = this.state;
+            const { currentPage, pageSize, isConfirmOpen, selectedPlanId } = this.state;
             const plans = filePaginate(registeredList, currentPage, pageSize);
             const pagination = renderPagination(
                 pageSize,
@@ -301,7 +246,8 @@ class RSSautoplanlist extends Component {
                 isConfirmOpen,
                 faTrashAlt,
                 MODAL_MESSAGE,
-                this.closeModal
+                this.closeModal,
+                selectedPlanId
             );
 
             return (
@@ -353,20 +299,22 @@ class RSSautoplanlist extends Component {
                                                 </td>
                                                 <td>{plan.planDescription}</td>
                                                 <td>{plan.planTarget}</td>
-                                                <td>{plan.planPeriod}</td>
+                                                <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
                                                 <td>{CreateStatus(plan.planStatus)}</td>
                                                 <td>{plan.planLastRun}</td>
                                                 <td>{CreateDetail(plan.planDetail)}</td>
                                                 <td>
                                                     <div
                                                         className="icon-area move-left"
-                                                        onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }
+                                                        /*onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }*/
+                                                        onClick={ () =>  this.setEditPlanList(plan.id) }
+
                                                     >
                                                         <FontAwesomeIcon icon={faEdit} />
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={this.openModal}>
+                                                    <div className="icon-area" onClick={ () => this.openModal(plan.id) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>
@@ -423,4 +371,15 @@ function CreateDetail(detail) {
     }
 }
 
-export default RSSautoplanlist;
+export default connect(
+    (state) => ({
+        toolInfoList: state.viewList.get('toolInfoList'),
+        logInfoList: state.viewList.get('logInfoList'),
+        autoPlan: state.autoPlan.get('autoPlan'),
+    }),
+    (dispatch) => ({
+        viewListActions: bindActionCreators(viewListActions, dispatch),
+        autoPlanActions: bindActionCreators(autoPlanActions, dispatch),
+    })
+)(RSSautoplanlist);
+

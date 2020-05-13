@@ -12,6 +12,7 @@ import Navbar from "./components/common/Navbar";
 import Manual from "./components/Manual/Manual";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
+import MovePage from "./components/Common/MovePage";
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
 
@@ -49,6 +50,7 @@ class App extends Component {
                 <>
                     {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}
                     <Switch>
+                        <Route path={Define.PAGE_MOVE} component={MovePage} />
                         <Route path={Define.PAGE_LOGIN} component={Login} />
                         <Route path={Define.PAGE_MANUAL} component={Manual} />
                         <Route path={Define.PAGE_AUTO} component={Auto} />

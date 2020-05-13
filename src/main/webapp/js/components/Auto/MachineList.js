@@ -32,7 +32,6 @@ class RSSautomachinelist extends Component {
   };
 
   render() {
-    //const { machineList, checkedList, titleList, ItemsChecked } = this.state;
     const { ItemsChecked } = this.state;
     const titleList = API.getEquipmentList(this.props);
     const machineList = API.getToolInfoList(this.props);
