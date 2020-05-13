@@ -78,7 +78,7 @@ const CreateBreadCrumb = props => {
             return (
                 <Breadcrumb className="auto-plan-topic-path">
                     <BreadcrumbItem>
-                        <NavLink to={DEFINE.PAGE_AUTO_STATUS} className="link">
+                        <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
                             Plan Status
                         </NavLink>
                     </BreadcrumbItem>
@@ -91,7 +91,7 @@ const CreateBreadCrumb = props => {
                 <>
                     <Breadcrumb className="auto-plan-topic-path">
                         <BreadcrumbItem>
-                            <NavLink to={DEFINE.PAGE_AUTO_STATUS} className="link">
+                            <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
                                 Plan Status
                             </NavLink>
                         </BreadcrumbItem>

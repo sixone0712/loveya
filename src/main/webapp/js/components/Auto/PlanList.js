@@ -157,6 +157,8 @@ class RSSautoplanlist extends Component {
     }
 
     setEditPlanList = (id) => {
+        console.log("setEditPlanList");
+        console.log("id", id);
         const { registeredList } = this.state;
         const findList = registeredList.find(item => item.id == id);
 
@@ -173,8 +175,8 @@ class RSSautoplanlist extends Component {
             interval: findList.interval,
             description: findList.planDescription
         });
-        //this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT+ "?editId=" + id);
-        this.props.history.push(DEFINE.PAGE_MOVE + DEFINE.GO_PAGE_AUTO_PLAN_EDIT +  "?editId=" + id);
+        console.log("id", id);
+        this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_PLAN_EDIT +  "&editId=" + String(id));
     }
 
     openModal = async (planId) => {

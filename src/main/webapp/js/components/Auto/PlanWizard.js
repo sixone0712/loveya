@@ -70,7 +70,7 @@ class RSSautoplanwizard extends Component {
     return String(millisec);
   }
 
-  handleRequestAutoPlanAdd = async () => {
+  makeRequestAutoPlanData = () => {
     const { autoPlan, toolInfoList, logInfoList } = this.props;
     const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
     const convInterval = this.calculateTime(collectType, interval, intervalUnit);
@@ -95,17 +95,39 @@ class RSSautoplanwizard extends Component {
       interval: convInterval,
       description: description,
     };
+    return reqData;
+  }
 
+  handleRequestAutoPlanAdd = async () => {
+    const reqData = this.makeRequestAutoPlanData();
     console.log("reqData", reqData);
     const res = await services.axiosAPI.postByJson("/plan/add", reqData);
     console.log(res);
+
+    console.log("this.props.history", this.props.history);
+    this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_STATUS);
+    // 에러 처리 추가 필요
   }
+
+  handleRequestAutoPlanEdit = async (editId) => {
+    const reqData = this.makeRequestAutoPlanData();
+    console.log("reqData", reqData);
+    console.log("editID", editId);
+    const res = await services.axiosAPI.postByJson("/plan/modify?id=" + editId, reqData);
+    console.log(res);
+    console.log("this.props.history", this.props.history);
+    this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_STATUS);
+    // 에러 처리 추가 필요
+  }
+
 
   handleNext = () => {
     const currentStep = this.state.currentStep + 1;
 
     if(this.state.isNew && currentStep === STEP_MAX) {
       this.handleRequestAutoPlanAdd();
+    } else if(!this.state.isNew && currentStep === STEP_MAX) {
+      this.handleRequestAutoPlanEdit(this.state.editId);
     }
 
     this.setState(prevState => ({
@@ -186,6 +208,8 @@ class RSSautoplanwizard extends Component {
   };
 
   render() {
+    console.log("render");
+    console.log("this.state.editID", this.state.editID);
     const { currentStep, isNew } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,

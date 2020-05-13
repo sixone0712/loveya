@@ -72,7 +72,7 @@ class RSSNavbar extends Component{
             <Nav className="mr-auto" navbar>
               <NavLink
                   tag={RRNavLink}
-                  to={Define.PAGE_MOVE + Define.GO_PAGE_MANUAL}
+                  to={Define.PAGE_REFRESH_MANUAL}
                   className={this.getClassName("Manual")}
                   onClick={() => this.handlePageChange("Manual")}>
                 Manual Download
@@ -84,14 +84,14 @@ class RSSNavbar extends Component{
                 <DropdownMenu>
                   <DropdownItem
                       tag={RRNavLink}
-                      to={Define.PAGE_MOVE + Define.GO_PAGE_AUTO_PLAN_ADD}
+                      to={Define.PAGE_REFRESH_AUTO_PLAN_ADD}
                       onClick={ () => this.handlePageChange("Auto") }>
                     Add New Plan
                   </DropdownItem>
                   <DropdownItem divider />
                   <DropdownItem
                       tag={RRNavLink}
-                      to={Define.PAGE_MOVE + Define.GO_PAGE_AUTO_STATUS}
+                      to={Define.PAGE_REFRESH_AUTO_STATUS}
                       onClick={() => this.handlePageChange("Auto")}
                   >
                     Plan Status

@@ -7,20 +7,21 @@ import * as viewListActions from "../../modules/viewList";
 import * as autoPlanActions from "../../modules/autoPlan";
 import {PAGE_AUTO_PLAN_ADD} from "../../define";
 
-class MovePage extends Component {
+class MoveRefreshPage extends Component {
     async componentDidMount() {
-        console.log("[MovePage] componentDidMount");
+        console.log("[MoveRefreshPage] componentDidMount");
         const {history, location} = this.props;
         const query = queryString.parse(location.search);
         const { target } = query;
 
+        console.log("query", query);
         console.log("target", target);
 
         if (target.includes(DEFINE.PAGE_AUTO_PLAN_EDIT)) {
             console.log("PAGE_AUTO_PLAN_EDIT");
             const { editId } = query;
             console.log("editId", editId);
-            history.push(DEFINE.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
+            history.replace(DEFINE.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
         } else if (target.includes(DEFINE.PAGE_AUTO_PLAN_ADD)) {
             console.log("PAGE_AUTO_PLAN_ADD");
             const {viewListActions} = this.props;
@@ -28,13 +29,13 @@ class MovePage extends Component {
             await viewListActions.viewCheckAllToolList(false);
             await viewListActions.viewCheckAllLogTypeList(false)
             await autoPlanActions.autoPlanInit();
-            history.push(DEFINE.PAGE_AUTO_PLAN_ADD);
+            history.replace(DEFINE.PAGE_AUTO_PLAN_ADD);
         } else if (target.includes(DEFINE.PAGE_MANUAL)) {
             console.log("PAGE_MANUAL");
-            history.push(DEFINE.PAGE_MANUAL);
+            history.replace(DEFINE.PAGE_MANUAL);
         } else if (target.includes(DEFINE.PAGE_AUTO_STATUS)) {
             console.log("PAGE_AUTO_STATUS");
-            history.push(DEFINE.PAGE_AUTO_STATUS);
+            history.replace(DEFINE.PAGE_AUTO_STATUS);
         }
     }
 
@@ -52,4 +53,4 @@ export default connect(
         viewListActions: bindActionCreators(viewListActions, dispatch),
         autoPlanActions: bindActionCreators(autoPlanActions, dispatch),
     })
-)(MovePage);
+)(MoveRefreshPage);

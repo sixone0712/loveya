@@ -127,15 +127,19 @@ class DownloadConfirmModal extends Component {
     closeCancelModal = async (isCancel) => {
         if(isCancel) {
             const downloadStatus = this.props.downloadStatus;
-            const { func } = downloadStatus.toJS();
+            const { func, dlId } = downloadStatus.toJS();
 
-            // SetInveral 상태요청 중지
+            // Stop requesting status to SetInveral
             if(func !== null){
                 clearInterval(func);
+                // Reauest Cancel
+                const res = await services.axiosAPI.get("/dl/cancel?dlId=" + dlId);
+                console.log("res", res)
+                // 에러 처리 추가 필요
             }
 
             const {searchListActions } = this.props;
-            // 상태 초기화
+            // Initialize state
             searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
             this.props.setErrorStatus(Define.RSS_SUCCESS);
             this.closeProcessModal();
@@ -146,7 +150,7 @@ class DownloadConfirmModal extends Component {
                 });
             }, 100);
         } else {
-            // setState는 비동기이기 때문에 await로 대기한다.
+            // setState is asynchronous, so it waits with await.
             await this.setState({
                 ...this.state,
                 cancelModalOpen: false,
@@ -154,7 +158,7 @@ class DownloadConfirmModal extends Component {
 
             const downloadStatus = this.props.downloadStatus;
             const { status, totalFiles, downloadFiles} = downloadStatus.toJS();
-            // 이미 다운로드가 완료 된 상태인 경우 openCompleteModal을 Open한다.
+            // If the download has already been completed, open openCompleteModal.
             if(status === "done" && totalFiles === downloadFiles) {
                 this.openCompleteModal();
             }
