@@ -132,8 +132,6 @@ public class DatabaseTestController {
         return "okay";
     }
 
-
-
     @RequestMapping("/plan/list")
     @ResponseBody
     public String getPlans() {
