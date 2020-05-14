@@ -1,9 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.connect.postgresql;
 
-import jp.co.canon.cks.eec.fs.rssportal.vo.GenreVo;
-import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
-import jp.co.canon.cks.eec.fs.rssportal.vo.UserPermissionVo;
-import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.*;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +26,7 @@ public class PostgresSqlSessionFactory {
                     UserPermissionVo.class,
                     UserVo.class,
                     GenreVo.class,
+                    CommandVo.class,
                     CollectPlanVo.class);
             /*factoryBean.setTypeHandlers(
                     new ArrayTypeHandler()

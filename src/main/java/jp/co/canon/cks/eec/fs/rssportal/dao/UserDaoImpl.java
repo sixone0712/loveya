@@ -56,4 +56,12 @@ public class UserDaoImpl implements UserDao {
         return true;
     }
 
+    @Override
+    public boolean delete(@NonNull UserVo user) {
+        SqlSession session = sessionFactory.openSession(true);
+        session.delete("users.delete", user);
+        session.close();
+        return true;
+    }
+
 }

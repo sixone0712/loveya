@@ -145,13 +145,25 @@ class RSSNavbar extends Component{
               RSS
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
-              <NavLink
-                  tag={RRNavLink}
-                  to={Define.PAGE_REFRESH_MANUAL}
-                  className={this.getClassName("Manual")}
-                  onClick={() => this.handlePageChange("Manual")}>
+
+              <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
+                  <DropdownToggle nav>
                 Manual Download
-              </NavLink>
+              </DropdownToggle>
+                <DropdownMenu>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL} onClick={() => this.handlePageChange("Manual")}>
+                        FTP Download
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual2")}>
+                        VFTP Download(COMPAT/Optional)
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual3")}>
+                        VFTP Download(SSSS/Optional)
+                    </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav className={this.getClassName("Auto")}>
                   Auto Download

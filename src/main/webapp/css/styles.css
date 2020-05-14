@@ -853,6 +853,10 @@ a:hover {
     background: rgb(92, 124, 250);
 }
 
+.ribbon-gray_blue {
+  background: rgb(26, 32, 44);
+}
+
 .ribbon-primary.ribbon-clip::before {
     border-color: rgb(141, 99, 218) rgb(141, 99, 218) transparent transparent;
 }
@@ -867,6 +871,10 @@ a:hover {
 
 .ribbon-info.ribbon-clip::before {
     border-color: rgb(61, 100, 119) rgb(61, 100, 119) transparent transparent;
+}
+
+.ribbon-gray_blue.ribbon-clip::before {
+  border-color: rgb(26, 32, 44) rgb(26, 32, 44) transparent transparent;
 }
 /* ribbon style end */
 
@@ -1116,13 +1124,17 @@ td.selected:hover {
     box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.1);
 }
 
+.catlist-card .cmdlist-btn-toggle,
 .catlist-card .catlist-btn,
 .catlist-card .catlist-btn-toggle:hover {
     color: rgb(255, 169, 77);
     background-color: white;
     border-color: rgb(255, 169, 77);
 }
-
+.catlist-card .cmdlist-btn-toggle:not(:disabled):not(.disabled).active,
+.catlist-card .cmdlist-btn-toggle:hover{
+    margin-left: 4px;
+}
 .catlist-card .catlist-btn:hover {
     color: white;
     background-color: rgb(255, 169, 77);
