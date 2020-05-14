@@ -5,15 +5,33 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faTrashAlt,
     faCheck,
-    faExclamation
+    faExclamation,
+    faExclamationCircle,
+    faDownload
 } from "@fortawesome/free-solid-svg-icons";
 import { filePaginate, renderPagination } from "../Common/Pagination";
-import ConfirmModal from "./ConfirmModal";
+import ConfirmModal from "../Common/ConfirmModal";
+import AlertModal from "../Common/AlertModal";
 
-const MODAL_MESSAGE = "Are you sure you want to delete this request id?";
+const modalMessage = {
+    MODAL_DELETE_MESSAGE: "Are you sure you want to delete the selected file?",
+    MODAL_DOWNLOAD_MESSAGE_1:
+        "Do you want to download a file of the selected request ID?",
+    MODAL_DOWNLOAD_MESSAGE_2: "Do you want to download a new file?",
+    MODAL_ALERT_MESSAGE: "No new files to download."
+};
 
-const STATUS_NEW = 1;
-const STATUS_FINISH = 2;
+const statusType = {
+    STATUS_NEW: 1,
+    STATUS_FINISH: 2
+};
+
+const modalType = {
+    MODAL_DELETE: 1,
+    MODAL_DOWNLOAD_1: 2,
+    MODAL_DOWNLOAD_2: 3,
+    MODAL_ALERT: 4
+};
 
 const customSelectStyles = {
     container: styles => ({
@@ -87,84 +105,122 @@ class RSSAutoDownloadList extends Component {
             requestList: [
                 {
                     requestId: "0000000123456781",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "0000000123456782",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "0000000123456783",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "0000000123456784",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "0000000123456785",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "0000000123456786",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "0000000123456787",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "0000000123456788",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "0000000123456789",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "00000001234567810",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "00000001234567811",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "00000001234567812",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "00000001234567813",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "00000001234567814",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 },
                 {
                     requestId: "00000001234567815",
-                    requestStatus: STATUS_NEW
+                    requestStatus: statusType.STATUS_NEW
                 },
                 {
                     requestId: "00000001234567816",
-                    requestStatus: STATUS_FINISH
+                    requestStatus: statusType.STATUS_FINISH
                 }
             ],
             pageSize: 10,
             currentPage: 1,
-            isOpen: false
+            isDeleteOpen: false,
+            isSelectDownloadOpen: false,
+            isNewDownloadOpen: false,
+            isAlertOpen: false,
+            modalMessage: ""
         };
     }
 
-    openModal = () => {
-        this.setState({
-            isOpen: true
-        });
+    openModal = type => {
+        switch (type) {
+            case modalType.MODAL_DELETE:
+                this.setState({
+                    isDeleteOpen: true,
+                    modalMessage: modalMessage.MODAL_DELETE_MESSAGE
+                });
+                break;
+
+            case modalType.MODAL_DOWNLOAD_1:
+                this.setState({
+                    isSelectDownloadOpen: true,
+                    modalMessage: modalMessage.MODAL_DOWNLOAD_MESSAGE_1
+                });
+                break;
+
+            case modalType.MODAL_DOWNLOAD_2:
+                this.setState({
+                    isNewDownloadOpen: true,
+                    modalMessage: modalMessage.MODAL_DOWNLOAD_MESSAGE_2
+                });
+                break;
+
+            case modalType.MODAL_ALERT:
+                this.setState({
+                    isAlertOpen: true,
+                    modalMessage: modalMessage.MODAL_ALERT_MESSAGE
+                });
+                break;
+
+            default:
+                console.log("type error!!");
+                break;
+        }
     };
 
     closeModal = () => {
         this.setState({
-            isOpen: false
+            isDeleteOpen: false,
+            isSelectDownloadOpen: false,
+            isNewDownloadOpen: false,
+            isAlertOpen: false,
+            modalMessage: ""
         });
     };
 
@@ -180,8 +236,25 @@ class RSSAutoDownloadList extends Component {
         });
     };
 
+    checkNewDownloadFile = value => {
+        if (value === true) {
+            this.openModal(modalType.MODAL_DOWNLOAD_2);
+        } else {
+            this.openModal(modalType.MODAL_ALERT);
+        }
+    };
+
     render() {
-        const { requestList, pageSize, currentPage, isOpen } = this.state;
+        const {
+            requestList,
+            pageSize,
+            currentPage,
+            isDeleteOpen,
+            isSelectDownloadOpen,
+            isNewDownloadOpen,
+            isAlertOpen,
+            modalMessage
+        } = this.state;
         const { length: count } = requestList;
 
         const requests = filePaginate(requestList, currentPage, pageSize);
@@ -192,16 +265,50 @@ class RSSAutoDownloadList extends Component {
             "custom-pagination"
         );
 
-        const renderModal = ConfirmModal(
-            isOpen,
+        const renderDeleteModal = ConfirmModal(
+            isDeleteOpen,
             faTrashAlt,
-            MODAL_MESSAGE,
+            modalMessage,
+            "auto-plan",
+            this.closeModal,
+            this.closeModal,
+            this.closeModal
+        );
+
+        const renderSelectDownloadModal = ConfirmModal(
+            isSelectDownloadOpen,
+            faDownload,
+            modalMessage,
+            "auto-plan",
+            this.closeModal,
+            this.closeModal,
+            this.closeModal
+        );
+
+        const renderNewDownloadModal = ConfirmModal(
+            isNewDownloadOpen,
+            faDownload,
+            modalMessage,
+            "auto-plan",
+            this.closeModal,
+            this.closeModal,
+            this.closeModal
+        );
+
+        const renderAlertModal = AlertModal(
+            isAlertOpen,
+            faExclamationCircle,
+            modalMessage,
+            "auto-plan",
             this.closeModal
         );
 
         return (
             <>
-                {renderModal}
+                {renderDeleteModal}
+                {renderSelectDownloadModal}
+                {renderNewDownloadModal}
+                {renderAlertModal}
                 <Card className="auto-plan-box">
                     <CardHeader className="auto-plan-card-header">
                         Download List
@@ -223,7 +330,7 @@ class RSSAutoDownloadList extends Component {
                             <div className="content-section header">
                                 <div className="plan-id">ID: CollectionPlan-501201-01</div>
                                 <div>
-                                    <Button size="sm" className="download-btn">
+                                    <Button size="sm" className="download-btn" onClick={() => this.checkNewDownloadFile(false)}>
                                         New File Download
                                     </Button>
                                 </div>
@@ -241,13 +348,13 @@ class RSSAutoDownloadList extends Component {
                                     return (
                                         <tr key={idx}>
                                             <td>
-                                                <div className="request-id-area">
+                                                <div className="request-id-area" onClick={() => this.openModal(modalType.MODAL_DOWNLOAD_1)}>
                                                     {request.requestId}
                                                 </div>
                                             </td>
                                             <td>{CreateStatus(request.requestStatus)}</td>
                                             <td>
-                                                <div className="icon-area" onClick={this.openModal}>
+                                                <div className="icon-area" onClick={() => this.openModal(modalType.MODAL_DELETE)}>
                                                     <FontAwesomeIcon icon={faTrashAlt} />
                                                 </div>
                                             </td>
@@ -267,20 +374,23 @@ class RSSAutoDownloadList extends Component {
 
 function CreateStatus(status) {
     switch (status) {
-        case STATUS_NEW:
-        default:
+        case statusType.STATUS_NEW:
             return (
                 <>
                     <FontAwesomeIcon className="twinkle" icon={faExclamation} /> New
                 </>
             );
 
-        case STATUS_FINISH:
+        case statusType.STATUS_FINISH:
             return (
                 <>
                     <FontAwesomeIcon icon={faCheck} /> Finished
                 </>
             );
+
+        default:
+            console.log("invalid status!!!");
+            return null;
     }
 }
 

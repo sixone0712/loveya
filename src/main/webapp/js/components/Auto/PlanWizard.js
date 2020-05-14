@@ -4,7 +4,6 @@ import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import services from '../../services';
 import * as DEFINE from "../../define"
-
 import {
   Col,
   Card,
@@ -22,12 +21,20 @@ import Check from "./CheckSetting";
 import moment from "moment";
 import * as API from "../../api";
 import * as autoPlanActions from "../../modules/autoPlan";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import AlertModal from "../Common/AlertModal";
 
 const STEP_MACHINE = 1;
 const STEP_TARGET = 2;
 const STEP_OPTION = 3;
 const STEP_CHECK = 4;
 const STEP_MAX = 5;
+
+const MACHINE_ALERT_MESSAGE = "You must select at least one or more machines.";
+const TARGET_ALERT_MESSAGE = "You must select at least one or more targets.";
+const PLAN_ID_ALERT_MESSAGE = "Plan ID must be at least 1 character long."
+const FROM_TO_ALERT_MESSAGE = "Please set the From(Period) time before the To(Period) time.";
+const CYCLE_ALERT_MESSAGE = "Cycle mode must have a minimum of 1 interval.";
 
 class RSSautoplanwizard extends Component {
   constructor(props) {
@@ -47,6 +54,8 @@ class RSSautoplanwizard extends Component {
       planMode: "",
       cycleOption: { count: "", unit: "" },
       planDescription: "",
+      isAlertOpen: false,
+      alertMessage: null
     };
   }
 
@@ -54,7 +63,7 @@ class RSSautoplanwizard extends Component {
     const intervalInt = Number(interval);
     let millisec = 0;
 
-    if(collectType =  DEFINE.AUTO_MODE_CYCLE) {
+    if(collectType === DEFINE.AUTO_MODE_CYCLE) {
       switch (intervalUnit) {
         case DEFINE.AUTO_UNIT_MINUTE:
           millisec = intervalInt * 60 * 1000;
@@ -122,23 +131,29 @@ class RSSautoplanwizard extends Component {
 
 
   handleNext = () => {
-    const currentStep = this.state.currentStep + 1;
+    const { currentStep } = this.state;
+    const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt } = this.props;
+    const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan);
 
-    if(this.state.isNew && currentStep === STEP_MAX) {
-      this.handleRequestAutoPlanAdd();
-    } else if(!this.state.isNew && currentStep === STEP_MAX) {
-      this.handleRequestAutoPlanEdit(this.state.editId);
+    if(message === null) {
+      if(this.state.isNew && currentStep === STEP_CHECK) {
+        this.handleRequestAutoPlanAdd();
+      } else if(!this.state.isNew && currentStep === STEP_CHECK) {
+        this.handleRequestAutoPlanEdit(this.state.editId);
+      }
+
+      this.setState(prevState => ({
+        completeStep: [...prevState.completeStep, currentStep],
+        currentStep: currentStep + 1
+      }));
+    } else {
+      this.modalOpen(message);
     }
-
-    this.setState(prevState => ({
-      completeStep: [...prevState.completeStep, currentStep - 1],
-      currentStep: currentStep
-    }));
   };
 
   handlePrev = () => {
     const currentStep =
-        this.state.currentStep <= 1 ? 1 : this.state.currentStep - 1;
+        this.state.currentStep <= STEP_MACHINE ? STEP_MACHINE : this.state.currentStep - 1;
 
     this.setState(prevState => ({
       completeStep: prevState.completeStep.filter(item => item !== currentStep),
@@ -173,7 +188,7 @@ class RSSautoplanwizard extends Component {
   drawPrevButton = () => {
     const { currentStep } = this.state;
 
-    if (currentStep !== STEP_MACHINE && currentStep !== STEP_MAX) {
+    if (currentStep !== STEP_MACHINE) {
       return (
           <Button className="footer-btn" onClick={this.handlePrev}>
             Previous
@@ -207,14 +222,28 @@ class RSSautoplanwizard extends Component {
     );
   };
 
+  modalOpen = (message) => {
+    this.setState({
+      isAlertOpen: true,
+      alertMessage: message
+    });
+  }
+
+  modalClose = () => {
+    this.setState({
+      isAlertOpen: false,
+      alertMessage: null
+    });
+  }
   render() {
     console.log("render");
     console.log("this.state.editID", this.state.editID);
-    const { currentStep, isNew } = this.state;
+    const { currentStep, isNew, isAlertOpen, alertMessage } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,
             logTypeFailure,
             toolInfoFailure } = this.props;
+    const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, alertMessage, "auto-plan", this.modalClose);
 
     return (
         <>
@@ -292,10 +321,50 @@ class RSSautoplanwizard extends Component {
         </Card>
         }
         { logTypeFailure && toolInfoFailure &&
-          <div style={{fontsize: 40, marginTop: 400, textAlign: "center"}}>Network Connection Error</div>
+          <div className="network-connection-error">Network Connection Error</div>
         }
+        {renderAlertModal}
       </>
     );
+  }
+}
+
+function invalidCheck(step, toolCnt, targetCnt, optionList) {
+  switch(step) {
+    case STEP_MACHINE:
+      if (toolCnt === 0) {
+        return MACHINE_ALERT_MESSAGE;
+      } else {
+        return null;
+      }
+
+    case STEP_TARGET:
+      if (targetCnt === 0) {
+        return TARGET_ALERT_MESSAGE;
+      } else {
+        return null;
+      }
+
+    case STEP_OPTION:
+      const { planId, collectType, interval, from, to } = optionList.toJS();
+
+      if (planId.toString().length < 1) {
+        return PLAN_ID_ALERT_MESSAGE;
+      } else if (from.isAfter(to)) {
+        return FROM_TO_ALERT_MESSAGE;
+      } else if (collectType === DEFINE.AUTO_MODE_CYCLE) {
+        if (interval < 1) {
+          return CYCLE_ALERT_MESSAGE;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+
+    case STEP_CHECK:
+    default:
+      return null;
   }
 }
 
@@ -303,6 +372,8 @@ export default connect(
     (state) => ({
       equipmentList: state.viewList.get('equipmentList'),
       toolInfoList: state.viewList.get('toolInfoList'),
+      toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
+      logInfoListCheckCnt: state.viewList.get('logInfoListCheckCnt'),
       logInfoList: state.viewList.get('logInfoList'),
       autoPlan: state.autoPlan.get('autoPlan'),
       logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],

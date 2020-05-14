@@ -1,14 +1,10 @@
 import React, {Component} from "react"
-import '../../../css/user.css'
 import ReactTransitionGroup from 'react-addons-css-transition-group';
 import * as API from "../../api";
-import ModalTwoButton from "../Common/ModalTwoButton";
 import ErrorModalOneButton from "../Common/ErrorModal";
-import * as Define from "../../define";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
-import md5 from "md5-hash";
 
 class ChangeAuthModal extends Component {
     constructor(props) {
@@ -36,10 +32,6 @@ class ChangeAuthModal extends Component {
         Auth_100_Msg:'100',
         Auth_100_Detail:'Administrators only',
     };
-    buttonMsg = {
-        leftMsg:'Cancel',
-        rightMsg:'Save',
-    };
 
     changePermissionProcess = async(e) => {
         console.log("changePermission");
@@ -52,6 +44,7 @@ class ChangeAuthModal extends Component {
             window.sessionStorage.setItem('auth', this.state.selectedValue);
             API.setLoginAuth(this.props, this.state.selectedValue);
             this.props.right(); //pw change modal Close
+            this.props.alertOpen("permission");
         }
         else
         {
@@ -79,20 +72,18 @@ class ChangeAuthModal extends Component {
     }
     render() {
         const { isOpen, right } = this.props;
-
         return (
-            <React.Fragment>
+            <>
                 {
-                    {isOpen} ? (
+                    isOpen ? (
                         <ReactTransitionGroup
-                            transitionName={'Modal-anim'}
+                            transitionName={'Custom-modal-anim'}
                             transitionEnterTimeout={200}
                             transitionLeaveTimeout={200} >
-                            <div className="Custom-modal-overlay" onClick={close} />
+                            <div className="Custom-modal-overlay" onClick={right} />
                             <div className="Custom-modal">
                                 <p className="title">{this.data.titleMsg}</p>
-                                <div className="border border-solid border-gray-900"/>
-                                <p className="content">
+                                <div className="content-with-title user-modal">
                                     <div className="Custom-ratio">
                                         <input type="radio" id="auth_10" value="10" checked={this.state.selectedValue === '10'} onChange={this.handleRadio} />
                                         <label htmlFor="auth_10">
@@ -115,8 +106,15 @@ class ChangeAuthModal extends Component {
                                             <div>{this.data.Auth_100_Detail}</div>
                                         </label>
                                     </div>
-                                </p>
-                                <ModalTwoButton data={this.buttonMsg} actionLeftFunc={this.changePermissionProcess} actionRightFunc={right} />
+                                </div>
+                                <div className="button-wrap no-margin">
+                                    <button className="gray form-type left-btn" onClick={this.changePermissionProcess}>
+                                        Save
+                                    </button>
+                                    <button className="gray form-type right-btn" onClick={right}>
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                             {
                                 (this.state.isModalOpen === true) &&
@@ -124,10 +122,10 @@ class ChangeAuthModal extends Component {
                             }
                         </ReactTransitionGroup>
                     ):(
-                        <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
+                        <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
                     )
                 }
-            </React.Fragment>
+            </>
         );
     }
 }

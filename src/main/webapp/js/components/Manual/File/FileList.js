@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
+import { Card, CardBody, Table, ButtonToggle } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
@@ -46,7 +46,7 @@ const customSelectStyles = {
     border: "1px solid #85a4b3",
     borderRadius: "3px",
     caretColor: "transparent",
-    transition: "color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out",
+    transition: "all .15s ease-in-out",
     ":hover": {
       outline: "0",
       boxShadow: "0 0 0 0.2em rgba(133, 164, 179, 0.5)"

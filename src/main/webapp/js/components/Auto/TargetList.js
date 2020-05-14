@@ -187,7 +187,7 @@ class RSSautoTargetlist extends Component {
                     outline
                     size="sm"
                     color="info"
-                    className={"form-btn" + (ItemsChecked ? " active" : "")}
+                    className={"form-btn toggle-all" + (ItemsChecked ? " active" : "")}
                     onClick={this.selectAllItem}
                     style={{ zIndex: "2" }}
                 >
@@ -209,11 +209,11 @@ class RSSautoTargetlist extends Component {
                     );
                   })
               ) : (
-                  <div style={{ alignSelf: "center", flex: "auto" }}>
-                    <p style={{ textAlign: "center" }}>
+                  <div className="search-error-area">
+                    <p>
                       <FontAwesomeIcon icon={faExclamationCircle} size="8x" />
                     </p>
-                    <p style={{ textAlign: "center" }}>Target not found.</p>
+                    <p>Target not found.</p>
                   </div>
               )}
             </FormGroup>
