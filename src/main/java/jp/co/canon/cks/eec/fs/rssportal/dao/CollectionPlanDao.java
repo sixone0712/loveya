@@ -11,6 +11,7 @@ public interface CollectionPlanDao {
     List<CollectPlanVo> findAll(boolean ordering, int limit);
     CollectPlanVo find(int id);
     int addPlan(CollectPlanVo plan);
-    boolean updatePlan(@NonNull CollectPlanVo plan);
+    boolean updatePlan(CollectPlanVo plan);
     boolean deletePlan(int id);
+    boolean updateStatus(CollectPlanVo plan);
 }

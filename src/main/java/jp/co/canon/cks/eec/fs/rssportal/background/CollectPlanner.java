@@ -10,6 +10,7 @@ import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -113,15 +114,15 @@ public class CollectPlanner extends Thread {
     private boolean collect(CollectPlanVo plan) throws InterruptedException, IOException {
 
         log.info("collect: "+plan.toString());
+        service.setLastStatus(plan, PlanStatus.collecting);
         List<DownloadForm> downloadList = createDownloadList(plan);
 
-        boolean failed = false;
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
             String jobType = useVirtualFileService?"virtual":"auto";
             FileDownloadExecutor executor = new FileDownloadExecutor(
                     jobType,
-                    "",
+                    plan.getPlanName(),
                     fileServiceManage,
                     fileService,
                     downloadList,
@@ -129,16 +130,18 @@ public class CollectPlanner extends Thread {
             executor.setMonitor(monitor);
             executor.start();
 
-            while(executor.isRunning()) sleep(100);
+            while(executor.isRunning())
+                sleep(100);
             if(!executor.getStatus().equalsIgnoreCase("complete")) {
                 log.error("file download failed [planId="+plan.getId()+"]");
-                failed = true;
+                service.setLastStatus(plan, PlanStatus.suspended);
             } else {
                 copyFiles(plan, executor.getBaseDir());
                 compress(plan);
+                service.setLastStatus(plan, PlanStatus.collected);
+                service.updateLastCollect(plan);
             }
         }
-        service.updateLastCollect(plan, failed);
         service.schedulePlan(plan);
         return true;
     }

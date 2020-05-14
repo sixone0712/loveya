@@ -1,6 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface CollectPlanService {
 
-    int addPlan(@NonNull String planId,
+    int addPlan(@NonNull String planName,
                 @NonNull List<String> tools,
                 @NonNull List<String> logTypes,
                 @NonNull Date collectStart,
@@ -49,7 +50,6 @@ public interface CollectPlanService {
      * @param plan
      */
     void updateLastCollect(CollectPlanVo plan);
-    void updateLastCollect(CollectPlanVo plan, boolean isFailed);
 
     /**
      * Add a notifier that is called when changes occur.
@@ -60,7 +60,8 @@ public interface CollectPlanService {
     /**
      * Set the last operation status
      * @param planId
-     * @param status    "ok" or "error"
+     * @param status
      */
-    void setLastStatus(int planId, String status);
+    void setLastStatus(int planId, PlanStatus status);
+    void setLastStatus(CollectPlanVo plan, PlanStatus status);
 }
