@@ -22,6 +22,11 @@ import * as API from '../../../api'
 import {element, object} from "prop-types";
 
 const customSelectStyles = {
+  container: (styles, { isDisabled }) => ({
+    ...styles,
+    transition: "all .2s ease-in-out",
+    backgroundColor: isDisabled ? "rgba(0,0,0,0.12)" : null
+  }),
   option: (styles, { isFocused, isSelected }) => {
     return {
       ...styles,
@@ -46,7 +51,7 @@ const customSelectStyles = {
     border: "1px solid #ffa94d",
     borderRadius: "3px",
     transition:
-        "color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out",
+        "all .15s ease-in-out",
     ":hover": {
       outline: "0",
       boxShadow: "0 0 0 0.2em rgba(255, 169, 77, 0.5)"
@@ -237,9 +242,10 @@ class CategoryList extends Component {
               <FormGroup className="catlist-form-group">
                 <Collapse isOpen={showGenre}>
                   <div className="catlist-genre-area">
-                    <div style={{ width: "55%" }}>
+                    <div className="genre-select-area">
                       <Select
-                          isSearchable
+                          isSearchable={ genreList.totalCnt > 0 }
+                          isDisabled={ genreList.totalCnt === 0 }
                           onChange={this.handleSelectBoxChange}
                           options={ genreList.totalCnt > 0 &&
                             genreList.list.map((list) => {
@@ -252,7 +258,7 @@ class CategoryList extends Component {
                           noOptionsMessage={() => "Genre not found."}
                       />
                     </div>
-                    <div style={{ width: "42%", display: "flex", justifyContent: "space-between" }}>
+                    <div className="genre-btn-area">
                       <InputModal
                           title={"Create Genre"}
                           openbtn={"Create"}
@@ -326,11 +332,11 @@ class CategoryList extends Component {
                       );
                     })
                 ) : (
-                    <div>
-                      <p style={{ marginTop: "6rem", textAlign: "center" }}>
+                    <div className="no-search-genre">
+                      <p>
                         <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
                       </p>
-                      <p style={{ textAlign: "center" }}>Category not found.</p>
+                      <p>Category not found.</p>
                     </div>
                 )}
               </FormGroup>

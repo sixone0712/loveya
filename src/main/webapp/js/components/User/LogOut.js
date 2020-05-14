@@ -3,42 +3,39 @@ import '../../../css/modal.scss'
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {faSignOutAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import ModalTwoButton from "../Common/ModalTwoButton";
 
-const LogOutModal = ({ isOpen, left,right }) => {
-
-    const buttonMsg = {
-        leftMsg:'No',
-        rightMsg:'Yes',
-    };
-    const data = {
-        bodyMsg:'Log out ?',
-    };
-
+const LogOutModal = ({ isOpen, left, right }) => {
     return (
-        <React.Fragment>
+        <>
         {
             isOpen ? (
             <ReactTransitionGroup
-                transitionName={'Modal-anim'}
+                transitionName={'Custom-modal-anim'}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200} >
-                <div className="Custom-modal-overlay" onClick={close} />
+                <div className="Custom-modal-overlay" onClick={right} />
                 <div className="Custom-modal">
                     <div className="content-without-title">
                         <p>
                             <FontAwesomeIcon icon={faSignOutAlt} size="6x" />
                         </p>
-                        <p>{data.bodyMsg}</p>
+                        <p>Are you sure you want to log out?</p>
                     </div>
-                    <ModalTwoButton data={buttonMsg} actionRightFunc={right} actionLeftFunc={left}/>
+                    <div className="button-wrap">
+                        <button className="gray form-type left-btn" onClick={left}>
+                            Yes
+                        </button>
+                        <button className="gray form-type right-btn" onClick={right}>
+                            No
+                        </button>
+                    </div>
                 </div>
             </ReactTransitionGroup>
             ):(
-            <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
+            <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
             )
         }
-        </React.Fragment>
+        </>
     )
 }
 export default LogOutModal;

@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import { faUserCircle, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import {
   Navbar,
   NavbarBrand,
@@ -22,14 +22,22 @@ import * as Define from "../../define";
 import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import ChangeAuthModal from "../User/ChangeAuth";
+import AlertModal from "../Common/AlertModal";
+
+const PASSWORD_ALERT_MESSAGE = "Password change completed.";
+const AUTH_ALERT_MESSAGE = "Permission change completed.";
 
 class RSSNavbar extends Component{
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       currentPage: "Manual",
-            isModalOpen : false,
-            isMode:"",
+      isPasswordOpen : false,
+      isAuthOpen : false,
+      isLogoutOpen : false,
+      isAlertOpen: false,
+      alertMessage: "",
+      isMode:""
     };
   }
 
@@ -45,13 +53,72 @@ class RSSNavbar extends Component{
     });
   };
   
-  openModal =async (sMode) => {
-  	await this.setState(() => ({isModalOpen: true, isMode:sMode}));
+  openModal = async (sMode) => {
+    switch(sMode) {
+      case "password":
+        await this.setState({isPasswordOpen: true, isMode : sMode});
+        break;
+
+      case "permission":
+        await this.setState(() => ({isAuthOpen: true, isMode:sMode}));
+        break;
+
+      case "logout":
+        await this.setState(() => ({isLogoutOpen: true, isMode:sMode}));
+        break;
+
+      default:
+        console.log("sMode error:" + sMode);
+        break;
+    }
   }
   
   closeModal = async () => {
-  	await this.setState(() => ({isModalOpen: false,isMode:''}));
+  	await this.setState(() => ({
+      isPasswordOpen: false,
+      isAuthOpen: false,
+      isLogoutOpen: false,
+      isMode:''
+  	}));
   }
+
+  openAlert = (type) => {
+    setTimeout(() => {
+      switch(type) {
+        case "password":
+          this.setState({
+            isAlertOpen: true,
+            alertMessage: PASSWORD_ALERT_MESSAGE
+          });
+          break;
+
+        case "permission":
+          this.setState({
+            isAlertOpen: true,
+            alertMessage: AUTH_ALERT_MESSAGE
+          });
+          break;
+
+        default:
+          console.log("invalid type!!");
+          break;
+      }
+    }, 800);
+  }
+
+  closeAlert = () => {
+    this.setState({
+      isAlertOpen: false,
+      alertMessage: ""
+    });
+  }
+
+  initViewListCheck = async () => {
+    await API.checkAllToolInfoList(this.props, false);
+    await API.checkAllLogInfoList(this.props, false);
+    return true;
+  }
+
 
   onLogout = () => {
     window.sessionStorage.removeItem('isLoggedIn');
@@ -63,10 +130,18 @@ class RSSNavbar extends Component{
   };
 
   render() {
+    const { isPasswordOpen, isAuthOpen, isLogoutOpen, isAlertOpen, alertMessage } = this.state;
+    const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "gray", this.closeAlert);
+
     return (
-        <div className="navbar-container">
-          <Navbar color="dark" dark expand="md">
-            <NavbarBrand className="custom-brand" style={{pointerEvents: "none"}}>
+        <>
+          {renderAlert}
+          <ChangePwModal isOpen={isPasswordOpen} right={this.closeModal} alertOpen={this.openAlert}/>
+          <ChangeAuthModal isOpen={isAuthOpen} right={this.closeModal} alertOpen={this.openAlert}/>
+          <LogOutModal isOpen={isLogoutOpen} left={this.onLogout} right={this.closeModal} />
+          <div className="navbar-container">
+            <Navbar color="dark" dark expand="md">
+              <NavbarBrand className="custom-brand">
               RSS
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
@@ -120,16 +195,8 @@ class RSSNavbar extends Component{
               </UncontrolledDropdown>
             </Nav>
           </Navbar>
-        {
-            this.state.isMode ==='logout'
-            ?<LogOutModal isOpen={this.state.isModalOpen } left={this.onLogout} right={this.closeModal} />
-            : this.state.isMode ==='password'
-                ? <ChangePwModal isOpen={this.state.isModalOpen } right={this.closeModal} />
-                : this.state.isMode ==='permission'
-                    ? <ChangeAuthModal isOpen={this.state.isModalOpen } right={this.closeModal} />
-                :null
-        }
         </div>
+        </>
     );
   }
 }

@@ -7,11 +7,12 @@ import {
     faStop,
     faCheck,
     faTimes,
-    faTrashAlt
+    faTrashAlt,
+    faExclamationCircle
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
 import { filePaginate, renderPagination } from "../Common/Pagination";
-import ConfirmModal from "./ConfirmModal";
+import ConfirmModal from "../Common/ConfirmModal";
 import * as DEFINE from "../../define";
 import services from "../../services"
 import moment from "moment";
@@ -230,7 +231,14 @@ class RSSautoplanlist extends Component {
                         </p>
                     </CardHeader>
                     <CardBody className="auto-plan-card-body">
-                        <Col className="auto-plan-collection-list" />
+                        <Col className="auto-plan-collection-list">
+                            <p className="no-registered-plan">
+                                <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                            </p>
+                            <p className="no-registered-plan">
+                                There are no registered collection plans.
+                            </p>
+                        </Col>
                     </CardBody>
                 </Card>
             );
@@ -248,8 +256,10 @@ class RSSautoplanlist extends Component {
                 isConfirmOpen,
                 faTrashAlt,
                 MODAL_MESSAGE,
-                this.closeModal,
-                selectedPlanId
+                "auto-plan",
+                () => this.closeModal(false, selectedPlanId),
+                () => this.closeModal(true, selectedPlanId),
+                () => this.closeModal(false, selectedPlanId)
             );
 
             return (
@@ -357,7 +367,6 @@ function CreateStatus(status) {
 function CreateDetail(detail) {
     switch (detail) {
         case DETAIL_COMPLETE:
-        default:
             return (
                 <>
                     <FontAwesomeIcon className="completed" icon={faCheck} /> Completed
@@ -367,9 +376,13 @@ function CreateDetail(detail) {
         case DETAIL_FAILED:
             return (
                 <>
-                    <FontAwesomeIcon className="failed" icon={faTimes} /> Falied
+                    <FontAwesomeIcon className="failed" icon={faTimes} /> Failed
                 </>
             );
+
+        default:
+            console.log("plan status detail error");
+            return null;
     }
 }
 

@@ -6,6 +6,7 @@ import AutoPlanAdd from "./AutoRegistAdd";
 import AutoPlanEdit from "./AutoRegistEdit";
 import AutoStatus from "./AutoPlanStatus";
 import AutoDownload from "./DownloadList"
+import Footer from "../Common/Footer";
 import {Breadcrumb, BreadcrumbItem, Container } from "reactstrap";
 
 class Auto extends Component {
@@ -47,6 +48,7 @@ class Auto extends Component {
                         <Route path={DEFINE.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
                     </Switch>
                 </Container>
+                <Footer />
             </>
         );
     }
@@ -77,6 +79,7 @@ const CreateBreadCrumb = props => {
         case DEFINE.AUTO_CUR_PAGE_EDIT:
             return (
                 <Breadcrumb className="auto-plan-topic-path">
+                    <BreadcrumbItem>Auto Download</BreadcrumbItem>
                     <BreadcrumbItem>
                         <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
                             Plan Status
@@ -90,6 +93,7 @@ const CreateBreadCrumb = props => {
             return (
                 <>
                     <Breadcrumb className="auto-plan-topic-path">
+                        <BreadcrumbItem>Auto Download</BreadcrumbItem>
                         <BreadcrumbItem>
                             <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
                                 Plan Status

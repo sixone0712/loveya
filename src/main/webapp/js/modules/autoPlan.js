@@ -34,7 +34,7 @@ const initialState = Map({
         from: moment().utc().startOf('day'),
         to : moment().utc().endOf('day'),
         collectType: DEFINE.AUTO_MODE_CONTINUOUS,
-        interval: "",
+        interval: 1,
         intervalUnit: DEFINE.AUTO_UNIT_MINUTE,
         description: ""
     })

@@ -13,7 +13,6 @@ import * as genreListActions from "../../../modules/genreList";
 class InputModal extends Component {
     constructor(props) {
         super(props);
-        this.errRef = React.createRef();
         this.state = {
             inputOpen: false,
             alertOpen: false,
@@ -29,7 +28,7 @@ class InputModal extends Component {
         const { isServerErr } = genreList.toJS();
         console.log("isServerErr", isServerErr);
         console.log("nextProps.nowAction", nextProps.nowAction);
-        if(isServerErr && nextProps.nowAction == nextProps.openbtn) {
+        if(isServerErr && nextProps.nowAction === nextProps.openbtn) {
             return {
                 ...prevState,
                 inputOpen: false,
@@ -50,8 +49,11 @@ class InputModal extends Component {
 
     closeInputModal = () => {
         this.setState({
-            ...this.state,
-            inputOpen: false
+            inputOpen: false,
+            alertOpen: false,
+            errMsg: "",
+            alertMsg: "",
+            genreName: ""
         });
     };
 
@@ -130,7 +132,6 @@ class InputModal extends Component {
                 alertMsg: alertMsg
             });
 
-            this.errRef.current.classList.remove('modal-err-msg-hidden');
             if(genreList.needUpdate) {
                 this.openAlertModal();
             }
@@ -169,7 +170,7 @@ class InputModal extends Component {
                         <div className="Custom-modal">
                             <p className="title">{title}</p>
                             <div className="content-with-title">
-                                <FormGroup>
+                                <div className="genre-name-input-area">
                                     <Input
                                         type="text"
                                         name={inputname}
@@ -179,8 +180,8 @@ class InputModal extends Component {
                                         //onChange={(e) => this.props.onChangeGenreName(e.target.value)}
                                         onChange={(e) => this.setState({...this.state, genreName: e.target.value})}
                                     />
-                                    <p className="modal-err-msg modal-err-msg-hidden" ref={this.errRef}>{errMsg}</p>
-                                </FormGroup>
+                                    <span className="error">{errMsg}</span>
+                                </div>
                             </div>
                             <div className="button-wrap">
                                 <button

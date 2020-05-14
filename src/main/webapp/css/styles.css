@@ -88,6 +88,12 @@ a:hover {
     top: 3px;
 }
 
+.network-connection-error {
+    font-size: 40px;
+    margin-top: 400px;
+    text-align: center;
+}
+
 @-webkit-keyframes changeOpacity {
     from {
         opacity: 0;
@@ -698,10 +704,12 @@ a:hover {
 .navbar .custom-brand {
     font-weight: 700;
     margin-right: 2em;
+    pointer-events: none;
 }
 
 .navbar .navbar-nav .nav-item {
     margin-left: 10px;
+    margin-right: 10px;
 }
 
 .navbar .navbar-nav .nav-link {
@@ -1209,26 +1217,28 @@ td.selected:hover {
     box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5);
 }
 
-.catlist-form-group .catlist-select {
-    font-size: 14px;
-    width: 58%;
-}
-
-.catlist-form-group .catlist-modal-input {
-    margin-top: 1em;
-}
-
-.catlist-form-group .catlist-select:focus,
-.catlist-form-group .catlist-modal-input:focus {
-    background-color: white;
-    border-color: rgb(255, 169, 77);
-    box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5);
-}
-
 .catlist-form-group .catlist-genre-area {
     display: flex;
     margin-bottom: 10px;
     justify-content: space-between;
+}
+
+.catlist-form-group .catlist-genre-area .genre-select-area {
+    width: 55%;
+}
+
+.catlist-form-group .catlist-genre-area .genre-btn-area {
+    width: 42%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.catlist-form-group .no-search-genre p {
+    text-align: center;
+}
+
+.catlist-form-group .no-search-genre p:first-child {
+    margin-top: 6rem;
 }
 /* categorylist end */
 
@@ -1334,12 +1344,10 @@ td.selected:hover {
 }
 
 .filelist-card .custom-pagination .page-item.active .page-link:hover {
-    border-color: rgb(175, 199, 210);
     background-color: rgb(175, 199, 210);
 }
 
 .filelist-card .custom-pagination .page-item:not(.active) .page-link:hover {
-    border-color: rgb(220, 220, 220);
     background-color: rgb(220, 220, 220);
 }
 
@@ -1543,12 +1551,12 @@ td.selected:hover {
 .auto-plan-topic-path ol li > .link {
     display: inline;
     padding: 3px;
+    color: #212529;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
 }
 
 .auto-plan-topic-path ol li > .link:hover {
-    color: rgb(92, 124, 250);
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 3px;
     cursor: pointer;
@@ -1580,12 +1588,10 @@ td.selected:hover {
 }
 
 .auto-plan-box .custom-pagination .page-item.active .page-link:hover {
-    border-color: rgba(92, 124, 250, 0.7);
     background-color: rgba(92, 124, 250, 0.7);
 }
 
 .auto-plan-box .custom-pagination .page-item:not(.active) .page-link:hover {
-    border-color: rgba(92, 124, 250, 0.3);
     background-color: rgba(92, 124, 250, 0.3);
 }
 
@@ -1852,6 +1858,10 @@ td.selected:hover {
     margin-left: 5px;
 }
 
+.auto-plan-card-body .form-header-section .form-btn-section .form-btn.toggle-all {
+    z-index: 2;
+}
+
 .auto-plan-card-footer .footer-btn {
     font-size: 14px;
 }
@@ -1952,6 +1962,15 @@ td.selected:hover {
 .auto-plan-form-group.targetlist {
     display: flex;
     justify-content: flex-start;
+}
+
+.auto-plan-form-group.targetlist .search-error-area {
+    align-self: center;
+    flex: auto;
+}
+
+.auto-plan-form-group.targetlist .search-error-area p {
+    text-align: center;
 }
 
 .auto-plan-form-group.targetlist .checkbox-section:not(:last-child) {
@@ -2094,6 +2113,18 @@ td.selected:hover {
 .auto-plan-checklist-form-group .setting-info {
     display: inline-block;
     margin-left: 20px;
+}
+
+.auto-plan-collection-list p.no-registered-plan {
+    text-align: center;
+}
+
+.auto-plan-collection-list p.no-registered-plan:first-child {
+    margin-top: 1rem;
+}
+
+.auto-plan-collection-list p.no-registered-plan:last-child {
+    font-size: 14px;
 }
 
 .auto-plan-collection-list.download-list {

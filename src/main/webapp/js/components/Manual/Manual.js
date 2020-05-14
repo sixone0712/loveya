@@ -10,7 +10,7 @@ import Machinelist from "./Machine/MachineList";
 import Categorylist from "./Category/CategoryList";
 import Formlist from "./Search/FormList";
 import Filelist from "./File/FileList";
-import Footer from "../common/Footer";
+import Footer from "../Common/Footer";
 import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
@@ -24,10 +24,10 @@ class Manual extends Component {
         searchListActions.searchSetInitAllList();
         genreListActions.genreInitAllList();
         viewListActions.viewInitAllList();
-        //viewListActions.viewLoadToolInfoList("/api/createToolList");
-        //viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
-        viewListActions.viewLoadToolInfoList("/test/createToolList");
-        viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
+        viewListActions.viewLoadToolInfoList("/api/createToolList");
+        viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
+        //viewListActions.viewLoadToolInfoList("/test/createToolList");
+        //viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
         genreListActions.genreLoadDbList("/db/genre/get");
     }
 
@@ -84,7 +84,7 @@ class Manual extends Component {
                 </>
                 }
                 { isFailure &&
-                    <div style={{fontsize: 40, marginTop: 400, textAlign: "center"}}>Network Connection Error</div>
+                    <div className="network-connection-error">Network Connection Error</div>
                 }
             </>
         );
