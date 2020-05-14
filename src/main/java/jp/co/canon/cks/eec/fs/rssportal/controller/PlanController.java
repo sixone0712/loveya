@@ -159,6 +159,7 @@ public class PlanController {
 
     private int addPlanProc(@NonNull Map<String, Object> param) throws ParseException {
 
+        String planName = param.containsKey("planId")?(String)param.get("planId"):null;
         List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
         List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
         String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
@@ -168,7 +169,7 @@ public class PlanController {
         String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
         String description = param.containsKey("description")?(String)param.get("description"):null;
 
-        if(tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
+        if(planName==null || tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
                 collectType==null || intervalStr==null)
             return -1;
         if(collectType.equalsIgnoreCase("cycle")==false &&
@@ -180,7 +181,7 @@ public class PlanController {
         Date toDate = toDate(toStr);
         long interval = Long.valueOf(intervalStr);
 
-        int id = service.addPlan(tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
+        int id = service.addPlan(planName, tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
         if(id<0)
             return -2;
         return id;

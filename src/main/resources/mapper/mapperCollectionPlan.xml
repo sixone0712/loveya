@@ -5,6 +5,7 @@
     <select id="selectAll" resultType="CollectPlanVo">
         select
             id,
+            planname,
             tool,
             logtype,
             description,
@@ -17,13 +18,18 @@
             tsend as end,
             tslastcollect as lastCollect,
             tsnext as nextAction,
-            tslastpoint as lastPoint
+            tslastpoint as lastPoint,
+            laststatus as detail,
+            case when laststatus='collecting' then 'running' else 'stop' end as status,
+            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+
         from rsss."collection_plan"
     </select>
 
     <select id="selectAllOptions" parameterType="hashmap" resultType="CollectPlanVo">
         select
             id,
+            planname,
             tool,
             logtype,
             description,
@@ -36,7 +42,11 @@
             tsend as end,
             tslastcollect as lastCollect,
             tsnext as nextAction,
-            tslastpoint as lastPoint
+            tslastpoint as lastPoint,
+            laststatus as detail,
+            case when laststatus='collecting' then 'running' else 'stop' end as status,
+            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+
         from rsss."collection_plan" as t_collect
         where
             expired is false
@@ -52,6 +62,7 @@
     <select id="selectId" parameterType="Integer" resultType="CollectPlanVo">
         select
             id,
+            planname,
             tool,
             logtype,
             description,
@@ -64,7 +75,11 @@
             tsend as end,
             tslastcollect as lastCollect,
             tsnext as nextAction,
-            tslastpoint as lastPoint
+            tslastpoint as lastPoint,
+            laststatus as detail,
+            case when laststatus='collecting' then 'running' else 'stop' end as status,
+            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+
         from rsss."collection_plan"
         where id=#{id}
     </select>
@@ -75,6 +90,7 @@
         </selectKey>
         insert into rsss."collection_plan" (
             id,
+            planname,
             tool,
             logtype,
             tscreated,
@@ -89,6 +105,7 @@
             tslastpoint
         ) values (
             #{id},
+            #{planName},
             #{tool},
             #{logType},
             now(),
@@ -106,6 +123,7 @@
 
     <update id="update" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
+            planname = #{planName},
             tslastcollect = #{lastCollect},
             <if test="nextAction!=null">
             tsnext = #{nextAction},
@@ -115,6 +133,12 @@
             </if>
             expired = #{expired},
             tslastpoint = #{lastPoint}
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="CollectPlanVo">
+        update rsss."collection_plan" set
+            laststatus = #{lastStatus}
         where id = #{id}
     </update>
 

@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 public class CollectPlanVo {
 
     private int id;
+    private String planName;
     private String tool;
     private String logType;
     private Timestamp created;
@@ -21,6 +22,11 @@ public class CollectPlanVo {
     private Timestamp lastPoint;
     private boolean expired;
     private String lastStatus;
+    private PlanStatus planStatus;
+
+    private String status;
+    private String detail;
+    private String collectTypeStr;
 
     @Override
     public String toString() {
@@ -40,6 +46,14 @@ public class CollectPlanVo {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPlanName() {
+        return planName;
+    }
+
+    public void setPlanName(String planName) {
+        this.planName = planName;
     }
 
     public String getTool() {
@@ -160,5 +174,37 @@ public class CollectPlanVo {
 
     public void setLastStatus(String lastStatus) {
         this.lastStatus = lastStatus;
+    }
+
+    public PlanStatus getPlanStatus() {
+        return planStatus;
+    }
+
+    public void setPlanStatus(PlanStatus planStatus) {
+        this.planStatus = planStatus;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    public String getCollectTypeStr() {
+        return collectTypeStr;
+    }
+
+    public void setCollectTypeStr(String collectTypeStr) {
+        this.collectTypeStr = collectTypeStr;
     }
 }
