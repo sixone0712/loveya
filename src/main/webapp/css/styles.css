@@ -94,6 +94,12 @@ a:hover {
     text-align: center;
 }
 
+.scroll-up-icon {
+    color: white;
+    position: relative;
+    top: 6px;
+}
+
 @-webkit-keyframes changeOpacity {
     from {
         opacity: 0;
@@ -709,6 +715,9 @@ a:hover {
 
 .navbar .navbar-nav .nav-item {
     margin-left: 10px;
+}
+
+.navbar .navbar-nav .nav-item:not(:first-child) {
     margin-right: 10px;
 }
 
@@ -1591,7 +1600,7 @@ td.selected:hover {
 .auto-plan-box .custom-pagination .page-item.active .page-link {
     color: white;
     background-color: rgb(92, 124, 250);
-    border-color: rgb(92, 124, 250);
+    border: 1px solid rgb(92, 124, 250);
 }
 
 .auto-plan-box .custom-pagination .page-item .page-link:focus {
@@ -1600,10 +1609,12 @@ td.selected:hover {
 }
 
 .auto-plan-box .custom-pagination .page-item.active .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.1);
     background-color: rgba(92, 124, 250, 0.7);
 }
 
 .auto-plan-box .custom-pagination .page-item:not(.active) .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.1);
     background-color: rgba(92, 124, 250, 0.3);
 }
 
@@ -2143,6 +2154,18 @@ td.selected:hover {
     display: flex;
     justify-content: center;
     flex-direction: column;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list {
+    text-align: center;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list:first-child {
+    margin-top: 1em;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list:last-child {
+    font-size: 15px;
 }
 
 .auto-plan-collection-list.download-list .content-section {

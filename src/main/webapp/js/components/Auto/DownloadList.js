@@ -303,72 +303,96 @@ class RSSAutoDownloadList extends Component {
             this.closeModal
         );
 
-        return (
-            <>
-                {renderDeleteModal}
-                {renderSelectDownloadModal}
-                {renderNewDownloadModal}
-                {renderAlertModal}
+        if (count === 0) {
+            return (
                 <Card className="auto-plan-box">
                     <CardHeader className="auto-plan-card-header">
                         Download List
                         <p>
                             Check the download list of <span>collection plan.</span>
                         </p>
-                        <div className="select-area">
-                            <label>Rows per page : </label>
-                            <Select
-                                options={optionList}
-                                styles={customSelectStyles}
-                                defaultValue={optionList[0]}
-                                onChange={this.handleSelectBoxChange}
-                            />
-                        </div>
                     </CardHeader>
                     <CardBody className="auto-plan-card-body">
                         <Col className="auto-plan-collection-list download-list">
-                            <div className="content-section header">
-                                <div className="plan-id">ID: CollectionPlan-501201-01</div>
-                                <div>
-                                    <Button size="sm" className="download-btn" onClick={() => this.checkNewDownloadFile(false)}>
-                                        New File Download
-                                    </Button>
-                                </div>
-                            </div>
-                            <Table className="content-section">
-                                <thead>
-                                <tr>
-                                    <th>Request ID</th>
-                                    <th>Status</th>
-                                    <th>Delete</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {requests.map((request, idx) => {
-                                    return (
-                                        <tr key={idx}>
-                                            <td>
-                                                <div className="request-id-area" onClick={() => this.openModal(modalType.MODAL_DOWNLOAD_1)}>
-                                                    {request.requestId}
-                                                </div>
-                                            </td>
-                                            <td>{CreateStatus(request.requestStatus)}</td>
-                                            <td>
-                                                <div className="icon-area" onClick={() => this.openModal(modalType.MODAL_DELETE)}>
-                                                    <FontAwesomeIcon icon={faTrashAlt} />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                                </tbody>
-                            </Table>
+                            <p className="no-download-list">
+                                <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                            </p>
+                            <p className="no-download-list">No completed requests.</p>
                         </Col>
                     </CardBody>
-                    {pagination}
                 </Card>
-            </>
-        );
+            );
+        } else {
+            return (
+                <>
+                    {renderDeleteModal}
+                    {renderSelectDownloadModal}
+                    {renderNewDownloadModal}
+                    {renderAlertModal}
+                    <Card className="auto-plan-box">
+                        <CardHeader className="auto-plan-card-header">
+                            Download List
+                            <p>
+                                Check the download list of <span>collection plan.</span>
+                            </p>
+                            <div className="select-area">
+                                <label>Rows per page : </label>
+                                <Select
+                                    options={optionList}
+                                    styles={customSelectStyles}
+                                    defaultValue={optionList[0]}
+                                    onChange={this.handleSelectBoxChange}
+                                />
+                            </div>
+                        </CardHeader>
+                        <CardBody className="auto-plan-card-body">
+                            <Col className="auto-plan-collection-list download-list">
+                                <div className="content-section header">
+                                    <div className="plan-id">ID: CollectionPlan-501201-01</div>
+                                    <div>
+                                        <Button size="sm" className="download-btn"
+                                                onClick={() => this.checkNewDownloadFile(false)}>
+                                            New File Download
+                                        </Button>
+                                    </div>
+                                </div>
+                                <Table className="content-section">
+                                    <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Status</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {requests.map((request, idx) => {
+                                        return (
+                                            <tr key={idx}>
+                                                <td>
+                                                    <div className="request-id-area"
+                                                         onClick={() => this.openModal(modalType.MODAL_DOWNLOAD_1)}>
+                                                        {request.requestId}
+                                                    </div>
+                                                </td>
+                                                <td>{CreateStatus(request.requestStatus)}</td>
+                                                <td>
+                                                    <div className="icon-area"
+                                                         onClick={() => this.openModal(modalType.MODAL_DELETE)}>
+                                                        <FontAwesomeIcon icon={faTrashAlt}/>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    </tbody>
+                                </Table>
+                            </Col>
+                        </CardBody>
+                        {pagination}
+                    </Card>
+                </>
+            );
+        }
     }
 }
 

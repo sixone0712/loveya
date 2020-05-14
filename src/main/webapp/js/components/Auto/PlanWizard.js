@@ -21,20 +21,31 @@ import Check from "./CheckSetting";
 import moment from "moment";
 import * as API from "../../api";
 import * as autoPlanActions from "../../modules/autoPlan";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faExclamationCircle, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import AlertModal from "../Common/AlertModal";
+import ConfirmModal from "../Common/ConfirmModal";
 
-const STEP_MACHINE = 1;
-const STEP_TARGET = 2;
-const STEP_OPTION = 3;
-const STEP_CHECK = 4;
-const STEP_MAX = 5;
+const wizardStep = {
+  MACHINE: 1,
+  TARGET: 2,
+  OPTION: 3,
+  CHECK: 4
+};
 
-const MACHINE_ALERT_MESSAGE = "You must select at least one or more machines.";
-const TARGET_ALERT_MESSAGE = "You must select at least one or more targets.";
-const PLAN_ID_ALERT_MESSAGE = "Plan ID must be at least 1 character long."
-const FROM_TO_ALERT_MESSAGE = "Please set the From(Period) time before the To(Period) time.";
-const CYCLE_ALERT_MESSAGE = "Cycle mode must have a minimum of 1 interval.";
+const modalMessage = {
+  MACHINE_ALERT_MESSAGE: "You must select at least one or more machines.",
+  TARGET_ALERT_MESSAGE: "You must select at least one or more targets.",
+  PLAN_ID_ALERT_MESSAGE: "Plan ID must be at least 1 character long.",
+  FROM_TO_ALERT_MESSAGE: "Please set the from(Period) time before the To(Period) time.",
+  CYCLE_ALERT_MESSAGE: "Cycle mode must have a minimum of 1 interval.",
+  PLAN_ADD_MESSAGE: "Are you sure you want to create a collection plan with this setting?",
+  PLAN_EDIT_MESSAGE: "Are you sure you want to change the collection plan with this setting?"
+};
+
+const modalType = {
+  ALERT: 1,
+  CONFIRM: 2
+};
 
 class RSSautoplanwizard extends Component {
   constructor(props) {
@@ -43,7 +54,7 @@ class RSSautoplanwizard extends Component {
     this.state = {
       isNew,
       editId,
-      currentStep: STEP_MACHINE,
+      currentStep: wizardStep.MACHINE,
       completeStep: [],
       machineList: [],
       targetList: [],
@@ -55,7 +66,8 @@ class RSSautoplanwizard extends Component {
       cycleOption: { count: "", unit: "" },
       planDescription: "",
       isAlertOpen: false,
-      alertMessage: null
+      isConfirmOpen: false,
+      modalMessage: null
     };
   }
 
@@ -131,29 +143,31 @@ class RSSautoplanwizard extends Component {
 
 
   handleNext = () => {
-    const { currentStep } = this.state;
+    const { currentStep, isNew } = this.state;
     const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt } = this.props;
     const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan);
 
     if(message === null) {
-      if(this.state.isNew && currentStep === STEP_CHECK) {
-        this.handleRequestAutoPlanAdd();
-      } else if(!this.state.isNew && currentStep === STEP_CHECK) {
-        this.handleRequestAutoPlanEdit(this.state.editId);
+      if(currentStep === wizardStep.CHECK) {
+        if (isNew) {
+          this.modalOpen(modalType.CONFIRM, modalMessage.PLAN_ADD_MESSAGE);
+        } else {
+          this.modalOpen(modalType.CONFIRM, modalMessage.PLAN_EDIT_MESSAGE);
+        }
+      } else {
+        this.setState(prevState => ({
+          completeStep: [...prevState.completeStep, currentStep],
+          currentStep: currentStep + 1
+        }));
       }
-
-      this.setState(prevState => ({
-        completeStep: [...prevState.completeStep, currentStep],
-        currentStep: currentStep + 1
-      }));
     } else {
-      this.modalOpen(message);
+      this.modalOpen(modalType.ALERT, message);
     }
   };
 
   handlePrev = () => {
     const currentStep =
-        this.state.currentStep <= STEP_MACHINE ? STEP_MACHINE : this.state.currentStep - 1;
+        this.state.currentStep <= wizardStep.MACHINE ? wizardStep.MACHINE : this.state.currentStep - 1;
 
     this.setState(prevState => ({
       completeStep: prevState.completeStep.filter(item => item !== currentStep),
@@ -188,7 +202,7 @@ class RSSautoplanwizard extends Component {
   drawPrevButton = () => {
     const { currentStep } = this.state;
 
-    if (currentStep !== STEP_MACHINE) {
+    if (currentStep !== wizardStep.MACHINE) {
       return (
           <Button className="footer-btn" onClick={this.handlePrev}>
             Previous
@@ -203,9 +217,9 @@ class RSSautoplanwizard extends Component {
     const { currentStep, isNew } = this.state;
     let buttonName = "";
 
-    if (currentStep < STEP_CHECK) {
+    if (currentStep < wizardStep.CHECK) {
       buttonName = "Next";
-    } else if (currentStep === STEP_CHECK) {
+    } else if (currentStep === wizardStep.CHECK) {
       if (isNew) {
         buttonName = "Add Plan";
       } else {
@@ -222,108 +236,144 @@ class RSSautoplanwizard extends Component {
     );
   };
 
-  modalOpen = (message) => {
-    this.setState({
-      isAlertOpen: true,
-      alertMessage: message
-    });
+  modalOpen = (type, message) => {
+    switch(type) {
+      case modalType.ALERT:
+        this.setState({
+          isAlertOpen: true,
+          modalMessage: message
+        });
+        break;
+
+      case modalType.CONFIRM:
+        this.setState({
+          isConfirmOpen: true,
+          modalMessage: message
+        });
+        break;
+
+      default:
+        break;
+    }
   }
 
   modalClose = () => {
     this.setState({
       isAlertOpen: false,
-      alertMessage: null
+      isConfirmOpen: false,
+      modalMessage: ""
     });
   }
+
   render() {
     console.log("render");
     console.log("this.state.editID", this.state.editID);
-    const { currentStep, isNew, isAlertOpen, alertMessage } = this.state;
+    const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,
             logTypeFailure,
             toolInfoFailure } = this.props;
-    const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, alertMessage, "auto-plan", this.modalClose);
+    const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, modalMessage, "auto-plan", this.modalClose);
+    let renderConfirmModal;
+
+    if (isNew) {
+      renderConfirmModal = ConfirmModal(isConfirmOpen,
+                                        faCheckCircle,
+                                        modalMessage,
+                                        "auto-plan",
+                                        this.modalClose,
+                                        () => this.handleRequestAutoPlanAdd(),
+                                        this.modalClose);
+    } else {
+      renderConfirmModal = ConfirmModal(isConfirmOpen,
+                                        faCheckCircle,
+                                        modalMessage,
+                                        "auto-plan",
+                                        this.modalClose,
+                                        () => this.handleRequestAutoPlanEdit(editId),
+                                        this.modalClose);
+    }
 
     return (
-        <>
-          {toolInfoSuccess && logTypeSuccess &&
-        <Card className="auto-plan-box">
-          <CardHeader className="auto-plan-card-header">
-            Plan Settings
-            <p>
-              Set the <span>following items.</span>
-            </p>
-          </CardHeader>
-          <CardBody className="auto-plan-card-body">
-            <Col sm={{ size: 3 }} className="step-indicator pdl-0 bd-right">
-              <ul>
-                <li>
-                  <div className={this.getClassName(STEP_MACHINE)}>
-                    <div className="step-number">
-                      {this.completeCheck(STEP_MACHINE)}
+      <>
+        {toolInfoSuccess && logTypeSuccess &&
+          <Card className="auto-plan-box">
+            <CardHeader className="auto-plan-card-header">
+              Plan Settings
+              <p>
+                Set the <span>following items.</span>
+              </p>
+            </CardHeader>
+            <CardBody className="auto-plan-card-body">
+              <Col sm={{ size: 3 }} className="step-indicator pdl-0 bd-right">
+                <ul>
+                  <li>
+                    <div className={this.getClassName(wizardStep.MACHINE)}>
+                      <div className="step-number">
+                        {this.completeCheck(wizardStep.MACHINE)}
+                      </div>
+                      <div className="step-label">Machine</div>
                     </div>
-                    <div className="step-label">Machine</div>
-                  </div>
-                </li>
-                <li>
-                  <div className={this.getClassName(STEP_TARGET)}>
-                    <div className="step-number">
-                      {this.completeCheck(STEP_TARGET)}
+                  </li>
+                  <li>
+                    <div className={this.getClassName(wizardStep.TARGET)}>
+                      <div className="step-number">
+                        {this.completeCheck(wizardStep.TARGET)}
+                      </div>
+                      <div className="step-label">Target</div>
                     </div>
-                    <div className="step-label">Target</div>
-                  </div>
-                </li>
-                <li>
-                  <div className={this.getClassName(STEP_OPTION)}>
-                    <div className="step-number">
-                      {this.completeCheck(STEP_OPTION)}
+                  </li>
+                  <li>
+                    <div className={this.getClassName(wizardStep.OPTION)}>
+                      <div className="step-number">
+                        {this.completeCheck(wizardStep.OPTION)}
+                      </div>
+                      <div className="step-label">Detail Options</div>
                     </div>
-                    <div className="step-label">Detail Options</div>
-                  </div>
-                </li>
-                <li>
-                  <div className={this.getClassName(STEP_CHECK)}>
-                    <div className="step-number">
-                      {this.completeCheck(STEP_CHECK)}
+                  </li>
+                  <li>
+                    <div className={this.getClassName(wizardStep.CHECK)}>
+                      <div className="step-number">
+                        {this.completeCheck(wizardStep.CHECK)}
+                      </div>
+                      <div className="step-label">Check Settings</div>
                     </div>
-                    <div className="step-label">Check Settings</div>
-                  </div>
-                </li>
-              </ul>
-            </Col>
-            <Col sm={{ size: 9 }} className="pdr-0 pdl-5">
-              <Carousel
-                  activeIndex={currentStep - 1}
-                  next={this.handleNext}
-                  previous={this.handlePrev}
-                  interval={false}
-              >
-                <CarouselItem key={STEP_MACHINE}>
-                  <Machine isNew={isNew} />
-                </CarouselItem>
-                <CarouselItem key={STEP_TARGET}>
-                  <Target isNew={isNew} />
-                </CarouselItem>
-                <CarouselItem key={STEP_OPTION}>
-                  <Option isNew={isNew} />
-                </CarouselItem>
-                <CarouselItem key={STEP_CHECK}>
-                  <Check isNew={isNew} />
-                </CarouselItem>
-              </Carousel>
-            </Col>
-          </CardBody>
-          <CardFooter className="auto-plan-card-footer">
-            {this.drawPrevButton()}
-            {this.drawNextButton()}
-          </CardFooter>
-        </Card>
+                  </li>
+                </ul>
+              </Col>
+              <Col sm={{ size: 9 }} className="pdr-0 pdl-5">
+                <Carousel
+                    activeIndex={currentStep - 1}
+                    next={this.handleNext}
+                    previous={this.handlePrev}
+                    interval={false}
+                >
+                  <CarouselItem key={wizardStep.MACHINE}>
+                    <Machine isNew={isNew} />
+                  </CarouselItem>
+                  <CarouselItem key={wizardStep.TARGET}>
+                    <Target isNew={isNew} />
+                  </CarouselItem>
+                  <CarouselItem key={wizardStep.OPTION}>
+                    <Option isNew={isNew} />
+                  </CarouselItem>
+                  <CarouselItem key={wizardStep.CHECK}>
+                    <Check isNew={isNew} />
+                  </CarouselItem>
+                </Carousel>
+              </Col>
+            </CardBody>
+            <CardFooter className="auto-plan-card-footer">
+              {this.drawPrevButton()}
+              {this.drawNextButton()}
+            </CardFooter>
+          </Card>
         }
         { logTypeFailure && toolInfoFailure &&
           <div className="network-connection-error">Network Connection Error</div>
         }
         {renderAlertModal}
+        {renderConfirmModal}
       </>
     );
   }
@@ -331,30 +381,30 @@ class RSSautoplanwizard extends Component {
 
 function invalidCheck(step, toolCnt, targetCnt, optionList) {
   switch(step) {
-    case STEP_MACHINE:
+    case wizardStep.MACHINE:
       if (toolCnt === 0) {
-        return MACHINE_ALERT_MESSAGE;
+        return modalMessage.MACHINE_ALERT_MESSAGE;
       } else {
         return null;
       }
 
-    case STEP_TARGET:
+    case wizardStep.TARGET:
       if (targetCnt === 0) {
-        return TARGET_ALERT_MESSAGE;
+        return modalMessage.TARGET_ALERT_MESSAGE;
       } else {
         return null;
       }
 
-    case STEP_OPTION:
+    case wizardStep.OPTION:
       const { planId, collectType, interval, from, to } = optionList.toJS();
 
       if (planId.toString().length < 1) {
-        return PLAN_ID_ALERT_MESSAGE;
+        return modalMessage.PLAN_ID_ALERT_MESSAGE;
       } else if (from.isAfter(to)) {
-        return FROM_TO_ALERT_MESSAGE;
+        return modalMessage.FROM_TO_ALERT_MESSAGE;
       } else if (collectType === DEFINE.AUTO_MODE_CYCLE) {
         if (interval < 1) {
-          return CYCLE_ALERT_MESSAGE;
+          return modalMessage.CYCLE_ALERT_MESSAGE;
         } else {
           return null;
         }
@@ -362,7 +412,7 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
         return null;
       }
 
-    case STEP_CHECK:
+    case wizardStep.CHECK:
     default:
       return null;
   }

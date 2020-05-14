@@ -236,7 +236,7 @@ class RSSautoplanlist extends Component {
                                 <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
                             </p>
                             <p className="no-registered-plan">
-                                There are no registered collection plans.
+                                No registered collection plans.
                             </p>
                         </Col>
                     </CardBody>
