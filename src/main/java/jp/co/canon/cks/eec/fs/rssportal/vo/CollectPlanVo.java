@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 public class CollectPlanVo {
 
     private int id;
+    private String planId;
     private String tool;
     private String logType;
     private Timestamp created;
@@ -40,6 +41,14 @@ public class CollectPlanVo {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(String planId) {
+        this.planId = planId;
     }
 
     public String getTool() {

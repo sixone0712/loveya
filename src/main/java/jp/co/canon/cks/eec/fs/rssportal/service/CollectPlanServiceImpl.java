@@ -38,7 +38,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    public int addPlan(@NonNull List<String> tools,
+    public int addPlan(@NonNull String planId,
+                       @NonNull List<String> tools,
                        @NonNull List<String> logTypes,
                        @NonNull Date collectStart,
                        @NonNull Date start,
@@ -59,6 +60,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         }
 
         CollectPlanVo plan = new CollectPlanVo();
+        plan.setPlanId(planId);
         plan.setTool(toSingleString(tools));
         plan.setLogType(toSingleString(logTypes));
         plan.setCollectionType(colType);

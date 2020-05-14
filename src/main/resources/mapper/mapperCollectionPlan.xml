@@ -5,6 +5,7 @@
     <select id="selectAll" resultType="CollectPlanVo">
         select
             id,
+            planid,
             tool,
             logtype,
             description,
@@ -24,6 +25,7 @@
     <select id="selectAllOptions" parameterType="hashmap" resultType="CollectPlanVo">
         select
             id,
+            planid,
             tool,
             logtype,
             description,
@@ -52,6 +54,7 @@
     <select id="selectId" parameterType="Integer" resultType="CollectPlanVo">
         select
             id,
+            planid,
             tool,
             logtype,
             description,
@@ -75,6 +78,7 @@
         </selectKey>
         insert into rsss."collection_plan" (
             id,
+            planid,
             tool,
             logtype,
             tscreated,
@@ -89,6 +93,7 @@
             tslastpoint
         ) values (
             #{id},
+            #{planId},
             #{tool},
             #{logType},
             now(),
@@ -106,6 +111,7 @@
 
     <update id="update" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
+            planid = #{planId},
             tslastcollect = #{lastCollect},
             <if test="nextAction!=null">
             tsnext = #{nextAction},

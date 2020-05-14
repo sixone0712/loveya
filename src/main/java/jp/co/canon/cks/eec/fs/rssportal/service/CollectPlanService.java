@@ -9,18 +9,8 @@ import java.util.List;
 
 public interface CollectPlanService {
 
-    /**
-     * Add a new plan.
-     * @param tools
-     * @param logTypes
-     * @param start
-     * @param end
-     * @param collectType   "cycle" or "continuous"
-     * @param interval      milliseconds. it has to be 60000 over.
-     * @param description
-     * @return
-     */
-    int addPlan(@NonNull List<String> tools,
+    int addPlan(@NonNull String planId,
+                @NonNull List<String> tools,
                 @NonNull List<String> logTypes,
                 @NonNull Date collectStart,
                 @NonNull Date start,
