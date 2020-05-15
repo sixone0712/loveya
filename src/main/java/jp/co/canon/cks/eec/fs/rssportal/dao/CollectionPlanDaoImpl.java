@@ -76,4 +76,12 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
         session.close();
         return true;
     }
+
+    @Override
+    public boolean updateStatus(CollectPlanVo plan) {
+        SqlSession session = sessionFactory.openSession(true);
+        session.update("colplan.updateStatus", plan);
+        session.close();
+        return true;
+    }
 }

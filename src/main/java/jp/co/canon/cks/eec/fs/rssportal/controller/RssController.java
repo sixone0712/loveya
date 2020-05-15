@@ -1,14 +1,25 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class RssController {
-    @RequestMapping(value={"", "*", "rss/*"})
+    private Log log = LogFactory.getLog(getClass());
+
+    @RequestMapping(value={"/rss", "/rss/"})
     public String rss(Model model) {
+        log.info("[RssController] rss url called");
         model.addAttribute("pageName", "index");
         return "page";
+    }
+
+    @RequestMapping(value={"/rss/**"})
+    public String redirect() {
+        log.info("[[RssController]] other url called");
+        return "redirect:/rss";
     }
 }

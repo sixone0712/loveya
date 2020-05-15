@@ -94,6 +94,12 @@ a:hover {
     text-align: center;
 }
 
+.scroll-up-icon {
+    color: white;
+    position: relative;
+    top: 6px;
+}
+
 @-webkit-keyframes changeOpacity {
     from {
         opacity: 0;
@@ -709,6 +715,9 @@ a:hover {
 
 .navbar .navbar-nav .nav-item {
     margin-left: 10px;
+}
+
+.navbar .navbar-nav .nav-item:not(:first-child) {
     margin-right: 10px;
 }
 
@@ -853,6 +862,10 @@ a:hover {
     background: rgb(92, 124, 250);
 }
 
+.ribbon-gray_blue {
+  background: rgb(26, 32, 44);
+}
+
 .ribbon-primary.ribbon-clip::before {
     border-color: rgb(141, 99, 218) rgb(141, 99, 218) transparent transparent;
 }
@@ -867,6 +880,10 @@ a:hover {
 
 .ribbon-info.ribbon-clip::before {
     border-color: rgb(61, 100, 119) rgb(61, 100, 119) transparent transparent;
+}
+
+.ribbon-gray_blue.ribbon-clip::before {
+  border-color: rgb(26, 32, 44) rgb(26, 32, 44) transparent transparent;
 }
 /* ribbon style end */
 
@@ -1116,13 +1133,17 @@ td.selected:hover {
     box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.1);
 }
 
+.catlist-card .cmdlist-btn-toggle,
 .catlist-card .catlist-btn,
 .catlist-card .catlist-btn-toggle:hover {
     color: rgb(255, 169, 77);
     background-color: white;
     border-color: rgb(255, 169, 77);
 }
-
+.catlist-card .cmdlist-btn-toggle:not(:disabled):not(.disabled).active,
+.catlist-card .cmdlist-btn-toggle:hover{
+    margin-left: 4px;
+}
 .catlist-card .catlist-btn:hover {
     color: white;
     background-color: rgb(255, 169, 77);
@@ -1579,7 +1600,7 @@ td.selected:hover {
 .auto-plan-box .custom-pagination .page-item.active .page-link {
     color: white;
     background-color: rgb(92, 124, 250);
-    border-color: rgb(92, 124, 250);
+    border: 1px solid rgb(92, 124, 250);
 }
 
 .auto-plan-box .custom-pagination .page-item .page-link:focus {
@@ -1588,10 +1609,12 @@ td.selected:hover {
 }
 
 .auto-plan-box .custom-pagination .page-item.active .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.1);
     background-color: rgba(92, 124, 250, 0.7);
 }
 
 .auto-plan-box .custom-pagination .page-item:not(.active) .page-link:hover {
+    border-color: rgba(92, 124, 250, 0.1);
     background-color: rgba(92, 124, 250, 0.3);
 }
 
@@ -2131,6 +2154,18 @@ td.selected:hover {
     display: flex;
     justify-content: center;
     flex-direction: column;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list {
+    text-align: center;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list:first-child {
+    margin-top: 1em;
+}
+
+.auto-plan-collection-list.download-list p.no-download-list:last-child {
+    font-size: 15px;
 }
 
 .auto-plan-collection-list.download-list .content-section {

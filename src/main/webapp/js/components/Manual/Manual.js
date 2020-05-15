@@ -18,7 +18,7 @@ import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
 class Manual extends Component {
 
     async componentDidMount() {
-        console.log("componentDidMount");
+        console.log("[Manual][componentDidMount]componentDidMount");
         const {viewListActions, genreListActions, searchListActions} = this.props;
 
         searchListActions.searchSetInitAllList();
@@ -38,7 +38,7 @@ class Manual extends Component {
             genreSuccess,
             logTypeFailure,
             toolInfoFailure,
-            genreFailure
+            genreFailure,
         } = this.props;
         const isSuccess = logTypeSuccess && toolInfoSuccess && genreSuccess;
         const isFailure = logTypeFailure || toolInfoFailure || genreFailure;

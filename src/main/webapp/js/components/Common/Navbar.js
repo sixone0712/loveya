@@ -23,6 +23,7 @@ import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import ChangeAuthModal from "../User/ChangeAuth";
 import AlertModal from "../Common/AlertModal";
+import services from "../../services";
 
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
 const AUTH_ALERT_MESSAGE = "Permission change completed.";
@@ -120,12 +121,13 @@ class RSSNavbar extends Component{
   }
 
 
-  onLogout = () => {
+  onLogout = async () => {
     window.sessionStorage.removeItem('isLoggedIn');
     window.sessionStorage.removeItem('username');
     window.sessionStorage.removeItem('password');
     window.sessionStorage.removeItem('auth');
-    API.setLoginInit(this.props);
+    await API.setLoginInit(this.props);
+    await services.axiosAPI.get("/user/logout");
     this.props.onMovePage(Define.PAGE_LOGIN)
   };
 
@@ -145,13 +147,25 @@ class RSSNavbar extends Component{
               RSS
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
-              <NavLink
-                  tag={RRNavLink}
-                  to={Define.PAGE_REFRESH_MANUAL}
-                  className={this.getClassName("Manual")}
-                  onClick={() => this.handlePageChange("Manual")}>
+
+              <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
+                  <DropdownToggle nav>
                 Manual Download
-              </NavLink>
+              </DropdownToggle>
+                <DropdownMenu>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL} onClick={() => this.handlePageChange("Manual")}>
+                        FTP Download
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual2")}>
+                        VFTP Download(COMPAT/Optional)
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual3")}>
+                        VFTP Download(SSSS/Optional)
+                    </DropdownItem>
+                </DropdownMenu>
+              </UncontrolledDropdown>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav className={this.getClassName("Auto")}>
                   Auto Download

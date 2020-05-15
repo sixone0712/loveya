@@ -28,7 +28,7 @@ class ChangePwModal extends Component {
         if (oldPw !== originalPw) {
             this.setState({
                 errors: {
-                    oldPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_INCCORECT_CURRENT_PASSWORD)
+                    oldPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD)
                 }
             });
             return true;

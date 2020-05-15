@@ -1,9 +1,9 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
-import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     private static final int COLLECTTYPE_CYCLE = 1;
     private static final int COLLECTTYPE_CONTINUOUS = 2;
-    private static final int CONTINUOUS_DEFAULT_INTERVAL = 10*60*1000; // 10 minutes
+    //private static final int CONTINUOUS_DEFAULT_INTERVAL = 10*60*1000; // 10 minutes
+    private static final int CONTINUOUS_DEFAULT_INTERVAL = 60*1000; // 1 minute
 
     private final HttpSession session;
     private final CollectionPlanDao dao;
@@ -33,12 +34,12 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     public CollectPlanServiceImpl(HttpSession session, CollectionPlanDao dao) {
         this.session = session;
         this.dao = dao;
-
         notifiers = new ArrayList<>();
     }
 
     @Override
-    public int addPlan(@NonNull List<String> tools,
+    public int addPlan(@NonNull String planName,
+                       @NonNull List<String> tools,
                        @NonNull List<String> logTypes,
                        @NonNull Date collectStart,
                        @NonNull Date start,
@@ -59,6 +60,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         }
 
         CollectPlanVo plan = new CollectPlanVo();
+        plan.setPlanName(planName);
         plan.setTool(toSingleString(tools));
         plan.setLogType(toSingleString(logTypes));
         plan.setCollectionType(colType);
@@ -72,6 +74,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         plan.setEnd(new Timestamp(end.getTime()));
         plan.setNextAction(new Timestamp(start.getTime()));
         plan.setLastPoint(new Timestamp(start.getTime()-(3600*1000)));
+        plan.setLastStatus(PlanStatus.registered.name());
 
         if(description!=null) {
             plan.setDescription(description);
@@ -215,14 +218,15 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         if(endTime<=cur) {
             plan.setNextAction(null);
             plan.setExpired(true);
+            plan.setLastStatus(PlanStatus.completed.name());
         } else {
             Date last = plan.getLastCollect();
+            long interval = plan.getCollectionType()==COLLECTTYPE_CYCLE ?plan.getInterval():CONTINUOUS_DEFAULT_INTERVAL;
             long nextTime;
-            if (last == null) {
-                nextTime = plan.getStart().getTime() + plan.getInterval();
-            } else {
-                nextTime = last.getTime() + plan.getInterval();
-            }
+            if (last == null)
+                nextTime = plan.getStart().getTime() + interval;
+            else
+                nextTime = last.getTime() + interval;
             plan.setNextAction(new Timestamp(nextTime));
         }
         dao.updatePlan(plan);
@@ -231,24 +235,28 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public void updateLastCollect(@NonNull CollectPlanVo plan) {
-        updateLastCollect(plan, false);
-    }
-
-    @Override
-    public void updateLastCollect(CollectPlanVo plan, boolean isFailed) {
         log.info("updateLastCollect: planId="+plan.getId()+" lastCollect="+plan.getLastCollect());
-        if(isFailed==false) {
-            plan.setLastCollect(new Timestamp(System.currentTimeMillis()));
-            plan.setLastStatus("ok");
-        } else {
-            plan.setLastStatus("error");
-        }
+        plan.setLastCollect(new Timestamp(System.currentTimeMillis()));
         dao.updatePlan(plan);
     }
 
     @Override
-    public void setLastStatus(int planId, String status) {
+    public void setLastStatus(int planId, PlanStatus status) {
+        CollectPlanVo plan = getPlan(planId);
+        if(plan==null) {
+            log.error("setLastStatus invalid planId "+planId);
+            return;
+        }
+        setLastStatus(plan, status);
+    }
 
+    @Override
+    public void setLastStatus(@NonNull CollectPlanVo plan, PlanStatus status) {
+        plan.setLastStatus(status.name());
+        if(dao.updateStatus(plan))
+            log.info("update statue (plan="+plan.getPlanName()+" status="+status.name()+")");
+        else
+            log.info("update status failed (plan="+plan.getPlanName()+" status="+status.name()+")");
     }
 
     @Override

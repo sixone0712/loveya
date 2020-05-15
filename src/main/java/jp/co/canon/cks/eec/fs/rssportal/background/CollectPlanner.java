@@ -5,11 +5,14 @@ import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -37,6 +40,7 @@ public class CollectPlanner extends Thread {
     private static final boolean useVirtualFileService = true;
     private static final String planRootDir = "planroot";
     private final CollectPlanService service;
+    private final DownloadListService downloadListService;
     private final FileServiceManage fileServiceManage;
     private final FileServiceModel fileService;
     private final DownloadMonitor monitor;
@@ -44,12 +48,13 @@ public class CollectPlanner extends Thread {
     private boolean planUpdated = true;
 
     @Autowired
-    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service) throws ServiceException {
-        if(service==null) {
+    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService) throws ServiceException {
+        if(service==null || monitor==null || downloadListService==null)
             throw new BeanInitializationException("service injection failed");
-        }
+
         this.monitor = monitor;
         this.service = service;
+        this.downloadListService = downloadListService;
         service.addNotifier(notifyUpdate);
         service.scheduleAllPlans();
 
@@ -113,15 +118,15 @@ public class CollectPlanner extends Thread {
     private boolean collect(CollectPlanVo plan) throws InterruptedException, IOException {
 
         log.info("collect: "+plan.toString());
+        service.setLastStatus(plan, PlanStatus.collecting);
         List<DownloadForm> downloadList = createDownloadList(plan);
 
-        boolean failed = false;
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
             String jobType = useVirtualFileService?"virtual":"auto";
             FileDownloadExecutor executor = new FileDownloadExecutor(
                     jobType,
-                    "",
+                    plan.getPlanName(),
                     fileServiceManage,
                     fileService,
                     downloadList,
@@ -129,16 +134,25 @@ public class CollectPlanner extends Thread {
             executor.setMonitor(monitor);
             executor.start();
 
-            while(executor.isRunning()) sleep(100);
+            while(executor.isRunning())
+                sleep(100);
             if(!executor.getStatus().equalsIgnoreCase("complete")) {
                 log.error("file download failed [planId="+plan.getId()+"]");
-                failed = true;
+                service.setLastStatus(plan, PlanStatus.suspended);
             } else {
                 copyFiles(plan, executor.getBaseDir());
-                compress(plan);
+                String outputPath = compress(plan);
+                if(outputPath==null) {
+                    log.error("failed to pack logs");
+                    service.setLastStatus(plan, PlanStatus.suspended);
+                } else {
+                    service.setLastStatus(plan, PlanStatus.collected);
+                    downloadListService.insert(plan, outputPath);
+                    service.updateLastCollect(plan);
+                    log.info("plan "+plan.getPlanName()+" collecting success");
+                }
             }
         }
-        service.updateLastCollect(plan, failed);
         service.schedulePlan(plan);
         return true;
     }
@@ -233,13 +247,16 @@ public class CollectPlanner extends Thread {
         }
     }
 
-    private void compress(CollectPlanVo plan) {
+    private String compress(CollectPlanVo plan) {
         log.info("compress");
         File dir = Paths.get(planRootDir, String.valueOf(plan.getId())).toFile();
         if(dir.exists()==false) {
             log.error("sequence error. no files to compress");
-            return;
+            return null;
         }
+        /* Planner doesn't delete result files here.
+           Let's implement another process to clean old files up.
+
         File[] files = dir.listFiles();
         File oldTmp = null, oldZip = null;
         for(File file: files) {
@@ -257,9 +274,9 @@ public class CollectPlanner extends Thread {
             File rename = new File(oldZip.getAbsolutePath()+".tmp");
             oldZip.renameTo(rename);
         }
-
+        */
         Compressor compressor = new Compressor();
-        String zipName = plan.getId()+".zip";
+        String zipName = plan.getId()+"_"+System.currentTimeMillis()+".zip";
         Path zipPath = Paths.get(dir.toString(), zipName);
         if(compressor.compress(dir.toString(), zipPath.toString())) {
             log.info("compressing success "+"["+zipName+"]");
@@ -267,29 +284,12 @@ public class CollectPlanner extends Thread {
             log.info("compressing failed");
         }
         log.info("compress done ("+zipName+")");
+        return zipPath.toString();
     }
 
     private Runnable notifyUpdate = ()->{
         planUpdated = true;
     };
-
-    public File getZipPath(int planId) {
-        CollectPlanVo plan = service.getPlan(planId);
-        if(plan==null || plan.getLastCollect()==null)
-            return null;
-
-        File zip = null;
-        File[] files = Paths.get(planRootDir, String.valueOf(plan.getId())).toFile().listFiles();
-        for(File file: files) {
-            if(file.isFile() && file.getName().endsWith(".zip")) {
-                zip = file;
-                break;
-            }
-        }
-        if(zip==null)
-            return null;
-        return zip;
-    }
 
     private final Log log = LogFactory.getLog(getClass());
 }

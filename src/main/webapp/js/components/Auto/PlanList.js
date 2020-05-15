@@ -25,11 +25,16 @@ const PAGE_EDIT = 2;
 const PAGE_DOWNLOAD = 3;
 const MODAL_MESSAGE = "Are you sure you want to delete this collection plan?";
 
-const STATUS_RUNNING = 1;
-const STATUS_STOPPED = 2;
+const STATUS_RUNNING = "running";
+const STATUS_STOPPED = "stop";
 
-const DETAIL_COMPLETE = 1;
-const DETAIL_FAILED = 2;
+const DETAIL_REGISTERED = "registered";
+const DETAIL_COLLECTING = "collecting";
+const DETAIL_COLLECTED = "collected";
+const DETAIL_SUSPENDED = "suspended";
+const DETAIL_HALTED = "halted";
+const DETAIL_COMPLETED = "completed";
+
 
 const optionList = [
     { value: 10, label: "10" },
@@ -125,30 +130,33 @@ class RSSautoplanlist extends Component {
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get("/plan/list");
-        console.log("res", res);
+        const res =  await services.axiosAPI.get("/plan/list?withExpired=yes");
+        console.log("[AUTO][loadPlanList]res", res);
         const { data } = res;
-
         const newData = data.map(item => {
             const targetArray = item.logType.split(",")
             return (
                 {
-                    planId: "Plan " + item.id,
+                    planId: item.planName,
                     planDescription: item.description,
                     planTarget: targetArray.length,
                     planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
                     planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: STATUS_RUNNING,     // 수정필요
-                    planLastRun: moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),    // 수정필요
-                    planDetail: DETAIL_COMPLETE,    // 수정필요
+                    planStatus: item.status,
+                    planLastRun: item.lastCollect == null ? "-" : moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),
+                    planDetail: item.detail,
                     id: item.id,
                     tool: item.tool,
                     logType: item.logType,
                     interval: item.interval,
-                    collectStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),    //수정필요
+                    collectStart: moment(item.collectStart).format("YYYY-MM-DD HH:mm:ss"),
+                    collectTypeStr: item.collectTypeStr,
+                    expired: item.expired,
                 }
             );
         })
+
+        console.log("[AUTO][loadPlanList]newData", newData);
 
         this.setState({
             ...this.state,
@@ -158,8 +166,8 @@ class RSSautoplanlist extends Component {
     }
 
     setEditPlanList = (id) => {
-        console.log("setEditPlanList");
-        console.log("id", id);
+        console.log("[AUTO][setEditPlanList]setEditPlanList");
+        console.log("[AUTO][setEditPlanList]id", id);
         const { registeredList } = this.state;
         const findList = registeredList.find(item => item.id == id);
 
@@ -172,7 +180,7 @@ class RSSautoplanlist extends Component {
             collectStart: findList.collectStart,
             from: findList.planPeriodStart,
             to: findList.planPeriodEnd,
-            collectType: DEFINE.AUTO_MODE_CYCLE,       // 수정필요
+            collectType: findList.collectTypeStr,
             interval: findList.interval,
             description: findList.planDescription
         });
@@ -236,7 +244,7 @@ class RSSautoplanlist extends Component {
                                 <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
                             </p>
                             <p className="no-registered-plan">
-                                There are no registered collection plans.
+                                No registered collection plans.
                             </p>
                         </Col>
                     </CardBody>
@@ -346,44 +354,39 @@ class RSSautoplanlist extends Component {
 }
 
 function CreateStatus(status) {
+    let component = null;
     switch (status) {
         case STATUS_RUNNING:
-        default:
-            return (
-                <>
-                    <FontAwesomeIcon className="running" icon={faPlay} /> Running
-                </>
-            );
-
+            component = (<><FontAwesomeIcon className="running" icon={faPlay} /> Running</>);    break;
         case STATUS_STOPPED:
-            return (
-                <>
-                    <FontAwesomeIcon className="stopped" icon={faStop} /> Stopped
-                </>
-            );
+            component = (<><FontAwesomeIcon className="stopped" icon={faStop} /> Stopped</>);    break;
+        default:
+            console.error("plan detail error");   break;
     }
+
+    return component;
 }
 
 function CreateDetail(detail) {
+    let component = null;
     switch (detail) {
-        case DETAIL_COMPLETE:
-            return (
-                <>
-                    <FontAwesomeIcon className="completed" icon={faCheck} /> Completed
-                </>
-            );
-
-        case DETAIL_FAILED:
-            return (
-                <>
-                    <FontAwesomeIcon className="failed" icon={faTimes} /> Failed
-                </>
-            );
-
+        case DETAIL_REGISTERED:
+            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Registered</>);   break;
+        case DETAIL_COLLECTING:
+            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collecting</>);   break;
+        case DETAIL_COLLECTED:
+            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collected</>);   break;
+        case DETAIL_SUSPENDED:
+            component = (<><FontAwesomeIcon className="failed" icon={faTimes} /> Suspended</>);   break;
+        case DETAIL_HALTED:
+            component = (<><FontAwesomeIcon className="failed" icon={faTimes} /> Halted</>);   break;
+        case DETAIL_COMPLETED:
+            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Completed</>);   break;
         default:
-            console.log("plan status detail error");
-            return null;
+            console.error("plan detail error");   break;
     }
+
+    return component;
 }
 
 export default connect(

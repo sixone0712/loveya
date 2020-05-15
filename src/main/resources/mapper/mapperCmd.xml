@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cmd">
+
+    <select id="selectAll" resultType="CommandVo">
+        select * from rsss."cmd" where validity is true
+    </select>
+
+    <select id="select" resultType="CommandVo">
+        select * from rsss."cmd"
+        where
+            validity is true
+            <if test="cmd_type!=null and cmd_type!=''">
+                and cmd_type = #{cmd_type}
+            </if>
+            <if test="cmd_name!=null and cmd_name!=''">
+                and cmd_name = #{cmd_name}
+            </if>
+    </select>
+
+    <insert id="insert" parameterType="CommandVo">
+        insert into rsss."cmd" (
+            cmd_name
+            ,cmd_type
+            ,created
+            ,modified
+            ,validity
+            ) values (
+                #{cmd_name}
+                ,#{cmd_type}
+                ,now()
+                ,now()
+                ,true
+        )
+    </insert>
+
+    <update id="update" parameterType="CommandVo">
+        update rsss."cmd" set
+            cmd_name = #{cmd_name},
+            modified = now(),
+            where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete
+            from rsss."cmd"
+            where id = #{id}
+    </delete>
+
+    <select id="selectByName" resultType="CommandVo">
+        select * from rsss."cmd"
+        where
+        validity is true
+        <if test="cmd_name!=null and cmd_name!=''">
+            and cmd_name = #{cmd_name}
+        </if>
+    </select>
+    <select id="selectById" resultType="CommandVo">
+        select * from rsss."cmd"
+        where
+        validity is true
+        <if test="id!=null and id!=''">
+            and id = #{id}
+        </if>
+    </select>
+
+    <select id="getList" resultType="CommandVo">
+        select * from rsss."cmd"
+        where
+        validity is true
+        <if test="cmd_type!=null and cmd_type!=''">
+            and cmd_type = #{cmd_type}
+        </if>
+    </select>
+</mapper>

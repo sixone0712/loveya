@@ -179,7 +179,7 @@ public class FileDownloaderController {
 
         String fileName = String.format("%s_%s_%s.zip", username, fab, cur);
         log.info("filename = "+fileName);
-        return downloadId+".zip";
+        return fileName;
     }
 
     private void addDownloadItem(final Map map, String fab, String machine, String category, String file,

@@ -1,5 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.test.controller;
 
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserPermissionService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
@@ -25,16 +29,19 @@ public class DatabaseTestController {
     private final UserService serviceUser;
     private final UserPermissionService serviceUserPerm;
     private final CollectPlanService serviceCollectionPlan;
+    private final DownloadListService serviceDownloadList;
 
     @Autowired
     public DatabaseTestController(HttpSession httpSession,
                                   UserService serviceUser,
                                   UserPermissionService serviceUserPerm,
-                                  CollectPlanService serviceCollectionPlan) {
+                                  CollectPlanService serviceCollectionPlan,
+                                  DownloadListService serviceDownloadList) {
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
         this.serviceUserPerm = serviceUserPerm;
         this.serviceCollectionPlan = serviceCollectionPlan;
+        this.serviceDownloadList = serviceDownloadList;
     }
 
     @RequestMapping("/main")
@@ -117,7 +124,7 @@ public class DatabaseTestController {
         Date end1 = new Date(start1.getTime()+millis_per_hour);
         long interval1 = millis_per_minute;
 
-        serviceCollectionPlan.addPlan(tools1, logTypes1, start1, start1, end1, "cycle",
+        serviceCollectionPlan.addPlan("planid", tools1, logTypes1, start1, start1, end1, "cycle",
                 interval1, "1min-cycle");
 
         List<String> tools2 = Arrays.asList("EQVM88");
@@ -126,13 +133,11 @@ public class DatabaseTestController {
         Date end2 = new Date(start1.getTime()+millis_per_hour);
         long interval2 = millis_per_minute*3;
 
-        serviceCollectionPlan.addPlan(tools2, logTypes2, start2, start2, end2, "cycle",
+        serviceCollectionPlan.addPlan("planid", tools2, logTypes2, start2, start2, end2, "cycle",
                 interval2, "30sec-cycle");
 
         return "okay";
     }
-
-
 
     @RequestMapping("/plan/list")
     @ResponseBody
@@ -140,6 +145,29 @@ public class DatabaseTestController {
         log.info("/plan/list");
         List<CollectPlanVo> list = serviceCollectionPlan.getAllPlans();
         return list.toString();
+    }
+
+    @RequestMapping("/downloadlist/get")
+    @ResponseBody
+    public String getDownloadList() {
+        log.info("/downloadlist/get");
+        List<DownloadListVo> list = serviceDownloadList.getList();
+        return "ok";
+    }
+
+    @RequestMapping("/downloadlist/add")
+    @ResponseBody
+    public String addDownloadList(HttpServletRequest request) {
+        String path = request.getServletPath();
+        log.info(path);
+        DownloadListVo item = new DownloadListVo();
+        item.setPlanId(123);
+        item.setCreated(new Timestamp(System.currentTimeMillis()));
+        item.setPath("pathpathpath");
+        item.setStatus("registered");
+        item.setTitle("title1111");
+        serviceDownloadList.insert(item);
+        return path+" ok";
     }
 
     private final Log log = LogFactory.getLog(getClass());
