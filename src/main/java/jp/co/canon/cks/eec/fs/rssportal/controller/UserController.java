@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,27 @@ public class UserController {
         this.serviceUserPerm = serviceUserPerm;
     }
 
+    @GetMapping("/isLogin")
+    @ResponseBody
+    public Map<String, Object> isLogin(@RequestParam Map<String, Object> param)  throws Exception {
+        log.info("/user/isLogin");
+        Map<String, Object> res = new HashMap<>();
+
+        if(httpSession.getAttribute("context") != null) {
+            SessionContext context = (SessionContext)httpSession.getAttribute("context");
+            res.put("isLogin", true);
+            res.put("username", context.getUser().getUsername());
+            res.put("permissions", context.getUser().getPermissions());
+            log.info("true");
+        } else {
+            res.put("isLogin", false);
+            res.put("username", "");
+            res.put("permissions", "");
+            log.info("false");
+        }
+
+        return res;
+    }
 
     @GetMapping("/login")
     @ResponseBody

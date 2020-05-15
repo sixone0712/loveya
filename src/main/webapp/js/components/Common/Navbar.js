@@ -23,6 +23,7 @@ import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import ChangeAuthModal from "../User/ChangeAuth";
 import AlertModal from "../Common/AlertModal";
+import services from "../../services";
 
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
 const AUTH_ALERT_MESSAGE = "Permission change completed.";
@@ -120,12 +121,13 @@ class RSSNavbar extends Component{
   }
 
 
-  onLogout = () => {
+  onLogout = async () => {
     window.sessionStorage.removeItem('isLoggedIn');
     window.sessionStorage.removeItem('username');
     window.sessionStorage.removeItem('password');
     window.sessionStorage.removeItem('auth');
-    API.setLoginInit(this.props);
+    await API.setLoginInit(this.props);
+    await services.axiosAPI.get("/user/logout");
     this.props.onMovePage(Define.PAGE_LOGIN)
   };
 

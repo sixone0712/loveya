@@ -20,18 +20,14 @@ import * as Define from "./define";
 
 class App extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     onMovePage = (url) => {
         this.props.history.push(url);
     };
 
-    componentDidMount() {
+    async componentDidMount() {
+        console.log("[App][componentDidMount]");
+        /*
         const isLoggedInStorage = window.sessionStorage.getItem('isLoggedIn');
-
-        console.log("componentDidMount");
         console.log("this.props.isLoggedIn", this.props.isLoggedIn);
         console.log("isLoggedInStorage", isLoggedInStorage);
 
@@ -42,22 +38,38 @@ class App extends Component {
             API.setLoginIsLoggedIn(this.props, true);
             this.onMovePage(Define.PAGE_MANUAL);
         }
+        */
+
+        const res = await services.axiosAPI.isLogin("/user/isLogin");
+        console.log("[App][componentDidMount]res", res);
+        const { isLogin, username, permissions} = res.data;
+        await API.setLoginIsLoggedIn(this.props, isLogin);
+        const isLoggedIn = API.getLoginIsLoggedIn(this.props);
+        console.log("[App][componentDidMount]isLoggedIn", isLoggedIn);
+        if(isLoggedIn) {
+            await API.setLoginUserName(this.props, username);
+            await API.setLoginAuth(this.props, permissions);
+            this.onMovePage(Define.PAGE_MANUAL);
+        } else {
+            this.onMovePage(Define.PAGE_LOGIN);
+        }
     }
 
     render() {
         const isLoggedIn = API.getLoginIsLoggedIn(this.props);
-        console.log("isLoggedIn", isLoggedIn);
-        console.log("this.props.history", this.props.history);
+        console.log("[App][render]");
+        console.log("[App][render]isLoggedIn", isLoggedIn);
+        console.log("[App][render]this.props.history", this.props.history);
         return (
                 <>
                     {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}
                     <Switch>
-                        <Route path={Define.PAGE_REFRESH} component={MoveRefreshPage} />
-                        <Route path={Define.PAGE_LOGIN} component={Login} />
-                        <Route path={Define.PAGE_MANUAL} component={Manual} />
-                        <Route path={Define.PAGE_MANUAL2} component={Manual2} />
-                        <Route path={Define.PAGE_AUTO} component={Auto} />
-                        <Redirect to={Define.PAGE_MANUAL} component={Manual} />
+                        <Route path={Define.PAGE_REFRESH} component={MoveRefreshPage}/>
+                        <Route path={Define.PAGE_LOGIN} component={Login}/>
+                        <Route path={Define.PAGE_MANUAL} component={Manual}/>
+                        <Route path={Define.PAGE_MANUAL2} component={Manual2}/>
+                        <Route path={Define.PAGE_AUTO} component={Auto}/>
+                        {/*<Redirect to={Define.PAGE_MANUAL} component={Manual} />*/}
 
                         {/* How to pass props */}
                         {/*
