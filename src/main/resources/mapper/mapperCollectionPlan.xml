@@ -13,6 +13,7 @@
             cinterval as interval,
             ownerid as owner,
             expired,
+            tscollectstart as collectStart,
             tscreated as created,
             tsstart as start,
             tsend as end,
@@ -20,7 +21,7 @@
             tsnext as nextAction,
             tslastpoint as lastPoint,
             laststatus as detail,
-            case when laststatus='halted' then 'stop' else 'running' end as status,
+            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
             case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
 
         from rsss."collection_plan"
@@ -37,6 +38,7 @@
             cinterval as interval,
             ownerid as owner,
             expired,
+            tscollectstart as collectStart,
             tscreated as created,
             tsstart as start,
             tsend as end,
@@ -44,7 +46,7 @@
             tsnext as nextAction,
             tslastpoint as lastPoint,
             laststatus as detail,
-            case when laststatus='halted' then 'stop' else 'running' end as status,
+            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
             case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
 
         from rsss."collection_plan" as t_collect
@@ -70,6 +72,7 @@
             cinterval as interval,
             ownerid as owner,
             expired,
+            tscollectstart as collectStart,
             tscreated as created,
             tsstart as start,
             tsend as end,
@@ -77,7 +80,7 @@
             tsnext as nextAction,
             tslastpoint as lastPoint,
             laststatus as detail,
-            case when laststatus='halted' then 'stop' else 'running' end as status,
+            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
             case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
 
         from rsss."collection_plan"
