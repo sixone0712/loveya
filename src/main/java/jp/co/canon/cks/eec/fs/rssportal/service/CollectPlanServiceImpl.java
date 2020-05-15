@@ -22,7 +22,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     private static final int COLLECTTYPE_CYCLE = 1;
     private static final int COLLECTTYPE_CONTINUOUS = 2;
-    private static final int CONTINUOUS_DEFAULT_INTERVAL = 10*60*1000; // 10 minutes
+    //private static final int CONTINUOUS_DEFAULT_INTERVAL = 10*60*1000; // 10 minutes
+    private static final int CONTINUOUS_DEFAULT_INTERVAL = 60*1000; // 1 minute
 
     private final HttpSession session;
     private final CollectionPlanDao dao;
@@ -220,12 +221,12 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setLastStatus(PlanStatus.completed.name());
         } else {
             Date last = plan.getLastCollect();
+            long interval = plan.getCollectionType()==COLLECTTYPE_CYCLE ?plan.getInterval():CONTINUOUS_DEFAULT_INTERVAL;
             long nextTime;
-            if (last == null) {
-                nextTime = plan.getStart().getTime() + plan.getInterval();
-            } else {
-                nextTime = last.getTime() + plan.getInterval();
-            }
+            if (last == null)
+                nextTime = plan.getStart().getTime() + interval;
+            else
+                nextTime = last.getTime() + interval;
             plan.setNextAction(new Timestamp(nextTime));
         }
         dao.updatePlan(plan);
@@ -251,7 +252,6 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public void setLastStatus(@NonNull CollectPlanVo plan, PlanStatus status) {
-        plan.setLastStatus(status.name());
         plan.setLastStatus(status.name());
         if(dao.updateStatus(plan))
             log.info("update statue (plan="+plan.getPlanName()+" status="+status.name()+")");

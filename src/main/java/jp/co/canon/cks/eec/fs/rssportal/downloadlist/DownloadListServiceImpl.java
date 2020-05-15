@@ -1,0 +1,53 @@
+package jp.co.canon.cks.eec.fs.rssportal.downloadlist;
+
+import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+@Service
+public class DownloadListServiceImpl implements DownloadListService{
+
+    private Log log = LogFactory.getLog(getClass());
+    private DownloadListDao dao;
+
+    @Autowired
+    private DownloadListServiceImpl(DownloadListDao dao) {
+        if(dao==null)
+            throw new BeanInitializationException("DownloadList repository is null");
+        this.dao = dao;
+    }
+
+    @Override
+    public List<DownloadListVo> getList() {
+        return dao.find();
+    }
+
+    @Override
+    public List<DownloadListVo> getList(int offset, int limit) {
+        return null;
+    }
+
+    @Override
+    public boolean insert(DownloadListVo item) {
+        return dao.insert(item);
+    }
+
+    @Override
+    public boolean insert(@NonNull CollectPlanVo plan, @NonNull String filePath) {
+        DownloadListVo item = new DownloadListVo(new Timestamp(System.currentTimeMillis()), "new",
+                plan.getId(), filePath);
+        return dao.insert(item);
+    }
+
+    @Override
+    public boolean update(DownloadListVo item) {
+        return dao.update(item);
+    }
+}
