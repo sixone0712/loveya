@@ -21,9 +21,11 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     private static final String[] allowedRegex = {
             "/",
             "/error",
-            "/rss/login",
-            "/user/login",
             "/dbtest",
+            "/rss",
+            "/user/login",
+            "/user/isLogin",
+            "/favicon.ico",
             "/build/react/[\\w.]*"
     };
 
@@ -33,27 +35,40 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         HttpSession session = request.getSession();
         String url = request.getServletPath();
         log.info("preHandler (url="+url+")");
+        log.info("preHandler (session id: " + request.getSession().getId() + ")");
 
         // If the client requests a page which permits guest access, this method does nothing here.
         if(isUserspace(url)==false) {
+            log.info("userauth : true");
+            response.addHeader("userauth", "true");
             return true;
         }
+
+
 
         // Check session has been authorized.
         SessionContext context = (SessionContext)session.getAttribute("context");
         if(context==null) {
             log.warn("invalid access. redirect login page");
-            //response.sendRedirect("/test/login"); // TODO
-            return false;
+            response.addHeader("userauth", "false");
+            if(isPageMove(url)) {
+                response.sendRedirect("/rss");
+            }
+              return false;
         }
 
         long current = System.currentTimeMillis();
         if((current-session.getLastAccessedTime())>SESSION_TIMEOUT) {
             log.info("session timeout");
+            if(isPageMove(url)) {
+                response.sendRedirect("/rss");
+            }
             session.invalidate();
-            //response.sendRedirect("/test/login"); // TODO
             return false;
         }
+
+        log.info("userauth : true");
+        response.addHeader("userauth", "true");
         return true;
     }
 
@@ -69,6 +84,9 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         return true;
     }
 
+    private boolean isPageMove(@NonNull String url) {
+        return url.startsWith("/rss");
+    }
 
     @SuppressWarnings("unused")
     private void testAllowRegex() {
