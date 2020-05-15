@@ -13,4 +13,5 @@ public interface DownloadListService {
     boolean insert(DownloadListVo item);
     boolean insert(CollectPlanVo plan, String filePath);
     boolean updateDownloadStatus(int id);
+    boolean delete(int id);
 }

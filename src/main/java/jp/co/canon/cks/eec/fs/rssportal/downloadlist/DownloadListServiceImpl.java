@@ -62,4 +62,9 @@ public class DownloadListServiceImpl implements DownloadListService{
         }
         return true;
     }
+
+    @Override
+    public boolean delete(int id) {
+        return dao.delete(id);
+    }
 }

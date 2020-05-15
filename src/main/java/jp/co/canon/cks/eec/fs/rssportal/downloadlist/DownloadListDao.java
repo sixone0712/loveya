@@ -9,4 +9,5 @@ public interface DownloadListDao {
     List<DownloadListVo> find(int limit, int page);
     boolean insert(DownloadListVo item);
     boolean update(DownloadListVo item);
+    boolean delete(int id);
 }

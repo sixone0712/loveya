@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -39,4 +40,15 @@ public class DownloadListController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @RequestMapping("/delete")
+    public ResponseEntity delete(HttpServletRequest request,
+                                         @RequestParam(name="id") int id) {
+        String path = request.getServletPath();
+        log.info("request "+path);
+        DownloadListVo item = service.get(id);
+        if(item==null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        service.delete(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

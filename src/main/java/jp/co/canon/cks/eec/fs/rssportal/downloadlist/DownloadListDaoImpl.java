@@ -60,4 +60,12 @@ public class DownloadListDaoImpl implements DownloadListDao {
         session.close();
         return true;
     }
+
+    @Override
+    public boolean delete(int id) {
+        SqlSession session = sessionFactory.openSession(true);
+        session.delete("downloadList.delete", id);
+        session.close();
+        return true;
+    }
 }

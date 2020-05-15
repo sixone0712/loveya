@@ -52,4 +52,8 @@
         where id=#{id}
     </update>
 
+    <delete id="delete" parameterType="integer">
+        delete from rsss."download_list" where id=#{id}
+    </delete>
+
 </mapper>
