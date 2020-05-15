@@ -1,5 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.test.controller;
 
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserPermissionService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
@@ -25,16 +29,19 @@ public class DatabaseTestController {
     private final UserService serviceUser;
     private final UserPermissionService serviceUserPerm;
     private final CollectPlanService serviceCollectionPlan;
+    private final DownloadListService serviceDownloadList;
 
     @Autowired
     public DatabaseTestController(HttpSession httpSession,
                                   UserService serviceUser,
                                   UserPermissionService serviceUserPerm,
-                                  CollectPlanService serviceCollectionPlan) {
+                                  CollectPlanService serviceCollectionPlan,
+                                  DownloadListService serviceDownloadList) {
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
         this.serviceUserPerm = serviceUserPerm;
         this.serviceCollectionPlan = serviceCollectionPlan;
+        this.serviceDownloadList = serviceDownloadList;
     }
 
     @RequestMapping("/main")
@@ -138,6 +145,29 @@ public class DatabaseTestController {
         log.info("/plan/list");
         List<CollectPlanVo> list = serviceCollectionPlan.getAllPlans();
         return list.toString();
+    }
+
+    @RequestMapping("/downloadlist/get")
+    @ResponseBody
+    public String getDownloadList() {
+        log.info("/downloadlist/get");
+        List<DownloadListVo> list = serviceDownloadList.getList();
+        return "ok";
+    }
+
+    @RequestMapping("/downloadlist/add")
+    @ResponseBody
+    public String addDownloadList(HttpServletRequest request) {
+        String path = request.getServletPath();
+        log.info(path);
+        DownloadListVo item = new DownloadListVo();
+        item.setPlanId(123);
+        item.setCreated(new Timestamp(System.currentTimeMillis()));
+        item.setPath("pathpathpath");
+        item.setStatus("registered");
+        item.setTitle("title1111");
+        serviceDownloadList.insert(item);
+        return path+" ok";
     }
 
     private final Log log = LogFactory.getLog(getClass());

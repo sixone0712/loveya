@@ -1,6 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -38,12 +40,15 @@ public class PlanController {
     private final HttpSession session;
     private final CollectPlanner collector;
     private final CollectPlanService service;
+    private final DownloadListService downloadService;
 
     @Autowired
-    public PlanController(@NonNull HttpSession session, @NonNull CollectPlanner collector, @NonNull CollectPlanService service) {
+    public PlanController(@NonNull HttpSession session, @NonNull CollectPlanner collector,
+                          @NonNull CollectPlanService service, @NonNull DownloadListService downloadListService) {
         this.session = session;
         this.collector = collector;
         this.service = service;
+        this.downloadService = downloadListService;
     }
 
     @RequestMapping("/add")
@@ -111,11 +116,26 @@ public class PlanController {
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        File zip = collector.getZipPath(id);
-        if(zip==null)
+        DownloadListVo item = downloadService.get(id);
+        if(item==null) {
+            log.error("invalid downloadId "+id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-        String downloadFileName = zip.getName();
+        CollectPlanVo plan = service.getPlan(item.getPlanId());
+        if(plan==null || plan.getLastCollect()==null) {
+            log.error("invalid download request for invisible plan "+item.getPlanId());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        File zip = new File(item.getPath());
+        if(zip==null || !zip.isFile() || !zip.exists()) {
+            log.error("no download file");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        downloadService.updateDownloadStatus(id);
+
+        String downloadFileName = createDownloadFilename(plan, item);
         try {
             InputStream is = new FileInputStream(zip);
             InputStreamResource isr = new InputStreamResource(is);
@@ -155,6 +175,48 @@ public class PlanController {
         } catch (ParseException e) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private String createDownloadFilename(CollectPlanVo plan, DownloadListVo item) {
+        // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
+
+        if(session==null) {
+            log.error("null session");
+            return null;
+        }
+
+        SessionContext context = (SessionContext)session.getAttribute("context");
+        if(context==null || context.isAuthorized()==false) {
+            log.error("unauthorized download request");
+            return null;
+        }
+        String username = context.getUser().getUsername();
+        if(username==null) {
+            log.error("no username");
+            return null;
+        }
+
+        /* TODO
+        List<String> fabs = fileDownloader.getFabs(downloadId);
+        if(fabs==null || fabs.size()==0) {
+            log.error("no fab info");
+            return null;
+        }
+        String fab = fabs.get(0);
+        if(fabs.size()>1) {
+            for(int i=1; i<fabs.size(); ++i)
+                fab += "_"+fabs.get(i);
+        }
+        */
+        String fab = "unknown_fab";
+
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String cur = dateFormat.format(new Date(item.getCreated().getTime()));
+
+        String fileName = String.format("%s_%s_%s.zip", username, fab, cur);
+        log.info("filename = "+fileName);
+        return fileName;
     }
 
     private int addPlanProc(@NonNull Map<String, Object> param) throws ParseException {

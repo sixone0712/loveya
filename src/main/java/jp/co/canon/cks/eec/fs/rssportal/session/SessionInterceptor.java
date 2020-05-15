@@ -21,11 +21,13 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     private static final String[] allowedRegex = {
             "/",
             "/error",
+            "/rss/login",
+            "/user/login",
+            "/favicon\\.icon",
+            "/dbtest/[\\w./]*",
             "/dbtest",
             "/rss",
-            "/user/login",
             "/user/isLogin",
-            "/favicon.ico",
             "/build/react/[\\w.]*"
     };
 
@@ -36,6 +38,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         String url = request.getServletPath();
         log.info("preHandler (url="+url+")");
         log.info("preHandler (session id: " + request.getSession().getId() + ")");
+
+        //response.setHeader("");
 
         // If the client requests a page which permits guest access, this method does nothing here.
         if(isUserspace(url)==false) {
