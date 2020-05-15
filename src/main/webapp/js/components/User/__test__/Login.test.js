@@ -1,0 +1,108 @@
+import 'babel-polyfill';
+import React from 'react';
+import renderer from 'react-test-renderer'
+import ConnectedLogin, {Login} from '../Login';
+import configureMockStore from 'redux-mock-store'
+import configureStore from 'redux-mock-store'
+import { shallow, mount } from 'enzyme';
+import {createStore} from 'redux';
+import login from '../../../modules/login';
+import {Provider} from 'react-redux';
+import * as Define from "../../../define";
+import * as API from "../../../api";
+
+
+
+jest.mock('../../../api')
+
+const initialState = {
+    login : {
+        get : ()=>{}
+    }
+};
+const mockStore = configureStore();
+const store = mockStore(initialState);
+
+describe('Login', () => {
+    let component = null;
+    let tree = null;
+
+    it('renders correctly', () => {
+        component = mount(<Login />);
+        // console.log(component.instance())
+        //console.log(store.getState().login.get())
+        // console.log(component.props().getState)
+        // console.log(component.props().children.props.store)
+        // console.log(component.props().children.props.store.getState())
+    });
+
+    it('matches snapshot', () => {
+        // tree = component.toJSON();
+        expect(component).toMatchSnapshot();
+    });
+
+    it('call openModal', () => {
+        component.instance().openModal();
+        expect(component.instance().state.isModalOpen).toEqual(true);
+    });
+
+    it('call closeModal', () => {
+        component.instance().closeModal();
+        expect(component.instance().state.isModalOpen).toEqual(false);
+    });
+
+    // it('call loginProcess', () => {
+    //     component.instance().loginProcess()
+    // });
+
+    it('button clicked', () => {
+        API.getErrorMsg.mockReturnValue('error')
+        component.find('button[type="button"]').simulate('click');
+    });
+
+    it('input username', () => {
+        // component.find('input').simulate('change', {target: {name : 'username', value: 'test'}});
+        // expect(component.instance().state('username')).toEqual('test')
+        const input = component.find('input[name="username"]');
+        input.instance().value = '';
+        input.simulate('change');
+        input.instance().value = 'test';
+        input.simulate('change');
+        expect(component.state().username).toEqual('test');
+
+    });
+
+    it('input password', () => {
+        // component.find('input').simulate('change', {target: {name : 'username', value: 'test'}});
+        // expect(component.instance().state('username')).toEqual('test')
+        const input = component.find('input[name="password"]');
+        input.instance().value = '';
+        input.simulate('change');
+        input.instance().value = 'test';
+        input.simulate('change');
+        expect(component.state().password).toEqual('test');
+    });
+
+    it('login success', () => {
+        API.getLoginIsLoggedIn.mockReturnValue(1);
+        component.find('button[type="button"]').simulate('click');
+    });
+
+    it('login fail', () => {
+        API.getLoginIsLoggedIn.mockReturnValue(0);
+        API.getErrorMsg.mockReturnValue('error')
+        component.find('button[type="button"]').simulate('click');
+    });
+
+    it('fail', () => {
+        API.getLoginIsLoggedIn.mockReturnValue(0);
+        API.getErrorMsg.mockReturnValue('error')
+        component.find('button[type="button"]').simulate('click');
+    });
+
+
+    it('connected component call', () => {
+        component = mount(<Provider store={store}><ConnectedLogin /></Provider>);
+    });
+
+});

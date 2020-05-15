@@ -1,0 +1,23 @@
+import React from 'react';
+import renderer from 'react-test-renderer'
+import { shallow, configure } from 'enzyme';
+import LogOutModal from '../LogOut'
+import configureMockStore from 'redux-mock-store'
+
+
+describe('LogOut', () => {
+    let component = null;
+
+    it('Call LogOutModal', () => {
+         component = LogOutModal({
+            isOpen:true,
+            left:()=>{},
+            right:()=>{}
+        });
+         component = LogOutModal({
+            isOpen:false,
+            left:()=>{},
+            right:()=>{}
+        });
+    });
+});

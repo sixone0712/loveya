@@ -1,0 +1,130 @@
+import 'babel-polyfill';
+import ConnectedChangeAuthModal, {ChangeAuthModal, ChangePwModal} from '../ChangeAuth';
+import React from 'react';
+import configureStore from 'redux-mock-store'
+import { shallow, mount } from 'enzyme';
+import {Provider} from 'react-redux';
+
+
+
+const localStorageMock = (() => {
+    let store = {};
+
+    return {
+        getItem(key) {
+            return store[key] || null;
+        },
+        setItem(key, value) {
+            store[key] = value.toString();
+        },
+        removeItem(key) {
+            delete store[key];
+        },
+        clear() {
+            store = {};
+        }
+    }
+})();
+
+Object.defineProperty(window, 'sessionStorage', {
+    value: localStorageMock
+});
+
+describe('ChangePw', () => {
+    let component = null;
+
+    beforeEach(() => {
+        window.sessionStorage.clear();
+        // jest.restoreAllMocks();
+    });
+
+
+    it('renders correctly', () => {
+        const initialState = {
+            login : {
+                get : ()=>{ return {
+                    errCode: 0,
+                    isLoggedIn: false,
+                    username: "",
+                    password: "",
+                    auth: 0,
+                    toJS:()=>{return {errCode: 0,
+                        isLoggedIn: false,
+                        username: "",
+                        password: "",
+                        auth: 0}
+                    }
+                }
+                }
+            },
+            isOpen : true
+        };
+        const mockStore = configureStore();
+        const store = mockStore(initialState);
+        component = mount(<Provider store={store}><ConnectedChangeAuthModal isOpen={true} right={jest.fn()} alertOpen={jest.fn()}><ChangeAuthModal /></ConnectedChangeAuthModal></Provider>);
+        expect(component.find(ChangeAuthModal).state().isModalOpen).toEqual(false);
+    });
+
+    it('matches snapshot', () => {
+        expect(component).toMatchSnapshot();
+    });
+
+    it('라디오 버튼 10 선택', () => {
+        component.find('#auth_10').simulate('change');
+        // console.log(component.find(ChangeAuthModal).state());
+        expect(component.find(ChangeAuthModal).state().selectedValue).toEqual("10");
+    });
+
+    it('라디오 버튼 20 선택', () => {
+        component.find('#auth_20').simulate('change');
+        // console.log(component.find(ChangeAuthModal).state());
+        expect(component.find(ChangeAuthModal).state().selectedValue).toEqual("20");
+    });
+
+    it('라디오 버튼 50 선택', () => {
+        component.find('#auth_50').simulate('change');
+        // console.log(component.find(ChangeAuthModal).state());
+        expect(component.find(ChangeAuthModal).state().selectedValue).toEqual("50");
+    });
+
+    it('라디오 버튼 100 선택', () => {
+        component.find('#auth_100').simulate('change');
+        // console.log(component.find(ChangeAuthModal).state());
+        expect(component.find(ChangeAuthModal).state().selectedValue).toEqual("100");
+    });
+
+    it('Save버튼 입력(에러 없는 경우)', () => {
+        component.find('button').at(0).simulate('click')
+    });
+
+    it('Save버튼 입력(에러 있는 경우', () => {
+        const initialState = {
+            login : {
+                get : ()=>{ return {
+                    errCode: 10,
+                    isLoggedIn: false,
+                    username: "",
+                    password: "",
+                    auth: 0,
+                    toJS:()=>{return {errCode: 10,
+                        isLoggedIn: false,
+                        username: "",
+                        password: "",
+                        auth: 0}
+                    }
+                }
+                }
+            },
+            isOpen : true
+        };
+        const mockStore = configureStore();
+        const store = mockStore(initialState);
+
+        component = mount(<Provider store={store}><ConnectedChangeAuthModal isOpen={true} right={jest.fn()} alertOpen={jest.fn()}><ChangeAuthModal /></ConnectedChangeAuthModal></Provider>);
+        component.find('button').at(0).simulate('click')
+        console.log(component.find(ChangeAuthModal).state());
+    });
+
+
+
+});

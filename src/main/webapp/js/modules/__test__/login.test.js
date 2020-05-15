@@ -1,0 +1,46 @@
+import 'babel-polyfill';
+import login, * as loginActions from '../login';
+import {Map} from "immutable";
+
+// http://velopert.com/3591 참고
+
+describe('login', () => {
+    // describe('actions', () => {
+    //     const actions = [
+    //         loginActions.loginInitAllData(),
+    //         loginActions.loginSetIsLoggedIn()
+    //     ];
+    //     it('should create actions', () => {
+    //         expect(actions).toMatchSnapshot();
+    //     })
+    // });
+
+    describe('reducer', () => {
+        let state = login(undefined, {});
+        it('should return the initialState', () => {
+            expect(state).toEqual(Map({
+                loginInfo : Map({
+                    errCode: "",
+                    isLoggedIn: false,
+                    username: "",
+                    password: "",
+                    auth: 0
+                })
+            }));
+        });
+
+        it('Call Actions', () => {
+            state = login(state, loginActions.loginInitAllData());
+            state = login(state, loginActions.loginSetIsLoggedIn());
+            state = login(state, loginActions.loginSetUsername());
+            state = login(state, loginActions.loginSetPassword());
+            state = login(state, loginActions.loginSetAuth());
+            state = login(state, loginActions.loginSetErrCode());
+            state = login(state, loginActions.loginCheckAuth());
+            state = login(state, loginActions.loginSetLogOff());
+            state = login(state, loginActions.changeUserPassword());
+            state = login(state, loginActions.changeUserPermission());
+            // expect(state.names).toEqual(['hello']);
+        });
+    });
+});

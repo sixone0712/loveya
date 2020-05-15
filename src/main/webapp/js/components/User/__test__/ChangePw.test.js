@@ -1,0 +1,219 @@
+import 'babel-polyfill';
+import React from 'react';
+import renderer from 'react-test-renderer'
+import ConnectedChangePwModal, {ChangePwModal} from '../ChangePw';
+import configureMockStore from 'redux-mock-store'
+import configureStore from 'redux-mock-store'
+import { shallow, mount } from 'enzyme';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import ConnectedLogin from "../Login";
+// import * as API from "../../../api";
+
+const initialState = {
+    login : {
+        get : ()=>{}
+    }
+};
+const mockStore = configureStore();
+const store = mockStore(initialState);
+
+const localStorageMock = (() => {
+    let store = {};
+
+    return {
+        getItem(key) {
+            return store[key] || null;
+        },
+        setItem(key, value) {
+            store[key] = value.toString();
+        },
+        removeItem(key) {
+            delete store[key];
+        },
+        clear() {
+            store = {};
+        }
+    }
+})();
+
+Object.defineProperty(window, 'sessionStorage', {
+    value: localStorageMock
+});
+
+describe('ChangePw', () => {
+    let component = null;
+
+    beforeEach(() => {
+        window.sessionStorage.clear();
+        jest.restoreAllMocks();
+    });
+
+
+    it('renders correctly', () => {
+        const loginActions = {
+            changeUserPassword : jest.fn(),
+            loginSetPassword : jest.fn()
+        }
+        component = mount(<ChangePwModal isOpen={true} loginActions={loginActions} right={jest.fn()} alertOpen={jest.fn()}/>);
+    });
+
+    it('matches snapshot', () => {
+        expect(component).toMatchSnapshot();
+    });
+
+    it('현재 비밀번호를 잘못 입력한 경우', () => {
+        //기존 비밀번호 설정
+        const getItemSpy = jest.spyOn(window.sessionStorage, 'getItem');
+        window.sessionStorage.setItem('password', 'password');
+
+        //현재 비밀번호 입력
+        let input = component.find('input[name="oldPw"]');
+        input.instance().value = 'wrong password';
+        input.simulate('change');
+        expect(component.state().oldPw).toEqual('wrong password');
+
+        // save버튼 클릭
+        // console.log(component.find('button').debug());
+        component.find('button').at(0).simulate('click')
+
+        // console.log(component.state());
+        expect(component.state().errors.oldPw).toEqual('Current Password is incorrect');
+        expect(getItemSpy).toBeCalledWith('password');
+    });
+
+    it('현재 비밀번호와 신규 비밀번호가 동일한 경우', () => {
+        //기존 비밀번호 설정
+        const getItemSpy = jest.spyOn(window.sessionStorage, 'getItem');
+        window.sessionStorage.setItem('password', 'password');
+
+        //현재 비밀번호 입력
+        let input = component.find('input[name="oldPw"]');
+        input.instance().value = 'password';
+        input.simulate('change');
+        expect(component.state().oldPw).toEqual('password');
+
+        //신규 비밀번호 입력
+        input = component.find('input[name="newPw"]');
+        input.instance().value = 'password';
+        input.simulate('change');
+        expect(component.state().newPw).toEqual('password');
+
+        // save버튼 클릭
+        // console.log(component.find('button').debug());
+        component.find('button').at(0).simulate('click')
+
+        // console.log(component.state());
+        expect(component.state().errors.newPw).toEqual('Current password and new password are the same.');
+        expect(getItemSpy).toBeCalledWith('password');
+    });
+
+    it('신규 비밀번호가 비어있는 경우', () => {
+        //기존 비밀번호 설정
+        const getItemSpy = jest.spyOn(window.sessionStorage, 'getItem');
+        window.sessionStorage.setItem('password', 'password');
+
+        //현재 비밀번호 입력
+        let input = component.find('input[name="oldPw"]');
+        input.instance().value = 'password';
+        input.simulate('change');
+        expect(component.state().oldPw).toEqual('password');
+
+        //신규 비밀번호 입력
+        input = component.find('input[name="newPw"]');
+        input.instance().value = '';
+        input.simulate('change');
+        expect(component.state().newPw).toEqual('');
+
+        // save버튼 클릭
+        // console.log(component.find('button').debug());
+        component.find('button').at(0).simulate('click')
+
+        // console.log(component.state());
+        expect(component.state().errors.newPw).toEqual('New Password is incorrect');
+        expect(getItemSpy).toBeCalledWith('password');
+    });
+
+    it('신규 비밀번호와 비밀번호 재확인이 다르게 입력된 경우', () => {
+        //기존 비밀번호 설정
+        const getItemSpy = jest.spyOn(window.sessionStorage, 'getItem');
+        window.sessionStorage.setItem('password', 'password');
+
+        //현재 비밀번호 입력
+        let input = component.find('input[name="oldPw"]');
+        input.instance().value = 'password';
+        input.simulate('change');
+        expect(component.state().oldPw).toEqual('password');
+
+        //신규 비밀번호 입력
+        input = component.find('input[name="newPw"]');
+        input.instance().value = 'new password';
+        input.simulate('change');
+        expect(component.state().newPw).toEqual('new password');
+
+        //비밀번호 재확인 입력
+        input = component.find('input[name="confirmPw"]');
+        input.instance().value = 'wrong password';
+        input.simulate('change');
+        expect(component.state().confirmPw).toEqual('wrong password');
+
+        // save버튼 클릭
+        // console.log(component.find('button').debug());
+        component.find('button').at(0).simulate('click')
+
+        // console.log(component.state());
+        expect(component.state().errors.newPw).toEqual('New and Confirm Password is not match');
+        expect(getItemSpy).toBeCalledWith('password');
+    });
+
+    it('비밀번호 변경 성공', () => {
+        //기존 비밀번호 설정
+        const getItemSpy = jest.spyOn(window.sessionStorage, 'getItem');
+        window.sessionStorage.setItem('password', 'password');
+
+        //현재 비밀번호 입력
+        let input = component.find('input[name="oldPw"]');
+        input.instance().value = 'password';
+        input.simulate('change');
+        expect(component.state().oldPw).toEqual('password');
+
+        //신규 비밀번호 입력
+        input = component.find('input[name="newPw"]');
+        input.instance().value = 'new password';
+        input.simulate('change');
+        expect(component.state().newPw).toEqual('new password');
+
+        //비밀번호 재확인 입력
+        input = component.find('input[name="confirmPw"]');
+        input.instance().value = 'new password';
+        input.simulate('change');
+        expect(component.state().confirmPw).toEqual('new password');
+
+        // save버튼 클릭
+        // console.log(component.find('button').debug());
+        component.find('button').at(0).simulate('click')
+
+        // console.log(component.state());
+        expect(component.state().errors.newPw).toEqual('');
+        expect(component.state().errors.oldPw).toEqual('');
+        expect(getItemSpy).toBeCalledWith('password');
+
+        //변경된 정보 확인
+        expect(window.sessionStorage.getItem('password')).toEqual('new password');
+    });
+
+    it('Close 버튼 클릭', () => {
+        component.find('button').at(1).simulate('click')
+
+        expect(component.state().oldPw).toEqual('');
+        expect(component.state().newPw).toEqual('');
+    });
+
+    it('isOpen이 false인 경우', () => {
+        component = mount(<ChangePwModal isOpen={false} />);
+    });
+
+    it('connected component call', () => {
+        component = mount(<Provider store={store}><ConnectedChangePwModal /></Provider>);
+    });
+});
