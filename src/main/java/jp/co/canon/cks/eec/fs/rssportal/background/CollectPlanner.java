@@ -6,6 +6,7 @@ import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
+import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
@@ -289,24 +290,6 @@ public class CollectPlanner extends Thread {
     private Runnable notifyUpdate = ()->{
         planUpdated = true;
     };
-
-    public File getZipPath(int planId) {
-        CollectPlanVo plan = service.getPlan(planId);
-        if(plan==null || plan.getLastCollect()==null)
-            return null;
-
-        File zip = null;
-        File[] files = Paths.get(planRootDir, String.valueOf(plan.getId())).toFile().listFiles();
-        for(File file: files) {
-            if(file.isFile() && file.getName().endsWith(".zip")) {
-                zip = file;
-                break;
-            }
-        }
-        if(zip==null)
-            return null;
-        return zip;
-    }
 
     private final Log log = LogFactory.getLog(getClass());
 }

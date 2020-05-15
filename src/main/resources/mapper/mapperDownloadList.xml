@@ -3,6 +3,18 @@
 
 <mapper namespace="downloadList">
 
+    <select id="findItem" parameterType="integer" resultType="DownloadListVo">
+        select
+            id,
+            created,
+            status,
+            planid as planId,
+            path,
+            title
+        from rsss."download_list"
+        where id=#{id}
+    </select>
+
     <select id="find" parameterType="hashmap" resultType="DownloadListVo">
         select
             id,

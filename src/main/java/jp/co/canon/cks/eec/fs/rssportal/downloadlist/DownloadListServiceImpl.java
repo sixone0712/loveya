@@ -25,6 +25,11 @@ public class DownloadListServiceImpl implements DownloadListService{
     }
 
     @Override
+    public DownloadListVo get(int id) {
+        return dao.findItem(id);
+    }
+
+    @Override
     public List<DownloadListVo> getList() {
         return dao.find();
     }
@@ -47,7 +52,14 @@ public class DownloadListServiceImpl implements DownloadListService{
     }
 
     @Override
-    public boolean update(DownloadListVo item) {
-        return dao.update(item);
+    public boolean updateDownloadStatus(int id) {
+        DownloadListVo item = dao.findItem(id);
+        if(item==null)
+            return false;
+        if(!item.getStatus().equals("finished")) {
+            item.setStatus("finished");
+            dao.update(item);
+        }
+        return true;
     }
 }

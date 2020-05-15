@@ -23,6 +23,14 @@ public class DownloadListDaoImpl implements DownloadListDao {
     }
 
     @Override
+    public DownloadListVo findItem(int id) {
+        SqlSession session = sessionFactory.openSession();
+        DownloadListVo item = session.selectOne("downloadList.findItem", id);
+        session.close();
+        return item;
+    }
+
+    @Override
     public List<DownloadListVo> find() {
         SqlSession session = sessionFactory.openSession();
         List<DownloadListVo> list = session.selectList("downloadList.find");
