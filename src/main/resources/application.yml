@@ -9,3 +9,9 @@ spring:
 server:
   tomcat:
     uri-encoding: UTF-8
+
+rssportal:
+  vftp:
+    directory:
+      request: /LOG/VFTP/Requests
+    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions.ObjectList.xml

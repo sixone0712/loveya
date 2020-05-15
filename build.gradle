@@ -35,6 +35,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
     compileOnly 'org.projectlombok:lombok'
@@ -45,6 +46,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 
     // Build Jar
     compile 'org.apache.tomcat.embed:tomcat-embed-jasper'
