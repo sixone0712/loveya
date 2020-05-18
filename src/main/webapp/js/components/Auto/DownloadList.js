@@ -12,6 +12,9 @@ import {
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
+import services from "../../services"
+import * as DEFINE from "../../define";
+import moment from "moment";
 
 const modalMessage = {
     MODAL_DELETE_MESSAGE: "Are you sure you want to delete the selected file?",
@@ -22,8 +25,8 @@ const modalMessage = {
 };
 
 const statusType = {
-    STATUS_NEW: 1,
-    STATUS_FINISH: 2
+    STATUS_NEW: "new",
+    STATUS_FINISHED: "finished"
 };
 
 const modalType = {
@@ -102,72 +105,8 @@ class RSSAutoDownloadList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            requestList: [
-                {
-                    requestId: "0000000123456781",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "0000000123456782",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "0000000123456783",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "0000000123456784",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "0000000123456785",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "0000000123456786",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "0000000123456787",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "0000000123456788",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "0000000123456789",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "00000001234567810",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "00000001234567811",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "00000001234567812",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "00000001234567813",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "00000001234567814",
-                    requestStatus: statusType.STATUS_FINISH
-                },
-                {
-                    requestId: "00000001234567815",
-                    requestStatus: statusType.STATUS_NEW
-                },
-                {
-                    requestId: "00000001234567816",
-                    requestStatus: statusType.STATUS_FINISH
-                }
-            ],
+            requestList: [],
+            download: {},
             pageSize: 10,
             currentPage: 1,
             isDeleteOpen: false,
@@ -236,15 +175,64 @@ class RSSAutoDownloadList extends Component {
         });
     };
 
-    checkNewDownloadFile = value => {
-        if (value === true) {
+    checkNewDownloadFile = async () => {
+
+        const { requestList } = this.state;
+        let isExist = false;
+
+        console.log("requestList", requestList);
+
+        const newList = requestList.filter(item => item.requestStatus === "new");
+
+        if(newList.length > 0) {
+            isExist = true;
+            await this.setState({
+                ...this.state,
+                download: newList[newList.length - 1]
+            });
+        } else {
+            await this.setState({
+                ...this.state,
+                download: {}
+            });
+        }
+
+        console.log("download", this.state.download);
+
+        if (isExist === true) {
             this.openModal(modalType.MODAL_DOWNLOAD_2);
         } else {
             this.openModal(modalType.MODAL_ALERT);
         }
     };
 
+    actionNewDownloadFile = () => {
+
+
+    }
+
+    async componentDidMount() {
+        const res = await services.axiosAPI.get("/downloadlist/list");
+        const { data } = res;
+        console.log("[DownloadList][componentDidMount]res", res);
+
+        const newRequestList = data.map(item => {
+
+            return {
+                requestId: item.title,
+                requestStatus: item.status,
+                path: item.path
+            }
+        })
+
+        await this.setState({
+            ...this.state,
+            requestList: newRequestList
+        })
+    }
+
     render() {
+        console.log("[DownloadList][render]");
         const {
             requestList,
             pageSize,
@@ -405,7 +393,7 @@ function CreateStatus(status) {
                 </>
             );
 
-        case statusType.STATUS_FINISH:
+        case statusType.STATUS_FINISHED:
             return (
                 <>
                     <FontAwesomeIcon icon={faCheck} /> Finished

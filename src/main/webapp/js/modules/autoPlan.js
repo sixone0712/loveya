@@ -30,9 +30,9 @@ export const autoPlanSetEditPlanList = createAction(AUTO_PLAN_SET_EDIT_PLAN_LIST
 const initialState = Map({
     autoPlan: Map({
         planId: "",
-        collectStart: moment().utc().startOf('day'),
-        from: moment().utc().startOf('day'),
-        to : moment().utc().endOf('day'),
+        collectStart: moment().startOf('day'),
+        from: moment().startOf('day'),
+        to : moment().endOf('day'),
         collectType: DEFINE.AUTO_MODE_CONTINUOUS,
         interval: 1,
         intervalUnit: DEFINE.AUTO_UNIT_MINUTE,
