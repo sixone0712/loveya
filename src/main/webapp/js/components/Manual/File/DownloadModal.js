@@ -183,7 +183,7 @@ class DownloadConfirmModal extends Component {
 
         if(isSave) {
             const { downloadStatus } = this.props;
-            result = await services.axiosAPI.downloadFile(downloadStatus.toJS().dlId);
+            result = await services.axiosAPI.downloadFile("/dl/download?dlId=" + downloadStatus.toJS().dlId);
             this.props.setErrorStatus(result);
         }
         // 상태 초기화

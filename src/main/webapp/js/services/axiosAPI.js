@@ -60,9 +60,8 @@ export const postByJson = async (url, postData) => {
     return checkSession(res);
 }
 
-export const downloadFile = async (dlId) => {
+export const downloadFile = async (url) => {
     const method = 'GET';
-    const url = "/dl/download?dlId=" + dlId;
     const result = await axios.request({
         url,
         method,
