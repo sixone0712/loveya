@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class DownloadListDaoImpl implements DownloadListDao {
@@ -31,15 +33,21 @@ public class DownloadListDaoImpl implements DownloadListDao {
     }
 
     @Override
-    public List<DownloadListVo> find() {
-        SqlSession session = sessionFactory.openSession();
-        List<DownloadListVo> list = session.selectList("downloadList.find");
-        session.close();
-        return list;
+    public List<DownloadListVo> find(int planId) {
+        return find(planId, -1, -1);
     }
 
     @Override
-    public List<DownloadListVo> find(int limit, int page) {
+    public List<DownloadListVo> find(int planId, int limit, int page) {
+        SqlSession session = sessionFactory.openSession();
+        Map<String, Object> param = new HashMap<>();
+        param.put("planId", planId);
+        if(limit>=0)
+            param.put("limit", limit);
+        if(page>=0)
+            param.put("page", page);
+        List<DownloadListVo> list = session.selectList("downloadList.find", param);
+        session.close();
         return null;
     }
 

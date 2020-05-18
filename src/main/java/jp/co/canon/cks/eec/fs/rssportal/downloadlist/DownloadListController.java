@@ -32,11 +32,12 @@ public class DownloadListController {
     }
 
     @RequestMapping("/list")
-    public ResponseEntity<List<DownloadListVo>> getList(HttpServletRequest request) {
+    public ResponseEntity<List<DownloadListVo>> getList(HttpServletRequest request,
+                                                        @RequestParam(name="planId") int planId) {
         String path = request.getServletPath();
         log.info("request "+path);
         List<DownloadListVo> list;
-        list = service.getList();
+        list = service.getList(planId);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 

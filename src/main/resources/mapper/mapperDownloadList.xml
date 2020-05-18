@@ -24,6 +24,7 @@
             path,
             title
         from rsss."download_list"
+        where planid = #{planId}
         order by id desc
         <if test="limit!=null">
             limit #{limit}

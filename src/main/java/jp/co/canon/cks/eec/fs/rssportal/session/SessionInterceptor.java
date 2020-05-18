@@ -23,7 +23,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             "/error",
             "/rss/login",
             "/user/login",
-            "/favicon\\.icon",
+            "/favicon\\.ico",
             "/dbtest/[\\w./]*",
             "/dbtest",
             "/rss",
@@ -36,43 +36,42 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
         HttpSession session = request.getSession();
         String url = request.getServletPath();
-        log.info("preHandler (url="+url+")");
-        log.info("preHandler (session id: " + request.getSession().getId() + ")");
-
-        //response.setHeader("");
+        StringBuilder sb = new StringBuilder("request ");
+        sb.append(url).append(" ");
 
         // If the client requests a page which permits guest access, this method does nothing here.
         if(isUserspace(url)==false) {
-            log.info("userauth : true");
             response.addHeader("userauth", "true");
+            sb.append("[guest][true]");
+            log.info(sb.toString());
             return true;
         }
-
-
 
         // Check session has been authorized.
         SessionContext context = (SessionContext)session.getAttribute("context");
         if(context==null) {
-            log.warn("invalid access. redirect login page");
             response.addHeader("userauth", "false");
             if(isPageMove(url)) {
                 response.sendRedirect("/rss");
             }
-              return false;
+            sb.append("[invalid-session][false]");
+            log.info(sb.toString());
+            return false;
         }
 
         long current = System.currentTimeMillis();
         if((current-session.getLastAccessedTime())>SESSION_TIMEOUT) {
-            log.info("session timeout");
             if(isPageMove(url)) {
                 response.sendRedirect("/rss");
             }
             session.invalidate();
+            sb.append("[timeout][false]");
+            log.info(sb.toString());
             return false;
         }
 
-        log.info("userauth : true");
         response.addHeader("userauth", "true");
+        log.info(sb.toString());
         return true;
     }
 

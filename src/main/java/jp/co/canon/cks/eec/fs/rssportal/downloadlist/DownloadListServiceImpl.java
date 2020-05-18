@@ -30,12 +30,12 @@ public class DownloadListServiceImpl implements DownloadListService{
     }
 
     @Override
-    public List<DownloadListVo> getList() {
-        return dao.find();
+    public List<DownloadListVo> getList(int planId) {
+        return dao.find(planId);
     }
 
     @Override
-    public List<DownloadListVo> getList(int offset, int limit) {
+    public List<DownloadListVo> getList(int planId, int offset, int limit) {
         return null;
     }
 
