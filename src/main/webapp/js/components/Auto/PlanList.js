@@ -312,7 +312,11 @@ class RSSautoplanlist extends Component {
                                                 <td>
                                                     <div
                                                         className="plan-id-area"
-                                                        onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_DOWNLOAD) }
+                                                        onClick={ () => {
+                                                            const param = `?id=${plan.id}&name=${plan.planId}`;
+                                                            this.props.history.push(DEFINE.PAGE_AUTO_DOWNLOAD + param);
+                                                            }
+                                                        }
                                                     >
                                                         {plan.planId}
                                                     </div>

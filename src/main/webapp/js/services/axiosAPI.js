@@ -102,7 +102,17 @@ export const downloadFile = async (url) => {
             return Define.RSS_SUCCESS;
         })
         .catch(error => {
-            return Define.RSS_FAIL
+            const errResp = error.response;
+            let res = Define.COMMON_FAIL_SERVER_ERROR;
+            if(typeof errResp == "undefined") {
+                return res;
+            }
+            console.error("[axioAPI][downloadFile]errResp", error.response);
+            console.error("[axioAPI][downloadFile]errResp.status", error.response.status);
+            if(errResp.status === 404) {
+                res = Define.COMMON_FAIL_NOT_FOUND;
+            }
+            return res;
         });
 
     return result;

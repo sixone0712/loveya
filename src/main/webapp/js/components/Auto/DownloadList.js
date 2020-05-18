@@ -15,13 +15,17 @@ import AlertModal from "../Common/AlertModal";
 import services from "../../services"
 import * as DEFINE from "../../define";
 import moment from "moment";
+import queryString from "query-string";
+import * as Define from "../../define";
 
 const modalMessage = {
     MODAL_DELETE_MESSAGE: "Are you sure you want to delete the selected file?",
     MODAL_DOWNLOAD_MESSAGE_1:
         "Do you want to download a file of the selected request ID?",
     MODAL_DOWNLOAD_MESSAGE_2: "Do you want to download a new file?",
-    MODAL_ALERT_MESSAGE: "No new files to download."
+    MODAL_ALERT_MESSAGE: "No new files to download.",
+    MODAL_NETWORK_ERROR: "Network Error.",
+    MODAL_FILE_NOT_FOUND: "File not found."
 };
 
 const statusType = {
@@ -33,7 +37,9 @@ const modalType = {
     MODAL_DELETE: 1,
     MODAL_DOWNLOAD_1: 2,
     MODAL_DOWNLOAD_2: 3,
-    MODAL_ALERT: 4
+    MODAL_ALERT: 4,
+    MODAL_NETWORK_ERROR: 5,
+    MODAL_FILE_NOT_FOUND: 6
 };
 
 const customSelectStyles = {
@@ -102,48 +108,62 @@ const optionList = [
 ];
 
 class RSSAutoDownloadList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            requestList: [],
-            download: {},
-            pageSize: 10,
-            currentPage: 1,
-            isDeleteOpen: false,
-            isSelectDownloadOpen: false,
-            isNewDownloadOpen: false,
-            isAlertOpen: false,
-            modalMessage: ""
-        };
-    }
+    state = {
+        requestName: "",
+        requestId: "",
+        requestList: [],
+        download: {},
+        delete: {},
+        pageSize: 10,
+        currentPage: 1,
+        isDeleteOpen: false,
+        isSelectDownloadOpen: false,
+        isNewDownloadOpen: false,
+        isAlertOpen: false,
+        modalMessage: ""
+    };
 
-    openModal = type => {
+    openModal = async type => {
         switch (type) {
             case modalType.MODAL_DELETE:
-                this.setState({
+                await this.setState({
                     isDeleteOpen: true,
                     modalMessage: modalMessage.MODAL_DELETE_MESSAGE
                 });
                 break;
 
             case modalType.MODAL_DOWNLOAD_1:
-                this.setState({
+                await this.setState({
                     isSelectDownloadOpen: true,
                     modalMessage: modalMessage.MODAL_DOWNLOAD_MESSAGE_1
                 });
                 break;
 
             case modalType.MODAL_DOWNLOAD_2:
-                this.setState({
+                await this.setState({
                     isNewDownloadOpen: true,
                     modalMessage: modalMessage.MODAL_DOWNLOAD_MESSAGE_2
                 });
                 break;
 
             case modalType.MODAL_ALERT:
-                this.setState({
+                await this.setState({
                     isAlertOpen: true,
                     modalMessage: modalMessage.MODAL_ALERT_MESSAGE
+                });
+                break;
+
+            case modalType.MODAL_NETWORK_ERROR:
+                await this.setState({
+                    isAlertOpen: true,
+                    modalMessage: modalMessage.MODAL_NETWORK_ERROR
+                });
+                break;
+
+            case modalType.MODAL_FILE_NOT_FOUND:
+                await this.setState({
+                    isAlertOpen: true,
+                    modalMessage: modalMessage.MODAL_FILE_NOT_FOUND
                 });
                 break;
 
@@ -206,29 +226,109 @@ class RSSAutoDownloadList extends Component {
         }
     };
 
-    actionNewDownloadFile = () => {
-
-
+    saveDownloadFile = async () => {
+        console.log("[DownladList][saveDownloadFile]id", this.state.download.id);
+        if(this.state.download.id !== "") {
+            const res = await services.axiosAPI.downloadFile('/plan/download?id=' + this.state.download.id);
+            if(res === DEFINE.RSS_SUCCESS) {
+                this.closeModal();
+            } else {
+                this.closeModal();
+                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                    this.openModal(modalType.MODAL_FILE_NOT_FOUND)
+                } else {
+                    this.openModal(modalType.MODAL_NETWORK_ERROR)
+                }
+            }
+        } else {
+            console.error("[DownladList][saveDownloadFile]id is null");
+            this.closeModal();
+        }
+        this.loadDownloadList(this.state.requestId, this.state.requestId.name);
     }
 
-    async componentDidMount() {
-        const res = await services.axiosAPI.get("/downloadlist/list");
+    requestDelete = async () => {
+        const res = await services.axiosAPI.get('/downloadlist/delete?id=' + this.state.delete.id)
+            .then( res  => {
+                return Define.RSS_SUCCESS;
+            })
+            .catch(error => {
+                const errResp = error.response;
+                let res = Define.COMMON_FAIL_SERVER_ERROR;
+                if(typeof errResp == "undefined") {
+                    return res;
+                }
+                console.error("[DownLoadList][deleteDownloadFile]errResp", error.response);
+                if(errResp.status === 404) {
+                    res = Define.COMMON_FAIL_NOT_FOUND;
+                }
+                return res;
+            });
+
+        console.error("[DownLoadList][deleteDownloadFile]res", res);
+        return res;
+    }
+
+    deleteDownloadFile = async () => {
+        console.log("[DownladList][deleteDownloadFile]id", this.state.delete.id);
+        if(this.state.delete.id !== "") {
+            const res = await this.requestDelete();
+            console.log("[DownladList][deleteDownloadFile]res", res);
+            if(res === DEFINE.RSS_SUCCESS) {
+                this.closeModal();
+            } else {
+                this.closeModal();
+                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                    this.openModal(modalType.MODAL_FILE_NOT_FOUND)
+                } else {
+                    this.openModal(modalType.MODAL_NETWORK_ERROR)
+                }
+            }
+        } else {
+            console.error("[DownladList][deleteDownloadFile]id is null");
+            this.closeModal();
+        }
+
+        this.loadDownloadList(this.state.requestId, this.state.requestId.name);
+    }
+
+
+    loadDownloadList = async (id, name) => {
+        let result = false;
+        const res = await services.axiosAPI.get("/downloadlist/list?planId=" + id);
         const { data } = res;
         console.log("[DownloadList][componentDidMount]res", res);
-
-        const newRequestList = data.map(item => {
-
-            return {
-                requestId: item.title,
-                requestStatus: item.status,
-                path: item.path
-            }
-        })
+        let newRequestList = [];
+        if(data !== "") {
+            newRequestList = data.map(item => {
+                return {
+                    requestId: item.title,
+                    requestStatus: item.status,
+                    id: item.id,
+                    planId: item.planId,
+                    path: item.path
+                }
+            })
+            result = true;
+        }
 
         await this.setState({
             ...this.state,
+            requestName: name,
+            requestId: id,
             requestList: newRequestList
         })
+
+        return result;
+    }
+
+    async componentDidMount() {
+        const query = queryString.parse(this.props.location.search);
+        const { id, name } = query;
+        console.log("[DownloadList][componentDidMount]id", id);
+        console.log("[DownloadList][componentDidMount]name", name);
+
+        const res = await this.loadDownloadList(id, name);
     }
 
     render() {
@@ -259,7 +359,7 @@ class RSSAutoDownloadList extends Component {
             modalMessage,
             "auto-plan",
             this.closeModal,
-            this.closeModal,
+            this.deleteDownloadFile,
             this.closeModal
         );
 
@@ -269,7 +369,7 @@ class RSSAutoDownloadList extends Component {
             modalMessage,
             "auto-plan",
             this.closeModal,
-            this.closeModal,
+            this.saveDownloadFile,
             this.closeModal
         );
 
@@ -279,7 +379,7 @@ class RSSAutoDownloadList extends Component {
             modalMessage,
             "auto-plan",
             this.closeModal,
-            this.closeModal,
+            this.saveDownloadFile,
             this.closeModal
         );
 
@@ -336,10 +436,10 @@ class RSSAutoDownloadList extends Component {
                         <CardBody className="auto-plan-card-body">
                             <Col className="auto-plan-collection-list download-list">
                                 <div className="content-section header">
-                                    <div className="plan-id">ID: CollectionPlan-501201-01</div>
+                                    <div className="plan-id">{this.state.requestName}</div>
                                     <div>
                                         <Button size="sm" className="download-btn"
-                                                onClick={() => this.checkNewDownloadFile(false)}>
+                                                onClick={() => this.checkNewDownloadFile()}>
                                             New File Download
                                         </Button>
                                     </div>
@@ -358,14 +458,28 @@ class RSSAutoDownloadList extends Component {
                                             <tr key={idx}>
                                                 <td>
                                                     <div className="request-id-area"
-                                                         onClick={() => this.openModal(modalType.MODAL_DOWNLOAD_1)}>
+                                                         onClick={ () => {
+                                                             this.setState({
+                                                                 ...this.state,
+                                                                 download: request
+                                                             }, () => {
+                                                                 this.openModal(modalType.MODAL_DOWNLOAD_1)
+                                                             });
+                                                         }}>
                                                         {request.requestId}
                                                     </div>
                                                 </td>
                                                 <td>{CreateStatus(request.requestStatus)}</td>
                                                 <td>
                                                     <div className="icon-area"
-                                                         onClick={() => this.openModal(modalType.MODAL_DELETE)}>
+                                                         onClick={ () => {
+                                                             this.setState({
+                                                                 ...this.state,
+                                                                 delete: request
+                                                             }, () => {
+                                                                 this.openModal(modalType.MODAL_DELETE)
+                                                             });
+                                                         }}>
                                                         <FontAwesomeIcon icon={faTrashAlt}/>
                                                     </div>
                                                 </td>

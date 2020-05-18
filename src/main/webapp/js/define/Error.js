@@ -1,6 +1,9 @@
 export const RSS_SUCCESS = 0;
 export const RSS_FAIL = 1;
 
+export const COMMON_FAIL_SERVER_ERROR = 1000;
+export const COMMON_FAIL_NOT_FOUND = 1001;
+
 export const GENRE_SET_FAIL_NO_ITEM = 10;
 export const GENRE_SET_FAIL_SAME_NAME = 11;
 export const GENRE_SET_FAIL_EMPTY_NAME = 12;
