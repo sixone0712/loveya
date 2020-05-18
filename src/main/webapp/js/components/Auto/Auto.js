@@ -62,7 +62,7 @@ const CreateBreadCrumb = props => {
     switch (page) {
         case DEFINE.AUTO_CUR_PAGE_ADD:
             return (
-                <Breadcrumb className="auto-plan-topic-path">
+                <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
                     <BreadcrumbItem active>Add New Plan</BreadcrumbItem>
                 </Breadcrumb>
@@ -70,7 +70,7 @@ const CreateBreadCrumb = props => {
 
         case DEFINE.AUTO_CUR_PAGE_STATUS:
             return (
-                <Breadcrumb className="auto-plan-topic-path">
+                <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
                     <BreadcrumbItem active>Plan Status</BreadcrumbItem>
                 </Breadcrumb>
@@ -78,7 +78,7 @@ const CreateBreadCrumb = props => {
 
         case DEFINE.AUTO_CUR_PAGE_EDIT:
             return (
-                <Breadcrumb className="auto-plan-topic-path">
+                <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
                     <BreadcrumbItem>
                         <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
@@ -92,7 +92,7 @@ const CreateBreadCrumb = props => {
         case DEFINE.AUTO_CUR_PAGE_DOWNLOAD:
             return (
                 <>
-                    <Breadcrumb className="auto-plan-topic-path">
+                    <Breadcrumb className="topic-path">
                         <BreadcrumbItem>Auto Download</BreadcrumbItem>
                         <BreadcrumbItem>
                             <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">

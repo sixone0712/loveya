@@ -22,7 +22,7 @@ export const convertErrMsg = (error) => {
         case Define.LOGIN_FAIL_EMPTY_USER_PASSWORD: msg = "Username or Password field is empty"; break;
         case Define.CHANGE_PW_FAIL_EMPTY_PASSWORD: msg = "New Password is incorrect"; break;
         case Define.CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD: msg = "Current Password is incorrect"; break;
-        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "Password is not match"; break;
+        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "New and Confirm Password is not match"; break;
         case Define.CHANGE_PW_FAIL_CURRENT_NEW_SAME_PASSWORD: msg = "Current password and new password are the same."; break;
         case Define.COMMAND_FAIL_SAME_NAME: msg = "duplicated command."; break;
         case Define.COMMAND_FAIL_EMPTY_NAME: msg = "Please input command."; break;
@@ -58,7 +58,7 @@ export const getErrorMsg = (error) => {
         case Define.LOGIN_FAIL_EMPTY_USER_PASSWORD: msg = "Username or Password field is empty"; break;
         case Define.CHANGE_PW_FAIL_EMPTY_PASSWORD: msg = "New Password is incorrect"; break;
         case Define.CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD: msg = "Current Password is incorrect"; break;
-        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "Password is not match"; break;
+        case Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD: msg = "New and Confirm Password is not match"; break;
         case Define.CHANGE_PW_FAIL_CURRENT_NEW_SAME_PASSWORD: msg = "Current password and new password are the same."; break;
         case Define.DB_UPDATE_ERROR_NO_SUCH_USER: msg = "Update fail. No such user"; break;
         case Define.COMMAND_FAIL_SAME_NAME: msg = "duplicated command."; break;

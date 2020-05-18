@@ -38,7 +38,7 @@ class Manual extends Component {
             genreSuccess,
             logTypeFailure,
             toolInfoFailure,
-            genreFailure,
+            genreFailure
         } = this.props;
         const isSuccess = logTypeSuccess && toolInfoSuccess && genreSuccess;
         const isFailure = logTypeFailure || toolInfoFailure || genreFailure;
@@ -65,20 +65,7 @@ class Manual extends Component {
                         <Filelist/>
                     </Container>
                     <Footer/>
-                    <ScrollToTop showUnder={160} style={{
-                        position: 'fixed',
-                        bottom: 50,
-                        right: 30,
-                        cursor: 'pointer',
-                        transitionDuration: '0.2s',
-                        transitionTimingFunction: 'linear',
-                        transitionDelay: '0s',
-                        width: "40px",
-                        height: "40px",
-                        textAlign: "center",
-                        backgroundColor: "rgb(52, 58, 64)",
-                        borderRadius: "3px"
-                    }}>
+                    <ScrollToTop showUnder={160}>
                         <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
                     </ScrollToTop>
                 </>

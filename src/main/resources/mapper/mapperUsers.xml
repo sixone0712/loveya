@@ -4,7 +4,7 @@
 <mapper namespace="users">
 
     <select id="selectAll" resultType="UserVo">
-        select * from rsss."users" where validity is true
+        select * from rsss."users" where validity is true order by id
     </select>
 
     <select id="select" resultType="UserVo">

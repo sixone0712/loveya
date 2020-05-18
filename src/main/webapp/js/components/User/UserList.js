@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import {Col, CardHeader, CardBody, Table, Card, Container, Button} from "reactstrap";
-
+import {Col, CardHeader, CardBody, Table, Card, Container, Breadcrumb, BreadcrumbItem, Button} from "reactstrap";
 import * as API from "../../api";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -251,7 +250,7 @@ class UserList extends Component {
         <>
             {renderAlert}
             {deleteModal}
-            <ChangeAuthModal isOpen={isModalOpen && this.state.isMode==='ChangAuth'} right={this.closeModal} alertOpen={this.openAlert} userID = {selected} chgHandler ={this.handleRadio}/>
+            <ChangeAuthModal isOpen={isModalOpen && this.state.isMode==='ChangAuth'} right={this.closeModal} alertOpen={this.openAlert} userID = {selected} />
             <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
 
             <Container className="rss-container" fluid={true}>
@@ -270,8 +269,8 @@ class UserList extends Component {
                         />
                     </div>
                 </CardHeader>
-                <CardBody className="auto-plan-card-body" style={{display: "block"}}>
-                    <div className="auto-plan-card-footer" style={{display: "flex", marginLeft: "auto", justifyContent:"flex-start"}}>
+                <CardBody className="auto-plan-card-body not-flex">
+                    <div>
                         <Button outline size="sm" color="info" className="footer-btn"
                                 onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>  <FontAwesomeIcon icon={faUser} /> New Account </Button>
                     </div>

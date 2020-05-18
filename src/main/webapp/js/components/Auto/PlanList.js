@@ -8,8 +8,11 @@ import {
     faCheck,
     faTimes,
     faTrashAlt,
-    faExclamationCircle
+    faExclamationCircle,
+    faRegistered,
+    faPause
 } from "@fortawesome/free-solid-svg-icons";
+import ClockLoader from "react-spinners";
 import Select from "react-select";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
@@ -42,6 +45,11 @@ const optionList = [
     { value: 50, label: "50" },
     { value: 100, label: "100" }
 ];
+
+const spinnerStyles = {
+    display: "inline-block",
+    top: "2px"
+}
 
 const customSelectStyles = {
     container: styles => ({
@@ -375,13 +383,13 @@ function CreateDetail(detail) {
     let component = null;
     switch (detail) {
         case DETAIL_REGISTERED:
-            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Registered</>);   break;
+            component = (<><FontAwesomeIcon className="completed" icon={faRegistered} /> Registered</>);   break;
         case DETAIL_COLLECTING:
-            component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collecting</>);   break;
+            component = (<><ClockLoader size={15} color={"rgb(47, 158, 68"} css={spinnerStyles}/> Collecting</>);   break;
         case DETAIL_COLLECTED:
             component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collected</>);   break;
         case DETAIL_SUSPENDED:
-            component = (<><FontAwesomeIcon className="failed" icon={faTimes} /> Suspended</>);   break;
+            component = (<><FontAwesomeIcon className="failed" icon={faPause} /> Suspended</>);   break;
         case DETAIL_HALTED:
             component = (<><FontAwesomeIcon className="failed" icon={faTimes} /> Halted</>);   break;
         case DETAIL_COMPLETED:
