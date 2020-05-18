@@ -151,7 +151,7 @@ public class DatabaseTestController {
     @ResponseBody
     public String getDownloadList() {
         log.info("/downloadlist/get");
-        List<DownloadListVo> list = serviceDownloadList.getList();
+        List<DownloadListVo> list = serviceDownloadList.getList(45);
         return "ok";
     }
 
