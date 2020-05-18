@@ -11,6 +11,8 @@ import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -168,6 +170,18 @@ public class DatabaseTestController {
         item.setTitle("title1111");
         serviceDownloadList.insert(item);
         return path+" ok";
+    }
+
+    @RequestMapping("/downloadlist/list")
+    @ResponseBody
+    public String listDownloadList(HttpServletRequest request,
+                                   @RequestParam(name="planId") int planId) {
+        String path = request.getServletPath();
+        log.info(path+"?planId="+planId);
+
+        List<DownloadListVo> list;
+        list = serviceDownloadList.getList(planId);
+        return list.toString();
     }
 
     private final Log log = LogFactory.getLog(getClass());

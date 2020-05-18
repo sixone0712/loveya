@@ -48,7 +48,7 @@ public class DownloadListDaoImpl implements DownloadListDao {
             param.put("page", page);
         List<DownloadListVo> list = session.selectList("downloadList.find", param);
         session.close();
-        return null;
+        return list;
     }
 
     @Override
