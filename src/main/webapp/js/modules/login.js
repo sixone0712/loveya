@@ -73,7 +73,9 @@ export default handleActions({
                 if (action.payload.data === 0) {
                     return state.setIn(["loginInfo", "isLoggedIn"], true);
                 } else {
-                    return state.setIn(["loginInfo", "errCode"], action.payload.data);
+                    return state
+                        .setIn(["loginInfo", "isLoggedIn"], false)
+                        .setIn(["loginInfo", "errCode"], action.payload.data);
                 }
             }
         }

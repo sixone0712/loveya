@@ -6,3 +6,4 @@ export * from './SearchList';
 export * from './GenreList';
 export * from './Login';
 export * from './Command';
+export * from './User';

@@ -21,17 +21,15 @@
 
     <insert id="insert" parameterType="UserVo">
         insert into rsss."users" (
-                username
-                ,password
-                <if test="permissions!=null">
-                ,permissions
-                </if>
+                username,
+                password,
+                permissions,
+                validity
             ) values (
-                #{username}
-                ,#{password}
-                <if test="permissions!=null">
-                ,#{permissions}
-                </if>
+                #{username},
+                #{password},
+                #{permissions},
+                true
         )
     </insert>
 
@@ -43,5 +41,17 @@
             validity = #{validity}
             where id = #{id}
     </update>
+
+    <update id="updateAccessDate" parameterType="UserVo">
+       update rsss."users" set
+            lastaccess= now()
+            where id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete
+            from rsss."users"
+            where id = #{id}
+    </delete>
 
 </mapper>

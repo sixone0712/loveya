@@ -10,10 +10,12 @@ public interface UserService {
     List<UserVo> getUserList();
     UserVo getUser(int id);
     UserVo getUser(String username);
+    UserVo getUserById(String id);
     boolean addUser(UserVo user);
     boolean modifyUser(UserVo user);
     boolean deleteUser(UserVo user);
     boolean modifyPerm(int id, int[] perms);
     int verify(String username, String password);
+    boolean UpdateLastAccessTime(int id);
 
 }
