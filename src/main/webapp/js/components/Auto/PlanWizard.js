@@ -116,6 +116,7 @@ class RSSautoplanwizard extends Component {
       interval: convInterval,
       description: description,
     };
+    console.log("[PlanWizard][makeRequestAutoPlanData] reqData", reqData);
     return reqData;
   }
 

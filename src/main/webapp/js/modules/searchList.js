@@ -82,10 +82,10 @@ const initialState = Map({
     }),
 
     //startDate: moment().set({'hour' : 0, 'minute': 0, 'second': 1}),
-    startDate: moment().utc().startOf('day'),
+    startDate: moment().startOf('day'),
         // .hour(1)
         // .minute(0),
-    endDate : moment().utc().endOf('day')
+    endDate : moment().endOf('day')
         // .hour(23)
         // .minute(59),
 });

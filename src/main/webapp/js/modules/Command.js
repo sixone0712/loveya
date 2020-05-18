@@ -45,8 +45,8 @@ const initialState = Map({
             })
         ]),
     }),
-    startDate: moment().utc().startOf('day'),
-    endDate : moment().utc().endOf('day')
+    startDate: moment().startOf('day'),
+    endDate : moment().endOf('day')
 
 });
 
