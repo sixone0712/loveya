@@ -32,3 +32,12 @@ out/
 .vscode/
 /src/main/webapp/build/
 bin
+
+### Node Modules ###
+/node_modules
+
+### Download ###
+/download
+/planroot
+/vfs-cache-dum
+/virt-cache
