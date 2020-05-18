@@ -140,16 +140,22 @@ public class CollectPlanner extends Thread {
                 log.error("file download failed [planId="+plan.getId()+"]");
                 service.setLastStatus(plan, PlanStatus.suspended);
             } else {
-                copyFiles(plan, executor.getBaseDir());
-                String outputPath = compress(plan);
-                if(outputPath==null) {
-                    log.error("failed to pack logs");
-                    service.setLastStatus(plan, PlanStatus.suspended);
-                } else {
+                int copied = copyFiles(plan, executor.getBaseDir());
+                if(copied==0) {
+                    log.info("collection complete.. but no updated files");
                     service.setLastStatus(plan, PlanStatus.collected);
-                    downloadListService.insert(plan, outputPath);
                     service.updateLastCollect(plan);
-                    log.info("plan "+plan.getPlanName()+" collecting success");
+                } else {
+                    String outputPath = compress(plan);
+                    if (outputPath == null) {
+                        log.error("failed to pack logs");
+                        service.setLastStatus(plan, PlanStatus.suspended);
+                    } else {
+                        service.setLastStatus(plan, PlanStatus.collected);
+                        downloadListService.insert(plan, outputPath);
+                        service.updateLastCollect(plan);
+                        log.info("plan " + plan.getPlanName()+" "+copied+" files collecting success");
+                    }
                 }
             }
         }
@@ -212,7 +218,7 @@ public class CollectPlanner extends Thread {
         return nextPlan;
     }
 
-    private void copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
+    private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
         Path planPath = Paths.get(planRootDir, String.valueOf(plan.getId()));
         log.info("copyFiles(from="+tmpDir+" to="+planPath.toString()+")");
         File planRoot = planPath.toFile();
@@ -220,15 +226,15 @@ public class CollectPlanner extends Thread {
             planRoot.mkdirs();
         }
         File inRoot = Paths.get(tmpDir).toFile();
-        copyFile(inRoot, inRoot, planRoot);
+        return copyFile(inRoot, inRoot, planRoot, 0);
     }
 
-    private void copyFile(File in, final File inRoot, final File outRoot) throws IOException {
+    private int copyFile(File in, final File inRoot, final File outRoot, int copied) throws IOException {
         if(in.isDirectory()) {
             File[] inFiles = in.listFiles();
             if (inFiles != null) {
                 for (File f : inFiles) {
-                    copyFile(f, inRoot, outRoot);
+                    copied = copyFile(f, inRoot, outRoot, copied);
                 }
             }
         } else if(in.isFile()) {
@@ -241,10 +247,11 @@ public class CollectPlanner extends Thread {
             }
             if(outPath.exists()) {
                 log.info(outPath.getName()+" is already exist");
-                return;
+                return copied;
             }
             FileCopyUtils.copy(in, outPath);
         }
+        return copied+1;
     }
 
     private String compress(CollectPlanVo plan) {
