@@ -84,7 +84,7 @@ public abstract class FileSystemMonitor extends Thread {
     }
 
     protected int percent(long total, long usable) {
-        return total!=0?(int)(usable/total):0;
+        return total!=0?(int)(usable*100/total):0;
     }
 
     abstract protected boolean checkSpecial();
