@@ -46,6 +46,7 @@ public class CollectPlanner extends Thread {
     private final DownloadMonitor monitor;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
+    private boolean halted = false;
 
     @Autowired
     private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService) throws ServiceException {
@@ -91,15 +92,17 @@ public class CollectPlanner extends Thread {
 
         try {
             while(true) {
-                CollectPlanVo plan = getNext();
-                if(plan==null) {
-                    sleep(5000);
-                    continue;
-                }
+                if(!halted) {
+                    CollectPlanVo plan = getNext();
+                    if (plan == null) {
+                        sleep(5000);
+                        continue;
+                    }
 
-                Date cur = new Date(System.currentTimeMillis());
-                if(plan.getNextAction().before(cur)) {
-                    collect(plan);
+                    Date cur = new Date(System.currentTimeMillis());
+                    if (plan.getNextAction().before(cur)) {
+                        collect(plan);
+                    }
                 }
                 sleep(1000);
             }
@@ -292,6 +295,14 @@ public class CollectPlanner extends Thread {
         }
         log.info("compress done ("+zipName+")");
         return zipPath.toString();
+    }
+
+    public void halt() {
+        halted = true;
+    }
+
+    public void restart() {
+        halted = false;
     }
 
     private Runnable notifyUpdate = ()->{

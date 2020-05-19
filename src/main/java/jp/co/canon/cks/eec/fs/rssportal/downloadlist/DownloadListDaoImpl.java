@@ -52,6 +52,14 @@ public class DownloadListDaoImpl implements DownloadListDao {
     }
 
     @Override
+    public List<DownloadListVo> find(@NonNull Map<String, Object> condition) {
+        SqlSession session = sessionFactory.openSession();
+        List<DownloadListVo> list = session.selectList("downloadList.findCond", condition);
+        session.close();
+        return list;
+    }
+
+    @Override
     public boolean insert(@NonNull DownloadListVo item) {
         SqlSession session = sessionFactory.openSession(true);
         int ret = session.insert("downloadList.insert", item);
