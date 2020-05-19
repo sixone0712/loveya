@@ -1,33 +1,68 @@
 package jp.co.canon.cks.eec.fs.rssportal.background.localfs;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class DownloadFileSystemMonitor extends FileSystemMonitor {
 
     private final Log log = LogFactory.getLog(getClass());
     private static final String name = "download-fs-monitor";
-    private static final String _path = "download";
+    private static final String path = "zip";
     private static final int _minFreeSpace = 15;    // gigabytes
     private static final int _minFreeSpacePercent = 25;
     private static final long _interval = 3600*1000;
-    private static final long _keepPeriod = 24*3600*1000;
 
-    public DownloadFileSystemMonitor() {
-        super(name, _path, _minFreeSpace, _minFreeSpacePercent, _interval);
+    private final FileDownloader fileDownloader;
+    
+    private List<File> invalidFileList;
+
+    public DownloadFileSystemMonitor(FileDownloader fileDownloader) {
+        super(name, path, _minFreeSpace, _minFreeSpacePercent, _interval);
+        this.fileDownloader = fileDownloader;
+        invalidFileList = new ArrayList<>();
         log.info(name+" thread starts");
     }
 
     @Override
     protected boolean checkSpecial() {
-        return false;
+        File target = new File(path);
+        invalidFileList.clear();
+        for(File file: target.listFiles()) {
+            if(fileDownloader.getStatus(file.getName()).equalsIgnoreCase("invalid-id")) {
+                invalidFileList.add(file);
+            }
+        }
+        return invalidFileList.size()==0?false:true;
     }
 
     @Override
     protected void cleanup() {
+        if(invalidFileList.size()==0) {
+            log.warn("no file to cleanup");
+            return;
+        }
+        for(File file: invalidFileList) {
+            deleteDir(file);
+            log.info("downloaded file "+file.getName()+" deleted");
+        }
+    }
 
+    private void deleteDir(@NonNull File file) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
     }
 
     @Override
