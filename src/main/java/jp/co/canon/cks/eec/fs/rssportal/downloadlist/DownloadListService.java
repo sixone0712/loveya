@@ -8,6 +8,7 @@ import java.util.List;
 public interface DownloadListService {
 
     DownloadListVo get(int id);
+    List<DownloadListVo> getFinishedList();
     List<DownloadListVo> getList(int planId);
     List<DownloadListVo> getList(int planId, int offset, int limit);
     boolean insert(DownloadListVo item);

@@ -15,6 +15,25 @@
         where id=#{id}
     </select>
 
+    <select id="findCond" parameterType="hashmap" resultType="DownloadListVo">
+        select
+            id,
+            created,
+            status,
+            planid as planId,
+            path,
+            title
+        from rsss."download_list"
+        where
+        <if test="id!=null">
+            id=#{id} and
+        </if>
+        <if test="status!=null">
+            status=#{status} and
+        </if>
+            1=1
+    </select>
+
     <select id="find" parameterType="hashmap" resultType="DownloadListVo">
         select
             id,

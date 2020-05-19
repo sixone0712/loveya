@@ -1,5 +1,7 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.DownloadMonitor;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloadContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;

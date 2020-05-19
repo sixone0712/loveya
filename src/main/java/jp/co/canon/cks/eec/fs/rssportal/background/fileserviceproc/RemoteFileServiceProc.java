@@ -1,4 +1,4 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
@@ -6,7 +6,8 @@ import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
-import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloadContext;
+import jp.co.canon.cks.eec.fs.rssportal.background.FtpWorker;
 import org.springframework.lang.NonNull;
 
 import java.io.*;
