@@ -2,6 +2,9 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.VirtualFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

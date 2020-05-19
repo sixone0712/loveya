@@ -1,16 +1,10 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc;
 
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
-import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
-import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloadContext;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
