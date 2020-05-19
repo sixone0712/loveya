@@ -46,7 +46,7 @@ export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList("/api/createFileList", requestList.toJS());
+    searchListActions.searchLoadResponseList("/soap/createFileList", requestList.toJS());
 };
 
 export const getResponseList = (props) => {
