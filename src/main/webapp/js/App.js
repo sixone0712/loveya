@@ -6,12 +6,15 @@ import * as genreListActions from './modules/genreList';
 import * as searchListActions from './modules/searchList';
 import * as loginActions from './modules/login';
 import * as CmdActions from './modules/Command';
+import * as userActions from './modules/User';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
 import Navbar from "./components/common/Navbar";
 import Manual from "./components/Manual/Manual";
-import Manual2 from "./components/Manual/Manual2";
+import Manual2 from "./components/Manual/ManualVftpCompat";
+import Manual3 from "./components/Manual/ManualVftpSss";
+import AccountList from "./components/User/UserList";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
@@ -68,7 +71,10 @@ class App extends Component {
                         <Route path={Define.PAGE_LOGIN} component={Login}/>
                         <Route path={Define.PAGE_MANUAL} component={Manual}/>
                         <Route path={Define.PAGE_MANUAL2} component={Manual2}/>
+                        <Route path={Define.PAGE_MANUAL3} component={Manual3} />
                         <Route path={Define.PAGE_AUTO} component={Auto}/>
+                        <Route path={Define.PAGE_ADMIN_ACCOUNT} component={AccountList} />
+                        <Route path={Define.PAGE_ADMIN_DW_HISTORY} component={AccountList} />
                         {/*<Redirect to={Define.PAGE_MANUAL} component={Manual} />*/}
 
                         {/* How to pass props */}

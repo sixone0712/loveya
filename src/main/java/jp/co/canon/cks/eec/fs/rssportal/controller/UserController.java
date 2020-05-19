@@ -22,7 +22,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-
+    private final String USER_RESULT = "result";
+    private final String USER_DATA = "data";
     private final HttpSession httpSession;
     private final UserService serviceUser;
     private final UserPermissionService serviceUserPerm;
@@ -75,6 +76,7 @@ public class UserController {
             if(userId >= 10000) {
                 SessionContext context = new SessionContext();
                 UserVo LoginUser = serviceUser.getUser(userId);
+                serviceUser.UpdateLastAccessTime(userId);
                 context.setUser(LoginUser);
                 context.setAuthorized(true);
                 httpSession.setAttribute("context", context);
@@ -135,16 +137,18 @@ public class UserController {
     public int changeAuth(@RequestParam Map<String, Object> param)  throws Exception {
         int res = 0;
         log.info("/user/changeAuth");
-        String username = param.containsKey("username")?(String)param.get("username"):null;
+        String id = param.containsKey("id")?(String)param.get("id"):null;
         String permission = param.containsKey("permission")?(String)param.get("permission"):null;
 
-        if(username==null || permission==null || username.isEmpty() || permission.isEmpty())
+        log.info("id: "+id);
+
+        if(id==null || permission==null || id.isEmpty() || permission.isEmpty())
         {
             res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
         }
         else
         {
-            UserVo userObj = serviceUser.getUser(username);
+            UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
             if(userObj != null && (userObj.getId() >= 10000)) {
                 boolean DbResult = false;
                 userObj.setPermissions(permission);
@@ -165,7 +169,98 @@ public class UserController {
         }
         return res;
     }
+    @GetMapping("/create")
+    @ResponseBody
+    public int create(@RequestParam Map<String, Object> param)  throws Exception {
+        int res = 0;
+        log.info("/user/create");
+        String name = param.containsKey("name")?(String)param.get("name"):null;
+        String pwd = param.containsKey("pwd")?(String)param.get("pwd"):null;
+        String auth = param.containsKey("auth")?(String)param.get("auth"):null;
 
+        if(name==null || pwd==null || auth==null
+                || name.isEmpty() || pwd.isEmpty() || auth.isEmpty())
+        {
+            res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
+        }
+        else
+        {
+            UserVo userObj = serviceUser.getUser(name);
+            if(userObj != null) {
+               res= 300;//USER_SET_FAIL_SAME_NAME
+            }
+            else {
+                boolean DbResult = false;
+                userObj = new UserVo();
+                userObj.setUsername(name);
+                userObj.setPassword(pwd);
+                userObj.setPermissions(auth);
+                DbResult = serviceUser.addUser(userObj);
+                if(!DbResult)
+                {
+                    res = 350;//USER_SET_FAIL_NO_REASON
+                    log.info("DB create fail");
+                }
+                else
+                {
+                    log.info("DB create Success");
+                }
+            }
+        }
+        return res;
+    }
+
+    @GetMapping("/loadUserList")
+    @ResponseBody
+    public Map<String, Object> loadUserList()  throws Exception {
+
+        log.info("/user/loadUserList");
+        Map<String, Object> returnData = new HashMap<>();
+        List<UserVo> list = serviceUser.getUserList();
+        if(list == null)
+        {
+            log.info("List data is null");
+        }
+        else {
+            returnData.put(USER_RESULT,  0);
+            returnData.put(USER_DATA, list);
+        }
+        return returnData;
+    }
     private final Log log = LogFactory.getLog(getClass());
 
+    @GetMapping("/delete")
+    @ResponseBody
+    public int deleteUser(@RequestParam Map<String, Object> param)  throws Exception {
+        int res = 0;
+        log.info("/user/deleteUser");
+        String id = param.containsKey("id")?(String)param.get("id"):null;
+        log.info("id: "+id);
+
+        if(id==null || id.isEmpty())
+        {
+            res = 33;  //LOGIN_FAIL_NO_REGISTER_USER
+        }
+        else
+        {
+            UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
+            if(userObj == null) {
+                res= 33;//LOGIN_FAIL_NO_REGISTER_USER
+            }
+            else {
+                boolean DbResult = false;
+                DbResult = serviceUser.deleteUser(userObj);
+                if(!DbResult)
+                {
+                    res = 350;//USER_SET_FAIL_NO_REASON
+                    log.info("DB delete fail");
+                }
+                else
+                {
+                    log.info("DB delelte Success");
+                }
+            }
+        }
+        return res;
+    }
 }

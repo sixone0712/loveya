@@ -32,10 +32,17 @@ public class UserServiceImpl implements UserService {
         return dao.find(param);
     }
 
+
     @Override
     public UserVo getUser(@NonNull String username) {
         Map<String, Object> param = new HashMap<>();
         param.put("username", username);
+        return dao.find(param);
+    }
+    @Override
+    public UserVo getUserById(@NonNull String id) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("id",  Integer.parseInt(id));
         return dao.find(param);
     }
 
@@ -84,7 +91,19 @@ public class UserServiceImpl implements UserService {
         if(temp==null) {
             return false;
         }
-        user.setValidity(false);
-        return dao.modify(user);
+        return dao.delete(user);
+    }
+    @Override
+    public boolean UpdateLastAccessTime(int id) {
+        Map<String, Object> param = new HashMap<>();
+        UserVo temp = getUser(id);
+        param.put("id", id);
+        if(temp==null) {
+            return false;
+        }
+        else
+        {
+            return  dao.UpdateAccessDate(param);
+        }
     }
 }

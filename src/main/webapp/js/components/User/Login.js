@@ -36,6 +36,14 @@ class Login extends Component {
                 ? 0 : Define.LOGIN_FAIL_EMPTY_USER_PASSWORD);
     }
 
+    handleEnter = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            this.loginProcess();
+        }
+    }
+
     loginProcess =async(e) => {
         let errCode = this.handleSubmit();
         if (!errCode)
@@ -150,6 +158,7 @@ class Login extends Component {
                                                         placeholder="Enter your name"
                                                         autoComplete="off"
                                                         style={{ transition: "all .15s ease" }}
+                                                        onKeyDown={this.handleEnter}
                                                         onChange={this.handleChange} noValidate
                                                     />
                                                     {errors.username.length > 0 &&
@@ -171,6 +180,7 @@ class Login extends Component {
                                                         className="px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:shadow-outline w-full"
                                                         placeholder="Enter your password"
                                                         style={{ transition: "all .15s ease" }}
+                                                        onKeyDown={this.handleEnter}
                                                         autoComplete="off"
                                                         onChange={this.handleChange} noValidate
                                                     />

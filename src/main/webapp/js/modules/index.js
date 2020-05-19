@@ -5,6 +5,7 @@ import genreList from './genreList';
 import searchList from './searchList';
 import login from './login';
 import cmd from './Command';
+import user from './User';
 import autoPlan from './autoPlan';
 import { penderReducer } from 'redux-pender';
 
@@ -14,6 +15,7 @@ export default combineReducers({
     searchList,
     login,
     cmd,
+    user,
     autoPlan,
     pender: penderReducer
 });

@@ -371,7 +371,7 @@ class RSSautoplanwizard extends Component {
           </Card>
         }
         { logTypeFailure && toolInfoFailure &&
-          <div className="network-connection-error">Network Connection Error</div>
+          <div className="network-connection-error auto-plan">Network Connection Error</div>
         }
         {renderAlertModal}
         {renderConfirmModal}

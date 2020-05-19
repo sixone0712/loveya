@@ -9,17 +9,26 @@ import * as viewListActions from "../../../modules/viewList";
 import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 import * as Define from "../../../define";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import AlertModal from "../../Common/AlertModal";
+import ConfirmModal from "../../Common/ConfirmModal";
+
+const modalType = {
+    PROCESS: 1,
+    CANCEL: 2,
+    ALERT: 3,
+    CANCEL_COMPLETE: 4
+};
 
 class FormList extends Component{
     constructor() {
         super();
         this.state = {
-            modalMsg: null,
+            alertMsg: null,
             intervalValue: null,
             isProcessOpen: false,
-            isErrorOpen: false
+            isCancelOpen: false,
+            isAlertOpen: false
         }
     }
 
@@ -66,7 +75,7 @@ class FormList extends Component{
 
         if (msg.toString().length > 0) {
             this.setState({
-                modalMsg: msg
+                alertMsg: msg
             });
             return true;
         }
@@ -79,21 +88,21 @@ class FormList extends Component{
         const errCode = await API.setSearchList(this.props);
 
         if (this.onSetErrorState(errCode)) {
-            this.openErrorModal();
+            this.openModal(modalType.ALERT);
             return;
         }
 
-        this.openProcessModal();
+        this.openModal(modalType.PROCESS);
 
         API.startSearchList(this.props);
 
 
         const intervalProps = {
-            closeProcessModal: this.closeProcessModal,
+            closeProcessModal: () => this.closeModal(modalType.PROCESS),
             getIntervalFunc : this.getIntervalFunc,
             setIntervalFunc: this.setIntervalFunc,
             getResStatus: this.getResStatus,
-            openErrorModal: this.openErrorModal,
+            openErrorModal: () => this.openModal(modalType.ALERT),
             onSetErrorState: this.onSetErrorState
         };
 
@@ -104,32 +113,84 @@ class FormList extends Component{
         })
     };
 
-    openProcessModal = () => {
-        this.setState({
-            isProcessOpen: true
-        });
+    openModal = (type) => {
+        switch(type) {
+            case modalType.PROCESS:
+                this.setState({
+                    isProcessOpen: true
+                });
+                break;
+                
+            case modalType.CANCEL:
+                this.setState({
+                    isCancelOpen: true
+                });
+                break;
+                
+            case modalType.ALERT:
+                this.setState({
+                   isAlertOpen: true
+                });
+                break;
+
+            case modalType.CANCEL_COMPLETE:
+                this.closeModal();
+                setTimeout(() => {
+                    this.setState({
+                        isAlertOpen: true,
+                        alertMsg: "Search was canceled."
+                    });
+                }, 500);
+                break;
+
+            default:
+                console.log("[formlist.js] invalid modal type!!!!");
+                break;
+        }
     };
 
-    closeProcessModal = () => {
-        this.setState({
-            isProcessOpen: false
-        });
-    };
+    closeModal = (type) => {
+        switch(type) {
+            case modalType.PROCESS:
+                this.setState({
+                    isProcessOpen: false,
+                });
+                break;
 
-    openErrorModal = () => {
-        this.setState({
-           isErrorOpen: true
-        });
-    };
+            case modalType.CANCEL:
+                this.setState({
+                    isCancelOpen: false
+                });
+                break;
 
-    closeErrorModal = () => {
-        this.setState({
-           isErrorOpen: false
-        });
-    };
+            case modalType.ALERT:
+                this.setState({
+                    isAlertOpen: false,
+                    alertMsg: ""
+                });
+                break;
+
+            default:
+                this.setState({
+                    isProcessOpen: false,
+                    isCancelOpen: false,
+                    isAlertOpen: false,
+                    alertMsg: ""
+                })
+                break;
+        }
+    }
 
     render() {
-        const { isProcessOpen, isErrorOpen, modalMsg } = this.state;
+        const { isProcessOpen, isCancelOpen, isAlertOpen, alertMsg } = this.state;
+        const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, alertMsg, "green", () => this.closeModal(modalType.ALERT));
+        const renderCancelModal = ConfirmModal(isCancelOpen,
+                                               faExclamationCircle,
+                                               "Are you sure want to cancel the search?",
+                                               "green",
+                                               null,
+                                               () => this.openModal(modalType.CANCEL_COMPLETE),
+                                               () => this.closeModal(modalType.CANCEL));
 
         return (
             <Card className="ribbon-wrapper formlist-card">
@@ -169,32 +230,9 @@ class FormList extends Component{
                                         </div>
                                         <p>Searching...</p>
                                     </div>
-                                </div>
-                            </ReactTransitionGroup>
-                        ) : (
-                            <ReactTransitionGroup
-                                transitionName={"Custom-modal-anim"}
-                                transitionEnterTimeout={200}
-                                transitionLeaveTimeout={200}
-                            />
-                        )}
-                        {isErrorOpen ? (
-                            <ReactTransitionGroup
-                                transitionName={"Custom-modal-anim"}
-                                transitionEnterTimeout={200}
-                                transitionLeaveTimeout={200}
-                            >
-                                <div className="Custom-modal-overlay" onClick={this.closeErrorModal} />
-                                <div className="Custom-modal">
-                                    <div className="content-without-title">
-                                        <p>
-                                            <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
-                                        </p>
-                                        <p>{modalMsg}</p>
-                                    </div>
                                     <div className="button-wrap">
-                                        <button className="alert-type green" onClick={this.closeErrorModal}>
-                                            Close
+                                        <button className="alert-type green" onClick={() => this.openModal(modalType.CANCEL)}>
+                                            Cancel
                                         </button>
                                     </div>
                                 </div>
@@ -206,6 +244,8 @@ class FormList extends Component{
                                 transitionLeaveTimeout={200}
                             />
                         )}
+                        {renderCancelModal}
+                        {renderAlertModal}
                     </div>
                 </CardBody>
             </Card>

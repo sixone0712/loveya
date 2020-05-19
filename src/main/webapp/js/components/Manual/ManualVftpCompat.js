@@ -78,44 +78,9 @@ const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
     )
 }
 
-const CommandDeleteModal = ({ isOpen, left,right }) => {
-
-    const buttonMsg = {
-        leftMsg:'Delete',
-        rightMsg:'Cancel',
-    };
-
-    return (
-        <React.Fragment>
-            {
-                isOpen ? (
-                    <ReactTransitionGroup
-                        transitionName={'Modal-anim'}
-                        transitionEnterTimeout={200}
-                        transitionLeaveTimeout={200} >
-                        <div className="Custom-modal-overlay" onClick={close} />
-                        <div className="Custom-modal">
-                            <div className="content-without-title">
-                                <p>
-                                    <FontAwesomeIcon icon={faTrashAlt} size="6x" />
-                                </p>
-                                <p>Do you want to delete the selected command?</p>
-                            </div>
-                            <ModalTwoButton data={buttonMsg} actionRightFunc={right} actionLeftFunc={left}/>
-                        </div>
-                    </ReactTransitionGroup>
-                ):(
-                    <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
-                )
-            }
-        </React.Fragment>
-    )
-}
-
 function convertCommand (cmd, sDate,eDate) {
     let cmdString = '';
     const formatDate = 'YYYYMMDD_HHmmss';
-
 
     if (sDate) {
         cmdString += ( moment(sDate).format(formatDate)+ '-');
@@ -132,21 +97,21 @@ const CommandArea = ({ id, startDate, endDate}) => {
     const cmdString = convertCommand(id,startDate,endDate);
     return (
             <Card className="ribbon-wrapper formlist-card">
-                <CardBody className="custom-scrollbar manual-card-body">
+                <CardBody className="custom-scrollbar manual-cmd-body">
                     <div className="ribbon ribbon-clip ribbon-gray_blue">Command</div>
-                      <div style={{display: "flex", marginLeft: "auto", justifyContent:"flex-end", fontSize:"2em"}}>
+                      <div style={{display: "flex", marginLeft: "auto", justifyContent:"flex-end", fontSize:"1.5em", alignItems:"center"}}>
                           {cmdString}
                           <Button
                         outline size="l"
                         className="filelist-card mx-4">
-                        Search
+                        Download
                         </Button>
                       </div>
                 </CardBody>
             </Card>
     );
 }
-class Manual2 extends Component {
+class ManualVftpCompat extends Component {
     constructor() {
         super();
         this.state= {
@@ -345,7 +310,6 @@ class Manual2 extends Component {
             </Col>
             </Row>
             <CommandArea id={this.state.cmdName} startDate={startDate} endDate={endDate}/>
-            <Filelist/>
             </Container>
             <Footer/>
             <ScrollToTop showUnder={160} style={{
@@ -392,4 +356,4 @@ export default connect(
     (dispatch) => ({
         CmdActions: bindActionCreators(CmdActions, dispatch),
     })
-)(Manual2);
+)(ManualVftpCompat);

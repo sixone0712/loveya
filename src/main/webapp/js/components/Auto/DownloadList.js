@@ -345,52 +345,6 @@ class RSSAutoDownloadList extends Component {
         } = this.state;
         const { length: count } = requestList;
 
-        const requests = filePaginate(requestList, currentPage, pageSize);
-        const pagination = renderPagination(
-            pageSize,
-            count,
-            this.handlePaginationChange,
-            "custom-pagination"
-        );
-
-        const renderDeleteModal = ConfirmModal(
-            isDeleteOpen,
-            faTrashAlt,
-            modalMessage,
-            "auto-plan",
-            this.closeModal,
-            this.deleteDownloadFile,
-            this.closeModal
-        );
-
-        const renderSelectDownloadModal = ConfirmModal(
-            isSelectDownloadOpen,
-            faDownload,
-            modalMessage,
-            "auto-plan",
-            this.closeModal,
-            this.saveDownloadFile,
-            this.closeModal
-        );
-
-        const renderNewDownloadModal = ConfirmModal(
-            isNewDownloadOpen,
-            faDownload,
-            modalMessage,
-            "auto-plan",
-            this.closeModal,
-            this.saveDownloadFile,
-            this.closeModal
-        );
-
-        const renderAlertModal = AlertModal(
-            isAlertOpen,
-            faExclamationCircle,
-            modalMessage,
-            "auto-plan",
-            this.closeModal
-        );
-
         if (count === 0) {
             return (
                 <Card className="auto-plan-box">
@@ -411,6 +365,52 @@ class RSSAutoDownloadList extends Component {
                 </Card>
             );
         } else {
+            const requests = filePaginate(requestList, currentPage, pageSize);
+            const pagination = renderPagination(
+                pageSize,
+                count,
+                this.handlePaginationChange,
+                "custom-pagination"
+            );
+
+            const renderDeleteModal = ConfirmModal(
+                isDeleteOpen,
+                faTrashAlt,
+                modalMessage,
+                "auto-plan",
+                this.closeModal,
+                this.deleteDownloadFile,
+                this.closeModal
+            );
+
+            const renderSelectDownloadModal = ConfirmModal(
+                isSelectDownloadOpen,
+                faDownload,
+                modalMessage,
+                "auto-plan",
+                this.closeModal,
+                this.saveDownloadFile,
+                this.closeModal
+            );
+
+            const renderNewDownloadModal = ConfirmModal(
+                isNewDownloadOpen,
+                faDownload,
+                modalMessage,
+                "auto-plan",
+                this.closeModal,
+                this.saveDownloadFile,
+                this.closeModal
+            );
+
+            const renderAlertModal = AlertModal(
+                isAlertOpen,
+                faExclamationCircle,
+                modalMessage,
+                "auto-plan",
+                this.closeModal
+            );
+
             return (
                 <>
                     {renderDeleteModal}

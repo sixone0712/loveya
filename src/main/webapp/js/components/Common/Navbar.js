@@ -21,12 +21,12 @@ import * as API from "../../api";
 import * as Define from "../../define";
 import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
-import ChangeAuthModal from "../User/ChangeAuth";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services";
 
+
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
-const AUTH_ALERT_MESSAGE = "Permission change completed.";
+
 
 class RSSNavbar extends Component{
   constructor(props) {
@@ -60,10 +60,6 @@ class RSSNavbar extends Component{
         await this.setState({isPasswordOpen: true, isMode : sMode});
         break;
 
-      case "permission":
-        await this.setState(() => ({isAuthOpen: true, isMode:sMode}));
-        break;
-
       case "logout":
         await this.setState(() => ({isLogoutOpen: true, isMode:sMode}));
         break;
@@ -90,13 +86,6 @@ class RSSNavbar extends Component{
           this.setState({
             isAlertOpen: true,
             alertMessage: PASSWORD_ALERT_MESSAGE
-          });
-          break;
-
-        case "permission":
-          this.setState({
-            isAlertOpen: true,
-            alertMessage: AUTH_ALERT_MESSAGE
           });
           break;
 
@@ -139,7 +128,6 @@ class RSSNavbar extends Component{
         <>
           {renderAlert}
           <ChangePwModal isOpen={isPasswordOpen} right={this.closeModal} alertOpen={this.openAlert}/>
-          <ChangeAuthModal isOpen={isAuthOpen} right={this.closeModal} alertOpen={this.openAlert}/>
           <LogOutModal isOpen={isLogoutOpen} left={this.onLogout} right={this.closeModal} />
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
@@ -157,11 +145,11 @@ class RSSNavbar extends Component{
                         FTP Download
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual2")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual")}>
                         VFTP Download(COMPAT/Optional)
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual3")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual")}>
                         VFTP Download(SSSS/Optional)
                     </DropdownItem>
                 </DropdownMenu>
@@ -189,8 +177,20 @@ class RSSNavbar extends Component{
               </UncontrolledDropdown>
               {
                 (window.sessionStorage.getItem('auth') ==='100')
-               ?  <NavLink tag={RRNavLink} to={Define.PAGE_ADMIN} className={this.getClassName("admin")}
-                         onClick={() => this.handlePageChange("admin")}>  Administrator  </NavLink>
+               ?  <UncontrolledDropdown nav inNavbar className={this.getClassName("admin")}>
+                    <DropdownToggle nav>
+                      Administrator
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_ACCOUNT} onClick={() => this.handlePageChange("admin")}>
+                        User Account
+                      </DropdownItem>
+                      <DropdownItem divider />
+                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_DW_HISTORY} onClick={() => this.handlePageChange("admin")}>
+                        Download History
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </UncontrolledDropdown>
                : null
               }
             </Nav>
@@ -201,8 +201,6 @@ class RSSNavbar extends Component{
                 </DropdownToggle>
                 <DropdownMenu right>
                   <DropdownItem onClick={() => this.openModal("password")}>Change Password</DropdownItem>
-                  <DropdownItem divider/>
-                  <DropdownItem onClick={() => this.openModal("permission")}>Change Permission</DropdownItem>
                   <DropdownItem divider/>
                   <DropdownItem onClick={() => this.openModal("logout")}>Logout</DropdownItem>
                 </DropdownMenu>

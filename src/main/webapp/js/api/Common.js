@@ -29,7 +29,8 @@ export const convertErrMsg = (error) => {
         case Define.COMMAND_NO_SUCH_COMMAND: msg = "No such command."; break;
         case Define.COMMAND_NO_SELECT_COMMAND: msg = "Please choose a command."; break;
         case Define.COMMAND_EXIST_COMMAND: msg = "Already exist command."; break;
-
+        case Define.USER_SET_FAIL_SAME_NAME: msg = "The your name is duplicated."; break;
+        case Define.USER_SET_FAIL_NO_REASON: msg = "Account create failed"; break;
         default: msg="what's error : " + error; break;
     }
     return msg;
@@ -65,6 +66,9 @@ export const getErrorMsg = (error) => {
         case Define.COMMAND_NO_SUCH_COMMAND: msg = "No such command."; break;
         case Define.COMMAND_NO_SELECT_COMMAND: msg = "Please choose a command."; break;
         case Define.COMMAND_EXIST_COMMAND: msg = "Already exist command."; break;
+        case Define.USER_SET_FAIL_SAME_NAME: msg = "The your name is duplicated."; break;
+        case Define.USER_SET_FAIL_NO_REASON: msg = "Account create failed"; break;
+
         default: break;
     }
 

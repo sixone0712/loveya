@@ -64,4 +64,16 @@ public class UserDaoImpl implements UserDao {
         return true;
     }
 
+
+    @Override
+    public boolean UpdateAccessDate(@NonNull Map<String, Object> param) {
+        if(!param.containsKey("id")) {
+            return false;
+        }
+        SqlSession session = sessionFactory.openSession();
+        session.update("users.updateAccessDate", param);
+        session.close();
+        return true;
+    }
+
 }

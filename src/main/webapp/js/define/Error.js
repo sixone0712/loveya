@@ -43,3 +43,6 @@ export const COMMAND_FAIL_EMPTY_NAME = 201;
 export const COMMAND_NO_SUCH_COMMAND = 202;
 export const COMMAND_NO_SELECT_COMMAND = 203;
 export const COMMAND_EXIST_COMMAND = 204;
+
+export const USER_SET_FAIL_SAME_NAME = 300;
+export const USER_SET_FAIL_NO_REASON = 350;
