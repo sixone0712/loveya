@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -33,6 +34,7 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
         super(name, _path, _minFreeSpace, _minFreeSpacePercent, _interval);
         this.downloadService = downloadService;
         this.collectPlanner = collectPlanner;
+        cleanupList = new ArrayList<>();
         log.info(name+" thread starts");
     }
 
