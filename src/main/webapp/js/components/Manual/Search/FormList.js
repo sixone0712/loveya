@@ -12,6 +12,7 @@ import * as Define from "../../../define";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import AlertModal from "../../Common/AlertModal";
 import ConfirmModal from "../../Common/ConfirmModal";
+import services from "../../../services";
 
 const modalType = {
     PROCESS: 1,
@@ -84,7 +85,7 @@ class FormList extends Component{
 
     onSearch = async () => {
         let msg = "";
-        // Seacrh Request 데이터 저장
+        // Save Seacrh Request Data
         const errCode = await API.setSearchList(this.props);
 
         if (this.onSetErrorState(errCode)) {
@@ -113,7 +114,7 @@ class FormList extends Component{
         })
     };
 
-    openModal = (type) => {
+    openModal = async (type) => {
         switch(type) {
             case modalType.PROCESS:
                 this.setState({
@@ -134,7 +135,18 @@ class FormList extends Component{
                 break;
 
             case modalType.CANCEL_COMPLETE:
-                this.closeModal();
+                //this.closeModal();
+                services.axiosAPI.postCancel();
+                clearTimeout(this.getIntervalFunc());
+                await this.setState({
+                    ...this.state,
+                    isProcessOpen: false,
+                    isCancelOpen: false,
+                    isAlertOpen: false,
+                    alertMsg: "",
+                    intervalValue: null
+                })
+
                 setTimeout(() => {
                     this.setState({
                         isAlertOpen: true,

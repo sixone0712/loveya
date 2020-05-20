@@ -123,7 +123,7 @@ class RSSautoplanwizard extends Component {
   handleRequestAutoPlanAdd = async () => {
     const reqData = this.makeRequestAutoPlanData();
     console.log("reqData", reqData);
-    const res = await services.axiosAPI.postByJson("/plan/add", reqData);
+    const res = await services.axiosAPI.post("/plan/add", reqData);
     console.log(res);
 
     console.log("this.props.history", this.props.history);
@@ -135,7 +135,7 @@ class RSSautoplanwizard extends Component {
     const reqData = this.makeRequestAutoPlanData();
     console.log("reqData", reqData);
     console.log("editID", editId);
-    const res = await services.axiosAPI.postByJson("/plan/modify?id=" + editId, reqData);
+    const res = await services.axiosAPI.post("/plan/modify?id=" + editId, reqData);
     console.log(res);
     console.log("this.props.history", this.props.history);
     this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_STATUS);

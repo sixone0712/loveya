@@ -14,7 +14,7 @@ export const genreInitAllList = createAction(GENRE_INIT_ALL_LIST);
 export const genreInitServerError = createAction(GENRE_INIT_SERVER_ERROR);
 export const genreLoadDbList = createAction(GENRE_LOAD_DB_LIST, services.axiosAPI.get);
 export const genreGetDbList = createAction(GENRE_GET_DB_LIST, services.axiosAPI.get);
-export const genreSetDbList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.postByJson);
+export const genreSetDbList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.post);
 
 const initialState = Map({
     genreList: Map({

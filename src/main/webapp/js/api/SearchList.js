@@ -96,7 +96,7 @@ export const requestDownload = async (props) => {
     console.log("downloadList", downloadList);
     console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.postByJson("/dl/request", jsonList)
+    const result = await services.axiosAPI.post("/dl/request", jsonList)
         .then((data) => {console.log("data", data); return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
@@ -206,6 +206,7 @@ export const setWatchSearchStatus = (props) => {
 
         // when setTimeout is null
         if(intervalFunc == null) return;
+        console.log("intervalFunc", intervalFunc);
 
         console.log("resStatus", resStatus);
         if(resStatus === "success" || resStatus === "error") {

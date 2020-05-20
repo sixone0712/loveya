@@ -47,16 +47,20 @@ export const get = async (getId) => {
     return checkSession(res);
 };
 
-export const postByObject = async (url, postData) => {
-    const res =  await axios.post(url, postData);
-    return checkSession(res);
-}
-
-export const postByJson = async (url, postData) => {
+export const postCancelToken = axios.CancelToken;
+export let postCancel;
+export const post = async (url, postData) => {
     const res =  await axios.post(url, postData, {
         headers: {
             'Content-Type': 'application/json',
-        }});
+        },
+        // References
+        // https://yamoo9.github.io/axios/guide/cancellation.html
+        cancelToken: new postCancelToken(function executor(c) {
+            // The executor function takes the cancel function as a parameter.
+            postCancel = c;
+        })
+    });
     return checkSession(res);
 }
 

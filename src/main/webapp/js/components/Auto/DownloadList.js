@@ -436,7 +436,7 @@ class RSSAutoDownloadList extends Component {
                         <CardBody className="auto-plan-card-body">
                             <Col className="auto-plan-collection-list download-list">
                                 <div className="content-section header">
-                                    <div className="plan-id">{this.state.requestName}</div>
+                                    <div className="plan-id">{`Plan ID : ${this.state.requestName}`}</div>
                                     <div>
                                         <Button size="sm" className="download-btn"
                                                 onClick={() => this.checkNewDownloadFile()}>
