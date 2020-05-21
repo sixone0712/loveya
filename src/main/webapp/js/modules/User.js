@@ -7,7 +7,6 @@ import services from '../services';
 const USER_CREATE = "user/USER_CREATE";
 const USER_DELETE = "user/USER_DELETE";
 const USER_GET_LIST = "user/USER_GET_LIST";
-const USER_GET_DOWNLOAD_HISTORY = "user/USER_GET_DOWNLOAD_HISTORY";
 const USER_INIT_ALL_LIST = "user/USER_INIT_ALL_LIST";
 const USER_INIT_SERVER_ERROR = "user/USER_INIT_SERVER_ERROR";
 

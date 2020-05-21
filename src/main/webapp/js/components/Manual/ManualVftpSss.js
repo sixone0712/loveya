@@ -51,8 +51,8 @@ const scrollStyle = {
 
 const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
     const buttonMsg = {
-        leftMsg:'No',
-        rightMsg:'Yes',
+        leftMsg:'Cancel',
+        rightMsg:'OK',
     };
 
     return (
@@ -90,16 +90,16 @@ function convertCommand (cmd, sDate,eDate) {
     let cmdString = '';
     const formatDate = 'YYYYMMDD_HHmmss';
 
+    if (cmd) {
+        cmdString +=( cmd +'-');
+    }
     if (sDate) {
         cmdString += ( moment(sDate).format(formatDate)+ '-');
     }
     if (eDate) {
         cmdString += ( moment(eDate).format(formatDate));
     }
-    if (cmd) {
-        cmdString +=( '-' + cmd);
-    }
-    return "#get " + cmdString+ ".log";
+    return "#cd " + cmdString+ ".log";
 }
 const CommandArea = ({ id, startDate, endDate}) => {
     const cmdString = convertCommand(id,startDate,endDate);
@@ -112,13 +112,14 @@ const CommandArea = ({ id, startDate, endDate}) => {
                     <Button
                         outline size="l"
                         className="filelist-card mx-4">
-                        Download
+                        Search
                     </Button>
                 </div>
             </CardBody>
         </Card>
     );
 }
+export const  DELETE_MESSAGE = "Do you want to delete the selected command?";
 class ManualVftpSss extends Component {
     constructor() {
         super();
@@ -236,15 +237,17 @@ class ManualVftpSss extends Component {
         const {editShow} = this.state;
         const cmdlist  = API.getCmdList(this.props);
         const {startDate, endDate} = this.props;
+        const deleteModal = ConfirmModal((this.state.isModalOpen && this.state.isMode==='DeleteCommand'), faTrashAlt, DELETE_MESSAGE, "auto-plan", this.closeModal,this.DeleteCommand,this.closeModal);
         return (
             <>
+                {deleteModal}
                 <Container className="rss-container" fluid={true}>
                     <Row>
                         <Col sm={8}>
                             <Card className="ribbon-wrapper catlist-card">
                                 <CardBody className="custom-scrollbar manual-card-body">
                                     <div className="ribbon ribbon-clip ribbon-secondary">
-                                        Manual Download / [COMPAT/OPTIONAL] Command
+                                        Manual Download / [SSS/OPTIONAL] Command
                                     </div>
 
                                     <div className="card-btn-area">
@@ -271,16 +274,6 @@ class ManualVftpSss extends Component {
                                                     onChange={(e) => this.handleRadio(e.target.value)}
                                                     onDoubleClick={(e)=> {this.openModal("EditCommand");} }
                                         >
-                                            <div className="relative w-full">
-                                                <FormControlLabel
-                                                    className="px-2 py-2 border-b-1 placeholder-gray-400 text-gray-700 bg-white rounded text-xs shadow focus:shadow-outline w-full"
-                                                    type="radio"
-                                                    id="mode_continue"
-                                                    value ='0'
-                                                    name={"no select command"}
-                                                    label={"no select command"}
-                                                    control={<Radio />} />
-                                            </div>
                                             {cmdlist.map((cat, key) => {
                                                     return (
                                                         <div className="relative w-full1">
@@ -329,8 +322,6 @@ class ManualVftpSss extends Component {
                         ?<CommandAddModal isOpen={this.state.isModalOpen } left={this.AddCommand} right={this.closeModal} chgfunc={this.ChangeHandle} errorMsg={this.state.errMsg}/>
                         : this.state.isMode ==='AddCommand'
                         ? <CommandAddModal isOpen={this.state.isModalOpen } left={this.AddCommand} right={this.closeModal} chgfunc={this.ChangeHandle} errorMsg={this.state.errMsg}/>
-                        : this.state.isMode ==='DeleteCommand'
-                            ? <ConfirmModal isOpen={this.state.isModalOpen } icon={faTrashAlt} message={"Do you want to delete the selected command?"} style={"auto-plan"} actionBg={this.DeleteCommand} actionLeft={this.DeleteCommand} actionRight={this.closeModal} />
                             : this.state.isMode ==='ErrorModal'
                                 ? <AlertModal isOpen={this.state.isModalOpen } icon={faExclamationCircle} message={this.state.errMsg} closer={this.closeModal} />
                                 :  <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />

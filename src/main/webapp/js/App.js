@@ -7,6 +7,7 @@ import * as searchListActions from './modules/searchList';
 import * as loginActions from './modules/login';
 import * as CmdActions from './modules/Command';
 import * as userActions from './modules/User';
+import * as dwHistoryAction from './modules/dwHistory';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
@@ -15,11 +16,13 @@ import Manual from "./components/Manual/Manual";
 import Manual2 from "./components/Manual/ManualVftpCompat";
 import Manual3 from "./components/Manual/ManualVftpSss";
 import AccountList from "./components/User/UserList";
+import DwHistory from  "./components/User/DownloadHistory";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
+import ManualVftpCompat from "./components/Manual/ManualVftpCompat";
 
 class App extends Component {
 
@@ -74,7 +77,7 @@ class App extends Component {
                         <Route path={Define.PAGE_MANUAL3} component={Manual3} />
                         <Route path={Define.PAGE_AUTO} component={Auto}/>
                         <Route path={Define.PAGE_ADMIN_ACCOUNT} component={AccountList} />
-                        <Route path={Define.PAGE_ADMIN_DW_HISTORY} component={AccountList} />
+                        <Route path={Define.PAGE_ADMIN_DW_HISTORY} component={DwHistory} />
                         {/*<Redirect to={Define.PAGE_MANUAL} component={Manual} />*/}
 
                         {/* How to pass props */}

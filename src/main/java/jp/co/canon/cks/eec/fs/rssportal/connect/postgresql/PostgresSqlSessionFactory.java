@@ -29,7 +29,8 @@ public class PostgresSqlSessionFactory {
                     GenreVo.class,
                     CommandVo.class,
                     CollectPlanVo.class,
-                    DownloadListVo.class);
+                    DownloadListVo.class,
+                    DownloadHistoryVo.class);
             /*factoryBean.setTypeHandlers(
                     new ArrayTypeHandler()
             );*/

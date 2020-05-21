@@ -18,7 +18,6 @@ class ChangeAuthModal extends Component {
                 ModalMsg:''
             }
         };
-        this.handleRadio = this.handleRadio.bind(this);
     }
 
     changePermissionProcess = async id => {
@@ -51,7 +50,11 @@ class ChangeAuthModal extends Component {
     handleRadio = (value) => {
         this.setState(() => ({...this.state, selectedValue : value}));
     }
-
+    settingClose = () =>{
+        const {right} = this.props;
+        this.setState(() => ({...this.state,selectedValue: ""}));
+        right();
+    }
     data = {
         titleMsg:'Change the Permission'
     };
@@ -78,7 +81,7 @@ class ChangeAuthModal extends Component {
                                     <button className="gray form-type left-btn" onClick={()=>this.changePermissionProcess(userID)}>
                                         Save
                                     </button>
-                                    <button className="gray form-type right-btn" onClick={right}>
+                                    <button className="gray form-type right-btn" onClick={this.settingClose}>
                                         Cancel
                                     </button>
                                 </div>

@@ -79,7 +79,7 @@ class SignOut extends Component {
             else
             {
                 await API.getDBUserList(this.props);
-                this.props.right(); //create modal Close
+                this.close(); //create modal Close
                 this.props.alertOpen("create");
             }
         }
@@ -127,7 +127,14 @@ class SignOut extends Component {
     data = {
         titleMsg:'Create Account'
     };
-
+    close = () => {
+        this.setState(() => (
+            {...this.state,
+                error:{},
+            })
+        );
+        this.props.right();
+    }
     render() {
         const {errors, uInfo} = this.state;
         const {isOpen, right} = this.props;
@@ -174,7 +181,7 @@ class SignOut extends Component {
                                         <button className="gray form-type left-btn" onClick={this.SignOutProcess}>
                                             Save
                                         </button>
-                                        <button className="gray form-type right-btn" onClick={right}>
+                                        <button className="gray form-type right-btn" onClick={this.close}>
                                             Cancel
                                         </button>
                                     </div>

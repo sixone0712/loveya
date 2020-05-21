@@ -39,7 +39,7 @@ import Radio from "antd/es/radio";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import DateForm from "../Form/DateForm";
 import moment from "moment";
-
+import {DELETE_MESSAGE} from "./ManualVftpSss";
 
 const scrollStyle = {
     backgroundColor: "#343a40",
@@ -52,8 +52,8 @@ const scrollStyle = {
 
 const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
     const buttonMsg = {
-        leftMsg:'No',
-        rightMsg:'Yes',
+        leftMsg:'Cancel',
+        rightMsg:'OK',
     };
 
     return (
@@ -237,8 +237,11 @@ class ManualVftpCompat extends Component {
         const {editShow} = this.state;
         const cmdlist  = API.getCmdList(this.props);
         const {startDate, endDate} = this.props;
+        const deleteModal = ConfirmModal((this.state.isModalOpen && this.state.isMode==='DeleteCommand'), faTrashAlt, DELETE_MESSAGE, "auto-plan", this.closeModal,this.DeleteCommand,this.closeModal);
+
         return (
             <>
+            {deleteModal}
             <Container className="rss-container" fluid={true}>
             <Row>
             <Col sm={8}>
@@ -329,8 +332,6 @@ class ManualVftpCompat extends Component {
                         ?<CommandAddModal isOpen={this.state.isModalOpen } left={this.AddCommand} right={this.closeModal} chgfunc={this.ChangeHandle} errorMsg={this.state.errMsg}/>
                         : this.state.isMode ==='AddCommand'
                         ? <CommandAddModal isOpen={this.state.isModalOpen } left={this.AddCommand} right={this.closeModal} chgfunc={this.ChangeHandle} errorMsg={this.state.errMsg}/>
-                        : this.state.isMode ==='DeleteCommand'
-                        ? <ConfirmModal isOpen={this.state.isModalOpen } icon={faTrashAlt} message={"Do you want to delete the selected command?"} style={"auto-plan"} actionBg={this.DeleteCommand} actionLeft={this.DeleteCommand} actionRight={this.closeModal} />
                         : this.state.isMode ==='ErrorModal'
                         ? <AlertModal isOpen={this.state.isModalOpen } icon={faExclamationCircle} message={this.state.errMsg} closer={this.closeModal} />
                         :  <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
