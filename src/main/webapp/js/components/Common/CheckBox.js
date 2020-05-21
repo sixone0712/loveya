@@ -23,7 +23,7 @@ class CheckBox extends Component {
         <input
           type="checkbox"
           className="custom-control-input"
-          id={name+"_"+index}
+          id={name+"_{#div#}_"+index}
           value={name || ""}
           checked={setChecked}
           onChange={handleCheckboxClick}
@@ -31,7 +31,7 @@ class CheckBox extends Component {
 
         <label
             className={"custom-control-label " + labelClass}
-            htmlFor={name + "_" + index}
+            htmlFor={name + "_{#div#}_" + index}
         >
             {labelName}
         </label>

@@ -15,7 +15,7 @@ class MachineList extends Component {
   }
 
   checkMachineItem = (e) => {
-    const idx = e.target.id.split('_')[1];
+    const idx = e.target.id.split('_{#div#}_')[1];
     API.checkToolInfoList(this.props, idx);
   };
 

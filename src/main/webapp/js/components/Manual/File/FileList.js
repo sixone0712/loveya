@@ -117,7 +117,7 @@ class FileList extends Component {
   };
 
   checkFileItem = (e) => {
-    const idx = e.target.id.split('_')[1];
+    const idx = e.target.id.split('_{#div#}_')[1];
     API.checkResponseList(this.props, idx);
   };
 

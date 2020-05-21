@@ -73,7 +73,7 @@ class RSSautoTargetlist extends Component {
   };
 
   handleCheckboxClick = async e => {
-    const idx = e.target.id.split('_')[1];
+    const idx = e.target.id.split('_{#div#}_')[1];
 
     const newFilterData = this.state.filteredData.map(item => {
       if(item.keyIndex === parseInt(idx)) {
