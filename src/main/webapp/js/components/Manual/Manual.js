@@ -21,14 +21,23 @@ class Manual extends Component {
         console.log("[Manual][componentDidMount]componentDidMount");
         const {viewListActions, genreListActions, searchListActions} = this.props;
 
-        searchListActions.searchSetInitAllList();
-        genreListActions.genreInitAllList();
-        viewListActions.viewInitAllList();
-        viewListActions.viewLoadToolInfoList("/api/createToolList");
-        viewListActions.viewLoadLogTypeList("/api/createFileTypeList");
-        //viewListActions.viewLoadToolInfoList("/test/createToolList");
-        //viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
-        genreListActions.genreLoadDbList("/db/genre/get");
+        await viewListActions.viewInitAllList();
+        await searchListActions.searchSetInitAllList();
+        await genreListActions.genreInitAllList();
+
+        const TEST = 0;
+        if(TEST) {
+            viewListActions.viewLoadToolInfoList("/test/createToolList");
+            viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
+        } else {
+            await viewListActions.viewLoadToolInfoList("/soap/createToolList");
+            const { toolInfoList } = this.props;
+            const targetname = toolInfoList.getIn([0, "targetname"]);
+            console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
+            console.log("[Manual][componentDidMount]targetname", targetname);
+            await viewListActions.viewLoadLogTypeList("/soap/createFileTypeList?tool=" + targetname);
+        }
+        await genreListActions.genreLoadDbList("/db/genre/get");
     }
 
     render() {

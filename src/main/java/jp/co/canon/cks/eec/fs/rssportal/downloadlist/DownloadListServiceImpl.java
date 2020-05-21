@@ -9,7 +9,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DownloadListServiceImpl implements DownloadListService{
@@ -27,6 +29,13 @@ public class DownloadListServiceImpl implements DownloadListService{
     @Override
     public DownloadListVo get(int id) {
         return dao.findItem(id);
+    }
+
+    @Override
+    public List<DownloadListVo> getFinishedList() {
+        Map<String, Object> condition = new HashMap<>();
+        condition.put("status", "finished");
+        return dao.find(condition);
     }
 
     @Override

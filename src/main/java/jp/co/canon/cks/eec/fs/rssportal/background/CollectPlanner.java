@@ -46,6 +46,7 @@ public class CollectPlanner extends Thread {
     private final DownloadMonitor monitor;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
+    private boolean halted = false;
 
     @Autowired
     private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService) throws ServiceException {
@@ -91,15 +92,17 @@ public class CollectPlanner extends Thread {
 
         try {
             while(true) {
-                CollectPlanVo plan = getNext();
-                if(plan==null) {
-                    sleep(5000);
-                    continue;
-                }
+                if(!halted) {
+                    CollectPlanVo plan = getNext();
+                    if (plan == null) {
+                        sleep(5000);
+                        continue;
+                    }
 
-                Date cur = new Date(System.currentTimeMillis());
-                if(plan.getNextAction().before(cur)) {
-                    collect(plan);
+                    Date cur = new Date(System.currentTimeMillis());
+                    if (plan.getNextAction().before(cur)) {
+                        collect(plan);
+                    }
                 }
                 sleep(1000);
             }
@@ -208,14 +211,14 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo getNext() {
         if(planUpdated) {
             nextPlan = service.getNextPlan();
-            if(nextPlan!=null) {
+            if(nextPlan!=null && nextPlan.getNextAction()!=null) {
                 log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
             }
             if(nextPlan!=null) {
                 planUpdated = false;
             }
         }
-        return nextPlan;
+        return nextPlan.getNextAction()!=null?nextPlan:null;
     }
 
     private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
@@ -283,6 +286,7 @@ public class CollectPlanner extends Thread {
         }
         */
         Compressor compressor = new Compressor();
+        compressor.addExcludeExtension("zip");
         String zipName = plan.getId()+"_"+System.currentTimeMillis()+".zip";
         Path zipPath = Paths.get(dir.toString(), zipName);
         if(compressor.compress(dir.toString(), zipPath.toString())) {
@@ -292,6 +296,14 @@ public class CollectPlanner extends Thread {
         }
         log.info("compress done ("+zipName+")");
         return zipPath.toString();
+    }
+
+    public void halt() {
+        halted = true;
+    }
+
+    public void restart() {
+        halted = false;
     }
 
     private Runnable notifyUpdate = ()->{

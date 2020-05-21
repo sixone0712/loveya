@@ -20,7 +20,7 @@ public class CollectPlanVo {
     private int owner;
     private Timestamp nextAction;
     private Timestamp lastPoint;
-    private boolean expired;
+    private boolean stop;
     private String lastStatus;
     private PlanStatus planStatus;
 
@@ -32,7 +32,7 @@ public class CollectPlanVo {
     public String toString() {
         StringBuilder sb = new StringBuilder("");
         sb.append("collect-plan [id=").append(id);
-        sb.append(" expired=").append(expired);
+        sb.append(" stop=").append(stop);
         sb.append(" interval=").append(interval);
         sb.append(" lastCollect=").append(lastCollect==null?"":lastCollect.toString());
         sb.append(" nextAction=").append(nextAction.toString());
@@ -104,12 +104,12 @@ public class CollectPlanVo {
         this.owner = owner;
     }
 
-    public boolean isExpired() {
-        return expired;
+    public boolean isStop() {
+        return stop;
     }
 
-    public void setExpired(boolean expired) {
-        this.expired = expired;
+    public void setStop(boolean stop) {
+        this.stop = stop;
     }
 
     public Timestamp getCreated() {

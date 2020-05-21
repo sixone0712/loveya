@@ -77,19 +77,19 @@ const initialState = Map({
 export default handleActions({
 	...pender(
 		{
-			type: VIEW_LOAD_TOOLINFO_LIST, // type 이 주어지면, 이 type 에 접미사를 붙인 액션핸들러들이 담긴 객체를 생성합니다.
+			type: VIEW_LOAD_TOOLINFO_LIST, // If type is given, create an object containing action handlers suffixed to this type.
 
-			// 요청중 / 실패 했을 때 추가적으로 해야 할 작업이 있다면 이렇게 onPending 과 onFailure 를 추가해주면됩니다.
+			// In case of request / failure, if there is additional work to be done, add onPending and onFailure like this.
 			// onPending: (state, action) => state,
 			// onFailure: (state, action) => state
 
-			onSuccess: (state, action) => { // 성공했을때 해야 할 작업이 따로 없으면 이 함수 또한 생략해도 됩니다.
+			onSuccess: (state, action) => { // If there is nothing else to do when successful, this function can also be omitted.
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
 				const lists = action.payload.data;
 				console.log("lists", lists);
 
-				const equipLists = lists.map((list => list.structId));
-
+				// SYS is not used, so not included
+				const equipLists = lists.filter(list => list.structId !== "SYS").map((list => list.structId));
 				const filterdList = equipLists.filter( (item, idx, equipLists) => {
 					return equipLists.indexOf( item ) === idx ;
 				});
@@ -115,16 +115,11 @@ export default handleActions({
 
 				return state.set('toolInfoList', fromJS(newLists)).set('equipmentList', fromJS(newEquipLists));
 			},
-			// 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
+			// When a function is omitted, the default value (state, action) => state is set (that is, it returns the state as it is)
 		}),
 	...pender({
-		type: VIEW_LOAD_LOGTYPE_LIST, // type 이 주어지면, 이 type 에 접미사를 붙인 액션핸들러들이 담긴 객체를 생성합니다.
-
-		// 요청중 / 실패 했을 때 추가적으로 해야 할 작업이 있다면 이렇게 onPending 과 onFailure 를 추가해주면됩니다.
-		// onPending: (state, action) => state,
-		// onFailure: (state, action) => state
-
-		onSuccess: (state, action) => { // 성공했을때 해야 할 작업이 따로 없으면 이 함수 또한 생략해도 됩니다.
+		type: VIEW_LOAD_LOGTYPE_LIST,
+		onSuccess: (state, action) => {
 			console.log("handleActions[VIEW_LOAD_LOGTYPE_LIST]");
 			const lists = action.payload.data;
 			console.log("lists", lists);
@@ -143,7 +138,6 @@ export default handleActions({
 			console.log("newLists", newLists);
 			return state.set('logInfoList', fromJS(newLists));
 		}
-		// 함수가 생략됐을때 기본 값으론 (state, action) => state 가 설정됩니다 (state 를 그대로 반환한다는 것이죠)
 	}),
 
 	[VIEW_INIT_ALL_LIST]: (state, action) => {

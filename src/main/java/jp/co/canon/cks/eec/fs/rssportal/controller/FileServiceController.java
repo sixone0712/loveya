@@ -8,6 +8,10 @@ import jp.co.canon.cks.eec.fs.rssportal.model.RSSFileInfoBeanResponse;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSLogInfoBean;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSRequestSearch;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,31 +26,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/soap")
 public class FileServiceController {
 
+    private final Log log = LogFactory.getLog(getClass());
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
 
     @GetMapping("/createToolList")
     public RSSToolInfo[] createToolList() throws Exception {
-
         ToolInfoModel[] result = serviceLocator.getFileServiceManage().createToolList();
-        //ToolInfoModel[] result = serviceLocator.getFileServiceManage(null).createToolList();
         ToolInfoModel[] toolModels = result;
-        if (toolModels == null) toolModels = new ToolInfoModel[0];    // 2011.11.29 add by J,Tsuruta
+        if (toolModels == null) toolModels = new ToolInfoModel[0];
 
         ArrayList<RSSToolInfo> toolList = new ArrayList<>();
         for (int i = 0; i < toolModels.length; i++) {
-
-            // 임시로.....
-            if(!toolModels[i].getStructId().equals("SYS")) {
-                System.out.print("structId : "  + toolModels[i].getStructId() + "\n");
-                RSSToolInfo tool = new RSSToolInfo();
-                tool.setStructId(toolModels[i].getStructId());    // 2011.11.29 modify by J.Tsuruta
-                tool.setTargetname(toolModels[i].getName());
-                tool.setTargettype(toolModels[i].getType());
-                toolList.add(tool);
-            }
+            RSSToolInfo tool = new RSSToolInfo();
+            tool.setStructId(toolModels[i].getStructId());
+            tool.setTargetname(toolModels[i].getName());
+            tool.setTargettype(toolModels[i].getType());
+            toolList.add(tool);
         }
 
         RSSToolInfo[] arrToolList = toolList.toArray(new RSSToolInfo[toolList.size()]);
@@ -54,13 +52,16 @@ public class FileServiceController {
     }
 
     @GetMapping("/createFileTypeList")
-    public RSSLogInfoBean[] createFileTypeList() throws Exception {
+    public RSSLogInfoBean[] createFileTypeList(@RequestParam(name="tool") String tool) throws Exception {
+        if (tool == null) {
+            return null;
+        }
+
         String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
         String FILE_SELECT_PAGE = "FileListSelect";
-        FileTypeModel[] ftList = serviceLocator.getFileServiceManage().createFileTypeList("EQVM88");
-        //FileTypeModel[] ftList = serviceLocator.getFileServiceManage(null).createFileTypeList("EQVM88");
+        FileTypeModel[] ftList = serviceLocator.getFileServiceManage().createFileTypeList(tool);
 
-        if (ftList == null) ftList = new FileTypeModel[0];	// 2011.11.29 add by J,Tsuruta
+        if (ftList == null) ftList = new FileTypeModel[0];
 
         RSSLogInfoBean[] r = new RSSLogInfoBean[ftList.length];
         for (int i = 0; i < ftList.length; i++) {
@@ -161,14 +162,13 @@ public class FileServiceController {
 
     @PostMapping("/createFileList")
     public RSSFileInfoBeanResponse[] createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
-
-        // 10개의 Thread를 가진 ThreadPool생성
+        // Create ThreadPool with 10 threads
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
-        // Thread들이 비동기로 수행되면 그 결과를 담을 Futrure 객체
+        // Futrure object to hold the result when threads are executed asynchronously
         ArrayList<Future<ArrayList<RSSFileInfoBeanResponse>>> futures = new ArrayList<Future<ArrayList<RSSFileInfoBeanResponse>>>();
 
         for (final RSSRequestSearch list : requestList) {
-            // callable 객체를 통해 어떤 일을 수행할지 결정한다.
+            // Futrure object to hold the result when threads are executed asynchronously
             Callable<ArrayList<RSSFileInfoBeanResponse>> callable = new Callable<ArrayList<RSSFileInfoBeanResponse>>() {
                 @Override
                 public ArrayList<RSSFileInfoBeanResponse> call() throws Exception {
@@ -196,7 +196,6 @@ public class FileServiceController {
                     }
 
                     FileInfoModel[] src = serviceLocator.getFileServiceManage().createFileList(toolId, logId, st, ed, keyword, dir);
-                    //FileInfoModel[] src = serviceLocator.getFileServiceManage(null).createFileList(toolId, logId, st, ed, keyword, dir);
 
                     if (src == null) src = new FileInfoModel[0];
 
@@ -226,11 +225,12 @@ public class FileServiceController {
                     return result;
                 }
             };
-            // 생성된 callable들을 threadpool에서 수행시키고 결과는 Future 목록에 담는다.
+            // Execute the generated callables in the threadpool and put the result in the Future list.
             futures.add(threadPool.submit(callable));
         }
-        // 수행중인 callable들이 다 끝나면 threadpool을 종료시킨다.(반드시 해야함) // 자동으로 제거되지 않는다.
-        // showdownNow()는 수행중인 callable이 있더라도 인터럽트시켜 강제 종료한다.
+        // When the callables that are being executed are finished, the threadpool is terminated (must be done).
+        // It is not automatically removed.
+        // showdownNow () interrupts even if there is a callable being executed, and forcibly terminates it.
         threadPool.shutdown();
 
         ArrayList<RSSFileInfoBeanResponse> resultList = new ArrayList<>();
