@@ -180,7 +180,7 @@ class RSSautoformlist extends Component {
                         id="mode_continue"
                         name="collection_mode"
                         label="Continuous"
-                        checked={collectType === DEFINE.AUTO_MODE_CONTINUOUS ? true : false}
+                        checked={collectType === DEFINE.AUTO_MODE_CONTINUOUS}
                         onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CONTINUOUS)}
                     />
                     <CustomInput
@@ -189,7 +189,7 @@ class RSSautoformlist extends Component {
                         name="collection_mode"
                         label="Cycle"
                         className="mode-cycle"
-                        checked={collectType === DEFINE.AUTO_MODE_CYCLE ? true : false}
+                        checked={collectType === DEFINE.AUTO_MODE_CYCLE}
                         onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CYCLE)}
                     />
                     <div

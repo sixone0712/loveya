@@ -16,6 +16,7 @@ import ClockLoader from "react-spinners";
 import Select from "react-select";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
+import AlertModal from "../Common/AlertModal";
 import * as DEFINE from "../../define";
 import services from "../../services"
 import moment from "moment";
@@ -23,9 +24,29 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import * as viewListActions from "../../modules/viewList"
+import {setRowsPerPage} from "../../api";
+import {message} from "antd";
 
-const PAGE_EDIT = 2;
-const PAGE_DOWNLOAD = 3;
+const messageType = {
+    CONFIRM_MESSAGE: "Are you sure you want to delete this collection plan?",
+    EDIT_ALERT_MESSAGE: "Because of the current collecting it can not be edited.",
+    DELETE_ALERT_MESSAGE: "Because of the current collecting it can not be deleted."
+};
+
+const statusType = {
+    RUNNING: "running",
+    STOPPED: "stop"
+};
+
+const detailType = {
+    REGISTERED: "registered",
+    COLLECTING: "collecting",
+    COLLECTED: "collected",
+    SUSPENDED: "suspended",
+    HALTED: "halted",
+    COMPLETED: "completed"
+}
+
 const MODAL_MESSAGE = "Are you sure you want to delete this collection plan?";
 
 const STATUS_RUNNING = "running";
@@ -129,6 +150,8 @@ class RSSautoplanlist extends Component {
             pageSize: 10,
             currentPage: 1,
             isConfirmOpen: false,
+            isAlertOpen: false,
+            alertMessage: "",
             selectedPlanId: "",
         };
     }
@@ -173,35 +196,43 @@ class RSSautoplanlist extends Component {
 
     }
 
-    setEditPlanList = (id) => {
-        console.log("[AUTO][setEditPlanList]setEditPlanList");
-        console.log("[AUTO][setEditPlanList]id", id);
-        const { registeredList } = this.state;
-        const findList = registeredList.find(item => item.id == id);
+    setEditPlanList = (id, status) => {
+        if (status === statusType.RUNNING) {
+            this.openAlert(messageType.EDIT_ALERT_MESSAGE);
+        } else {
+            console.log("[AUTO][setEditPlanList]setEditPlanList");
+            console.log("[AUTO][setEditPlanList]id", id);
+            const {registeredList} = this.state;
+            const findList = registeredList.find(item => item.id == id);
 
-        const { viewListActions } = this.props;
-        viewListActions.viewSetEditPlanList({ tool: findList.tool, logCode: findList.logType });
+            const {viewListActions} = this.props;
+            viewListActions.viewSetEditPlanList({tool: findList.tool, logCode: findList.logType});
 
-        const { autoPlanActions } = this.props;
-        autoPlanActions.autoPlanSetEditPlanList({
-            planId: findList.planId,
-            collectStart: findList.collectStart,
-            from: findList.planPeriodStart,
-            to: findList.planPeriodEnd,
-            collectType: findList.collectTypeStr,
-            interval: findList.interval,
-            description: findList.planDescription
-        });
-        console.log("id", id);
-        this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_PLAN_EDIT +  "&editId=" + String(id));
+            const {autoPlanActions} = this.props;
+            autoPlanActions.autoPlanSetEditPlanList({
+                planId: findList.planId,
+                collectStart: findList.collectStart,
+                from: findList.planPeriodStart,
+                to: findList.planPeriodEnd,
+                collectType: findList.collectTypeStr,
+                interval: findList.interval,
+                description: findList.planDescription
+            });
+            console.log("id", id);
+            this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
+        }
     }
 
-    openModal = async (planId) => {
-        await this.setState({
-            ...this.state,
-            isConfirmOpen: true,
-            selectedPlanId: planId,
-        });
+    openModal = async (planId, status) => {
+        if (status === statusType.RUNNING) {
+            this.openAlert(messageType.DELETE_ALERT_MESSAGE);
+        } else {
+            await this.setState({
+                ...this.state,
+                isConfirmOpen: true,
+                selectedPlanId: planId,
+            });
+        }
     };
 
     closeModal = async (deleting, selectedPlanId) => {
@@ -219,6 +250,20 @@ class RSSautoplanlist extends Component {
         setTimeout(this.loadPlanList, 300);
     };
 
+    openAlert = (message) => {
+        this.setState({
+           isAlertOpen: true,
+           alertMessage: message
+        });
+    }
+
+    closeAlert = () => {
+        this.setState({
+           isAlertOpen: false,
+           alertMessage: ""
+        });
+    }
+
     handlePaginationChange = page => {
         this.setState({
             ...this.state,
@@ -226,10 +271,15 @@ class RSSautoplanlist extends Component {
         });
     };
 
+
     handleSelectBoxChange = newValue => {
+        const { pageSize, currentPage } = this.state;
+        const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
+
         this.setState({
             ...this.state,
-            pageSize: newValue.value
+            pageSize: parseInt(newValue.value),
+            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
         });
     };
 
@@ -259,28 +309,37 @@ class RSSautoplanlist extends Component {
                 </Card>
             );
         } else {
-            const { currentPage, pageSize, isConfirmOpen, selectedPlanId } = this.state;
+            const { currentPage, pageSize, isConfirmOpen, isAlertOpen, alertMessage, selectedPlanId } = this.state;
             const plans = filePaginate(registeredList, currentPage, pageSize);
             const pagination = renderPagination(
                 pageSize,
                 count,
                 this.handlePaginationChange,
+                currentPage,
                 "custom-pagination"
             );
 
             const renderConfirmModal = ConfirmModal(
                 isConfirmOpen,
                 faTrashAlt,
-                MODAL_MESSAGE,
+                messageType.CONFIRM_MESSAGE,
                 "auto-plan",
                 () => this.closeModal(false, selectedPlanId),
                 () => this.closeModal(true, selectedPlanId),
                 () => this.closeModal(false, selectedPlanId)
             );
 
+            const renderAlertModal = AlertModal(
+                isAlertOpen,
+                faExclamationCircle,
+                alertMessage,
+                "auto-plan",
+                this.closeAlert);
+
             return (
                 <>
                     {renderConfirmModal}
+                    {renderAlertModal}
                     <Card className="auto-plan-box">
                         <CardHeader className="auto-plan-card-header">
                             Plan Status
@@ -339,14 +398,14 @@ class RSSautoplanlist extends Component {
                                                     <div
                                                         className="icon-area move-left"
                                                         /*onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }*/
-                                                        onClick={ () =>  this.setEditPlanList(plan.id) }
+                                                        onClick={ () =>  this.setEditPlanList(plan.id, plan.planStatus) }
 
                                                     >
                                                         <FontAwesomeIcon icon={faEdit} />
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openModal(plan.id) }>
+                                                    <div className="icon-area" onClick={ () => this.openModal(plan.id, plan.planStatus) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>
@@ -368,9 +427,9 @@ class RSSautoplanlist extends Component {
 function CreateStatus(status) {
     let component = null;
     switch (status) {
-        case STATUS_RUNNING:
+        case statusType.RUNNING:
             component = (<><FontAwesomeIcon className="running" icon={faPlay} /> Running</>);    break;
-        case STATUS_STOPPED:
+        case statusType.STOPPED:
             component = (<><FontAwesomeIcon className="stopped" icon={faStop} /> Stopped</>);    break;
         default:
             console.error("plan detail error");   break;
@@ -382,17 +441,17 @@ function CreateStatus(status) {
 function CreateDetail(detail) {
     let component = null;
     switch (detail) {
-        case DETAIL_REGISTERED:
+        case detailType.REGISTERED:
             component = (<><FontAwesomeIcon className="completed" icon={faRegistered} /> Registered</>);   break;
-        case DETAIL_COLLECTING:
-            component = (<><ClockLoader size={15} color={"rgb(47, 158, 68"} css={spinnerStyles}/> Collecting</>);   break;
-        case DETAIL_COLLECTED:
+        case detailType.COLLECTING:
+            component = (<><ClockLoader size={15} color={"rgb(47, 158, 68)"} css={spinnerStyles}/> Collecting</>);   break;
+        case detailType.COLLECTED:
             component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collected</>);   break;
-        case DETAIL_SUSPENDED:
+        case detailType.SUSPENDED:
             component = (<><FontAwesomeIcon className="failed" icon={faPause} /> Suspended</>);   break;
-        case DETAIL_HALTED:
+        case detailType.HALTED:
             component = (<><FontAwesomeIcon className="failed" icon={faTimes} /> Halted</>);   break;
-        case DETAIL_COMPLETED:
+        case detailType.COMPLETED:
             component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Completed</>);   break;
         default:
             console.error("plan detail error");   break;

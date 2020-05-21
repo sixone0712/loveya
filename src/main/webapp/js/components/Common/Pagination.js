@@ -10,6 +10,7 @@ export function renderPagination(
     pageSize,
     itemsCount,
     onPageChange,
+    currentPage,
     className
 ) {
     const pageCount = Math.ceil(itemsCount / pageSize);
@@ -24,6 +25,7 @@ export function renderPagination(
                 totalItems={itemsCount}
                 pageSize={pageSize}
                 onSelect={onPageChange}
+                defaultActivePage={currentPage}
                 maxPaginationNumbers={10}
                 firstPageText={"«"}
                 previousPageText={"‹"}

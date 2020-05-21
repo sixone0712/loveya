@@ -98,8 +98,10 @@ class ConfirmModal extends Component {
                 await genreListActions.genreGetDbList("/db/genre/get");
             }
             this.closeConfirmModal();
-            this.openAlertModal();
-            this.props.handleSelectBoxChange(0);
+            setTimeout(() => {
+                this.openAlertModal();
+            }, 400);
+            //this.props.handleSelectBoxChange(0);
         }
         console.log("###actionFuncEnd");
     };

@@ -216,6 +216,14 @@ class CategoryList extends Component {
     })
   };
 
+  selectFilter = ({ label }, string) => {
+    if (string.toString().length === 0) {
+      return true;
+    }
+
+    return label === string;
+  }
+
   render() {
     const {
       showGenre,
@@ -256,6 +264,7 @@ class CategoryList extends Component {
                           placeholder={"Select genre..."}
                           styles={customSelectStyles}
                           noOptionsMessage={() => "Genre not found."}
+                          filterOption={this.selectFilter}
                       />
                     </div>
                     <div className="genre-btn-area">

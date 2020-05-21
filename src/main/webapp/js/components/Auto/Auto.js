@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { NavLink } from "react-router-dom";
+import ScrollToTop from "react-scroll-up";
 import * as DEFINE from "../../define";
 import AutoPlanAdd from "./AutoRegistAdd";
 import AutoPlanEdit from "./AutoRegistEdit";
@@ -8,6 +9,17 @@ import AutoStatus from "./AutoPlanStatus";
 import AutoDownload from "./DownloadList"
 import Footer from "../Common/Footer";
 import {Breadcrumb, BreadcrumbItem, Container } from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
+
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
 
 class Auto extends Component {
 
@@ -49,6 +61,9 @@ class Auto extends Component {
                     </Switch>
                 </Container>
                 <Footer />
+                <ScrollToTop showUnder={160} style={scrollStyle}>
+                    <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                </ScrollToTop>
             </>
         );
     }

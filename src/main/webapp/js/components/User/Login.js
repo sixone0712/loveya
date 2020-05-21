@@ -37,10 +37,14 @@ class Login extends Component {
     }
 
     handleEnter = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            e.stopPropagation();
-            this.loginProcess();
+        const { isModalOpen } = this.state;
+
+        if (!isModalOpen) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+                this.loginProcess();
+            }
         }
     }
 
@@ -131,7 +135,7 @@ class Login extends Component {
                                 background: "linear-gradient(135deg, #b3cae5 12%, #dbdde4 46%, #e4e3e4 70%, #f7ddbb 94%, #efcab2 100%)",
                                 backgroundRepeat: "no-repeat",
                             }}
-                        ></div>
+                        />
                         <div className="container mx-auto px-4 h-full">
                             <div className="flex content-center items-center justify-center h-full">
 
@@ -158,7 +162,6 @@ class Login extends Component {
                                                         placeholder="Enter your name"
                                                         autoComplete="off"
                                                         style={{ transition: "all .15s ease" }}
-                                                        onKeyDown={this.handleEnter}
                                                         onChange={this.handleChange} noValidate
                                                     />
                                                     {errors.username.length > 0 &&

@@ -17,6 +17,7 @@ import * as DEFINE from "../../define";
 import moment from "moment";
 import queryString from "query-string";
 import * as Define from "../../define";
+import {setRowsPerPage} from "../../api";
 
 const modalMessage = {
     MODAL_DELETE_MESSAGE: "Are you sure you want to delete the selected file?",
@@ -190,8 +191,12 @@ class RSSAutoDownloadList extends Component {
     };
 
     handleSelectBoxChange = newValue => {
+        const { pageSize, currentPage } = this.state;
+        const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
+
         this.setState({
-            pageSize: newValue.value
+            pageSize: parseInt(newValue.value),
+            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
         });
     };
 
@@ -370,6 +375,7 @@ class RSSAutoDownloadList extends Component {
                 pageSize,
                 count,
                 this.handlePaginationChange,
+                currentPage,
                 "custom-pagination"
             );
 
@@ -436,7 +442,7 @@ class RSSAutoDownloadList extends Component {
                         <CardBody className="auto-plan-card-body">
                             <Col className="auto-plan-collection-list download-list">
                                 <div className="content-section header">
-                                    <div className="plan-id">{`Plan ID : ${this.state.requestName}`}</div>
+                                    <div className="plan-id">Plan ID: {this.state.requestName}</div>
                                     <div>
                                         <Button size="sm" className="download-btn"
                                                 onClick={() => this.checkNewDownloadFile()}>
@@ -447,7 +453,7 @@ class RSSAutoDownloadList extends Component {
                                 <Table className="content-section">
                                     <thead>
                                     <tr>
-                                        <th>Request ID</th>
+                                        <th>File</th>
                                         <th>Status</th>
                                         <th>Delete</th>
                                     </tr>

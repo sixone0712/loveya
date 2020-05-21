@@ -348,6 +348,7 @@ class RSSautoplanwizard extends Component {
                     next={this.handleNext}
                     previous={this.handlePrev}
                     interval={false}
+                    keyboard={false}
                 >
                   <CarouselItem key={wizardStep.MACHINE}>
                     <Machine isNew={isNew} />

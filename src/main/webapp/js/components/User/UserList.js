@@ -114,12 +114,18 @@ class UserList extends Component {
             currentPage: page
         });
     };
+
     handleSelectBoxChange = newValue => {
+        const { pageSize, currentPage } = this.state;
+        const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
+
         this.setState({
             ...this.state,
-            pageSize: newValue.value
+            pageSize: parseInt(newValue.value),
+            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
         });
     };
+
     DeleteAccount = async (e) => {
         console.log("[VFT .....] DeleteAccount");
         console.log(this.state.selected);
@@ -176,6 +182,7 @@ class UserList extends Component {
         pageSize,
         count,
         this.handlePaginationChange,
+        currentPage,
         "custom-pagination"
     );
     const optionList = [
@@ -257,8 +264,8 @@ class UserList extends Component {
 
             <Card className="auto-plan-box">
                 <CardHeader className="auto-plan-card-header">
-                    User Account Management
-                    <p>Administrator / User Account</p>
+                    User Account
+                    <p>Manage user accounts.</p>
                     <div className="select-area">
                         <label>Rows per page : </label>
                         <Select

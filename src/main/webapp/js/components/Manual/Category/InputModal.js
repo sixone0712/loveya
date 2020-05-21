@@ -76,6 +76,7 @@ class InputModal extends Component {
     canOpenModal = async (openbtn) => {
         console.log("canOpenModal");
         await this.props.setNowAction(openbtn)
+
         if(openbtn === "Create") {
             if(this.props.logInfoListCheckCnt <= 0){
                 await this.setState({
@@ -85,6 +86,7 @@ class InputModal extends Component {
                 this.openAlertModal();
                 return;
             }
+
             await this.setState({
                 genreName: ""
             })
@@ -97,6 +99,16 @@ class InputModal extends Component {
                 this.openAlertModal();
                 return;
             }
+
+            if (this.props.logInfoListCheckCnt <= 0){
+                await this.setState({
+                    ...this.state,
+                    alertMsg: API.convertErrMsg(Define.GENRE_SET_FAIL_NO_ITEM)
+                });
+                this.openAlertModal();
+                return;
+            }
+
             await this.setState({
                 genreName: this.props.selectedGenreName
             })

@@ -1,18 +1,22 @@
 import React, { Component } from "react";
-import { Card, CardBody, Table, ButtonToggle } from "reactstrap";
+import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
+import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faBan, faChevronCircleDown, faDownload, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
+import ScaleLoader from "react-spinners/ScaleLoader";
 import Select from "react-select";
 import CheckBox from "../../Common/CheckBox";
-import DownloadConfirmModal from "./DownloadModal"
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
+import services from "../../../services";
 import { filePaginate, renderPagination } from "../../Common/Pagination";
+import ConfirmModal from "../../Common/ConfirmModal";
+import AlertModal from "../../Common/AlertModal";
 
 const customSelectStyles = {
   container: styles => ({
@@ -87,33 +91,206 @@ class FileList extends Component {
       currentPage: 1,
       sortDirection: "",
       sortKey: "",
-      isError: Define.RSS_SUCCESS
+      isError: Define.RSS_SUCCESS,
+      isDownloadOpen: false,
+      isProcessOpen: false,
+      isCancelOpen: false,
+      isCompleteOpen: false,
+      isAlertOpen: false,
+      modalMessage: ""
     };
   }
 
+  setErrorMsg = (errCode) => {
+    const  msg = API.getErrorMsg(errCode);
+    if (msg.toString().length > 0) {
+      this.setState({
+        modalMessage: msg
+      });
+      return true;
+    }
+    return false;
+  };
+
+  openDownloadModal = () => {
+    if(this.props.downloadCnt <= 0) {
+      this.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
+      this.setErrorMsg(Define.FILE_FAIL_NO_ITEM);
+      this.openAlertModal();
+    } else {
+      this.setErrorStatus(Define.RSS_SUCCESS);
+      this.setState({
+        isDownloadOpen: true,
+        modalMessage: "Do you want to download the selected file?"
+      });
+    }
+  };
+
+  closeDownloadModal = () => {
+    this.setState({
+      isDownloadOpen: false,
+      modalMessage: ""
+    });
+  };
+
+  openProcessModal = async () => {
+    this.closeDownloadModal();
+
+    setTimeout(() => {
+      this.setState({
+        isProcessOpen: true
+      });
+    }, 100);
+
+    // 초기화
+    const { searchListActions } = this.props;
+    searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
+    this.setErrorStatus(Define.RSS_SUCCESS);
+
+    // Download Request 요청
+    const requestId = await API.requestDownload(this.props);
+    console.log("requestId", requestId);
+    searchListActions.searchSetDlStatus({dlId: requestId});
+
+    // SetInterval에서 사용할 Modal Func 추가
+    const modalFunc = {
+      closeProcessModal: this.closeProcessModal,
+      openCompleteModal: this.openCompleteModal,
+      closeCompleteModal: this.closeCompleteModal,
+      setErrorMsg: this.setErrorMsg,
+      openErrorModal: this.openAlertModal,
+      getDownloadStatus: this.getDownloadStatus,
+      setSearchListActions: this.setSearchListActions
+    };
+
+    // Download Status 요청
+    if(requestId !== "") {
+      const intervalFunc = await API.setWatchDlStatus(requestId, modalFunc);
+      searchListActions.searchSetDlStatus({func: intervalFunc});
+    }
+  };
+
+  closeProcessModal = () => {
+    this.setState({
+      isProcessOpen: false
+    });
+  };
+
+  openCancelModal = () => {
+    this.setState({
+      isCancelOpen: true,
+      modalMessage: "Are you sure you want to cancel the download?"
+    });
+  };
+
+  closeCancelModal = async (isCancel) => {
+    if(isCancel) {
+      const downloadStatus = this.props.downloadStatus;
+      const { func, dlId } = downloadStatus.toJS();
+
+      // Stop requesting status to SetInveral
+      if(func !== null){
+        clearInterval(func);
+        // Reauest Cancel
+        const res = await services.axiosAPI.get("/dl/cancel?dlId=" + dlId);
+        console.log("res", res)
+        // 에러 처리 추가 필요
+      }
+
+      const {searchListActions } = this.props;
+      // Initialize state
+      searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
+      this.setErrorStatus(Define.RSS_SUCCESS);
+      this.closeProcessModal();
+      setTimeout(() => {
+        this.setState({
+          isCancelOpen: false,
+          modalMessage: ""
+        });
+      }, 100);
+    } else {
+      // setState is asynchronous, so it waits with await.
+      await this.setState({
+        isCancelOpen: false,
+        modalMessage: ""
+      });
+
+      const downloadStatus = this.props.downloadStatus;
+      const { status, totalFiles, downloadFiles} = downloadStatus.toJS();
+      // If the download has already been completed, open openCompleteModal.
+      if(status === "done" && totalFiles === downloadFiles) {
+        this.openCompleteModal();
+      }
+    }
+  };
+
+  openCompleteModal = () => {
+    if(this.state.isCancelOpen !== true) {
+      this.setState({
+        isCompleteOpen: true,
+        modalMessage: "Download Complete!"
+      });
+    }
+  };
+
+  closeCompleteModal = async (isSave) => {
+    let result = Define.RSS_SUCCESS;
+    this.setState({
+      isCompleteOpen: false,
+      modalMessage: ""
+    });
+
+    if(isSave) {
+      const { downloadStatus } = this.props;
+      result = await services.axiosAPI.downloadFile("/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      this.setErrorStatus(result);
+    }
+    // 상태 초기화
+    const { searchListActions } = this.props;
+    searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
+    this.setErrorStatus(Define.RSS_SUCCESS);
+  };
+
+  openAlertModal = () => {
+    this.setState({
+      isAlertOpen: true
+    });
+  };
+
+  closeAlertModal = () => {
+    this.setState({
+      isAlertOpen: false,
+      modalMessage: ""
+    });
+  };
+
+  getDownloadStatus = () => {
+    return this.props.downloadStatus.toJS();
+  };
+
+  setSearchListActions = (values) => {
+    const { searchListActions }  = this.props;
+    searchListActions.searchSetDlStatus({...values});
+  };
+
   setErrorStatus = (error) => {
     this.setState({
-      ...this.state,
       isError: error
     })
   };
 
   handlePageChange = page => {
     this.setState({
-      ...this.state,
       currentPage: page
     });
   };
 
   onChangeRowsPerPage = (option) => {
     setRowsPerPage(this.props, option.value);
-    this.setState(
-        {
-          ...this.state,
-          pageSize: parseInt(option.value),
-          currentPage: 1
-        }
-    )
+    this.setState({
+      pageSize: parseInt(option.value),
+      currentPage: 1
+    });
   };
 
   checkFileItem = (e) => {
@@ -169,7 +346,13 @@ class FileList extends Component {
       currentPage,
       isError,
       sortKey,
-      sortDirection
+      sortDirection,
+      isDownloadOpen,
+      isProcessOpen,
+      isCancelOpen,
+      isCompleteOpen,
+      isAlertOpen,
+      modalMessage
     } = this.state;
 
     console.log("responseList", responseList);
@@ -212,120 +395,204 @@ class FileList extends Component {
           pageSize,
           count,
           this.handlePageChange,
+          currentPage,
           "custom-pagination"
       );
+
+      const { totalFiles, downloadFiles } = this.props.downloadStatus.toJS();
+
+      const renderDownload = ConfirmModal(
+          isDownloadOpen,
+          faDownload,
+          modalMessage,
+          "secondary",
+          this.closeDownloadModal,
+          this.openProcessModal,
+          this.closeDownloadModal);
+
+      const renderCancel = ConfirmModal(
+          isCancelOpen,
+          faBan,
+          modalMessage,
+          "secondary",
+          null,
+          () => this.closeCancelModal(true),
+          () => this.closeCancelModal(false));
+
+      const renderComplete = ConfirmModal(
+          isCompleteOpen,
+          faBan,
+          faChevronCircleDown,
+          "secondary",
+          null,
+          () => this.closeCompleteModal(true),
+          () => this.closeCompleteModal(false));
+
+      const renderAlert = AlertModal(isAlertOpen, faExclamationCircle, modalMessage,"secondary", this.closeAlertModal);
+
       return (
-        <div className="filelist-container">
-          <Card className="ribbon-wrapper filelist-card">
-            <CardBody className="filelist-card-body">
-              <div className="ribbon ribbon-clip ribbon-info">File</div>
-              <Table>
-                <thead>
-                  <tr>
-                    <th>
-                      <div>
-                        <ButtonToggle
-                          outline
-                          size="sm"
-                          color="info"
-                          className={
-                            "filelist-btn filelist-btn-toggle" +
-                            (itemsChecked ? " active" : "")
-                          }
-                          onClick={()=> this.checkAllFileItem(!itemsChecked)}
+        <>
+          {renderDownload}
+          {isProcessOpen ? (
+              <ReactTransitionGroup
+                  transitionName={"Custom-modal-anim"}
+                  transitionEnterTimeout={200}
+                  transitionLeaveTimeout={200}
+              >
+                <div className="Custom-modal-overlay" />
+                <div className="Custom-modal">
+                  <div className="content-without-title">
+                    <div className="spinner-area">
+                      <ScaleLoader
+                          loading={true}
+                          height={45}
+                          width={16}
+                          radius={30}
+                          margin={5}
+                      />
+                    </div>
+                    <p className="no-margin-no-padding">
+                      Downloading...
+                    </p>
+                    {totalFiles > 0 && true &&
+                    <p className="no-margin-no-padding">
+                      ({downloadFiles}/{totalFiles})
+                    </p>
+                    }
+                  </div>
+                  <div className="button-wrap">
+                    <button
+                        className="secondary alert-type"
+                        onClick={this.openCancelModal}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </ReactTransitionGroup>
+          ) : (
+              <ReactTransitionGroup
+                  transitionName={"Custom-modal-anim"}
+                  transitionEnterTimeout={200}
+                  transitionLeaveTimeout={200}
+              />
+          )}
+          {renderCancel}
+          {renderComplete}
+          {renderAlert}
+          <div className="filelist-container">
+            <Card className="ribbon-wrapper filelist-card">
+              <CardBody className="filelist-card-body">
+                <div className="ribbon ribbon-clip ribbon-info">File</div>
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <div>
+                          <ButtonToggle
+                            outline
+                            size="sm"
+                            color="info"
+                            className={
+                              "filelist-btn filelist-btn-toggle" +
+                              (itemsChecked ? " active" : "")
+                            }
+                            onClick={()=> this.checkAllFileItem(!itemsChecked)}
+                          >
+                            All
+                          </ButtonToggle>
+                        </div>
+                      </th>
+                      <th onClick={() => this.handleThClick("targetName")}>
+                        <span className="sortLabel-root">
+                          Machine
+                          <span className={this.sortIconRender("targetName")}>➜</span>
+                        </span>
+                      </th>
+                      <th onClick={() => this.handleThClick("logName")}>
+                        <span className="sortLabel-root">
+                          Category
+                          <span className={this.sortIconRender("logName")}>➜</span>
+                        </span>
+                      </th>
+                      <th onClick={() => this.handleThClick("fileName")}>
+                        <span className="sortLabel-root">
+                          File Name
+                          <span className={this.sortIconRender("fileName")}>➜</span>
+                        </span>
+                      </th>
+                      <th onClick={() => this.handleThClick("fileDate")}>
+                        <span className="sortLabel-root">
+                          Date
+                          <span className={this.sortIconRender("fileDate")}>➜</span>
+                        </span>
+                      </th>
+                      <th onClick={() => this.handleThClick("sizeKB")}>
+                        <span className="sortLabel-root">
+                          Size
+                          <span className={this.sortIconRender("sizeKB")}>➜</span>
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                   <tbody>
+                  {files.map((file, key) => {
+                    const convFileDate = API.convertDateFormat(file.fileDate);
+                    return (
+                        <tr
+                            key={key}
+                            onClick={(e) => this.handleTrClick(e)}
+                            cbinfo={file.keyIndex}
                         >
-                          All
-                        </ButtonToggle>
-                      </div>
-                    </th>
-                    <th onClick={() => this.handleThClick("targetName")}>
-                      <span className="sortLabel-root">
-                        Machine
-                        <span className={this.sortIconRender("targetName")}>➜</span>
-                      </span>
-                    </th>
-                    <th onClick={() => this.handleThClick("logName")}>
-                      <span className="sortLabel-root">
-                        Category
-                        <span className={this.sortIconRender("logName")}>➜</span>
-                      </span>
-                    </th>
-                    <th onClick={() => this.handleThClick("fileName")}>
-                      <span className="sortLabel-root">
-                        File Name
-                        <span className={this.sortIconRender("fileName")}>➜</span>
-                      </span>
-                    </th>
-                    <th onClick={() => this.handleThClick("fileDate")}>
-                      <span className="sortLabel-root">
-                        Date
-                        <span className={this.sortIconRender("fileDate")}>➜</span>
-                      </span>
-                    </th>
-                    <th onClick={() => this.handleThClick("sizeKB")}>
-                      <span className="sortLabel-root">
-                        Size
-                        <span className={this.sortIconRender("sizeKB")}>➜</span>
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                 <tbody>
-                {files.map((file, key) => {
-                  const convFileDate = API.convertDateFormat(file.fileDate);
-                  return (
-                      <tr
-                          key={key}
-                          onClick={(e) => this.handleTrClick(e)}
-                          cbinfo={file.keyIndex}
-                      >
-                        <td>
-                          <CheckBox
-                              key={key}
-                              index={file.keyIndex}
-                              name={file.fileName}
-                              isChecked={file.checked}
-                              handleCheckboxClick={this.checkFileItem}
-                              labelClass="filelist-label"
-                          />
-                        </td>
-                        <td>{file.targetName}</td>
-                        <td>{file.logName}</td>
-                        <td>
-                          <FontAwesomeIcon icon={faFileAlt} />{" "}
-                          {file.fileName}
-                        </td>
-                        <td>{convFileDate}</td>
-                        <td>{file.sizeKB}</td>
-                      </tr>
-                  );
-                })}
-                </tbody>
-              </Table>
-            </CardBody>
-            {pagination}
-            <div className="filelist-info-area">
-              <label>{this.props.downloadCnt} File Selected</label>
-            </div>
-            <div className="filelist-item-area">
-              <label>Rows per page:</label>
-              <Select
-                  onChange={this.onChangeRowsPerPage}
-                  options={optionList}
-                  styles={customSelectStyles}
-                  defaultValue={optionList[0]}
-              />
-              <DownloadConfirmModal
-                openbtn={"Download"}
-                message={"Do you want to download the selected file?"}
-                leftbtn={"Download"}
-                rightbtn={"Cancel"}
-                isError={isError}
-                setErrorStatus={this.setErrorStatus}
-              />
-            </div>
-          </Card>
-        </div>
+                          <td>
+                            <CheckBox
+                                key={key}
+                                index={file.keyIndex}
+                                name={file.fileName}
+                                isChecked={file.checked}
+                                handleCheckboxClick={this.checkFileItem}
+                                labelClass="filelist-label"
+                            />
+                          </td>
+                          <td>{file.targetName}</td>
+                          <td>{file.logName}</td>
+                          <td>
+                            <FontAwesomeIcon icon={faFileAlt} />{" "}
+                            {file.fileName}
+                          </td>
+                          <td>{convFileDate}</td>
+                          <td>{file.sizeKB}</td>
+                        </tr>
+                    );
+                  })}
+                  </tbody>
+                </Table>
+              </CardBody>
+              {pagination}
+              <div className="filelist-info-area">
+                <label>{this.props.downloadCnt} File Selected</label>
+              </div>
+              <div className="filelist-item-area">
+                <label>Rows per page:</label>
+                <Select
+                    onChange={this.onChangeRowsPerPage}
+                    options={optionList}
+                    styles={customSelectStyles}
+                    defaultValue={optionList[0]}
+                />
+                <Button
+                    outline
+                    size="sm"
+                    color="info"
+                    className="filelist-btn"
+                    onClick={this.openDownloadModal}
+                >
+                  Download
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </>
       );
     }
   }
@@ -336,6 +603,7 @@ export default connect(
       responseList: state.searchList.get('responseList'),
       responseListCnt: state.searchList.get('responseListCnt'),
       downloadCnt: state.searchList.get('downloadCnt'),
+      downloadStatus: state.searchList.get('downloadStatus'),
       responsePerPage: state.searchList.get('responsePerPage'),
       resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
       resPending: state.pender.pending['searchList/SEARCH_LOAD_RESPONSE_LIST'],

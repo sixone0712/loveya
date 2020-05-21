@@ -27,7 +27,7 @@ class EquipmentCollapse extends Component {
 
         return (
             <>
-                <div className="machinelist-collapse-title" onClick={this.toggle}>
+                <div className="collapse-title" onClick={this.toggle}>
                     <FontAwesomeIcon icon={faBars} /> {this.props.structId}
                 </div>
                 <Collapse isOpened={isOpened}>

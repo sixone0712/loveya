@@ -35,7 +35,7 @@
   width: 500px;
   border-radius: 10px;
   background-color: white;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.26);
   & > * {
     &:first-child {
       margin-top: 16px;
@@ -55,7 +55,7 @@
     margin: 0;
   }
   p.title {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: #333;
     margin-bottom: 4px
@@ -69,6 +69,7 @@
   }
   .auto-plan-calendar-modal .form-group {
     margin-top: 1rem;
+    margin-bottom: 1rem !important;
   }
   .auto-plan-calendar-modal .form-group .datetime-picker .fa-angle-left::before {
     font-style: normal;
@@ -85,9 +86,7 @@
   .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item {
     width: 100%;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .datepicker-item:first-child {
+  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item:first-child {
     margin-right: 10px;
   }
   .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item label {
@@ -100,66 +99,26 @@
     width: 250px;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  .calendar-nav
-  .current-date,
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  .calendar-nav
-  button,
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav .current-date,
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav button,
   .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td {
     transition: all 0.2s;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  .calendar-nav
-  .current-date:hover,
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  .calendar-nav
-  button:hover,
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  table
-  tbody
-  tr
-  td:hover {
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav .current-date:hover,
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav button:hover,
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td:hover {
     background-color: rgb(230, 230, 230);
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  table
-  tbody
-  tr
-  td.selected {
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.selected {
     background-color: rgb(92, 124, 250);
     color: white !important;
     font-weight: 400;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  table
-  tbody
-  tr
-  td.selected:hover {
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.selected:hover {
     background-color: rgba(92, 124, 250, 0.7);
     color: white;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .calendar
-  table
-  tbody
-  tr
-  td.now {
+  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.now {
     color: rgb(92, 124, 250);
     font-weight: 400;
   }
@@ -167,30 +126,15 @@
     font-size: 14px;
     margin: 0 10px;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .time
-  .sliders
-  .slider
-  .handle:focus,
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .time
-  .sliders
-  .slider
-  .handle:active {
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle:focus,
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle:active {
     background-color: rgb(92, 124, 250);
     border-color: rgb(92, 124, 250);
   }
   .auto-plan-optionlist-form-group .datetime-picker .time .sliders {
     flex: 0 1 100%;
   }
-  .auto-plan-calendar-modal .form-group
-  .datetime-picker
-  .time
-  .sliders
-  .slider
-  .handle {
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle {
     top: 3px;
   }
 
@@ -266,18 +210,22 @@
   }
 
   .content-without-title {
-    margin: 30px 0px;
+    margin: 30px 0;
   }
   .content,
   .content-with-title,
   .content-without-title {
     p {
-      padding: 8px 0px;
+      padding: 8px 0;
       font-size: 14px;
       text-align: center;
     }
     p:first-child {
       margin-top: 1rem;
+    }
+    p.no-margin-no-padding {
+      margin: 0;
+      padding: 0;
     }
   }
 

@@ -41,6 +41,15 @@ import DateForm from "../Form/DateForm";
 import moment from "moment";
 
 
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
+
 const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
     const buttonMsg = {
         leftMsg:'No',
@@ -312,20 +321,7 @@ class ManualVftpCompat extends Component {
             <CommandArea id={this.state.cmdName} startDate={startDate} endDate={endDate}/>
             </Container>
             <Footer/>
-            <ScrollToTop showUnder={160} style={{
-            position: 'fixed',
-                bottom: 50,
-                right: 30,
-                cursor: 'pointer',
-                transitionDuration: '0.2s',
-                transitionTimingFunction: 'linear',
-                transitionDelay: '0s',
-                width: "40px",
-                height: "40px",
-                textAlign: "center",
-                backgroundColor: "rgb(52, 58, 64)",
-                borderRadius: "3px"
-        }}>
+            <ScrollToTop showUnder={160} style={scrollStyle}>
             <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
             </ScrollToTop>
                 {

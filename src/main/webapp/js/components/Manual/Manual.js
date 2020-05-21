@@ -15,6 +15,15 @@ import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
 
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
+
 class Manual extends Component {
 
     async componentDidMount() {
@@ -74,7 +83,7 @@ class Manual extends Component {
                         <Filelist/>
                     </Container>
                     <Footer/>
-                    <ScrollToTop showUnder={160}>
+                    <ScrollToTop showUnder={160} style={scrollStyle}>
                         <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
                     </ScrollToTop>
                 </>
