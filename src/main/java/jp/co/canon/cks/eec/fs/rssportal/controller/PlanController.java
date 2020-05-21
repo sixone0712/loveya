@@ -226,8 +226,6 @@ public class PlanController {
         }
         */
         String fab = "unknown_fab";
-
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String cur = dateFormat.format(new Date(item.getCreated().getTime()));
 

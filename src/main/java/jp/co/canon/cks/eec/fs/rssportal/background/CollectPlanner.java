@@ -211,7 +211,7 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo getNext() {
         if(planUpdated) {
             nextPlan = service.getNextPlan();
-            if(nextPlan!=null) {
+            if(nextPlan!=null && nextPlan.getNextAction()!=null) {
                 log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
             }
             if(nextPlan!=null) {
