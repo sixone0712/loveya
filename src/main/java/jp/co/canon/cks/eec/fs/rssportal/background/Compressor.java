@@ -11,12 +11,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Compressor {
 
     private final Log log = LogFactory.getLog(getClass());
+    private List<String> excludeExtensions;
+
+    public Compressor() {
+        excludeExtensions = new ArrayList<>();
+    }
 
     public boolean compress(@NonNull final String sourceDir,
                             @NonNull final String destFile) {
@@ -41,7 +48,9 @@ public class Compressor {
             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(dest));
             Path srcPath = Paths.get(sourceDir);
             Files.walk(srcPath)
-                    .filter(path->Files.isDirectory(path)==false && path.toFile().equals(dest)==false)
+                    .filter(path->Files.isDirectory(path)==false &&
+                            path.toFile().equals(dest)==false &&
+                            isExcludedFile(path.toString())==false)
                     .forEach(path->{
                         ZipEntry entry = new ZipEntry(srcPath.relativize(path).toString());
                         try {
@@ -66,6 +75,20 @@ public class Compressor {
 
     public boolean extract(@NonNull final String sourceFile,
                            @NonNull final String destDir) {
+        return false;
+    }
+
+    public void addExcludeExtension(@NonNull String extension) {
+        if(!extension.startsWith("."))
+            extension = "."+extension;
+        excludeExtensions.add(extension);
+    }
+
+    private boolean isExcludedFile(@NonNull String fileName) {
+        for(String extension: excludeExtensions) {
+            if(fileName.endsWith(extension))
+                return true;
+        }
         return false;
     }
 

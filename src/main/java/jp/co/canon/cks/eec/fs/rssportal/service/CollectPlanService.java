@@ -45,6 +45,10 @@ public interface CollectPlanService {
      */
     void schedulePlan(CollectPlanVo plan);
 
+    boolean stopPlan(int planId);
+
+    boolean restartPlan(int planId);
+
     /**
      * Update the last date that the collecting has been done.
      * @param plan
