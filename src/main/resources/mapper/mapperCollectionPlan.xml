@@ -2,57 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="colplan">
+
+    <sql id="selectFields">
+        id,
+        planname,
+        tool,
+        logtype,
+        description,
+        collecttype as collectionType,
+        cinterval as interval,
+        ownerid as owner,
+        stop,
+        tscollectstart as collectStart,
+        tscreated as created,
+        tsstart as start,
+        tsend as end,
+        tslastcollect as lastCollect,
+        tsnext as nextAction,
+        tslastpoint as lastPoint,
+        laststatus as detail,
+        case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
+        case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+    </sql>
+
     <select id="selectAll" resultType="CollectPlanVo">
         select
-            id,
-            planname,
-            tool,
-            logtype,
-            description,
-            collecttype as collectionType,
-            cinterval as interval,
-            ownerid as owner,
-            expired,
-            tscollectstart as collectStart,
-            tscreated as created,
-            tsstart as start,
-            tsend as end,
-            tslastcollect as lastCollect,
-            tsnext as nextAction,
-            tslastpoint as lastPoint,
-            laststatus as detail,
-            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
-            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+            <include refid="selectFields" />
 
         from rsss."collection_plan"
     </select>
 
     <select id="selectAllOptions" parameterType="hashmap" resultType="CollectPlanVo">
         select
-            id,
-            planname,
-            tool,
-            logtype,
-            description,
-            collecttype as collectionType,
-            cinterval as interval,
-            ownerid as owner,
-            expired,
-            tscollectstart as collectStart,
-            tscreated as created,
-            tsstart as start,
-            tsend as end,
-            tslastcollect as lastCollect,
-            tsnext as nextAction,
-            tslastpoint as lastPoint,
-            laststatus as detail,
-            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
-            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+            <include refid="selectFields" />
 
         from rsss."collection_plan" as t_collect
-        where
-            expired is false
-            and tsnext is not null
         <if test="order!=null and order==true">
         order by t_collect.tsnext
         </if>
@@ -63,25 +47,7 @@
 
     <select id="selectId" parameterType="Integer" resultType="CollectPlanVo">
         select
-            id,
-            planname,
-            tool,
-            logtype,
-            description,
-            collecttype as collectionType,
-            cinterval as interval,
-            ownerid as owner,
-            expired,
-            tscollectstart as collectStart,
-            tscreated as created,
-            tsstart as start,
-            tsend as end,
-            tslastcollect as lastCollect,
-            tsnext as nextAction,
-            tslastpoint as lastPoint,
-            laststatus as detail,
-            case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
-            case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
+            <include refid="selectFields" />
 
         from rsss."collection_plan"
         where id=#{id}
@@ -128,13 +94,11 @@
         update rsss."collection_plan" set
             planname = #{planName},
             tslastcollect = #{lastCollect},
-            <if test="nextAction!=null">
             tsnext = #{nextAction},
-            </if>
             <if test="lastStatus!=null">
             laststatus = #{lastStatus},
             </if>
-            expired = #{expired},
+            stop = #{stop},
             tslastpoint = #{lastPoint}
         where id = #{id}
     </update>

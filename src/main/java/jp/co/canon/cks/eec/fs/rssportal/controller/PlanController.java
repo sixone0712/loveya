@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ModelAndViewDefiningException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
@@ -177,6 +178,22 @@ public class PlanController {
         }
     }
 
+    @RequestMapping("/stop")
+    public ResponseEntity stopPlan(HttpServletRequest request,
+                                   @RequestParam(name="id") int id) {
+        log.info("request \""+request.getServletPath()+"\" [id="+id+"]");
+        HttpStatus status = service.stopPlan(id)?HttpStatus.OK:HttpStatus.NOT_FOUND;
+        return new ResponseEntity(status);
+    }
+
+    @RequestMapping("/restart")
+    public ResponseEntity restartPlan(HttpServletRequest request,
+                                   @RequestParam(name="id") int id) {
+        log.info("request \""+request.getServletPath()+"\" [id="+id+"]");
+        HttpStatus status = service.restartPlan(id)?HttpStatus.OK:HttpStatus.NOT_FOUND;
+        return new ResponseEntity(status);
+    }
+
     private String createDownloadFilename(CollectPlanVo plan, DownloadListVo item) {
         // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
 
@@ -209,8 +226,6 @@ public class PlanController {
         }
         */
         String fab = "unknown_fab";
-
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String cur = dateFormat.format(new Date(item.getCreated().getTime()));
 

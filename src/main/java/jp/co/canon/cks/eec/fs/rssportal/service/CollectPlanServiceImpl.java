@@ -190,20 +190,22 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
         List<CollectPlanVo> plans = getAllPlans();
         plans.forEach(plan->{
-            if(plan.isExpired()==false) {
-                long intv = plan.getCollectionType() == COLLECTTYPE_CYCLE ?
-                        plan.getInterval() :
-                        CONTINUOUS_DEFAULT_INTERVAL;
+            if(!plan.isStop()) {
+                if (!plan.getDetail().equals(PlanStatus.completed.name())) {
+                    long intv = plan.getCollectionType() == COLLECTTYPE_CYCLE ?
+                            plan.getInterval() :
+                            CONTINUOUS_DEFAULT_INTERVAL;
 
-                long cur = System.currentTimeMillis();
-                Date next = new Date(cur+intv);
-                if(next.after(plan.getEnd())) {
-                    log.info("planId "+plan.getId()+" was expired");
-                    plan.setExpired(true);
-                } else {
-                    plan.setNextAction(new Timestamp(next.getTime()));
+                    long cur = System.currentTimeMillis();
+                    Date next = new Date(cur + intv);
+                    if (next.after(plan.getEnd())) {
+                        log.info("plan " + plan.getPlanName() + " has been completed");
+                        plan.setLastStatus(PlanStatus.completed.name());
+                    } else {
+                        plan.setNextAction(new Timestamp(next.getTime()));
+                    }
+                    dao.updatePlan(plan);
                 }
-                dao.updatePlan(plan);
             }
         });
         notifyChanges();
@@ -215,9 +217,12 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         long cur = System.currentTimeMillis();
         long endTime = plan.getEnd().getTime();
 
+        if(plan.isStop())
+            return;
+
         if(endTime<=cur) {
             plan.setNextAction(null);
-            plan.setExpired(true);
+            log.info("plan "+plan.getPlanName()+" has been completed");
             plan.setLastStatus(PlanStatus.completed.name());
         } else {
             Date last = plan.getLastCollect();
@@ -231,6 +236,37 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         }
         dao.updatePlan(plan);
         notifyChanges();
+    }
+
+
+    @Override
+    public boolean stopPlan(int planId) {
+        CollectPlanVo plan = getPlan(planId);
+        if(plan==null) {
+            log.error("invalid planId "+planId);
+            return false;
+        }
+        if(!plan.isStop()) {
+            plan.setStop(true);
+            plan.setNextAction(null);
+            dao.updatePlan(plan);
+            notifyChanges();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean restartPlan(int planId) {
+        CollectPlanVo plan = getPlan(planId);
+        if(plan==null) {
+            log.error("invalid planId "+planId);
+            return false;
+        }
+        if(plan.isStop()) {
+            plan.setStop(false);
+            schedulePlan(plan);
+        }
+        return true;
     }
 
     @Override

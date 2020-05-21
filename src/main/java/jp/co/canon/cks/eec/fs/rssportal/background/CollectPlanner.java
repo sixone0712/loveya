@@ -211,14 +211,14 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo getNext() {
         if(planUpdated) {
             nextPlan = service.getNextPlan();
-            if(nextPlan!=null) {
+            if(nextPlan!=null && nextPlan.getNextAction()!=null) {
                 log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
             }
             if(nextPlan!=null) {
                 planUpdated = false;
             }
         }
-        return nextPlan;
+        return nextPlan.getNextAction()!=null?nextPlan:null;
     }
 
     private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
@@ -286,6 +286,7 @@ public class CollectPlanner extends Thread {
         }
         */
         Compressor compressor = new Compressor();
+        compressor.addExcludeExtension("zip");
         String zipName = plan.getId()+"_"+System.currentTimeMillis()+".zip";
         Path zipPath = Paths.get(dir.toString(), zipName);
         if(compressor.compress(dir.toString(), zipPath.toString())) {
