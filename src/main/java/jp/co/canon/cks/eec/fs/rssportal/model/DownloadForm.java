@@ -8,17 +8,19 @@ public class DownloadForm {
     private final String fab;
     private final String tool;
     private final String logType;
+    private final String logTypeStr;
     private List<FileInfo> files;
 
-    public DownloadForm(String fab, String tool, String logType) {
-        this("FS_P", fab, tool, logType);
+    public DownloadForm(String fab, String tool, String logType, String logTypeStr) {
+        this("FS_P", fab, tool, logType, logTypeStr);
     }
 
-    public DownloadForm(String system, String fab, String tool, String logType) {
+    public DownloadForm(String system, String fab, String tool, String logType, String logTypeStr) {
         this.system = system;
         this.fab = fab;
         this.tool = tool;
         this.logType = logType;
+        this.logTypeStr = logTypeStr;
         files = new ArrayList<>();
     }
 
@@ -31,6 +33,7 @@ public class DownloadForm {
     public String getFab() {return fab;}
     public String getTool() {return tool;}
     public String getLogType() {return logType;}
+    public String getLogTypeStr() {return logTypeStr;}
     public List<FileInfo> getFiles() {return files;}
 
     /* Setters */

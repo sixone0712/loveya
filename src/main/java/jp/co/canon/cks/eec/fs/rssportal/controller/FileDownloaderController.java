@@ -63,8 +63,14 @@ public class FileDownloaderController {
             checkItem &= item.containsKey("date");
 
             if(checkItem) {
-                addDownloadItem(map, (String)item.get("structId"), (String)item.get("machine"), (String)item.get("category"),
-                        (String)item.get("file"), (String)item.get("filesize"), (String)item.get("date"));
+                addDownloadItem(map,
+                        (String)item.get("structId"),
+                        (String)item.get("machine"),
+                        (String)item.get("category"),
+                        (String)null, // todo
+                        (String)item.get("file"),
+                        (String)item.get("filesize"),
+                        (String)item.get("date"));
             } else {
                 log.error("parameter failed");
                 return null;
@@ -185,24 +191,24 @@ public class FileDownloaderController {
         return fileName;
     }
 
-    private void addDownloadItem(final Map map, String fab, String machine, String category, String file,
-                                 String size, String date) {
+    private void addDownloadItem(final Map map, String fab, String tool, String logType, String logTypeStr,
+                                 String file, String size, String date) {
 
         DownloadForm form;
 
-        if(map.containsKey(machine)) {
-            Map<String, DownloadForm> submap = (Map<String, DownloadForm>) map.get(machine);
-            if(submap.containsKey(category)) {
-                form = submap.get(category);
+        if(map.containsKey(tool)) {
+            Map<String, DownloadForm> submap = (Map<String, DownloadForm>) map.get(tool);
+            if(submap.containsKey(logType)) {
+                form = submap.get(logType);
             } else {
-                form = new DownloadForm(fab, machine, category);
-                submap.put(category, form);
+                form = new DownloadForm(fab, tool, logType, logTypeStr);
+                submap.put(logType, form);
             }
         } else {
-            form = new DownloadForm(fab, machine, category);
+            form = new DownloadForm(fab, tool, logType, logTypeStr);
             Map<String, DownloadForm> submap = new HashMap<>();
-            submap.put(category, form);
-            map.put(machine, submap);
+            submap.put(logType, form);
+            map.put(tool, submap);
         }
 
         if(form==null) {

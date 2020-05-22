@@ -71,7 +71,6 @@ public class CollectPlanner extends Thread {
         this.start();
     }
 
-
     private void createVirtualFiles() {
         if(fileServiceManage instanceof VirtualFileServiceManagerImpl) {
             long cur = System.currentTimeMillis();
@@ -170,6 +169,7 @@ public class CollectPlanner extends Thread {
         List<DownloadForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
+        String[] typeStrs = plan.getLogTypeStr().split(",");
         log.info("createDownloadList: tools="+tools.length+" types="+types.length);
 
         long lastTime = plan.getLastPoint().getTime();
@@ -182,10 +182,11 @@ public class CollectPlanner extends Thread {
 
         for(String tool: tools) {
             tool = tool.trim();
-            for(String type: types) {
-                type = type.trim();
-                DownloadForm form = new DownloadForm("undefined", tool, type);
-                downloadList.add(form);
+            for(int i=0; i<types.length; ++i) {
+                String type = types[i].trim();
+                String typeStr = typeStrs[i].trim();
+                DownloadForm form = new DownloadForm("undefined", tool, type, typeStr);
+                //downloadList.add(form);
 
                 FileInfoModel[] fileInfos = fileServiceManage.createFileList(tool, type, from, to, "", "");
                 for(FileInfoModel file: fileInfos) {
