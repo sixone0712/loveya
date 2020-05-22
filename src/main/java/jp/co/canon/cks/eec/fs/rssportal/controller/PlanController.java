@@ -54,8 +54,10 @@ public class PlanController {
 
     @RequestMapping("/add")
     @ResponseBody
-    public ResponseEntity<Integer> addPlan(@RequestBody Map<String, Object> param) {
-        log.info("request \"/plan/add\"");
+    public ResponseEntity<Integer> addPlan(HttpServletRequest request,
+                                           @RequestBody Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
+        param.forEach((key,value)->log.info("key="+key+" value="+value));
         if(checkSession()==false) {
             log.error("unauthorized session");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -239,6 +241,7 @@ public class PlanController {
         String planName = param.containsKey("planId")?(String)param.get("planId"):null;
         List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
         List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
+        List<String> logTypeStr = param.containsKey("logNames")?(List<String>) param.get("logNames"):null;
         String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
         String fromStr = param.containsKey("from")?(String)param.get("from"):null;
         String toStr = param.containsKey("to")?(String)param.get("to"):null;
@@ -246,8 +249,8 @@ public class PlanController {
         String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
         String description = param.containsKey("description")?(String)param.get("description"):null;
 
-        if(planName==null || tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
-                collectType==null || intervalStr==null)
+        if(planName==null || tools==null || logTypes==null || logTypeStr==null || fromStr==null || toStr==null ||
+                collectStartStr==null || collectType==null || intervalStr==null)
             return -1;
         if(collectType.equalsIgnoreCase("cycle")==false &&
                 collectType.equalsIgnoreCase("continuous")==false)
@@ -258,7 +261,7 @@ public class PlanController {
         Date toDate = toDate(toStr);
         long interval = Long.valueOf(intervalStr);
 
-        int id = service.addPlan(planName, tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
+        int id = service.addPlan(planName, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate, collectType, interval, description);
         if(id<0)
             return -2;
         return id;

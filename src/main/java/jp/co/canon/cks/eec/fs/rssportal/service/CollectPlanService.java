@@ -10,26 +10,28 @@ import java.util.List;
 
 public interface CollectPlanService {
 
-    int addPlan(@NonNull String planName,
-                @NonNull List<String> tools,
-                @NonNull List<String> logTypes,
-                @NonNull Date collectStart,
-                @NonNull Date start,
-                @NonNull Date end,
-                @NonNull String collectType,
-                @NonNull long interval,
-                @Nullable String description);
+    int addPlan(String planName,
+                List<String> tools,
+                List<String> logTypes,
+                List<String> logTypeStr,
+                Date collectStart,
+                Date start,
+                Date end,
+                String collectType,
+                long interval,
+                String description);
 
     @Deprecated
     boolean modifyPlan(int planId,
-                       @NonNull List<String> tools,
-                       @NonNull List<String> logTypes,
-                       @NonNull Date collectStart,
-                       @NonNull Date start,
-                       @NonNull Date end,
-                       @NonNull String collectType,
-                       @NonNull long interval,
-                       @Nullable String description);
+                       List<String> tools,
+                       List<String> logTypes,
+                       List<String> logTypeStr,
+                       Date collectStart,
+                       Date start,
+                       Date end,
+                       String collectType,
+                       long interval,
+                       String description);
 
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);

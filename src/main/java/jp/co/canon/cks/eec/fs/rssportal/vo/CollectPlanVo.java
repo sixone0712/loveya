@@ -9,6 +9,7 @@ public class CollectPlanVo {
     private String planName;
     private String tool;
     private String logType;
+    private String logTypeStr;
     private Timestamp created;
     private String description;
     private int collectionType;
@@ -206,5 +207,13 @@ public class CollectPlanVo {
 
     public void setCollectTypeStr(String collectTypeStr) {
         this.collectTypeStr = collectTypeStr;
+    }
+
+    public String getLogTypeStr() {
+        return logTypeStr;
+    }
+
+    public void setLogTypeStr(String logTypeStr) {
+        this.logTypeStr = logTypeStr;
     }
 }

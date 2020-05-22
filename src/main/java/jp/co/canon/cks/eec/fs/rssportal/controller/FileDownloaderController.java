@@ -48,6 +48,8 @@ public class FileDownloaderController {
             return null;
         }
 
+        //param.forEach((key, value)->log.info("+ key="+key+" value="+value));
+
         Map<String, Map<String, DownloadForm>> map = new HashMap<>();
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("list");
 
