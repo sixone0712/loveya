@@ -251,7 +251,7 @@ class UserList extends Component {
     };
         const { isModalOpen, isAlertOpen, alertMessage} = this.state;
         const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "gray", this.closeAlert);
-        const deleteModal = ConfirmModal((isModalOpen && this.state.isMode==='deleteUser'), faTrashAlt, DELETE_CONFIRM_MESSAGE, "auto-plan", this.closeModal,this.DeleteAccount,this.closeModal);
+        const deleteModal = ConfirmModal((isModalOpen && this.state.isMode==='deleteUser'), faTrashAlt, DELETE_CONFIRM_MESSAGE, "gray", this.closeModal,this.DeleteAccount,this.closeModal);
 
         return (
         <>
@@ -278,8 +278,10 @@ class UserList extends Component {
                 </CardHeader>
                 <CardBody className="auto-plan-card-body not-flex">
                     <div>
-                        <Button outline size="sm" color="info" className="footer-btn"
-                                onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>  <FontAwesomeIcon icon={faUser} /> New Account </Button>
+                        <Button outline size="sm" className="new-account-btn"
+                                onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>
+                            <FontAwesomeIcon icon={faUser} /> New Account
+                        </Button>
                     </div>
                     <div className="auto-plan-collection-list">
                         <Table>
@@ -297,18 +299,13 @@ class UserList extends Component {
                             {users.map((user, idx) => {
                                 return (
                                     <tr key={idx}>
-                                        <td>
-                                            <div
-                                                className="plan-id-area"
-                                            >
-                                                {idx+1}
-                                            </div>
-                                        </td>
+                                        <td>{idx+1}</td>
                                         <td>{user.name}</td>
                                         <td>
-                                            <a href="#" onClick={()=> this.uChangeAuth(user.id)}>
-                                              <u>{user.auth}</u>
-                                            </a>
+                                            <div className="plan-id-area"
+                                                onClick={()=> this.uChangeAuth(user.id)}>
+                                              {user.auth}
+                                            </div>
                                         </td>
                                         <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
                                         <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>
