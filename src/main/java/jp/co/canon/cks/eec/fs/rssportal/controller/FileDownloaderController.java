@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
@@ -40,10 +41,8 @@ public class FileDownloaderController {
 
     @RequestMapping(value="dl/request")
     @ResponseBody
-    public String request(@RequestBody Map<String, Object> param) {
-
-        log.warn("request()");
-
+    public String request(HttpServletRequest request, @RequestBody Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
         if(param.size()==0 || param.containsKey("list")==false) {
             log.warn("no target to download");
             return null;
@@ -80,8 +79,8 @@ public class FileDownloaderController {
 
     @RequestMapping("dl/status")
     @ResponseBody
-    public DownloadStatusResponseBody getStatus(@RequestParam Map<String, Object> param) {
-
+    public DownloadStatusResponseBody getStatus(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
         if(param.containsKey("dlId")==false) {
             log.warn("dlId is null");
             return null;
@@ -99,12 +98,13 @@ public class FileDownloaderController {
     @RequestMapping("dl/download")
     public ResponseEntity<InputStreamResource> downloadFile(
             @RequestParam(value="dlId", defaultValue="") String dlId,
+            HttpServletRequest request,
             HttpServletResponse response) {
+        log.info(String.format("request \"%s?dlId=%d\"", request.getServletPath(), dlId));
         if(dlId.isEmpty()) {
             log.error("invalid param");
             return null;
         }
-        log.info("download(dlId="+dlId+")");
 
         if(fileDownloader.isValidId(dlId)==false) {
             log.error("invalid dlId");
@@ -137,8 +137,9 @@ public class FileDownloaderController {
 
     @RequestMapping("/dl/cancel")
     @ResponseBody
-    public ResponseEntity<String> cancelDownload(@RequestParam(value="dlId") String downloadId) {
-        log.info("request \"/dl/cancel\" ("+"(dlId="+downloadId+")");
+    public ResponseEntity<String> cancelDownload(HttpServletRequest request,
+                                                 @RequestParam(value="dlId") String downloadId) {
+        log.info(String.format("request \"%s?dlId=%d\"", request.getServletPath(), downloadId));
         if(!fileDownloader.cancelRequest(downloadId))
             return new ResponseEntity("invalid download id", HttpStatus.NOT_FOUND);
         return new ResponseEntity("ok", HttpStatus.OK);
