@@ -219,6 +219,16 @@ class RSSautoplanlist extends Component {
         });
     };
 
+    stopDownload = async (planId) => {
+        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/stop?id=${planId}`);
+        await this.loadPlanList();
+    }
+
+    restartDownload = async (planId) => {
+        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/restart?id=${planId}`);
+        await this.loadPlanList();
+    }
+
     render() {
         const { registeredList } = this.state;
         const { length: count } = registeredList;
