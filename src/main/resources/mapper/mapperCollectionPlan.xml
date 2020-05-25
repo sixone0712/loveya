@@ -6,8 +6,10 @@
     <sql id="selectFields">
         id,
         planname,
+        fab,
         tool,
         logtype,
+        logtypestr as logTypeStr,
         description,
         collecttype as collectionType,
         cinterval as interval,
@@ -60,8 +62,10 @@
         insert into rsss."collection_plan" (
             id,
             planname,
+            fab,
             tool,
             logtype,
+            logtypestr,
             tscreated,
             description,
             collecttype,
@@ -75,8 +79,10 @@
         ) values (
             #{id},
             #{planName},
+            #{fab},
             #{tool},
             #{logType},
+            #{logTypeStr},
             now(),
             #{description},
             #{collectionType},

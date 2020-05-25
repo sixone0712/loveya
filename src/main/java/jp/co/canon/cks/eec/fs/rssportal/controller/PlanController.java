@@ -54,8 +54,10 @@ public class PlanController {
 
     @RequestMapping("/add")
     @ResponseBody
-    public ResponseEntity<Integer> addPlan(@RequestBody Map<String, Object> param) {
-        log.info("request \"/plan/add\"");
+    public ResponseEntity<Integer> addPlan(HttpServletRequest request,
+                                           @RequestBody Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
+        param.forEach((key,value)->log.info("key="+key+" value="+value));
         if(checkSession()==false) {
             log.error("unauthorized session");
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -78,8 +80,9 @@ public class PlanController {
 
     @RequestMapping("/list")
     @ResponseBody
-    public ResponseEntity<List<CollectPlanVo>> listPlan(@RequestParam Map<String, Object> param) {
-        log.info("request \"/plan/list\"");
+    public ResponseEntity<List<CollectPlanVo>> listPlan(HttpServletRequest request,
+                                                        @RequestParam Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
         if(checkSession()==false) {
             log.error("unauthorized session");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -100,8 +103,8 @@ public class PlanController {
 
     @RequestMapping("/delete")
     @ResponseBody
-    public ResponseEntity deletePlan(@RequestParam(name="id") int id) {
-        log.info("request \"plan/delete\" [id="+id+"]");
+    public ResponseEntity deletePlan(HttpServletRequest request, @RequestParam(name="id") int id) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
@@ -112,8 +115,10 @@ public class PlanController {
     }
 
     @RequestMapping("/download")
-    public ResponseEntity<InputStreamResource> download(@RequestParam(name="id") int id, HttpServletResponse response) {
-        log.info("request \"plan/download\" [id="+id+"]");
+    public ResponseEntity<InputStreamResource> download(HttpServletRequest request,
+                                                        HttpServletResponse response,
+                                                        @RequestParam(name="id") int id) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
@@ -155,8 +160,9 @@ public class PlanController {
 
     @RequestMapping("/modify")
     @ResponseBody
-    public ResponseEntity<Integer> modify(@RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
-        log.info("request \"plan/modify\" [id="+id+"]");
+    public ResponseEntity<Integer> modify(HttpServletRequest request,
+                                          @RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         CollectPlanVo plan = service.getPlan(id);
         if(plan==null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -213,19 +219,27 @@ public class PlanController {
             return null;
         }
 
-        /* TODO
-        List<String> fabs = fileDownloader.getFabs(downloadId);
-        if(fabs==null || fabs.size()==0) {
+        if(plan.getFab()==null) {
             log.error("no fab info");
             return null;
         }
-        String fab = fabs.get(0);
-        if(fabs.size()>1) {
-            for(int i=1; i<fabs.size(); ++i)
-                fab += "_"+fabs.get(i);
+        String[] fabs = plan.getFab().split(",");
+        if(fabs.length==0) {
+            log.error("no fab info");
+            return null;
         }
-        */
-        String fab = "unknown_fab";
+        String fab = fabs[0];
+        if(fabs.length>1) {
+            nextFab:
+            for(int i=1; i<fabs.length; ++i) {
+                for(int j=0; j<i; ++j) {
+                    if(fabs[i].equals(fabs[j]))
+                        continue nextFab;
+                }
+                fab += "_" + fabs[i];
+            }
+        }
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String cur = dateFormat.format(new Date(item.getCreated().getTime()));
 
@@ -238,7 +252,9 @@ public class PlanController {
 
         String planName = param.containsKey("planId")?(String)param.get("planId"):null;
         List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
+        List<String> fabs = param.containsKey("structId")?(List<String>) param.get("structId"):null;
         List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
+        List<String> logTypeStr = param.containsKey("logNames")?(List<String>) param.get("logNames"):null;
         String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
         String fromStr = param.containsKey("from")?(String)param.get("from"):null;
         String toStr = param.containsKey("to")?(String)param.get("to"):null;
@@ -246,8 +262,8 @@ public class PlanController {
         String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
         String description = param.containsKey("description")?(String)param.get("description"):null;
 
-        if(planName==null || tools==null || logTypes==null || fromStr==null || toStr==null || collectStartStr==null ||
-                collectType==null || intervalStr==null)
+        if(planName==null || fabs==null || tools==null || logTypes==null || logTypeStr==null || fromStr==null ||
+                toStr==null || collectStartStr==null || collectType==null || intervalStr==null)
             return -1;
         if(collectType.equalsIgnoreCase("cycle")==false &&
                 collectType.equalsIgnoreCase("continuous")==false)
@@ -258,7 +274,8 @@ public class PlanController {
         Date toDate = toDate(toStr);
         long interval = Long.valueOf(intervalStr);
 
-        int id = service.addPlan(planName, tools, logTypes, collectStartDate, fromDate, toDate, collectType, interval, description);
+        int id = service.addPlan(planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
+                collectType, interval, description);
         if(id<0)
             return -2;
         return id;
@@ -266,20 +283,6 @@ public class PlanController {
 
     private Date toDate(@NonNull String str) throws ParseException {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(str);
-    }
-
-    private void resendToLogin(String reason) throws ModelAndViewDefiningException {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("login");
-        mav.addObject("reason", reason);
-        throw new ModelAndViewDefiningException(mav);
-    }
-
-    private void resendToError(String error) throws ModelAndViewDefiningException {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("error");
-        mav.addObject("error", error);
-        throw new ModelAndViewDefiningException(mav);
     }
 
     private boolean checkSession() {

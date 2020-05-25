@@ -7,8 +7,10 @@ public class CollectPlanVo {
 
     private int id;
     private String planName;
+    private String fab;
     private String tool;
     private String logType;
+    private String logTypeStr;
     private Timestamp created;
     private String description;
     private int collectionType;
@@ -54,6 +56,14 @@ public class CollectPlanVo {
 
     public void setPlanName(String planName) {
         this.planName = planName;
+    }
+
+    public String getFab() {
+        return fab;
+    }
+
+    public void setFab(String fab) {
+        this.fab = fab;
     }
 
     public String getTool() {
@@ -206,5 +216,13 @@ public class CollectPlanVo {
 
     public void setCollectTypeStr(String collectTypeStr) {
         this.collectTypeStr = collectTypeStr;
+    }
+
+    public String getLogTypeStr() {
+        return logTypeStr;
+    }
+
+    public void setLogTypeStr(String logTypeStr) {
+        this.logTypeStr = logTypeStr;
     }
 }

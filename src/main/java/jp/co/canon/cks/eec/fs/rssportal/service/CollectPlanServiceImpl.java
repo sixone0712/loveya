@@ -39,8 +39,10 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public int addPlan(@NonNull String planName,
+                       @NonNull List<String> fabs,
                        @NonNull List<String> tools,
                        @NonNull List<String> logTypes,
+                       @NonNull List<String> logTypeStr,
                        @NonNull Date collectStart,
                        @NonNull Date start,
                        @NonNull Date end,
@@ -61,8 +63,10 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
         CollectPlanVo plan = new CollectPlanVo();
         plan.setPlanName(planName);
+        plan.setFab(toSingleString(fabs));
         plan.setTool(toSingleString(tools));
         plan.setLogType(toSingleString(logTypes));
+        plan.setLogTypeStr(toSingleString(logTypeStr));
         plan.setCollectionType(colType);
         plan.setInterval(interval);
         if(start.after(end)) {
@@ -103,8 +107,10 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     @Override
     @Deprecated
     public boolean modifyPlan(int planId,
+                              List<String> fabs,
                               List<String> tools,
                               List<String> logTypes,
+                              List<String> logTypeStr,
                               Date collectStart,
                               Date start,
                               Date end,
