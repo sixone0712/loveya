@@ -4,11 +4,13 @@ import * as API from "../../api";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as dwHistoryAction from "../../modules/dwHistory";
-import Select from "react-select";
+import { Select } from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheckCircle, faUser, faExclamationCircle, faPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import {filePaginate, renderPagination} from "../Common/Pagination";
 import moment from "moment";
+
+const { Option } = Select;
 
 function HistoryListEmpty(props) {
     return (
@@ -49,114 +51,80 @@ class DownloadHistory extends Component {
             currentPage: page
         });
     };
-    handleSelectBoxChange = newValue => {
+
+    handleSelectBoxChange = value => {
+        const { pageSize, currentPage } = this.state;
+        const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
+
         this.setState({
-            ...this.state,
-            pageSize: newValue.value
+            pageSize: value,
+            currentPage: Math.ceil(startIndex / value)
         });
     };
+
      render() {
         const formatDate = 'YYYY/MM/DD HH:mm:ss';
         const historyList = API.getDwHistoryList(this.props);
         const {length:count} = historyList;
         console.log("historyList: ",historyList);
-         console.log("count: ",count);
-         {
-            const {currentPage, pageSize} = this.state;
-            const lists = filePaginate(historyList, currentPage, pageSize);
-            const pagination = renderPagination(
-                pageSize,
-                count,
-                this.handlePaginationChange,
-                "custom-pagination"
-            );
-            const optionList = [
-                {value: 10, label: "10"},
-                {value: 30, label: "30"},
-                {value: 50, label: "50"},
-                {value: 100, label: "100"}
-            ];
+        console.log("count: ",count);
 
-            const customSelectStyles = {
-                container: styles => ({
-                    ...styles,
-                    display: "inline-block",
-                    width: "85px",
-                    fontSize: "14px",
-                    marginLeft: "10px"
-                }),
-                option: (styles, {isFocused, isSelected}) => {
-                    return {
-                        ...styles,
-                        backgroundColor: isSelected
-                            ? "rgba(92, 124, 250, 0.5)"
-                            : isFocused
-                                ? "rgba(92, 124, 250, 0.3)"
-                                : null,
-                        color: "black",
-                        ":active": {
-                            ...styles[":active"],
-                            backgroundColor: isSelected
-                                ? "rgba(92, 124, 250, 0.9)"
-                                : isFocused
-                                    ? "rgba(92, 124, 250, 0.7)"
-                                    : null
-                        }
-                    };
-                },
-                control: () => ({
-                    display: "flex",
-                    border: "1px solid rgb(92, 124, 250)",
-                    borderRadius: "3px",
-                    caretColor: "transparent",
-                    transition: "all .15s ease-in-out",
-                    ":hover": {
-                        outline: "0",
-                        boxShadow: "0 0 0 0.2em rgba(92, 124, 250, 0.5)"
-                    }
-                }),
-                dropdownIndicator: styles => ({
-                    ...styles,
-                    color: "rgba(92, 124, 250, 0.6)",
-                    ":hover": {
-                        ...styles[":hover"],
-                        color: "rgb(92, 124, 250)"
-                    }
-                }),
-                indicatorSeparator: styles => ({
-                    ...styles,
-                    backgroundColor: "rgba(92, 124, 250, 0.6)"
-                }),
-                menu: styles => ({
-                    ...styles,
-                    borderRadius: "3px",
-                    boxShadow:
-                        "0 0 0 1px rgba(92, 124, 250, 0.6), 0 4px 11px rgba(92, 124, 250, 0.6)"
-                })
-            };
+        const {currentPage, pageSize} = this.state;
+        const lists = filePaginate(historyList, currentPage, pageSize);
+        const pagination = renderPagination(
+            pageSize,
+            count,
+            this.handlePaginationChange,
+            "custom-pagination"
+        );
+
+        if (count === 0) {
+         return (
+             <Card className="auto-plan-box">
+                 <Breadcrumb className="topic-path">
+                     <BreadcrumbItem>Administrator</BreadcrumbItem>
+                     <BreadcrumbItem active>Download History</BreadcrumbItem>
+                 </Breadcrumb>
+                 <CardHeader className="auto-plan-card-header">
+                     Download History
+                     <p>Check the <span>user's download history.</span></p>
+                 </CardHeader>
+                 <CardBody className="auto-plan-card-body">
+                     <Col className="auto-plan-collection-list">
+                         <p className="no-registered-plan">
+                             <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                         </p>
+                         <p className="no-registered-plan">
+                             No registered user's download history.
+                         </p>
+                     </Col>
+                 </CardBody>
+             </Card>
+         );
+        } else {
             return (
                 <>
                     <Container className="rss-container" fluid={true}>
-
-                        <Card className="auto-plan-box">
-                            <CardHeader className="auto-plan-card-header">
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Administrator</BreadcrumbItem>
+                            <BreadcrumbItem active>Download History</BreadcrumbItem>
+                        </Breadcrumb>
+                        <Card className="auto-plan-box administrator">
+                            <CardHeader className="auto-plan-card-header administrator">
                                 Download History
-                                <p>Administrator / Download History</p>
-                                {(count > 0) &&
+                                <p>Check the <span>user's download history.</span></p>
                                 <div className="select-area">
                                     <label>Rows per page : </label>
-                                    <Select
-                                        options={optionList}
-                                        styles={customSelectStyles}
-                                        defaultValue={optionList[0]}
-                                        onChange={this.handleSelectBoxChange}
-                                    />
-                                </div>}
+                                    <Select defaultValue={10} onChange={this.handleSelectBoxChange} className="administrator">
+                                        <Option value={10}>10</Option>
+                                        <Option value={30}>30</Option>
+                                        <Option value={50}>50</Option>
+                                        <Option value={100}>100</Option>
+                                    </Select>
+                                </div>
                             </CardHeader>
                             <CardBody className="auto-plan-card-body not-flex">
-                                {(count ===0)
-                                    ? <HistoryListEmpty/>
-                                    : <div className="auto-plan-collection-list">
+                                <div className="auto-plan-collection-list">
                                     <Table>
                                         <thead>
                                         <tr>
@@ -169,26 +137,21 @@ class DownloadHistory extends Component {
                                         </thead>
                                         <tbody>
                                         {lists.map((history, idx) => {
-                                        return (
-                                            <tr key={idx}>
-                                                <td>
-                                                    <div className="plan-id-area">
-                                                        {idx + 1}
-                                                    </div>
-                                                </td>
-                                                <td>{history.dw_user}</td>
-                                                <td>{(history.dw_date != null) ? moment(history.dw_date).format(formatDate) : ""}</td>
-                                                <td>{(history.dw_type != null) ? "Auto(Ftp)" : "Manual(Ftp)"}</td>
-                                                <td><u>Detail</u></td>
-                                            </tr>
-                                        );
+                                            return (
+                                                <tr key={idx}>
+                                                    <td>{idx + 1}</td>
+                                                    <td>{history.dw_user}</td>
+                                                    <td>{(history.dw_date != null) ? moment(history.dw_date).format(formatDate) : ""}</td>
+                                                    <td>{(history.dw_type != null) ? "Auto(Ftp)" : "Manual(Ftp)"}</td>
+                                                    <td>Detail</td>
+                                                </tr>
+                                            );
                                         })}
                                         </tbody>
                                     </Table>
                                 </div>
-                                }
                             </CardBody>
-                            {(count > 0) && pagination}
+                            {pagination}
                         </Card>
                     </Container>
                 </>

@@ -178,10 +178,10 @@ class SignOut extends Component {
 
                                     </div>
                                     <div className="button-wrap no-margin">
-                                        <button className="gray form-type left-btn" onClick={this.SignOutProcess}>
+                                        <button className="administrator form-type left-btn" onClick={this.SignOutProcess}>
                                             Save
                                         </button>
-                                        <button className="gray form-type right-btn" onClick={this.close}>
+                                        <button className="administrator form-type right-btn" onClick={this.close}>
                                             Cancel
                                         </button>
                                     </div>

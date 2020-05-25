@@ -373,15 +373,47 @@ a:hover {
     width: 120px;
 }
 
+.ant-select.administrator,
+.ant-select.planlist,
+.ant-select.downloadlist {
+    margin-left: 0.5em;
+    width: 80px;
+    top: 1.3px;
+}
+
+.ant-select.filelist {
+    width: 80px;
+    margin: 0 1em;
+    height: 32px;
+}
+
 .ant-select:not(.ant-select-focused):not(.ant-select-disabled):hover {
     border-radius: 3px;
-    border-right-width: 1px !important;
-    -webkit-box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+    /* border-right-width: 1px !important; */
+    -webkit-box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
+}
+
+.ant-select.administrator:not(.ant-select-focused):not(.ant-select-disabled):hover {
+    -webkit-box-shadow: 0 0 0 0.1em rgba(23, 162, 184, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(23, 162, 184, 0.5);
+}
+
+.ant-select.filelist:not(.ant-select-focused):not(.ant-select-disabled):hover {
+    -webkit-box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5);
 }
 
 .ant-select:not(.ant-select-focused):not(.ant-select-disabled):hover .ant-select-selector {
     border: 1px solid rgb(92, 124, 250);
+}
+
+.ant-select.administrator:not(.ant-select-focused):not(.ant-select-disabled):hover .ant-select-selector {
+    border: 1px solid rgb(23, 162, 184);
+}
+
+.ant-select.filelist:not(.ant-select-focused):not(.ant-select-disabled):hover .ant-select-selector {
+    border: 1px solid rgb(133, 164, 179);
 }
 
 .ant-select-single .ant-select-selector {
@@ -403,8 +435,23 @@ a:hover {
     -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
     width: 100%;
-    height: 31px;
+    height: 32px;
     padding: 0 11px;
+}
+.administrator .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    border: 1px solid rgb(23, 162, 184);
+}
+
+.flielist .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    border: 1px solid rgb(133, 164, 179);
+}
+
+.ant-select-show-search.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    cursor: text
+}
+
+.ant-select-show-search.ant-select-single:not(.ant-select-customize-input) .ant-select-selector input {
+    cursor: auto
 }
 
 .ant-select-single.ant-select-show-arrow .ant-select-selection-search {
@@ -465,12 +512,29 @@ a:hover {
     content: "\a0";
 }
 
+.ant-select-single.ant-select-customize-input .ant-select-selector .ant-select-selection-search {
+    position: static;
+    width: 100%
+}
+
 .ant-select-focused.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     border-color: rgb(92, 124, 250);
-    border-right-width: 1px !important;
+    /* border-right-width: 1px !important; */
     outline: 0;
-    -webkit-box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+    -webkit-box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
+}
+
+.ant-select-focused.administrator.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    border-color: rgb(23, 162, 184);
+    -webkit-box-shadow: 0 0 0 0.1em rgba(23, 162, 184, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(23, 162, 184, 0.5);
+}
+
+.ant-select-focused.filelist.ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    border-color: rgb(133, 164, 179);
+    -webkit-box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5);
 }
 
 .ant-select-open .ant-select-arrow .anticon.anticon-down {
@@ -484,7 +548,7 @@ a:hover {
 
 .ant-select-arrow {
     display: inline-block;
-    color: inherit;
+    /* color: inherit; */
     font-style: normal;
     line-height: 0;
     text-transform: none;
@@ -498,10 +562,17 @@ a:hover {
     width: 12px;
     height: 12px;
     margin-top: -6px;
-    /* color: rgba(0, 0, 0, 0.45); */
     font-size: 12px;
     /* line-height: 1; */
     text-align: center;
+}
+
+.administrator .ant-select-arrow {
+    color: rgb(23, 162, 184);
+}
+
+.filelist .ant-select-arrow {
+    color: rgb(133, 164, 179);
 }
 
 .ant-select-arrow > * {
@@ -1006,7 +1077,7 @@ a:hover {
 
 .datepicker-item-area input[type="text"]:focus,
 .datepicker-item-area input[type="text"]:hover {
-    box-shadow: 0 0 0 0.2em rgba(55, 178, 77, 0.4);
+    box-shadow: 0 0 0 0.1em rgba(55, 178, 77, 0.4);
 }
 
 .datepicker-item-area .fa-angle-left::before {
@@ -1113,7 +1184,7 @@ a:hover {
 
 .machinelist-btn:focus,
 .machinelist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(171, 140, 228, 0.5) !important;
+    box-shadow: 0 0 0 0.1em rgba(171, 140, 228, 0.5) !important;
 }
 
 .machinelist-form-group .ReactCollapse--collapse {
@@ -1137,7 +1208,7 @@ a:hover {
 
 .machinelist-form-group .custom-checkbox .custom-control-input:focus ~ .machinelist-label::before,
 .machinelist-form-group .custom-checkbox .custom-control-input:hover ~ .machinelist-label::before {
-    box-shadow: 0 0 0 1px white, 0 0 0 0.2em rgba(171, 140, 228, 0.5);
+    box-shadow: 0 0 0 1px white, 0 0 0 0.17em rgba(171, 140, 228, 0.5);
 }
 
 .machinelist-form-group .custom-control-input:focus:not(:checked) ~ .machinelist-label::before {
@@ -1175,7 +1246,7 @@ a:hover {
 
 .catlist-card .catlist-btn:focus,
 .catlist-card .catlist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5) !important;
+    box-shadow: 0 0 0 0.1em rgba(255, 169, 77, 0.5) !important;
 }
 
 .catlist-form-group .catlist-label::after {
@@ -1190,7 +1261,7 @@ a:hover {
 
 .catlist-form-group .custom-checkbox .custom-control-input:focus ~ .catlist-label::before,
 .catlist-form-group .custom-checkbox .custom-control-input:hover ~ .catlist-label::before {
-    box-shadow: 0 0 0 1px white, 0 0 0 0.2em rgba(255, 169, 77, 0.5);
+    box-shadow: 0 0 0 1px white, 0 0 0 0.17em rgba(255, 169, 77, 0.5);
 }
 
 .catlist-form-group .custom-control-input:focus:not(:checked) ~ .catlist-label::before {
@@ -1206,7 +1277,7 @@ a:hover {
 .catlist-form-group .catlist-search-input:hover,
 .catlist-form-group .catlist-search-input:focus {
     border-color: rgb(255, 169, 77);
-    box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(255, 169, 77, 0.5);
 }
 
 .catlist-form-group .catlist-genre-area {
@@ -1258,7 +1329,7 @@ a:hover {
 .formlist-card .formlist-btn:not(:disabled):not(.disabled):active:focus,
 .formlist-card .formlist-btn:not(:disabled):not(.disabled).active:focus,
 .formlist-card .formlist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(55, 178, 77, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(55, 178, 77, 0.5);
 }
 
 .formlist-form-group {
@@ -1300,7 +1371,7 @@ a:hover {
 
 .filelist-card .filelist-btn:focus,
 .filelist-card .filelist-btn:hover {
-    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5) !important;
+    box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5) !important;
 }
 
 .filelist-card .filelist-item-area {
@@ -1334,7 +1405,7 @@ a:hover {
 
 .filelist-card .custom-pagination .page-item .page-link:focus {
     border-radius: 3px;
-    box-shadow: 0 0 0 0.2em rgba(133, 164, 179, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(133, 164, 179, 0.5);
 }
 
 .filelist-card .custom-pagination .page-item.active .page-link:hover {
@@ -1367,7 +1438,7 @@ a:hover {
 
 .filelist-card-body .custom-checkbox .custom-control-input:focus ~ .filelist-label::before,
 .filelist-card-body .custom-checkbox .custom-control-input:hover ~ .filelist-label::before {
-    box-shadow: 0 0 0 1px white, 0 0 0 0.2em rgba(133, 164, 179, 0.5);
+    box-shadow: 0 0 0 1px white, 0 0 0 0.17em rgba(133, 164, 179, 0.5);
 }
 
 .filelist-card-body .custom-control-input:focus:not(:checked) ~ .filelist-label::before {
@@ -1500,15 +1571,28 @@ a:hover {
     transition: all 0.2s;
 }
 
+.auto-plan-box.administrator .custom-pagination .page-item .page-link {
+    color: rgb(23, 162, 184);
+}
+
 .auto-plan-box .custom-pagination .page-item.active .page-link {
     color: white;
     background-color: rgb(92, 124, 250);
     border: 1px solid rgb(92, 124, 250);
 }
 
+.auto-plan-box.administrator .custom-pagination .page-item.active .page-link {
+    background-color: rgb(23, 162, 184);
+    border: 1px solid rgb(23, 162, 184);
+}
+
 .auto-plan-box .custom-pagination .page-item .page-link:focus {
     border-radius: 3px;
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
+}
+
+.auto-plan-box.administrator .custom-pagination .page-item .page-link:focus {
+    box-shadow: 0 0 0 0.1em rgba(23, 162, 184, 0.5);
 }
 
 .auto-plan-box .custom-pagination .page-item.active .page-link:hover {
@@ -1516,9 +1600,19 @@ a:hover {
     background-color: rgba(92, 124, 250, 0.7);
 }
 
+.auto-plan-box.administrator .custom-pagination .page-item.active .page-link:hover {
+    border-color: rgba(23, 162, 184, 0.1);
+    background-color: rgba(23, 162, 184, 0.7);
+}
+
 .auto-plan-box .custom-pagination .page-item:not(.active) .page-link:hover {
     border-color: rgba(92, 124, 250, 0.1);
     background-color: rgba(92, 124, 250, 0.3);
+}
+
+.auto-plan-box.administrator .custom-pagination .page-item:not(.active) .page-link:hover {
+    border-color: rgba(23, 162, 184, 0.1);
+    background-color: rgba(23, 162, 184, 0.3);
 }
 
 .auto-plan-card-header {
@@ -1547,6 +1641,11 @@ a:hover {
     font-weight: 400;
 }
 
+.auto-plan-card-header.administrator .select-area {
+    right: 20px;
+    top: 20px;
+}
+
 .auto-plan-card-header .select-area > label {
     font-size: 14px;
 }
@@ -1572,6 +1671,11 @@ a:hover {
     justify-content: center;
 }
 
+.auto-plan-card-body .user-create-btn {
+    float: right;
+    margin-bottom: 0.75rem;
+}
+
 .auto-plan-card-body .form-section {
     margin-left: 10px;
 }
@@ -1583,7 +1687,7 @@ a:hover {
 .auto-plan-card-body .form-section input[type="text"]:hover,
 .auto-plan-card-body .form-section input[type="text"]:focus {
     border-color: rgb(92, 124, 250);
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+    box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5);
 }
 
 .auto-plan-card-body .form-section.targetlist .search-btn-area {
@@ -1746,7 +1850,7 @@ a:hover {
 .auto-plan-card-footer .footer-btn:focus,
 .auto-plan-card-body .auto-plan-collection-list.download-list .content-section.header .download-btn:hover,
 .auto-plan-card-body .auto-plan-collection-list.download-list .content-section.header .download-btn:focus {
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5) !important;
+    box-shadow: 0 0 0 0.1em rgba(92, 124, 250, 0.5) !important;
 }
 
 .auto-plan-card-body .form-header-section .form-btn-section .form-btn + .form-btn {
@@ -1801,7 +1905,7 @@ a:hover {
 
 .auto-plan-form-group .custom-checkbox .custom-control-input:focus ~ .form-check-label::before,
 .auto-plan-form-group .custom-checkbox .custom-control-input:hover ~ .form-check-label::before {
-    box-shadow: 0 0 0 1px white, 0 0 0 0.2em rgba(92, 124, 250, 0.5);
+    box-shadow: 0 0 0 1px white, 0 0 0 0.17em rgba(92, 124, 250, 0.5);
 }
 
 .auto-plan-form-group .custom-control-input:focus:not(:checked) ~ .form-check-label::before {
@@ -2103,6 +2207,18 @@ a:hover {
     -webkit-animation-direction: alternate;
     animation-direction: alternate;
 }
+
+.auto-plan-collection-list table tbody tr td > a.permission {
+    color: #212529;
+    padding: .3em 1em;
+    border-radius: 3px;
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+.auto-plan-collection-list table tbody tr td > a.permission:hover {
+    background-color: rgba(92, 124, 250, 0.2);
+}
 /* auto download style end */
 
 /* vftp style start */
@@ -2126,28 +2242,3 @@ a:hover {
      opacity: 0;
  }
 /* vftp style end */
-
-.new-account-btn {
-    border: 1px solid rgb(92, 124, 250);
-    border-radius: 3px;
-    background-color: white;
-    color:hsl(0,0%,20%);
-}
-.new-account-btn:focus,
-.new-account-btn:hover,
-.new-account-btn:active {
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5) !important;
-    border: 1px solid rgb(92, 124, 250);
-    border-radius: 3px;
-    background-color: white;
-    color:hsl(0,0%,20%);
-}
-
-.new-account-btn:not(:disabled):not(.disabled):active,
-.new-account-btn:not(:disabled):not(.disabled).active {
-    box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5) !important;
-    border: 1px solid rgb(92, 124, 250);
-    border-radius: 3px;
-    background-color: rgba(92, 124, 250, 0.3);
-    color:hsl(0,0%,20%);
-}

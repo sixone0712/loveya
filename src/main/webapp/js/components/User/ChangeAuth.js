@@ -2,11 +2,13 @@ import React, {Component} from "react"
 import ReactTransitionGroup from 'react-addons-css-transition-group';
 import * as API from "../../api";
 import ErrorModalOneButton from "../Common/ErrorModal";
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
 import UserAuthFrom from "../Form/UserAuthForm";
 import * as userActions from "../../modules/User";
+import AlertModal from "../Common/AlertModal";
 
 class ChangeAuthModal extends Component {
     constructor(props) {
@@ -34,10 +36,8 @@ class ChangeAuthModal extends Component {
             console.log("changePermission msg: ", msg);
             if (msg.length > 0) {
                 this.setState({
-                    ...this.state,
                     isModalOpen: true,
                     errors: {
-                        ...this.state.errors,
                         ModalMsg: msg
                     }
                 })
@@ -45,14 +45,14 @@ class ChangeAuthModal extends Component {
         }
     }
     closeModal = () => {
-        this.setState(() => ({...this.state,isModalOpen: false}));
+        this.setState(() => ({...this.state, isModalOpen: false}));
     }
     handleRadio = (value) => {
         this.setState(() => ({...this.state, selectedValue : value}));
     }
     settingClose = () =>{
         const {right} = this.props;
-        this.setState(() => ({...this.state,selectedValue: ""}));
+        this.setState(() => ({...this.state, selectedValue: ""}));
         right();
     }
     data = {
@@ -60,8 +60,10 @@ class ChangeAuthModal extends Component {
     };
     render() {
         const { isOpen, right, userID } = this.props;
-        const selected = (this.state.selectedValue ==='') ? API.getUserAuth(this.props,userID) : this.state.selectedValue;
+        const { isModalOpen, errors, selectedValue } = this.state;
+        const selected = (selectedValue ==='') ? API.getUserAuth(this.props, userID) : selectedValue;
 
+        const renderAlert = AlertModal(isModalOpen, faExclamationCircle, errors.ModalMsg, "administrator", this.closeModal);
         return (
             <>
                 {
@@ -74,27 +76,23 @@ class ChangeAuthModal extends Component {
                             <div className="Custom-modal">
                                 <p className="title">{this.data.titleMsg}</p>
                                 <div className="content-with-title user-modal">
-                                    <UserAuthFrom  sValue={selected}
-                                                   changeFunc={this.handleRadio}/>
+                                    <UserAuthFrom sValue={selected} changeFunc={this.handleRadio}/>
                                 </div>
                                 <div className="button-wrap no-margin">
-                                    <button className="gray form-type left-btn" onClick={()=>this.changePermissionProcess(userID)}>
+                                    <button className="administrator form-type left-btn" onClick={()=>this.changePermissionProcess(userID)}>
                                         Save
                                     </button>
-                                    <button className="gray form-type right-btn" onClick={this.settingClose}>
+                                    <button className="administrator form-type right-btn" onClick={this.settingClose}>
                                         Cancel
                                     </button>
                                 </div>
                             </div>
-                            {
-                                (this.state.isModalOpen === true) &&
-                                <ErrorModalOneButton  isOpen={this.state.isModalOpen } errorMsg={this.state.errors.ModalMsg} ActionCloseButton={this.closeModal}/>
-                            }
                         </ReactTransitionGroup>
                     ):(
                         <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
                     )
                 }
+                {renderAlert}
             </>
         );
     }
