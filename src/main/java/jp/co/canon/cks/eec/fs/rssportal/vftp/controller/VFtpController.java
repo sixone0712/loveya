@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileDownloadStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.ServerInfoRepository;
-import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpConfig;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpManager;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.checker.CompatChecker;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.checker.SSSChecker;
@@ -39,8 +38,6 @@ public class VFtpController {
     ServerInfoRepository serverInfoRepository;
     @Autowired
     VFtpManager manager;
-    @Autowired
-    VFtpConfig vftpConfig;
 
     @PostMapping("/vftp/compat/getrequest")
     @ResponseBody

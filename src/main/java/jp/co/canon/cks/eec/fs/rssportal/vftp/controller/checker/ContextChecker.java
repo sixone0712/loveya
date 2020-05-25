@@ -117,7 +117,7 @@ public class ContextChecker {
                         if (data.length <= idx + 1){
                             return null;
                         }
-                        if (data[idx+1].length() > 8 || data[idx+1].length() == 0){
+                        if (data[idx+1].length() > 8){
                             return null;
                         }
                         Context ctx = new Context("DE");
@@ -130,7 +130,7 @@ public class ContextChecker {
                         if (data.length <= idx + 1){
                             return null;
                         }
-                        if (data[idx+1].length() > 8 || data[idx+1].length() == 0){
+                        if (data[idx+1].length() > 8){
                             return null;
                         }
                         Context ctx = new Context("PR");
@@ -143,7 +143,7 @@ public class ContextChecker {
                         if (data.length <= idx + 1){
                             return null;
                         }
-                        if (data[idx+1].length() > 32 || data[idx+1].length() == 0){
+                        if (data[idx+1].length() > 32){
                             return null;
                         }
                         Context ctx = new Context("LO");
@@ -207,7 +207,7 @@ public class ContextChecker {
                         if (data.length <= idx + 1){
                             return null;
                         }
-                        if (data[idx+1].length() > 16 || data[idx+1].length() == 0){
+                        if (data[idx+1].length() > 16){
                             return null;
                         }
                         Context ctx = new Context("G");

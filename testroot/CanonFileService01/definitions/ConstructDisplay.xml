@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ConstructDisplay>
+    <Tree name="Equipments">
+        <Child id="1" name="Fab1"/>
+        <Child id="2" name="Fab2"/>
+    </Tree>
+    <Tree id="3" name="Systems"/>
+</ConstructDisplay>

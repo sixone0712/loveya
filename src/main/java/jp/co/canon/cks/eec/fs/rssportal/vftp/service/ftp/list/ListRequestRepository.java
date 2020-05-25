@@ -6,31 +6,32 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpConfig;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.RequestRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class ListRequestRepository extends RequestRepository{
-    VFtpConfig vftpconfig;
+    @Value("${rssportal.vftp.directory.request}")
+    private String requestFileRootDirectory;
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private static String requestInfoFileName = "requestInfo.json";
     private String rootDir = ".";
 
-    @Autowired
-    public ListRequestRepository(VFtpConfig vftpconfig){
-        this.vftpconfig = vftpconfig;
-        this.rootDir = vftpconfig.getRequestFileRootDirectory() + "/LIST";
+    @PostConstruct
+    private void init(){
+        this.rootDir = requestFileRootDirectory + "/LIST";
     }
 
     @Override

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TimeChecker {
+    private TimeChecker(){}
     public static Date checkDateString(String dateString){
         Date date = null;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -18,7 +19,7 @@ public class TimeChecker {
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e){
-
+            date = null;
         }
         return date;
     }

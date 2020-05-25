@@ -3,18 +3,20 @@ package jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileDownloadStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpManager;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get.GetFileParamList;
-//import lombok.extern.slf4j.Slf4j;
 
-//@Slf4j
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class FtpManagerTest {
     @Autowired
     VFtpManager manager;
+    /*
     @Test
     public void test_001() {
         String requestNo;
@@ -34,7 +36,8 @@ public class FtpManagerTest {
             }
         }
     }
-
+    */
+/*
     @Test
     public void test_002() {
         String requestNo;
@@ -55,4 +58,5 @@ public class FtpManagerTest {
             }
         }        
     }
+    */
 }

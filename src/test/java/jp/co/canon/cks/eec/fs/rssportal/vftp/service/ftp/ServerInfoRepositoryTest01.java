@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
 import jp.co.canon.cks.eec.fs.rssportal.vftp.ServerInfoRepository;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class ServerInfoRepositoryTest {
+public class ServerInfoRepositoryTest01 {
     @Autowired
     ServerInfoRepository serverInfoRepository;
     
@@ -39,5 +40,8 @@ public class ServerInfoRepositoryTest {
 
         serverName = serverInfoRepository.getServerNameByDevice("MPA_6");
         Assertions.assertEquals("OTS02_FS", serverName);
+
+        serverName = serverInfoRepository.getServerNameByDevice("AAAA");
+        Assertions.assertNull(serverName);
     } 
 }

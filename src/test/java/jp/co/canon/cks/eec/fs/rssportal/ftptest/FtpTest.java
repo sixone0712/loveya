@@ -11,6 +11,7 @@ import jp.co.canon.cks.eec.util.ftp.FTP;
 import jp.co.canon.cks.eec.util.ftp.FTPException;
 
 public class FtpTest {
+    /*
     @Test
     public void test_001() {
         boolean connected = false;
@@ -87,4 +88,5 @@ public class FtpTest {
             e.printStackTrace();
         }
     }
+    */
 }

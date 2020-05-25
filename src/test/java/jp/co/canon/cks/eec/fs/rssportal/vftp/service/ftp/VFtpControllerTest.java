@@ -53,6 +53,7 @@ public class VFtpControllerTest {
 
     @Test
     void test_004() {
+        /*
         SssListRequestParam param = new SssListRequestParam();
         param.setDirectory("IP_AS_RAW-20200514_081300-20200515_120000-DE_MPA1");
         ResponseEntity<FileListStatus> res = restTemplate.postForEntity("/vftp/sss/listrequest", param, FileListStatus.class);
@@ -68,5 +69,6 @@ public class VFtpControllerTest {
             }
             res = restTemplate.getForEntity(createdLocation, FileListStatus.class);
         }
+        */
     }
 }

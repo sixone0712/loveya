@@ -57,7 +57,7 @@ public class CollectPlanner extends Thread {
         this.service = service;
         this.downloadListService = downloadListService;
         service.addNotifier(notifyUpdate);
-        service.scheduleAllPlans();
+        //service.scheduleAllPlans();
 
         if(useVirtualFileService) {
             fileService = new VirtualFileServiceModelImpl();
