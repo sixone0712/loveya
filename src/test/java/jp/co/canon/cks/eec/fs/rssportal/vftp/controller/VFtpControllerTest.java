@@ -1,4 +1,4 @@
-package jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp;
+package jp.co.canon.cks.eec.fs.rssportal.vftp.controller;
 
 import java.net.URI;
 
@@ -18,7 +18,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus.Status;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.VFtpController.SssListRequestParam;
 
 @SpringBootTest(classes = RssportalApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("vftptest")
+@ActiveProfiles("vftptest3")
 public class VFtpControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
