@@ -24,6 +24,7 @@ public class FileDownloadContext implements DownloadConfig {
     private final String system;
     private final String tool;
     private final String logType;
+    private final String logTypeStr;
 
     private final int files;
     private final String[] fileNames;
@@ -55,6 +56,7 @@ public class FileDownloadContext implements DownloadConfig {
         this.system = form.getSystem();
         this.tool = form.getTool();
         this.logType = form.getLogType();
+        this.logTypeStr = form.getLogTypeStr();
         this.user = "eecAdmin";
         this.comment = "";
 
@@ -70,7 +72,7 @@ public class FileDownloadContext implements DownloadConfig {
             fileDates[i] = convertStringToCalendar(fileInfo.getDate());
         }
 
-        Path path = Paths.get(DownloadConfig.ROOT_PATH, id, tool, logType);
+        Path path = Paths.get(DownloadConfig.ROOT_PATH, id, tool, logTypeStr==null?logType:logTypeStr);
         this.outPath = path.toString();
 
         downloadFiles = 0;

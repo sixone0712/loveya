@@ -48,8 +48,6 @@ public class FileDownloaderController {
             return null;
         }
 
-        //param.forEach((key, value)->log.info("+ key="+key+" value="+value));
-
         Map<String, Map<String, DownloadForm>> map = new HashMap<>();
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("list");
 
@@ -58,6 +56,7 @@ public class FileDownloaderController {
             checkItem &= item.containsKey("structId");
             checkItem &= item.containsKey("machine");
             checkItem &= item.containsKey("category");
+            checkItem &= item.containsKey("categoryName");
             checkItem &= item.containsKey("file");
             checkItem &= item.containsKey("filesize");
             checkItem &= item.containsKey("date");
@@ -67,7 +66,7 @@ public class FileDownloaderController {
                         (String)item.get("structId"),
                         (String)item.get("machine"),
                         (String)item.get("category"),
-                        (String)null, // todo
+                        (String)item.get("categoryName"),
                         (String)item.get("file"),
                         (String)item.get("filesize"),
                         (String)item.get("date"));

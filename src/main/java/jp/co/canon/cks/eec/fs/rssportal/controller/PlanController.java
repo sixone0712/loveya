@@ -80,8 +80,9 @@ public class PlanController {
 
     @RequestMapping("/list")
     @ResponseBody
-    public ResponseEntity<List<CollectPlanVo>> listPlan(@RequestParam Map<String, Object> param) {
-        log.info("request \"/plan/list\"");
+    public ResponseEntity<List<CollectPlanVo>> listPlan(HttpServletRequest request,
+                                                        @RequestParam Map<String, Object> param) {
+        log.info(String.format("request \"%s\"", request.getServletPath()));
         if(checkSession()==false) {
             log.error("unauthorized session");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -102,8 +103,8 @@ public class PlanController {
 
     @RequestMapping("/delete")
     @ResponseBody
-    public ResponseEntity deletePlan(@RequestParam(name="id") int id) {
-        log.info("request \"plan/delete\" [id="+id+"]");
+    public ResponseEntity deletePlan(HttpServletRequest request, @RequestParam(name="id") int id) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
@@ -114,8 +115,10 @@ public class PlanController {
     }
 
     @RequestMapping("/download")
-    public ResponseEntity<InputStreamResource> download(@RequestParam(name="id") int id, HttpServletResponse response) {
-        log.info("request \"plan/download\" [id="+id+"]");
+    public ResponseEntity<InputStreamResource> download(HttpServletRequest request,
+                                                        HttpServletResponse response,
+                                                        @RequestParam(name="id") int id) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         if(checkSession()==false)
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
@@ -157,8 +160,9 @@ public class PlanController {
 
     @RequestMapping("/modify")
     @ResponseBody
-    public ResponseEntity<Integer> modify(@RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
-        log.info("request \"plan/modify\" [id="+id+"]");
+    public ResponseEntity<Integer> modify(HttpServletRequest request,
+                                          @RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
+        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
         CollectPlanVo plan = service.getPlan(id);
         if(plan==null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
