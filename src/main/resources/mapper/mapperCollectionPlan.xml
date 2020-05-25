@@ -6,6 +6,7 @@
     <sql id="selectFields">
         id,
         planname,
+        fab,
         tool,
         logtype,
         logtypestr as logTypeStr,
@@ -61,6 +62,7 @@
         insert into rsss."collection_plan" (
             id,
             planname,
+            fab,
             tool,
             logtype,
             logtypestr,
@@ -77,6 +79,7 @@
         ) values (
             #{id},
             #{planName},
+            #{fab},
             #{tool},
             #{logType},
             #{logTypeStr},

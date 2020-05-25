@@ -11,6 +11,7 @@ import java.util.List;
 public interface CollectPlanService {
 
     int addPlan(String planName,
+                List<String> fabs,
                 List<String> tools,
                 List<String> logTypes,
                 List<String> logTypeStr,
@@ -23,6 +24,7 @@ public interface CollectPlanService {
 
     @Deprecated
     boolean modifyPlan(int planId,
+                       List<String> fabs,
                        List<String> tools,
                        List<String> logTypes,
                        List<String> logTypeStr,

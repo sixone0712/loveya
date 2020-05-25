@@ -7,6 +7,7 @@ public class CollectPlanVo {
 
     private int id;
     private String planName;
+    private String fab;
     private String tool;
     private String logType;
     private String logTypeStr;
@@ -55,6 +56,14 @@ public class CollectPlanVo {
 
     public void setPlanName(String planName) {
         this.planName = planName;
+    }
+
+    public String getFab() {
+        return fab;
+    }
+
+    public void setFab(String fab) {
+        this.fab = fab;
     }
 
     public String getTool() {
