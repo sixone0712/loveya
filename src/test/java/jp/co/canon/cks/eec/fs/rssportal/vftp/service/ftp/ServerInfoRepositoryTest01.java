@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.ServerInfoRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles("vftptest")
 public class ServerInfoRepositoryTest01 {
     @Autowired
     ServerInfoRepository serverInfoRepository;

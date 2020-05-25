@@ -18,7 +18,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus.Status;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.VFtpController.SssListRequestParam;
 
 @SpringBootTest(classes = RssportalApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles("vftptest")
 public class VFtpControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;

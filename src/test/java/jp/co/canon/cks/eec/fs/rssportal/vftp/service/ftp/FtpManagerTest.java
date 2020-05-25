@@ -12,7 +12,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpManager;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get.GetFileParamList;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles("vftptest")
 public class FtpManagerTest {
     @Autowired
     VFtpManager manager;
