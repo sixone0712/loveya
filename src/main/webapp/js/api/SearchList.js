@@ -83,6 +83,7 @@ export const requestDownload = async (props) => {
             structId: cur.structId,
             machine: cur.targetName,
             category: cur.logId,
+            categoryName: cur.logName,
             file: cur.fileName,
             filesize: String(cur.fileSize),
             date: cur.fileDate,
