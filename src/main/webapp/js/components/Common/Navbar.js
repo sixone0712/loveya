@@ -93,7 +93,7 @@ class RSSNavbar extends Component{
           console.log("invalid type!!");
           break;
       }
-    }, 800);
+    }, 200);
   }
 
   closeAlert = () => {

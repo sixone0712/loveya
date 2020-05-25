@@ -403,7 +403,7 @@ class RSSAutoDownloadList extends Component {
                                         return (
                                             <tr key={idx}>
                                                 <td>
-                                                    <div className="request-id-area"
+                                                    <span className="request-id-area"
                                                          onClick={ () => {
                                                              this.setState({
                                                                  ...this.state,
@@ -413,7 +413,7 @@ class RSSAutoDownloadList extends Component {
                                                              });
                                                          }}>
                                                         {request.requestId}
-                                                    </div>
+                                                    </span>
                                                 </td>
                                                 <td>{CreateStatus(request.requestStatus)}</td>
                                                 <td>

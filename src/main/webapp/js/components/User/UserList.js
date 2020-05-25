@@ -87,7 +87,7 @@ class UserList extends Component {
                     console.log("invalid type!!");
                     break;
             }
-        }, 800);
+        }, 200);
     };
 
     closeAlert = () => {
@@ -172,21 +172,33 @@ class UserList extends Component {
         console.log(UserList);
         if (count === 0) {
             return (
-                <Card className="auto-plan-box">
-                    <CardHeader className="auto-plan-card-header">
-                        User List
-                    </CardHeader>
-                    <CardBody className="auto-plan-card-body">
-                        <Col className="auto-plan-collection-list">
-                            <p className="no-registered-plan">
-                                <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
-                            </p>
-                            <p className="no-registered-plan">
-                                No registered User List
-                            </p>
-                        </Col>
-                    </CardBody>
-                </Card>
+                <>
+                    <Container className="rss-container" fluid={true}>
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Administrator</BreadcrumbItem>
+                            <BreadcrumbItem active>User Account</BreadcrumbItem>
+                        </Breadcrumb>
+                        <Card className="auto-plan-box">
+                            <CardHeader className="auto-plan-card-header">
+                                User Account
+                            </CardHeader>
+                            <CardBody className="auto-plan-card-body">
+                                <Col className="auto-plan-collection-list">
+                                    <p className="no-registered-plan">
+                                        <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                                    </p>
+                                    <p className="no-registered-plan">
+                                        No registered User List
+                                    </p>
+                                </Col>
+                            </CardBody>
+                        </Card>
+                    </Container>
+                    <Footer/>
+                    <ScrollToTop showUnder={160} style={scrollStyle}>
+                        <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                    </ScrollToTop>
+                </>
             );
         } else {
             const { currentPage, pageSize, isConfirmOpen, selected } = this.state;
@@ -254,9 +266,9 @@ class UserList extends Component {
                                                     <td>{idx+1}</td>
                                                     <td>{user.name}</td>
                                                     <td>
-                                                        <a href="#" onClick={()=> this.uChangeAuth(user.id)} className="permission">
+                                                        <span onClick={()=> this.uChangeAuth(user.id)} className="permission">
                                                           {user.auth}
-                                                        </a>
+                                                        </span>
                                                     </td>
                                                     <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
                                                     <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>

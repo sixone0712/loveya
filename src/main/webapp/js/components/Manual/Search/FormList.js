@@ -89,11 +89,11 @@ class FormList extends Component{
         const errCode = await API.setSearchList(this.props);
 
         if (this.onSetErrorState(errCode)) {
-            this.openModal(modalType.ALERT);
+            await this.openModal(modalType.ALERT);
             return;
         }
 
-        this.openModal(modalType.PROCESS);
+        await this.openModal(modalType.PROCESS);
 
         API.startSearchList(this.props);
 
@@ -152,7 +152,7 @@ class FormList extends Component{
                         isAlertOpen: true,
                         alertMsg: "Search was canceled."
                     });
-                }, 500);
+                }, 200);
                 break;
 
             default:

@@ -6,28 +6,29 @@ import {bindActionCreators} from "redux";
 import * as dwHistoryAction from "../../modules/dwHistory";
 import { Select } from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheckCircle, faUser, faExclamationCircle, faPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {
+    faCheckCircle,
+    faUser,
+    faExclamationCircle,
+    faPlus,
+    faTrashAlt,
+    faAngleDoubleUp
+} from "@fortawesome/free-solid-svg-icons";
 import {filePaginate, renderPagination} from "../Common/Pagination";
+import Footer from "../Common/Footer";
+import ScrollToTop from "react-scroll-up";
 import moment from "moment";
 
 const { Option } = Select;
 
-function HistoryListEmpty(props) {
-    return (
-        <Card className="auto-plan-box">
-            <CardBody className="auto-plan-card-body">
-                <Col className="auto-plan-collection-list">
-                    <p className="no-registered-plan">
-                        <FontAwesomeIcon icon={faExclamationCircle} size="7x"/>
-                    </p>
-                    <p className="no-registered-plan">
-                        No registered Download History
-                    </p>
-                </Col>
-            </CardBody>
-        </Card>
-    );
-}
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
 
 class DownloadHistory extends Component {
     constructor(props) {
@@ -80,26 +81,34 @@ class DownloadHistory extends Component {
 
         if (count === 0) {
          return (
-             <Card className="auto-plan-box">
-                 <Breadcrumb className="topic-path">
-                     <BreadcrumbItem>Administrator</BreadcrumbItem>
-                     <BreadcrumbItem active>Download History</BreadcrumbItem>
-                 </Breadcrumb>
-                 <CardHeader className="auto-plan-card-header">
-                     Download History
-                     <p>Check the <span>user's download history.</span></p>
-                 </CardHeader>
-                 <CardBody className="auto-plan-card-body">
-                     <Col className="auto-plan-collection-list">
-                         <p className="no-registered-plan">
-                             <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
-                         </p>
-                         <p className="no-registered-plan">
-                             No registered user's download history.
-                         </p>
-                     </Col>
-                 </CardBody>
-             </Card>
+             <>
+                 <Container className="rss-container" fluid={true}>
+                     <Breadcrumb className="topic-path">
+                         <BreadcrumbItem>Administrator</BreadcrumbItem>
+                         <BreadcrumbItem active>Download History</BreadcrumbItem>
+                     </Breadcrumb>
+                     <Card className="auto-plan-box">
+                         <CardHeader className="auto-plan-card-header">
+                             Download History
+                             <p>Check the <span>user's download history.</span></p>
+                         </CardHeader>
+                         <CardBody className="auto-plan-card-body">
+                             <Col className="auto-plan-collection-list">
+                                 <p className="no-registered-plan">
+                                     <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                                 </p>
+                                 <p className="no-registered-plan">
+                                     No registered user's download history.
+                                 </p>
+                             </Col>
+                         </CardBody>
+                     </Card>
+                 </Container>
+                 <ScrollToTop showUnder={160} style={scrollStyle}>
+                     <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                 </ScrollToTop>
+                 <Footer/>
+             </>
          );
         } else {
             return (
@@ -154,6 +163,10 @@ class DownloadHistory extends Component {
                             {pagination}
                         </Card>
                     </Container>
+                    <ScrollToTop showUnder={160} style={scrollStyle}>
+                        <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                    </ScrollToTop>
+                    <Footer/>
                 </>
             );
         }

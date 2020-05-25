@@ -430,7 +430,7 @@ a:hover {
 .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     position: relative;
     background-color: #fff;
-    border: 1px solid #d9d9d9;
+    border: 1px solid rgb(92, 124, 250);
     border-radius: 3px;
     -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -442,7 +442,7 @@ a:hover {
     border: 1px solid rgb(23, 162, 184);
 }
 
-.flielist .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+.filelist-item-area .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     border: 1px solid rgb(133, 164, 179);
 }
 
@@ -548,7 +548,7 @@ a:hover {
 
 .ant-select-arrow {
     display: inline-block;
-    /* color: inherit; */
+    color: rgb(92, 124, 250);
     font-style: normal;
     line-height: 0;
     text-transform: none;
@@ -2150,14 +2150,9 @@ a:hover {
     animation-direction: alternate;
 }
 
-.auto-plan-collection-list table tbody tr td > .plan-id-area {
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
-}
-
+.auto-plan-collection-list table tbody tr td > .plan-id-area,
 .auto-plan-collection-list table tbody tr td > .request-id-area {
-    width: 40%;
-    display: inline-block;
+    padding: .3em 1em;
     -webkit-transition: all 0.3s;
     transition: all 0.3s;
 }
@@ -2166,7 +2161,6 @@ a:hover {
 .auto-plan-collection-list table tbody tr td > .plan-id-area:hover {
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 3px;
-    cursor: pointer;
 }
 
 .auto-plan-collection-list table tbody tr td > .icon-area {
@@ -2191,24 +2185,24 @@ a:hover {
     left: 1px;
 }
 
-.auto-plan-collection-list table tbody tr td > svg.stopped,
+.auto-plan-collection-list table tbody tr td div > svg.stopped,
 .auto-plan-collection-list table tbody tr td > svg.failed {
     color: rgb(201, 42, 42);
 }
 
-.auto-plan-collection-list table tbody tr td > svg.running,
-.auto-plan-collection-list table tbody tr td > svg.completed {
+.auto-plan-collection-list table tbody tr td div > svg.running,
+.auto-plan-collection-list table tbody tr td div > svg.completed {
     color: rgb(47, 158, 68);
 }
 
-.auto-plan-collection-list table tbody tr td > svg.running {
+.auto-plan-collection-list table tbody tr td div > svg.running {
     -webkit-animation: changeOpacity 0.7s infinite;
     animation: changeOpacity 0.7s infinite;
     -webkit-animation-direction: alternate;
     animation-direction: alternate;
 }
 
-.auto-plan-collection-list table tbody tr td > a.permission {
+.auto-plan-collection-list table tbody tr td > .permission {
     color: #212529;
     padding: .3em 1em;
     border-radius: 3px;
@@ -2216,7 +2210,7 @@ a:hover {
     transition: all 0.2s;
 }
 
-.auto-plan-collection-list table tbody tr td > a.permission:hover {
+.auto-plan-collection-list table tbody tr td > .permission:hover {
     background-color: rgba(92, 124, 250, 0.2);
 }
 /* auto download style end */

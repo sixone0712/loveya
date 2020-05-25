@@ -30,7 +30,9 @@ import {message} from "antd";
 const { Option } = Select;
 
 const messageType = {
-    CONFIRM_MESSAGE: "Are you sure you want to delete this collection plan?",
+    CONFIRM_DELETE_MESSAGE: "Are you sure you want to delete this collection plan?",
+    CONFIRM_STOP_MESSAGE: "Are you sure you want to stop this collection plan?",
+    CONFIRM_START_MESSAGE: "Are you sure you want to run this collection plan?",
     EDIT_ALERT_MESSAGE: "Because of the current collecting it can not be edited.",
     DELETE_ALERT_MESSAGE: "Because of the current collecting it can not be deleted."
 };
@@ -85,10 +87,13 @@ class RSSautoplanlist extends Component {
             ],
             pageSize: 10,
             currentPage: 1,
-            isConfirmOpen: false,
+            isDeleteOpen: false,
+            isStatusOpen: false,
             isAlertOpen: false,
             alertMessage: "",
+            statusMessage: "",
             selectedPlanId: "",
+            selectedPlanStatus: ""
         };
     }
 
@@ -109,7 +114,7 @@ class RSSautoplanlist extends Component {
                     planTarget: targetArray.length,
                     planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
                     planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: item.status,
+                    planStatus: item.stop,
                     planLastRun: item.lastCollect == null ? "-" : moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),
                     planDetail: item.detail,
                     id: item.id,
@@ -134,7 +139,8 @@ class RSSautoplanlist extends Component {
     }
 
     setEditPlanList = (id, status) => {
-        if (status === statusType.RUNNING) {
+        //if (status === statusType.RUNNING) {
+        if (!status) {
             this.openAlert(messageType.EDIT_ALERT_MESSAGE);
         } else {
             console.log("[AUTO][setEditPlanList]setEditPlanList");
@@ -160,19 +166,20 @@ class RSSautoplanlist extends Component {
         }
     }
 
-    openModal = async (planId, status) => {
-        if (status === statusType.RUNNING) {
+    openDeleteModal = async (planId, status) => {
+        //if (status === statusType.RUNNING) {
+        if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
         } else {
             await this.setState({
                 ...this.state,
-                isConfirmOpen: true,
+                isDeleteOpen: true,
                 selectedPlanId: planId,
             });
         }
     };
 
-    closeModal = async (deleting, selectedPlanId) => {
+    closeDeleteModal = async (deleting, selectedPlanId) => {
         let res;
         if(deleting) {
             res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
@@ -180,12 +187,39 @@ class RSSautoplanlist extends Component {
 
         await this.setState({
             ...this.state,
-            isConfirmOpen: false,
+            isDeleteOpen: false,
             selectedPlanId: ""
         });
 
         setTimeout(this.loadPlanList, 300);
     };
+
+    openStatusModal = (status, planId) => {
+        if(!status) {
+            this.setState({
+                isStatusOpen: true,
+                statusMessage: messageType.CONFIRM_STOP_MESSAGE,
+                selectedPlanId: planId,
+                selectedPlanStatus: statusType.RUNNING
+            });
+        } else {
+            this.setState({
+                isStatusOpen: true,
+                statusMessage: messageType.CONFIRM_START_MESSAGE,
+                selectedPlanId: planId,
+                selectedPlanStatus: statusType.STOPPED
+            });
+        }
+    }
+
+    closeStatusModal = () => {
+        this.setState({
+           isStatusOpen: false,
+           statusMessage: "",
+           selectedPlanId: "",
+           selectedPlanStatus: ""
+        });
+    }
 
     openAlert = (message) => {
         this.setState({
@@ -229,6 +263,24 @@ class RSSautoplanlist extends Component {
         await this.loadPlanList();
     }
 
+    handleStatusChange = async (status, planId) => {
+        switch(status) {
+            case statusType.RUNNING:
+                await this.stopDownload(planId);
+                break;
+
+            case statusType.STOPPED:
+                await this.restartDownload(planId);
+                break;
+
+            default:
+                console.log("[planlist.js] plan status error!!!");
+                break;
+        }
+
+        this.closeStatusModal();
+    }
+
     render() {
         const { registeredList } = this.state;
         const { length: count } = registeredList;
@@ -255,7 +307,7 @@ class RSSautoplanlist extends Component {
                 </Card>
             );
         } else {
-            const { currentPage, pageSize, isConfirmOpen, isAlertOpen, alertMessage, selectedPlanId } = this.state;
+            const { currentPage, pageSize, isStatusOpen, isDeleteOpen, isAlertOpen, alertMessage, statusMessage, selectedPlanId, selectedPlanStatus } = this.state;
             const plans = filePaginate(registeredList, currentPage, pageSize);
             const pagination = renderPagination(
                 pageSize,
@@ -265,14 +317,24 @@ class RSSautoplanlist extends Component {
                 "custom-pagination"
             );
 
-            const renderConfirmModal = ConfirmModal(
-                isConfirmOpen,
-                faTrashAlt,
-                messageType.CONFIRM_MESSAGE,
+            const renderStatusModal = ConfirmModal(
+                isStatusOpen,
+                faExclamationCircle,
+                statusMessage,
                 "auto-plan",
-                () => this.closeModal(false, selectedPlanId),
-                () => this.closeModal(true, selectedPlanId),
-                () => this.closeModal(false, selectedPlanId)
+                this.closeStatusModal,
+                () => this.handleStatusChange(selectedPlanStatus, selectedPlanId),
+                this.closeStatusModal
+            );
+
+            const renderDeleteModal = ConfirmModal(
+                isDeleteOpen,
+                faTrashAlt,
+                messageType.CONFIRM_DELETE_MESSAGE,
+                "auto-plan",
+                () => this.closeDeleteModal(false, selectedPlanId),
+                () => this.closeDeleteModal(true, selectedPlanId),
+                () => this.closeDeleteModal(false, selectedPlanId)
             );
 
             const renderAlertModal = AlertModal(
@@ -284,7 +346,8 @@ class RSSautoplanlist extends Component {
 
             return (
                 <>
-                    {renderConfirmModal}
+                    {renderStatusModal}
+                    {renderDeleteModal}
                     {renderAlertModal}
                     <Card className="auto-plan-box">
                         <CardHeader className="auto-plan-card-header">
@@ -324,10 +387,11 @@ class RSSautoplanlist extends Component {
                                     </thead>
                                     <tbody>
                                     {plans.map((plan, idx) => {
+                                        const renderStatus = CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id));
                                         return (
                                             <tr key={idx}>
                                                 <td>
-                                                    <div
+                                                    <span
                                                         className="plan-id-area"
                                                         onClick={ () => {
                                                             const param = `?id=${plan.id}&name=${plan.planId}`;
@@ -335,12 +399,12 @@ class RSSautoplanlist extends Component {
                                                         }}
                                                     >
                                                         {plan.planId}
-                                                    </div>
+                                                    </span>
                                                 </td>
                                                 <td>{plan.planDescription}</td>
                                                 <td>{plan.planTarget}</td>
                                                 <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
-                                                <td>{CreateStatus(plan.planStatus)}</td>
+                                                <td>{renderStatus}</td>
                                                 <td>{plan.planLastRun}</td>
                                                 <td>{CreateDetail(plan.planDetail)}</td>
                                                 <td>
@@ -354,7 +418,7 @@ class RSSautoplanlist extends Component {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openModal(plan.id, plan.planStatus) }>
+                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>
@@ -373,15 +437,22 @@ class RSSautoplanlist extends Component {
     }
 }
 
-function CreateStatus(status) {
+function CreateStatus(status, modalOpen) {
     let component = null;
+    /*
     switch (status) {
         case statusType.RUNNING:
-            component = (<><FontAwesomeIcon className="running" icon={faPlay} /> Running</>);    break;
+            component = <div onClick={stop}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;    break;
         case statusType.STOPPED:
-            component = (<><FontAwesomeIcon className="stopped" icon={faStop} /> Stopped</>);    break;
+            component = <div onClick={start}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;    break;
         default:
             console.error("plan detail error");   break;
+    }
+    */
+    if (!status) {
+        component = <div onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;
+    } else {
+        component = <div onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;
     }
 
     return component;
