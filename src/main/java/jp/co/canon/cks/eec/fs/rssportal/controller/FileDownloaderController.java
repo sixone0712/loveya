@@ -108,7 +108,7 @@ public class FileDownloaderController {
             @RequestParam(value="dlId", defaultValue="") String dlId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        log.info(String.format("request \"%s?dlId=%d\"", request.getServletPath(), dlId));
+        log.info(String.format("request \"%s?dlId=%s\"", request.getServletPath(), dlId));
         if(dlId.isEmpty()) {
             log.error("invalid param");
             return null;

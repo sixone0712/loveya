@@ -180,7 +180,7 @@ class FileList extends Component {
 
     if(isSave) {
       const { downloadStatus } = this.props;
-      result = await services.axiosAPI.downloadFile("/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      result = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
       this.setErrorStatus(result);
     }
     // Initialize state
