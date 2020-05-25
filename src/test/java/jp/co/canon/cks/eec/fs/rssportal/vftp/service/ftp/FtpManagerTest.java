@@ -8,9 +8,9 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.FileDownloadStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpManager;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get.GetFileParamList;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+//@Slf4j
 @SpringBootTest
 public class FtpManagerTest {
     @Autowired

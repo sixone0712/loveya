@@ -8,13 +8,12 @@ plugins {
 
 // Build War
 /*
-rssportalWar {
-    archiveBaseName = '-'
-    archiveFileName = '-.war'
-    archiveVersion = "0.0.0"
+bootWar {
+    archiveBaseName = 'rssportal'
+    archiveFileName = 'rssportal.war'
+    archiveVersion = "0.0.1"
 }
-*/
-
+ */
 
 group = 'jp.co.canon.cks.eec.fs'
 version = '0.0.1-SNAPSHOT'

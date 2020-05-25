@@ -11,9 +11,8 @@ module.exports = (env, options) => {
         devtool: 'source-map',
         cache: true,
         output: {
-            //path: path.resolve('./src/main/webapp/dist'),
-            path: path.resolve('./src/main/resources/static'),
-            filename: 'index.bundle.[hash].js'
+            path: path.resolve('./src/main/resources/static/rss'),
+            filename: 'index.bundle.[hash].js',
         },
         mode: options.mode === 'production' ? 'production' : 'development',
         module: {
@@ -52,11 +51,12 @@ module.exports = (env, options) => {
                 banner: () => `Build Date: ${new Date().toLocaleString()}\n`
             }),
             new HtmlWebpackPlugin({
-                template: './src/main/webapp/index.html', // ÅÛÇÃ¸´ °æ·Î¸¦ ÁöÁ¤
+                template: './src/main/webapp/index.html', // ï¿½ï¿½ï¿½Ã¸ï¿½ ï¿½ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+                filename: '../index.html'
                 /*
                 minify: process.env.NODE_ENV === 'production' ? {
-                    collapseWhitespace: true, // ºóÄ­ Á¦°Å
-                    removeComments: true, // ÁÖ¼® Á¦°Å
+                    collapseWhitespace: true, // ï¿½ï¿½Ä­ ï¿½ï¿½ï¿½ï¿½
+                    removeComments: true, // ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½
                 } : false,
                 */
             }),
