@@ -46,7 +46,7 @@ export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList("/soap/createFileList", requestList.toJS());
+    searchListActions.searchLoadResponseList(Define.REST_API_URL + "/soap/createFileList", requestList.toJS());
 };
 
 export const getResponseList = (props) => {
@@ -96,7 +96,7 @@ export const requestDownload = async (props) => {
     console.log("downloadList", downloadList);
     console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.post("/dl/request", jsonList)
+    const result = await services.axiosAPI.post(Define.REST_API_URL + "/dl/request", jsonList)
         .then((data) => {console.log("data", data); return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
@@ -165,7 +165,7 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
         let { func } = downloadStatus;
         if(func === null) return;
 
-        const res = await services.axiosAPI.get("/dl/status?dlId=" + requestId)
+        const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/status?dlId=" + requestId)
             .then(res => res)
             .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
 

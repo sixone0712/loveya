@@ -52,7 +52,7 @@ class Login extends Component {
         let errCode = this.handleSubmit();
         if (!errCode)
         {
-            await API.startLoginAuth(this.props, `/user/login?user=${this.state.username}&password=${md5(this.state.password)}`);
+            await API.startLoginAuth(this.props, `${Define.REST_API_URL}/user/login?user=${this.state.username}&password=${md5(this.state.password)}`);
             const isLoggedIn = API.getLoginIsLoggedIn(this.props);
             const errCode = API.getErrCode(this.props);
             console.log("isLoggedIn", isLoggedIn);

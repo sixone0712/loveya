@@ -1,7 +1,8 @@
+import * as Define from '../define';
 
 export const getDBDwHistoryList = (props) => {
     const { dwHistoryAction } = props;
-    return dwHistoryAction.loadDwHistoryList(`/dwHistory/getHistoryList`);
+    return dwHistoryAction.loadDwHistoryList(`${Define.REST_API_URL}/dwHistory/getHistoryList`);
 
 };
 export const getDwHistoryList = (props) => {

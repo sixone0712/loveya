@@ -30,12 +30,12 @@ export const addCommand = (props, name, type) => {
     if(name.length <= 0) {
         return Define.COMMAND_FAIL_EMPTY_NAME;
     }
-    return CmdActions.addCommand(`/cmd/add?cmd_name=${name}&cmd_type=${type}`);
+    return CmdActions.addCommand(`${Define.REST_API_URL}/cmd/add?cmd_name=${name}&cmd_type=${type}`);
 };
 
 export const deleteCommand = (props, id) => {
     const { CmdActions } = props;
-    return CmdActions.deleteCommand(`/cmd/delete?id=${id}`);
+    return CmdActions.deleteCommand(`${Define.REST_API_URL}/cmd/delete?id=${id}`);
 };
 
 export const updateCommand = (props, url) => {
@@ -45,7 +45,7 @@ export const updateCommand = (props, url) => {
 
 export const getDBCommandList = (props, type) => {
     const { CmdActions } = props;
-    return CmdActions.getCommandList(`/cmd/getList?cmd_type=${type}`);
+    return CmdActions.getCommandList(`${Define.REST_API_URL}/cmd/getList?cmd_type=${type}`);
 };
 
 export const setCmdStartDate = (props, date) => {

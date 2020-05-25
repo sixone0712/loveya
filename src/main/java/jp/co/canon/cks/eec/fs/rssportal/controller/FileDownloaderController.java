@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
+@RequestMapping("/rss/rest/dl")
 public class FileDownloaderController {
 
     private final HttpSession session;
@@ -38,7 +39,7 @@ public class FileDownloaderController {
         this.fileDownloader = fileDownloader;
     }
 
-    @RequestMapping(value="dl/request")
+    @RequestMapping(value="/request")
     @ResponseBody
     public String request(@RequestBody Map<String, Object> param) {
 
@@ -78,7 +79,7 @@ public class FileDownloaderController {
         return dlId;
     }
 
-    @RequestMapping("dl/status")
+    @RequestMapping("/status")
     @ResponseBody
     public DownloadStatusResponseBody getStatus(@RequestParam Map<String, Object> param) {
 
@@ -96,7 +97,7 @@ public class FileDownloaderController {
         return new DownloadStatusResponseBody(fileDownloader, dlId);
     }
 
-    @RequestMapping("dl/download")
+    @RequestMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(
             @RequestParam(value="dlId", defaultValue="") String dlId,
             HttpServletResponse response) {
@@ -135,7 +136,7 @@ public class FileDownloaderController {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping("/dl/cancel")
+    @RequestMapping("/cancel")
     @ResponseBody
     public ResponseEntity<String> cancelDownload(@RequestParam(value="dlId") String downloadId) {
         log.info("request \"/dl/cancel\" ("+"(dlId="+downloadId+")");

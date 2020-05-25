@@ -31,7 +31,7 @@ export const addGenreList = async (props, name) => {
     sendData.name = name;
     sendData.category = fileCatStr;
 
-    const { data } = await genreListActions.genreSetDbList("/db/genre/add", sendData)
+    const { data } = await genreListActions.genreSetDbList(Define.REST_API_URL + "/db/genre/add", sendData)
     console.log("data", data)
     const { result } = data;
     console.log("result", result);
@@ -45,7 +45,7 @@ export const deleteGenreList = async (props, id) => {
     const sendData = new Object();
     sendData.id = id;
 
-    const { data } = await genreListActions.genreSetDbList("/db/genre/delete", sendData);
+    const { data } = await genreListActions.genreSetDbList(Define.REST_API_URL + "/db/genre/delete", sendData);
     console.log("data", data)
     const { result } = data;
     console.log("result", result);
@@ -77,7 +77,7 @@ export const editGenreList = async (props, id, name) => {
     sendData.name = name;
     sendData.category = fileCatStr;
 
-    const { data } = await genreListActions.genreSetDbList("/db/genre/modify", sendData)
+    const { data } = await genreListActions.genreSetDbList(Define.REST_API_URL + "/db/genre/modify", sendData)
     console.log("data", data)
     const { result } = data;
     console.log("result", result);

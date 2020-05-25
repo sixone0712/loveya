@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/rss/rest/user")
 public class UserController {
     private final String USER_RESULT = "result";
     private final String USER_DATA = "data";

@@ -72,7 +72,7 @@ class ChangePwModal extends Component {
 
         if(!isError) {
             const username = window.sessionStorage.getItem('username');
-            API.changePassword(this.props, `/user/changePw?username=${username}&password=${md5(newPw)}`);
+            API.changePassword(this.props, `${Define.REST_API_URL}/user/changePw?username=${username}&password=${md5(newPw)}`);
             window.sessionStorage.setItem('password', newPw);
             API.setLoginPassword(this.props, newPw);
             this.props.right(); //pw change modal Close

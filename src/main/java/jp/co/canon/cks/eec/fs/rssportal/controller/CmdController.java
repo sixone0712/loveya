@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/cmd")
+@RequestMapping("/rss/rest/cmd")
 public class CmdController {
 
     private final HttpSession httpSession;

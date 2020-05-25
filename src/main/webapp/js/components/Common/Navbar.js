@@ -116,7 +116,7 @@ class RSSNavbar extends Component{
     window.sessionStorage.removeItem('password');
     window.sessionStorage.removeItem('auth');
     await API.setLoginInit(this.props);
-    await services.axiosAPI.get("/user/logout");
+    await services.axiosAPI.get(Define.REST_API_URL + "/user/logout");
     this.props.onMovePage(Define.PAGE_LOGIN)
   };
 
