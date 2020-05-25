@@ -100,12 +100,14 @@ class RSSautoplanwizard extends Component {
     const newToolInfoList = toolInfoListJS.filter(item => item.checked === true);
     const newLogInfoList = logInfoListJS.filter(item => item.checked === true);
 
+    const structId = newToolInfoList.map(item => item.structId);
     const tools = newToolInfoList.map(item => item.targetname);
     const logTypes = newLogInfoList.map(item => item.logCode);
     const logNames = newLogInfoList.map(item => item.logName);
 
     const reqData = {
       planId: planId,
+      structId: structId,
       tools: tools,
       logTypes: logTypes,
       logNames: logNames,

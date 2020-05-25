@@ -245,7 +245,7 @@ class FileList extends Component {
       result = await services.axiosAPI.downloadFile("/dl/download?dlId=" + downloadStatus.toJS().dlId);
       this.setErrorStatus(result);
     }
-    // 상태 초기화
+    // Initialize state
     const { searchListActions } = this.props;
     searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
     this.setErrorStatus(Define.RSS_SUCCESS);
