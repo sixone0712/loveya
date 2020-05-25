@@ -13,8 +13,9 @@ public class RssController {
     @RequestMapping(value={"/", "/rss"})
     public String rss(Model model) {
         log.info("[RssController] rss url called");
-        model.addAttribute("pageName", "index");
-        return "page";
+        //model.addAttribute("pageName", "index");
+        //return "page";
+		return "index.html";
     }
 
     @RequestMapping(value={"/rss/page/**"})
