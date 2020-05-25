@@ -13,7 +13,6 @@ import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services"
-import * as DEFINE from "../../define";
 import moment from "moment";
 import queryString from "query-string";
 import * as Define from "../../define";
@@ -171,12 +170,12 @@ class RSSAutoDownloadList extends Component {
     saveDownloadFile = async () => {
         console.log("[DownladList][saveDownloadFile]id", this.state.download.id);
         if(this.state.download.id !== "") {
-            const res = await services.axiosAPI.downloadFile('/plan/download?id=' + this.state.download.id);
-            if(res === DEFINE.RSS_SUCCESS) {
+            const res = await services.axiosAPI.downloadFile(Define.REST_API_URL + '/plan/download?id=' + this.state.download.id);
+            if(res === Define.RSS_SUCCESS) {
                 this.closeModal();
             } else {
                 this.closeModal();
-                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                if(res === Define.COMMON_FAIL_NOT_FOUND) {
                     this.openModal(modalType.MODAL_FILE_NOT_FOUND)
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
@@ -190,7 +189,7 @@ class RSSAutoDownloadList extends Component {
     }
 
     requestDelete = async () => {
-        const res = await services.axiosAPI.get('/downloadlist/delete?id=' + this.state.delete.id)
+        const res = await services.axiosAPI.get(Define.REST_API_URL + '/downloadlist/delete?id=' + this.state.delete.id)
             .then( res  => {
                 return Define.RSS_SUCCESS;
             })
@@ -216,11 +215,11 @@ class RSSAutoDownloadList extends Component {
         if(this.state.delete.id !== "") {
             const res = await this.requestDelete();
             console.log("[DownladList][deleteDownloadFile]res", res);
-            if(res === DEFINE.RSS_SUCCESS) {
+            if(res === Define.RSS_SUCCESS) {
                 this.closeModal();
             } else {
                 this.closeModal();
-                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                if(res === Define.COMMON_FAIL_NOT_FOUND) {
                     this.openModal(modalType.MODAL_FILE_NOT_FOUND)
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
@@ -237,7 +236,7 @@ class RSSAutoDownloadList extends Component {
 
     loadDownloadList = async (id, name) => {
         let result = false;
-        const res = await services.axiosAPI.get("/downloadlist/list?planId=" + id);
+        const res = await services.axiosAPI.get(Define.REST_API_URL + "/downloadlist/list?planId=" + id);
         const { data } = res;
         console.log("[DownloadList][componentDidMount]res", res);
         let newRequestList = [];

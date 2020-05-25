@@ -130,7 +130,7 @@ class FileList extends Component {
       if(func !== null){
         clearInterval(func);
         // Reauest Cancel
-        const res = await services.axiosAPI.get("/dl/cancel?dlId=" + dlId);
+        const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/cancel?dlId=" + dlId);
         console.log("res", res)
         // 에러 처리 추가 필요
       }

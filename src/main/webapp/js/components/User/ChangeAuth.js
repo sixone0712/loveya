@@ -9,6 +9,7 @@ import * as loginActions from "../../modules/login";
 import UserAuthFrom from "../Form/UserAuthForm";
 import * as userActions from "../../modules/User";
 import AlertModal from "../Common/AlertModal";
+import * as Define from '../../define';
 
 class ChangeAuthModal extends Component {
     constructor(props) {
@@ -24,7 +25,7 @@ class ChangeAuthModal extends Component {
 
     changePermissionProcess = async id => {
         console.log("changePermission");
-        await API.changePermission(this.props, `/user/changeAuth?id=${id}&permission=${(this.state.selectedValue)}`);
+        await API.changePermission(this.props, `${Define.REST_API_URL}/user/changeAuth?id=${id}&permission=${(this.state.selectedValue)}`);
         const err = API.getErrCode(this.props);
         console.log("changePermission err: ", err);
         if (!err) {
@@ -36,8 +37,10 @@ class ChangeAuthModal extends Component {
             console.log("changePermission msg: ", msg);
             if (msg.length > 0) {
                 this.setState({
+                    ...this.state,
                     isModalOpen: true,
                     errors: {
+                        ...this.state.errors,
                         ModalMsg: msg
                     }
                 })

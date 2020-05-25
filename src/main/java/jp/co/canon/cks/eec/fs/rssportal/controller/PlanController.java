@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/plan")
+@RequestMapping("/rss/rest/plan")
 public class PlanController {
 
     private final HttpSession session;

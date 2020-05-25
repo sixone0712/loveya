@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/dwHistory")
+@RequestMapping("/rss/rest/dwHistory")
 public class DwHistoryController {
     private final String HISTORY_RESULT = "result";
     private final String HISTORY_DATA = "data";

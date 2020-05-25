@@ -10,14 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RssController {
     private Log log = LogFactory.getLog(getClass());
 
-    @RequestMapping(value={"/rss", "/rss/"})
+    @RequestMapping(value={"/", "/rss"})
     public String rss(Model model) {
         log.info("[RssController] rss url called");
-        model.addAttribute("pageName", "index");
-        return "page";
+        //model.addAttribute("pageName", "index");
+        //return "page";
+		return "index.html";
     }
 
-    @RequestMapping(value={"/rss/**"})
+    @RequestMapping(value={"/rss/page/**"})
     public String redirect() {
         log.info("[[RssController]] other url called");
         return "redirect:/rss";

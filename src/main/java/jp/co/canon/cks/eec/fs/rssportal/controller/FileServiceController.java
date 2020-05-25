@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @RestController
-@RequestMapping("/soap")
+@RequestMapping("/rss/rest/soap")
 public class FileServiceController {
 
     private final Log log = LogFactory.getLog(getClass());

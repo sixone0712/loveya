@@ -46,7 +46,7 @@ class App extends Component {
         }
         */
 
-        const res = await services.axiosAPI.isLogin("/user/isLogin");
+        const res = await services.axiosAPI.isLogin(Define.REST_API_URL + "/user/isLogin");
         console.log("[App][componentDidMount]res", res);
         const { isLogin, username, permissions} = res.data;
         await API.setLoginIsLoggedIn(this.props, isLogin);

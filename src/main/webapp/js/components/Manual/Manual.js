@@ -4,6 +4,7 @@ import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as genreListActions from "../../modules/genreList";
 import * as searchListActions from "../../modules/searchList";
+import * as Define from '../../define';
 
 import { Container, Row, Col } from "reactstrap";
 import Machinelist from "./Machine/MachineList";
@@ -39,14 +40,14 @@ class Manual extends Component {
             viewListActions.viewLoadToolInfoList("/test/createToolList");
             viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
         } else {
-            await viewListActions.viewLoadToolInfoList("/soap/createToolList");
+            await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
             const { toolInfoList } = this.props;
             const targetname = toolInfoList.getIn([0, "targetname"]);
             console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
             console.log("[Manual][componentDidMount]targetname", targetname);
-            await viewListActions.viewLoadLogTypeList("/soap/createFileTypeList?tool=" + targetname);
+            await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
         }
-        await genreListActions.genreLoadDbList("/db/genre/get");
+        await genreListActions.genreLoadDbList(Define.REST_API_URL + "/db/genre/get");
     }
 
     render() {

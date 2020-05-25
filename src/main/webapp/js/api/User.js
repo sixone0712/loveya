@@ -5,18 +5,18 @@ import md5 from 'md5-hash'
 export const createUser = (props, uinfo) => {
     const { userActions } = props;
 
-    return userActions.createUser(`/user/create?name=${uinfo.name}&pwd=${md5(uinfo.pwd)}&auth=${uinfo.authValue}`);
+    return userActions.createUser(`${Define.REST_API_URL}/user/create?name=${uinfo.name}&pwd=${md5(uinfo.pwd)}&auth=${uinfo.authValue}`);
 };
 
 export const deleteUser = (props, id) => {
     const { userActions } = props;
 
-    return userActions.deleteUser(`/user/delete?id=${id}`);
+    return userActions.deleteUser(`${Define.REST_API_URL}/user/delete?id=${id}`);
 };
 
 export const getDBUserList = (props) => {
     const { userActions } = props;
-    return userActions.loadUserList(`/user/loadUserList`);
+    return userActions.loadUserList(`${Define.REST_API_URL}/user/loadUserList`);
 };
 
 export const getUserList = (props) => {

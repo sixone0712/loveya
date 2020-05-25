@@ -11,7 +11,7 @@ import { DatetimePicker } from "rc-datetime-picker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import moment from "moment";
 import { Select } from "antd";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 
 const { Option } = Select;
 
@@ -28,15 +28,15 @@ class RSSautoformlist extends Component {
     const { autoPlanActions } = this.props;
 
     switch (idx) {
-      case DEFINE.AUTO_DATE_PERIOD_FROM:
+      case Define.AUTO_DATE_PERIOD_FROM:
         autoPlanActions.autoPlanSetFrom(moment);
         break;
 
-      case DEFINE.AUTO_DATE_PERIOD_TO:
+      case Define.AUTO_DATE_PERIOD_TO:
         autoPlanActions.autoPlanSetTo(moment);
         break;
 
-      case DEFINE.AUTO_DATE_COLLECT_START:
+      case Define.AUTO_DATE_COLLECT_START:
         autoPlanActions.autoPlanSetCollectStart(moment);
         break;
 
@@ -48,13 +48,13 @@ class RSSautoformlist extends Component {
   getDateValue = idx => {
     const { autoPlan } = this.props;
     switch (idx) {
-      case DEFINE.AUTO_DATE_PERIOD_FROM:
+      case Define.AUTO_DATE_PERIOD_FROM:
         return autoPlan.get("from");
 
-      case DEFINE.AUTO_DATE_PERIOD_TO:
+      case Define.AUTO_DATE_PERIOD_TO:
         return autoPlan.get("to");
 
-      case DEFINE.AUTO_DATE_COLLECT_START:
+      case Define.AUTO_DATE_COLLECT_START:
         return autoPlan.get("collectStart");
 
       default:
@@ -143,7 +143,7 @@ class RSSautoformlist extends Component {
                         bsSize="sm"
                         value={from.format("YYYY-MM-DD HH:mm")}
                         onClick={() =>
-                            this.openModal(DEFINE.AUTO_DATE_PERIOD_FROM)
+                            this.openModal(Define.AUTO_DATE_PERIOD_FROM)
                         }
                         readOnly
                     />
@@ -152,7 +152,7 @@ class RSSautoformlist extends Component {
                         type="text"
                         bsSize="sm"
                         value={to.format("YYYY-MM-DD HH:mm")}
-                        onClick={() => this.openModal(DEFINE.AUTO_DATE_PERIOD_TO)}
+                        onClick={() => this.openModal(Define.AUTO_DATE_PERIOD_TO)}
                         readOnly
                     />
                   </FormGroup>
@@ -165,7 +165,7 @@ class RSSautoformlist extends Component {
                       type="text"
                       bsSize="sm"
                       value={collectStart.format("YYYY-MM-DD HH:mm")}
-                      onClick={() => this.openModal(DEFINE.AUTO_DATE_COLLECT_START)}
+                      onClick={() => this.openModal(Define.AUTO_DATE_COLLECT_START)}
                       readOnly
                       className="half-width"
                   />
@@ -180,8 +180,8 @@ class RSSautoformlist extends Component {
                         id="mode_continue"
                         name="collection_mode"
                         label="Continuous"
-                        checked={collectType === DEFINE.AUTO_MODE_CONTINUOUS}
-                        onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CONTINUOUS)}
+                        checked={collectType === Define.AUTO_MODE_CONTINUOUS}
+                        onChange={() => this.handleModeChange(Define.AUTO_MODE_CONTINUOUS)}
                     />
                     <CustomInput
                         type="radio"
@@ -189,13 +189,13 @@ class RSSautoformlist extends Component {
                         name="collection_mode"
                         label="Cycle"
                         className="mode-cycle"
-                        checked={collectType === DEFINE.AUTO_MODE_CYCLE}
-                        onChange={() => this.handleModeChange(DEFINE.AUTO_MODE_CYCLE)}
+                        checked={collectType === Define.AUTO_MODE_CYCLE}
+                        onChange={() => this.handleModeChange(Define.AUTO_MODE_CYCLE)}
                     />
                     <div
                         className={
                           "sub-option " +
-                          (collectType === DEFINE.AUTO_MODE_CONTINUOUS ? "hidden" : "show")
+                          (collectType === Define.AUTO_MODE_CONTINUOUS ? "hidden" : "show")
                         }
                     >
                       <Input
@@ -208,9 +208,9 @@ class RSSautoformlist extends Component {
                           defaultValue= {intervalUnit}
                           onChange={this.handleIntervalUnitChange}
                       >
-                        <Option value={DEFINE.AUTO_UNIT_MINUTE}>Minute</Option>
-                        <Option value={DEFINE.AUTO_UNIT_HOUR}>Hour</Option>
-                        <Option value={DEFINE.AUTO_UNIT_DAY}>Day</Option>
+                        <Option value={Define.AUTO_UNIT_MINUTE}>Minute</Option>
+                        <Option value={Define.AUTO_UNIT_HOUR}>Hour</Option>
+                        <Option value={Define.AUTO_UNIT_DAY}>Day</Option>
                       </Select>
                     </div>
                   </FormGroup>

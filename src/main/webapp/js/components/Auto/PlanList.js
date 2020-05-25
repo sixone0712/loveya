@@ -17,7 +17,7 @@ import { Select } from "antd";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 import services from "../../services"
 import moment from "moment";
 import {connect} from "react-redux";
@@ -97,7 +97,7 @@ class RSSautoplanlist extends Component {
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get("/plan/list?withExpired=yes");
+        const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list?withExpired=yes");
         console.log("[AUTO][loadPlanList]res", res);
         const { data } = res;
         const newData = data.map(item => {
@@ -156,7 +156,7 @@ class RSSautoplanlist extends Component {
                 description: findList.planDescription
             });
             console.log("id", id);
-            this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
+            this.props.history.push(Define.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
         }
     }
 
@@ -175,7 +175,7 @@ class RSSautoplanlist extends Component {
     closeModal = async (deleting, selectedPlanId) => {
         let res;
         if(deleting) {
-            res = await services.axiosAPI.get('/plan/delete?id='+selectedPlanId);
+            res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
         }
 
         await this.setState({
@@ -321,7 +321,7 @@ class RSSautoplanlist extends Component {
                                                         className="plan-id-area"
                                                         onClick={ () => {
                                                             const param = `?id=${plan.id}&name=${plan.planId}`;
-                                                            this.props.history.push(DEFINE.PAGE_AUTO_DOWNLOAD + param);
+                                                            this.props.history.push(Define.PAGE_AUTO_DOWNLOAD + param);
                                                         }}
                                                     >
                                                         {plan.planId}
@@ -336,7 +336,7 @@ class RSSautoplanlist extends Component {
                                                 <td>
                                                     <div
                                                         className="icon-area move-left"
-                                                        /*onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }*/
+                                                        /*onClick={ () =>  this.props.history.push(Define.PAGE_AUTO_PLAN_EDIT) }*/
                                                         onClick={ () =>  this.setEditPlanList(plan.id, plan.planStatus) }
 
                                                     >

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @Controller
-@RequestMapping("/downloadlist")
+@RequestMapping("/rss/rest/downloadlist")
 public class DownloadListController {
 
     private final Log log = LogFactory.getLog(getClass());
