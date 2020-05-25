@@ -1,0 +1,19 @@
+spring:
+  http:
+    encoding:
+      charset:    UTF-8
+  mvc:
+    view:
+      prefix:     /jsp/
+      suffix:     .jsp
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8081
+
+rssportal:
+  vftp:
+    directory:
+      request: testroot/VFTPREQUEST03
+    objectlistfile: testroot/CanonFileService03/definitions/ObjectList.xml
+    

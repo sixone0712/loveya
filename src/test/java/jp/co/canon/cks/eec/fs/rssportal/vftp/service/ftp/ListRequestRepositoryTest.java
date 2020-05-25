@@ -26,7 +26,7 @@ public class ListRequestRepositoryTest {
         serverInfo.setPassword("1234");
         return serverInfo;
     }
-
+/*
     @Test
     public void test_002() {
         ListRequest req = repository.getRequestById("TMP_LIST_REQUEST");
@@ -58,4 +58,5 @@ public class ListRequestRepositoryTest {
         }
         
     }
+    */
 }

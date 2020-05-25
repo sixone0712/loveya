@@ -4,6 +4,7 @@ plugins {
     id 'java'
     // Build War
     //id 'war'
+    id 'jacoco'
 }
 
 // Build War
@@ -69,4 +70,18 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = '0.8.5'
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled true
+        xml.enabled false
+        csv.enabled false
+
+        html.destination file("$buildDir/jacocoHtml")
+    }
 }

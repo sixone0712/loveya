@@ -8,6 +8,13 @@ public class CompatChecker {
     }
 
     public static CompatChecker fromFilename(String filename){
+        if (filename == null){
+            return null;
+        }
+        if (!filename.endsWith(".log")){
+            return null;
+        }
+        filename = filename.substring(0, filename.length() - 4);
         String[] data = filename.split("-");
         if (data.length < 2 || data.length > 5){
             return null;
@@ -55,9 +62,6 @@ public class CompatChecker {
     }
 
     public String getDeviceName(){
-        if (this.contextChecker == null){
-            return null;
-        }
         return this.contextChecker.getDeviceName();
     }
 /*
