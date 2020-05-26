@@ -37,7 +37,7 @@ import java.util.List;
 @Component
 public class CollectPlanner extends Thread {
 
-    private static final boolean useVirtualFileService = true;
+    private static final boolean useVirtualFileService = false;
     private static final String planRootDir = "planroot";
     private final CollectPlanService service;
     private final DownloadListService downloadListService;
@@ -152,6 +152,7 @@ public class CollectPlanner extends Thread {
                     if (outputPath == null) {
                         log.error("failed to pack logs");
                         service.setLastStatus(plan, PlanStatus.suspended);
+                        service.updateLastCollect(plan);
                     } else {
                         service.setLastStatus(plan, PlanStatus.collected);
                         downloadListService.insert(plan, outputPath);
@@ -160,6 +161,10 @@ public class CollectPlanner extends Thread {
                     }
                 }
             }
+        } else {
+            log.error("no files to collect");
+            service.setLastStatus(plan, PlanStatus.suspended);
+            service.updateLastCollect(plan);
         }
         service.schedulePlan(plan);
         return true;
@@ -212,12 +217,12 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo getNext() {
         if(planUpdated) {
             nextPlan = service.getNextPlan();
-            if(nextPlan!=null && nextPlan.getNextAction()!=null) {
+            if(nextPlan==null)
+                return null;
+            if(nextPlan!=null && nextPlan.getNextAction()!=null)
                 log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
-            }
-            if(nextPlan!=null) {
+            if(nextPlan!=null)
                 planUpdated = false;
-            }
         }
         return nextPlan.getNextAction()!=null?nextPlan:null;
     }
