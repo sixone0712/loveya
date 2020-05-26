@@ -48,6 +48,10 @@ public class FtpWorker extends Thread {
         this.stop = true;
     }
 
+    public boolean isWorkerStopped(){
+        return this.stop;
+    }
+
     private void connect() {
         ftp = new FTP(serverInfo.getHost(), serverInfo.getPort());
 
@@ -89,11 +93,14 @@ public class FtpWorker extends Thread {
         }
     }
 
-    private void processRequests(){
+    private void processRequests() throws Exception {
         SubRequest req = list.readyToProgress();
         while(req != null && this.stop == false){
-            
-            req.processRequest(ftp);
+            try {
+                req.processRequest(this, ftp);
+            } catch (Exception e){
+                throw e;
+            }
             list.progressToCompleted(req);
 
             req = list.readyToProgress();
@@ -107,9 +114,13 @@ public class FtpWorker extends Thread {
         if (getWorkerState() == FtpWorkerState.LOGIN_COMPLETED)
         {
             setWorkerState(FtpWorkerState.PROCESSING);
-
-            processRequests();
-
+            try {
+                processRequests();
+            }
+            catch (Exception e){
+                propertyChangeSupport.firePropertyChange("error", null, "processing failed");            
+                e.printStackTrace();
+            }
             setWorkerState(FtpWorkerState.PROCESS_COMPLETED);
         }
         disconnect();
