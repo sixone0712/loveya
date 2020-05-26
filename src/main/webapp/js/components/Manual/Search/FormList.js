@@ -276,6 +276,7 @@ export default connect(
       toolInfoList: state.viewList.get('toolInfoList'),
       logInfoList: state.viewList.get('logInfoList'),
       requestList: state.searchList.get('requestList'),
+      responseListCnt: state.searchList.get('responseListCnt'),
       startDate: state.searchList.get('startDate'),
       endDate: state.searchList.get('endDate'),
       resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
