@@ -79,7 +79,8 @@ a:hover {
 }
 
 .custom-pagination {
-    margin: 0 auto;
+    display: flex;
+    justify-content: center;
     font-size: 14px;
 }
 
@@ -167,6 +168,10 @@ a:hover {
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 3px;
     cursor: pointer;
+}
+
+.popover .popover-body p:last-child {
+    margin-bottom: 0;
 }
 
 .not-flex {
@@ -828,7 +833,7 @@ a:hover {
 .navbar-container {
     position: fixed;
     width: 100%;
-    z-index: 200;
+    z-index: 2000;
     top: 0;
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
 }
@@ -1156,6 +1161,8 @@ a:hover {
 
 .datepicker-item-area .datetime-picker .time .sliders {
     flex: 0 1 100%;
+    width: 100%;
+    max-width: 120px;
 }
 
 .datepicker-item-area .datetime-picker .time .sliders .slider .handle {
@@ -1304,6 +1311,22 @@ a:hover {
 .catlist-form-group .no-search-genre p:first-child {
     margin-top: 6rem;
 }
+
+.catlist.fade {
+    transition: none;
+}
+
+.catlist .popover {
+    max-width: 300px;
+}
+
+.catlist .popover .popover-header {
+    border-bottom: 1px solid rgb(255, 169, 77);
+}
+
+.catlist .popover .popover-body p > svg {
+    color: rgb(255, 192, 120);
+}
 /* categorylist end */
 
 /* formlist start */
@@ -1446,8 +1469,10 @@ a:hover {
 }
 
 .filelist-card-body table {
+    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
     margin: 0.5em 0;
+    border-collapse: separate;
 }
 
 .filelist-card-body table thead tr {
@@ -1555,6 +1580,14 @@ a:hover {
 /* auto download style start */
 .network-connection-error.auto-plan {
     margin: 2em 0;
+}
+
+.auto-plan .popover .popover-header {
+    border-bottom: 1px solid rgb(92, 124, 250);
+}
+
+.auto-plan .popover .popover-body p > svg {
+    color: rgb(92, 124, 250);
 }
 
 .auto-plan-box {
@@ -2151,14 +2184,16 @@ a:hover {
 }
 
 .auto-plan-collection-list table tbody tr td > .plan-id-area,
-.auto-plan-collection-list table tbody tr td > .request-id-area {
+.auto-plan-collection-list table tbody tr td > .request-id-area,
+.auto-plan-collection-list table tbody tr td > .status-area {
     padding: .3em 1em;
     -webkit-transition: all 0.3s;
     transition: all 0.3s;
 }
 
 .auto-plan-collection-list table tbody tr td > .request-id-area:hover,
-.auto-plan-collection-list table tbody tr td > .plan-id-area:hover {
+.auto-plan-collection-list table tbody tr td > .plan-id-area:hover,
+.auto-plan-collection-list table tbody tr td > .status-area:hover {
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 3px;
 }
@@ -2192,17 +2227,17 @@ a:hover {
     left: 1px;
 }
 
-.auto-plan-collection-list table tbody tr td div > svg.stopped,
+.auto-plan-collection-list table tbody tr td span > svg.stopped,
 .auto-plan-collection-list table tbody tr td > svg.failed {
     color: rgb(201, 42, 42);
 }
 
-.auto-plan-collection-list table tbody tr td div > svg.running,
-.auto-plan-collection-list table tbody tr td div > svg.completed {
+.auto-plan-collection-list table tbody tr td span > svg.running,
+.auto-plan-collection-list table tbody tr td > svg.completed {
     color: rgb(47, 158, 68);
 }
 
-.auto-plan-collection-list table tbody tr td div > svg.running {
+.auto-plan-collection-list table tbody tr td span > svg.running {
     -webkit-animation: changeOpacity 0.7s infinite;
     animation: changeOpacity 0.7s infinite;
     -webkit-animation-direction: alternate;

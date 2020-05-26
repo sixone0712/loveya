@@ -265,6 +265,9 @@ class CategoryList extends Component {
                           styles={customSelectStyles}
                           noOptionsMessage={() => "Genre not found."}
                           filterOption={this.selectFilter}
+                          onInputChange={inputValue =>
+                              (inputValue.length <= 20 ? inputValue : inputValue.substr(0, 20))
+                          }
                       />
                     </div>
                     <div className="genre-btn-area">

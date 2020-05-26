@@ -4,9 +4,9 @@ import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import * as API from '../../api'
 
-import { Col, FormGroup, Input, Label, CustomInput } from "reactstrap";
+import { Col, FormGroup, Input, Label, CustomInput, UncontrolledPopover, PopoverHeader, PopoverBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
+import { faExclamation } from "@fortawesome/free-solid-svg-icons";
 import { DatetimePicker } from "rc-datetime-picker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import moment from "moment";
@@ -130,8 +130,26 @@ class RSSautoformlist extends Component {
                       bsSize="sm"
                       className="half-width"
                       value={planId}
+                      maxLength="32"
                       onChange={this.handlePlanIdChange}
                   />
+                  <UncontrolledPopover placement="top-end" target="plan_id" className="auto-plan" trigger="hover">
+                    <PopoverHeader>Plan ID</PopoverHeader>
+                    <PopoverBody>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                      </p>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Start and end must be entered in alphabet or number.
+                      </p>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Allowed to be at least 3 characters long and up to 32 characters long.
+                      </p>
+                    </PopoverBody>
+                  </UncontrolledPopover>
                 </FormGroup>
                 <FormGroup>
                   <Label for="plan_period" className="input-label">
@@ -223,9 +241,32 @@ class RSSautoformlist extends Component {
                       type="text"
                       id="plan_desc"
                       bsSize="sm"
+                      className="half-width"
+                      maxLength="40"
                       value={description}
                       onChange={this.handleDiscriptionChange}
                   />
+                  <UncontrolledPopover placement="top-end" target="plan_desc" className="auto-plan" trigger="hover">
+                    <PopoverHeader>Description</PopoverHeader>
+                    <PopoverBody>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        You can register a collection plan without entering the description.
+                      </p>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                      </p>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Start and end must be entered in alphabet or number.
+                      </p>
+                      <p>
+                        <FontAwesomeIcon icon={faExclamation} />{" "}
+                        Allowed to be at least 3 characters long and up to 40 characters long.
+                      </p>
+                    </PopoverBody>
+                  </UncontrolledPopover>
                 </FormGroup>
               </FormGroup>
             </div>

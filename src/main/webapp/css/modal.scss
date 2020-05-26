@@ -307,15 +307,15 @@
   }
   &.Custom-modal-anim-enter {
     opacity: 0;
-    -webkit-transition: all 0.2s;
-    transition: all 0.2s;
-    -webkit-transform: translate(-50%, -50%) scale(0.7);
-    transform: translate(-50%, -50%) scale(0.7);
+    -webkit-transition: all .2s;
+    transition: all .2s;
+    /* -webkit-transform: translate(-50%, -50%) scale(0.7); */
+    /* transform: translate(-50%, -50%) scale(0.7); */
   }
   &.Custom-modal-anim-enter.Custom-modal-anim-enter-active {
     opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    transform: translate(-50%, -50%) scale(1);
+    /* -webkit-transform: translate(-50%, -50%) scale(1); */
+    /* transform: translate(-50%, -50%) scale(1); */
   }
   &.Custom-modal-anim-leave {
     opacity: 1;

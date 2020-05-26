@@ -387,7 +387,6 @@ class RSSautoplanlist extends Component {
                                     </thead>
                                     <tbody>
                                     {plans.map((plan, idx) => {
-                                        const renderStatus = CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id));
                                         return (
                                             <tr key={idx}>
                                                 <td>
@@ -404,7 +403,7 @@ class RSSautoplanlist extends Component {
                                                 <td>{plan.planDescription}</td>
                                                 <td>{plan.planTarget}</td>
                                                 <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
-                                                <td>{renderStatus}</td>
+                                                <td>{CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id))}</td>
                                                 <td>{plan.planLastRun}</td>
                                                 <td>{CreateDetail(plan.planDetail)}</td>
                                                 <td>
@@ -450,9 +449,9 @@ function CreateStatus(status, modalOpen) {
     }
     */
     if (!status) {
-        component = <div onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;
+        component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</span>;
     } else {
-        component = <div onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;
+        component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</span>;
     }
 
     return component;

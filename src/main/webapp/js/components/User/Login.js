@@ -121,7 +121,7 @@ class Login extends Component {
         const {errors} = this.state;
         return (
             <>
-                <main>
+                <div>
                     <section className="absolute w-full h-full">
                         <div
                             className="absolute top-0 w-full h-full bg-gray-900"
@@ -218,7 +218,7 @@ class Login extends Component {
                             </div>
                         </div>
                     </section>
-                </main>
+                </div>
             </>
         );
     }

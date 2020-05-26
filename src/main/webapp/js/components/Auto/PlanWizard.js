@@ -35,9 +35,10 @@ const wizardStep = {
 const modalMessage = {
   MACHINE_ALERT_MESSAGE: "You must select at least one or more machines.",
   TARGET_ALERT_MESSAGE: "You must select at least one or more targets.",
-  PLAN_ID_ALERT_MESSAGE: "Plan ID must be at least 1 character long.",
+  PLAN_ID_ALERT_MESSAGE: "Plan ID is invalid.",
   FROM_TO_ALERT_MESSAGE: "Please set the from(Period) time before the To(Period) time.",
   CYCLE_ALERT_MESSAGE: "Cycle mode must have a minimum of 1 interval.",
+  DESCRIPTION_ALERT_MESSAGE: "Description is invalid.",
   PLAN_ADD_MESSAGE: "Are you sure you want to create a collection plan with this setting?",
   PLAN_EDIT_MESSAGE: "Are you sure you want to change the collection plan with this setting?"
 };
@@ -67,7 +68,8 @@ class RSSautoplanwizard extends Component {
       planDescription: "",
       isAlertOpen: false,
       isConfirmOpen: false,
-      modalMessage: null
+      modalMessage: null,
+      animating: false
     };
   }
 
@@ -146,6 +148,7 @@ class RSSautoplanwizard extends Component {
 
 
   handleNext = () => {
+    if (this.animating) return;
     const { currentStep, isNew } = this.state;
     const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt } = this.props;
     const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan);
@@ -169,6 +172,7 @@ class RSSautoplanwizard extends Component {
   };
 
   handlePrev = () => {
+    if (this.animating) return;
     const currentStep =
         this.state.currentStep <= wizardStep.MACHINE ? wizardStep.MACHINE : this.state.currentStep - 1;
 
@@ -268,10 +272,22 @@ class RSSautoplanwizard extends Component {
     });
   }
 
+  onExiting = () => {
+    this.setState({
+      animating: true
+    });
+  }
+
+  onExited = () => {
+    this.setState({
+      animating: false
+    });
+  }
+
   render() {
     console.log("render");
     console.log("this.state.editID", this.state.editID);
-    const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
+    const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage, animating } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,
             logTypeFailure,
@@ -349,19 +365,18 @@ class RSSautoplanwizard extends Component {
                     activeIndex={currentStep - 1}
                     next={this.handleNext}
                     previous={this.handlePrev}
-                    interval={false}
                     keyboard={false}
                 >
-                  <CarouselItem key={wizardStep.MACHINE}>
+                  <CarouselItem key={wizardStep.MACHINE} onExiting={this.onExiting} onExited={this.onExited}>
                     <Machine isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.TARGET}>
+                  <CarouselItem key={wizardStep.TARGET} onExiting={this.onExiting} onExited={this.onExited}>
                     <Target isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.OPTION}>
+                  <CarouselItem key={wizardStep.OPTION} onExiting={this.onExiting} onExited={this.onExited}>
                     <Option isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.CHECK}>
+                  <CarouselItem key={wizardStep.CHECK} onExiting={this.onExiting} onExited={this.onExited}>
                     <Check isNew={isNew} />
                   </CarouselItem>
                 </Carousel>
@@ -400,21 +415,31 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
       }
 
     case wizardStep.OPTION:
-      const { planId, collectType, interval, from, to } = optionList.toJS();
+      const { planId, collectType, interval, from, to, description } = optionList.toJS();
+      const planIdRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,30})([a-zA-Z0-9]$)/g;
+      const planDescRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,38})([a-zA-Z0-9]$)/g;
 
-      if (planId.toString().length < 1) {
+      if (!planIdRegex.test(planId)) {
         return modalMessage.PLAN_ID_ALERT_MESSAGE;
-      } else if (from.isAfter(to)) {
+      }
+
+      if (from.isAfter(to)) {
         return modalMessage.FROM_TO_ALERT_MESSAGE;
-      } else if (collectType === Define.AUTO_MODE_CYCLE) {
+      }
+
+      if (collectType === Define.AUTO_MODE_CYCLE) {
         if (interval < 1) {
           return modalMessage.CYCLE_ALERT_MESSAGE;
-        } else {
-          return null;
         }
-      } else {
-        return null;
       }
+
+      if (description.toString().length > 0) {
+        if(!planDescRegex.test(description)) {
+          return modalMessage.DESCRIPTION_ALERT_MESSAGE;
+        }
+      }
+
+      return null;
 
     case wizardStep.CHECK:
     default:

@@ -50,7 +50,7 @@
     "md5-hash": "^1.0.1",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
-    "query-string": "^6.12.1",
+    "query-string": "5.0.0",
     "rc-datetime-picker": "^1.6.1",
     "react-addons-css-transition-group": "^15.6.2",
     "react-app-polyfill": "^1.0.6",

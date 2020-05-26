@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import {Button, FormGroup, Input} from "reactstrap";
+import {Button, Input, UncontrolledPopover, PopoverHeader, PopoverBody } from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import {faExclamationCircle, faExclamation} from "@fortawesome/free-solid-svg-icons";
 import * as Define from '../../../define';
 import * as API from "../../../api";
 import services from '../../../services'
@@ -117,8 +117,17 @@ class InputModal extends Component {
     };
 
     actionFunc = async (openbtn) => {
-        //call async function
         const genreName = this.state.genreName;
+        const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,18})([a-zA-Z0-9]$)/g;
+
+        if(!nameRegex.test(genreName)) {
+            this.setState({
+                errMsg: "Genre name is invalid. Please re-enter."
+            });
+            return;
+        }
+
+        //call async function
         const selectedId = this.props.selectedGenre;
         const result = await this.props.confirmFunc(selectedId, genreName);
         let alertMsg = "";
@@ -185,13 +194,31 @@ class InputModal extends Component {
                                 <div className="genre-name-input-area">
                                     <Input
                                         type="text"
-                                        name={inputname}
+                                        id={inputname}
                                         value={this.state.genreName}
                                         placeholder={inputpholder}
+                                        maxLength="20"
                                         className="catlist-modal-input"
                                         //onChange={(e) => this.props.onChangeGenreName(e.target.value)}
                                         onChange={(e) => this.setState({...this.state, genreName: e.target.value})}
                                     />
+                                    <UncontrolledPopover placement="top-end" target={inputname} className="catlist" trigger="hover">
+                                        <PopoverHeader>Genre Name</PopoverHeader>
+                                        <PopoverBody>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Start and end must be entered in alphabet or number.
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Allowed to be at least 3 characters long and up to 20 characters long.
+                                            </p>
+                                        </PopoverBody>
+                                    </UncontrolledPopover>
                                     <span className="error">{errMsg}</span>
                                 </div>
                             </div>
