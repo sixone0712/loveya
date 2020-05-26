@@ -29,12 +29,6 @@ spring:
 #      prefix:     /jsp/
 #      suffix:     .jsp
 
-  # Hot reload
-  devtools:
-    livereload:
-      enabled: true
-  freemarker:
-    cache: false
 server:
   tomcat:
     uri-encoding: UTF-8
@@ -44,9 +38,17 @@ rssportal:
     directory:
       request: /LOG/VFTP/Requests
     objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
+
 ---
 spring:
   profiles: dev
+  # Hot reload
+  devtools:
+    livereload:
+      enabled: true
+  freemarker:
+    cache: false
+
 rssportal:
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
