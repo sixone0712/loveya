@@ -10,6 +10,7 @@ import CheckBox from "../../Common/CheckBox";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../../modules/searchList";
+import * as dlHistoryAction from "../../../modules/dlHistory";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
@@ -52,7 +53,7 @@ class FileList extends Component {
 
   openDownloadModal = () => {
     if(this.props.downloadCnt <= 0) {
-      this.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
+      this.setErrorStatus(Define.FILE_FAIL_NO_ITEM);is
       this.setErrorMsg(Define.FILE_FAIL_NO_ITEM);
       this.openAlertModal();
     } else {
@@ -180,8 +181,16 @@ class FileList extends Component {
 
     if(isSave) {
       const { downloadStatus } = this.props;
-      result = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
-      this.setErrorStatus(result);
+      let res = 0;
+      res = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      console.log("res: ",res);
+      (res.result == Define.RSS_SUCCESS)
+          ? API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Completed")
+          : API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Fail");
+      this.setErrorStatus(res.result);
+    }
+    else {
+      API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,"unknown", "User Cancel");
     }
     // Initialize state
     const { searchListActions } = this.props;
@@ -557,5 +566,6 @@ export default connect(
     }),
     (dispatch) => ({
       searchListActions: bindActionCreators(searchListActions, dispatch)
+      dlHistoryAction: bindActionCreators(dlHistoryAction, dispatch)
     })
 )(FileList);
