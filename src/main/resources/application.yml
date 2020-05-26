@@ -14,6 +14,8 @@ log4j:
   rootLogger: DEBUG, stdout
 
 spring:
+  profiles:
+    active: dev
   datasource:
     password: 1234  
     platform: postgresql
@@ -42,3 +44,16 @@ rssportal:
     directory:
       request: /LOG/VFTP/Requests
     objectlistfile: /usr/local/canon/esp/CanonFileService/definitions.ObjectList.xml
+---
+spring:
+  profiles: dev
+rssportal:
+  property:
+    constructdisplay: devTemp/ConstructDisplay.xml
+
+---
+spring:
+  profiles: release
+rssportal:
+  property:
+    constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml

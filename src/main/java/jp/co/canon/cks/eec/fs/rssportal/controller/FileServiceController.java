@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.json.XML;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -29,21 +30,24 @@ import java.util.concurrent.Future;
 @RequestMapping("/rss/rest/soap")
 public class FileServiceController {
 
+    @Value("${rssportal.property.constructdisplay}")
+    private String contructDisplay;
+
     private final Log log = LogFactory.getLog(getClass());
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
 
     @GetMapping("/getFabName")
     public Object getGenre() throws FileNotFoundException {
 
-        try (InputStream inputStream = new FileInputStream(new File(
-                "devTemp/ConstructDisplay.xml"))) {
+        log.info("contructDisplay : " + contructDisplay);
+        try (InputStream inputStream = new FileInputStream(new File(contructDisplay))) {
             String xml = IOUtils.toString(inputStream);
             JSONObject jObject = XML.toJSONObject(xml);
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             Object json = mapper.readValue(jObject.toString(), Object.class);
             String output = mapper.writeValueAsString(json);
-            System.out.println(output);
+            log.info("output : " + output);
             return json;
         } catch (IOException e) {
             e.printStackTrace();
