@@ -464,8 +464,7 @@ function CreateDetail(detail) {
         case detailType.REGISTERED:
             component = (<><FontAwesomeIcon className="completed" icon={faRegistered} /> Registered</>);   break;
         case detailType.COLLECTING:
-            break;
-            /*component = (<><ClockLoader size={15} color={"rgb(47, 158, 68)"} css={spinnerStyles}/> Collecting</>);   break;*/
+            component = (<><ClockLoader size={15} color={"rgb(47, 158, 68)"} css={spinnerStyles}/> Collecting</>);   break;
         case detailType.COLLECTED:
             component = (<><FontAwesomeIcon className="completed" icon={faCheck} /> Collected</>);   break;
         case detailType.SUSPENDED:
