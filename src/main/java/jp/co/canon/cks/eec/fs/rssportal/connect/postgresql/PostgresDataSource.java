@@ -13,7 +13,7 @@ public class PostgresDataSource {
     public PostgresDataSource() {
         DataSourceBuilder builder = DataSourceBuilder.create();
         builder.driverClassName("org.postgresql.Driver")
-                .url("jdbc:postgresql://localhost:5432/rssdb")
+                .url("jdbc:postgresql://10.1.31.237:5432/rssdb")
                 .username("rssadmin")
                 .password("1234");
         dataSource = builder.build();
