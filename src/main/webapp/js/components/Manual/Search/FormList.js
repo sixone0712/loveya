@@ -136,8 +136,10 @@ class FormList extends Component{
 
             case modalType.CANCEL_COMPLETE:
                 //this.closeModal();
-                services.axiosAPI.postCancel();
-                clearTimeout(this.getIntervalFunc());
+                if(this.props.responseListCnt === 0) {
+                    services.axiosAPI.postCancel();
+                    clearTimeout(this.getIntervalFunc());
+                }
                 await this.setState({
                     ...this.state,
                     isProcessOpen: false,
@@ -147,12 +149,14 @@ class FormList extends Component{
                     intervalValue: null
                 })
 
-                setTimeout(() => {
-                    this.setState({
-                        isAlertOpen: true,
-                        alertMsg: "Search was canceled."
-                    });
-                }, 200);
+                if(this.props.responseListCnt === 0) {
+                    setTimeout(() => {
+                        this.setState({
+                            isAlertOpen: true,
+                            alertMsg: "Search was canceled."
+                        });
+                    }, 200);
+                }
                 break;
 
             default:

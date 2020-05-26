@@ -37,9 +37,11 @@ class Manual extends Component {
 
         const TEST = 0;
         if(TEST) {
-            viewListActions.viewLoadToolInfoList("/test/createToolList");
-            viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
+            await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
+            await viewListActions.viewLoadToolInfoList("/test/createToolList");
+            await viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
         } else {
+            await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
             await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
             const { toolInfoList } = this.props;
             const targetname = toolInfoList.getIn([0, "targetname"]);

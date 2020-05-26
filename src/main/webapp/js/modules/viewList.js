@@ -5,6 +5,7 @@ import services from '../services';
 import moment from "moment";
 
 const VIEW_INIT_ALL_LIST= 'viewList/VIEW_INIT_ALL_LIST';
+const VIEW_LOAD_CONSTRUCT_DISPLAY= 'viewList/VIEW_LOAD_CONSTRUCT_DISPLAY';
 const VIEW_LOAD_TOOLINFO_LIST= 'viewList/VIEW_LOAD_TOOLINFO_LIST';
 const VIEW_LOAD_LOGTYPE_LIST= 'viewList/VIEW_LOAD_LOGTYPE_LIST';
 const VIEW_CHECK_TOOL_LIST = 'viewList/VIEW_CHECK_TOOL_LIST';
@@ -15,6 +16,7 @@ const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
 const VIEW_SET_EDIT_PLAN_LIST= 'viewList/VIEW_SET_EDIT_PLAN_LIST';
 
 export const viewInitAllList = createAction(VIEW_INIT_ALL_LIST);
+export const viewLoadConstructDisplay = createAction(VIEW_LOAD_CONSTRUCT_DISPLAY, services.axiosAPI.get);	// getURL
 export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);	// getURL
 export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.get);		// getURL
 export const viewCheckToolList = createAction(VIEW_CHECK_TOOL_LIST); 	// index
@@ -26,6 +28,13 @@ export const viewSetEditPlanList = createAction(VIEW_SET_EDIT_PLAN_LIST);
 
 const initialState = Map({
 	gotReady: false,	// flag for loaded data
+
+	constructDisplay:  List([
+		Map({
+			name: "",
+			id: ""
+		})
+	]),
 
 	equipmentList: List([
 		Map({
@@ -75,6 +84,20 @@ const initialState = Map({
 });
 
 export default handleActions({
+	...pender({
+		type: VIEW_LOAD_CONSTRUCT_DISPLAY,
+		onSuccess: (state, action) => {
+			console.log("handleActions[VIEW_LOAD_CONSTRUCT_DISPLAY]");
+			const lists = action.payload.data;
+			const tree = lists.ConstructDisplay.Tree;
+			const equipments = tree.find(item => item.name === "Equipments");
+			console.log("lists", lists);
+			console.log("tree", tree);
+			console.log("equipments", equipments);
+			console.log("equipments.Child", equipments.Child);
+			return state.set("constructDisplay",fromJS(equipments.Child));
+		}
+	}),
 	...pender(
 		{
 			type: VIEW_LOAD_TOOLINFO_LIST, // If type is given, create an object containing action handlers suffixed to this type.
@@ -86,22 +109,36 @@ export default handleActions({
 			onSuccess: (state, action) => { // If there is nothing else to do when successful, this function can also be omitted.
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
 				const lists = action.payload.data;
+				const constructDisplay = state.get("constructDisplay").toJS();
 				console.log("lists", lists);
+				console.log("constructDisplay", constructDisplay);
 
-				// SYS is not used, so not included
-				const equipLists = lists.filter(list => list.structId !== "SYS").map((list => list.structId));
-				const filterdList = equipLists.filter( (item, idx, equipLists) => {
-					return equipLists.indexOf( item ) === idx ;
-				});
+				const newList = lists.reduce((acc, cur) => {
+					const find = constructDisplay.find(item => {
+						return item.id === cur.structId
+					});
+					if(find !== undefined){
+						const newCur = {
+							...cur,
+							structId: find.name
+						}
+						acc.push(newCur);
+					}
+					return acc;
+				}, []);
 
-				const newEquipLists = filterdList.map((item, idx) => {
+				console.log("newList", newList);
+
+				const newEquipLists = constructDisplay.map((item, idx) => {
 					return {
 						keyIndex: idx,
-						equipmentId: item
+						equipmentId: item.name
 					}
 				});
 
-				const newLists = lists.map((list, idx) => {
+				console.log("newEquipLists", newEquipLists);
+
+				const newToolInfoList = newList.map((list, idx) => {
 					return {
 						keyIndex: idx,
 						structId: list.structId,
@@ -113,7 +150,9 @@ export default handleActions({
 					}
 				});
 
-				return state.set('toolInfoList', fromJS(newLists)).set('equipmentList', fromJS(newEquipLists));
+				console.log("newToolInfoList", newToolInfoList);
+
+				return state.set('toolInfoList', fromJS(newToolInfoList)).set('equipmentList', fromJS(newEquipLists));
 			},
 			// When a function is omitted, the default value (state, action) => state is set (that is, it returns the state as it is)
 		}),

@@ -1,5 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.manage.FileTypeModel;
@@ -8,18 +10,16 @@ import jp.co.canon.cks.eec.fs.rssportal.model.RSSFileInfoBeanResponse;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSLogInfoBean;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSRequestSearch;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +31,25 @@ public class FileServiceController {
 
     private final Log log = LogFactory.getLog(getClass());
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+
+    @GetMapping("/getFabName")
+    public Object getGenre() throws FileNotFoundException {
+
+        try (InputStream inputStream = new FileInputStream(new File(
+                "devTemp/ConstructDisplay.xml"))) {
+            String xml = IOUtils.toString(inputStream);
+            JSONObject jObject = XML.toJSONObject(xml);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            Object json = mapper.readValue(jObject.toString(), Object.class);
+            String output = mapper.writeValueAsString(json);
+            System.out.println(output);
+            return json;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     @GetMapping("/createToolList")
     public RSSToolInfo[] createToolList() throws Exception {
@@ -194,7 +213,13 @@ public class FileServiceController {
                         ed = Calendar.getInstance();
                         ed.setTime(f.parse(endDate));
                     }
-
+                    log.info("===== createFileList");
+                    log.info("toolId : " + toolId);
+                    log.info("logId : " + logId);
+                    log.info("st : " + st);
+                    log.info("ed : " + ed);
+                    log.info("keyword : " + keyword);
+                    log.info("dir : " + dir);
                     FileInfoModel[] src = serviceLocator.getFileServiceManage().createFileList(toolId, logId, st, ed, keyword, dir);
 
                     if (src == null) src = new FileInfoModel[0];

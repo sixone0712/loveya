@@ -87,7 +87,7 @@ public class Constants {
 
 	// 設定ファイル
 	/** 構成表示設定ファイル */
-	public static final String CONFIG_CONSTRUCT_DISPLAY = "ConstructDisplay.xml";
+	public static final String CONFIG_CONSTRUCT_DISPLAY = "temp/ConstructDisplay.xml";
 	/** */
 	public static final String LOGIN_PRAM = "loginInfo";
 	/** */
