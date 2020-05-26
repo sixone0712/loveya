@@ -6,7 +6,7 @@ import searchList from './searchList';
 import login from './login';
 import cmd from './Command';
 import user from './User';
-import dwHis from './dwHistory';
+import dlHistory from './dlHistory';
 import autoPlan from './autoPlan';
 import { penderReducer } from 'redux-pender';
 
@@ -18,6 +18,6 @@ export default combineReducers({
     cmd,
     user,
     autoPlan,
-    dwHis,
+    dlHistory,
     pender: penderReducer
 });

@@ -30,7 +30,7 @@ class ChangeAuthModal extends Component {
         console.log("changePermission err: ", err);
         if (!err) {
             await API.getDBUserList(this.props);//user list refresh
-            this.props.right(); //pw change modal Close
+            this.settingClose();//permission change modal Close & initial
             this.props.alertOpen("permission");
         } else {
             const msg = API.getErrorMsg(err);

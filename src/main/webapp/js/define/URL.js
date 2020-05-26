@@ -10,7 +10,7 @@ export const PAGE_AUTO_PLAN_EDIT = "/rss/page/auto/plan/edit";
 export const PAGE_AUTO_STATUS = "/rss/page/auto/status";
 export const PAGE_AUTO_DOWNLOAD = "/rss/page/auto/download";
 export const PAGE_ADMIN_ACCOUNT = "/rss/page/admin/account";
-export const PAGE_ADMIN_DW_HISTORY = "/rss/page/admin/history";
+export const PAGE_ADMIN_DL_HISTORY = "/rss/page/admin/history";
 
 export const PAGE_REFRESH_MANUAL = PAGE_REFRESH + "?target=" + PAGE_MANUAL;
 export const PAGE_REFRESH_AUTO_PLAN_ADD = PAGE_REFRESH + "?target=" + PAGE_AUTO_PLAN_ADD;

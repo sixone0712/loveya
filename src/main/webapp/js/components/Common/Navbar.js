@@ -111,10 +111,6 @@ class RSSNavbar extends Component{
 
 
   onLogout = async () => {
-    window.sessionStorage.removeItem('isLoggedIn');
-    window.sessionStorage.removeItem('username');
-    window.sessionStorage.removeItem('password');
-    window.sessionStorage.removeItem('auth');
     await API.setLoginInit(this.props);
     await services.axiosAPI.get(Define.REST_API_URL + "/user/logout");
     this.props.onMovePage(Define.PAGE_LOGIN)
@@ -176,7 +172,7 @@ class RSSNavbar extends Component{
                 </DropdownMenu>
               </UncontrolledDropdown>
               {
-                (window.sessionStorage.getItem('auth') ==='100')
+                (API.getLoginAuth(this.props)==='100')
                ?  <UncontrolledDropdown nav inNavbar className={this.getClassName("admin")}>
                     <DropdownToggle nav>
                       Administrator
@@ -186,7 +182,7 @@ class RSSNavbar extends Component{
                         User Account
                       </DropdownItem>
                       <DropdownItem divider />
-                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_DW_HISTORY} onClick={() => this.handlePageChange("admin")}>
+                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_DL_HISTORY} onClick={() => this.handlePageChange("admin")}>
                         Download History
                       </DropdownItem>
                     </DropdownMenu>
@@ -197,7 +193,7 @@ class RSSNavbar extends Component{
             <Nav className="ml-auto" navbar>
               <UncontrolledDropdown nav inNavbar>
                 <DropdownToggle nav>
-                  <FontAwesomeIcon icon={faUserCircle} size="lg"/> {window.sessionStorage.getItem('username')}
+                  <FontAwesomeIcon icon={faUserCircle} size="lg"/> {API.getLoginUserName(this.props)}
                 </DropdownToggle>
                 <DropdownMenu right>
                   <DropdownItem onClick={() => this.openModal("password")}>Change Password</DropdownItem>

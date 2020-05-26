@@ -24,7 +24,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
     @Override
     public List<DownloadHistoryVo> findAll() {
         SqlSession session = sessionFactory.openSession();
-        List list = session.selectList("dwHistory.selectAll");
+        List list = session.selectList("dlHistory.selectAll");
         session.close();
         return list;
     }
@@ -35,7 +35,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
             return null;
         }
         SqlSession session = sessionFactory.openSession();
-        DownloadHistoryVo history = session.selectOne("dwHistory.select", param);
+        DownloadHistoryVo history = session.selectOne("dlHistory.select", param);
         session.close();
         return history;
     }
@@ -43,7 +43,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
     @Override
     public boolean add(@NonNull DownloadHistoryVo history) {
         SqlSession session = sessionFactory.openSession(true);
-        session.insert("dwHistory.insert", history);
+        session.insert("dlHistory.insert", history);
         session.close();
         return true;
     }
@@ -51,7 +51,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
     @Override
     public boolean modify(@NonNull DownloadHistoryVo history) {
         SqlSession session = sessionFactory.openSession(true);
-        session.update("dwHistory.update", history);
+        session.update("dlHistory.update", history);
         session.close();
         return true;
     }
@@ -59,7 +59,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
     @Override
     public boolean delete(@NonNull DownloadHistoryVo history) {
         SqlSession session = sessionFactory.openSession(true);
-        session.delete("dwHistory.delete", history);
+        session.delete("dlHistory.delete", history);
         session.close();
         return true;
     }

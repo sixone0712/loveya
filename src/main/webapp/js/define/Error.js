@@ -1,6 +1,11 @@
 export const RSS_SUCCESS = 0;
 export const RSS_FAIL = 1;
 
+export const RSS_TYPE_FTP_MANUAL = 1;
+export const RSS_TYPE_FTP_AUTO = 2;
+export const RSS_TYPE_VFTP_COMPAT = 3;
+export const RSS_TYPE_VFTP_SSS = 4;
+
 export const COMMON_FAIL_SERVER_ERROR = 1000;
 export const COMMON_FAIL_NOT_FOUND = 1001;
 

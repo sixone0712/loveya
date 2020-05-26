@@ -10,12 +10,10 @@ import java.util.Date;
 @Setter
 @ToString
 public class DownloadHistoryVo {
-
-    private int dw_id;
-    private String dw_user;
-    private Date dw_date;
-    private String dw_type;
-    private String dw_filelist;
-
-
+    private int id;
+    private String dl_user;
+    private Date dl_date;
+    private String dl_type;
+    private String dl_filename;
+    private String dl_status;
 }

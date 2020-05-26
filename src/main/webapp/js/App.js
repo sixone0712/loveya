@@ -7,7 +7,7 @@ import * as searchListActions from './modules/searchList';
 import * as loginActions from './modules/login';
 import * as CmdActions from './modules/Command';
 import * as userActions from './modules/User';
-import * as dwHistoryAction from './modules/dwHistory';
+import * as dlHistoryAction from './modules/dlHistory';
 import services from './services'
 import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
@@ -16,7 +16,7 @@ import Manual from "./components/Manual/Manual";
 import Manual2 from "./components/Manual/ManualVftpCompat";
 import Manual3 from "./components/Manual/ManualVftpSss";
 import AccountList from "./components/User/UserList";
-import DwHistory from  "./components/User/DownloadHistory";
+import DlHistory from  "./components/User/DownloadHistory";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
@@ -77,7 +77,7 @@ class App extends Component {
                         <Route path={Define.PAGE_MANUAL3} component={Manual3} />
                         <Route path={Define.PAGE_AUTO} component={Auto}/>
                         <Route path={Define.PAGE_ADMIN_ACCOUNT} component={AccountList} />
-                        <Route path={Define.PAGE_ADMIN_DW_HISTORY} component={DwHistory} />
+                        <Route path={Define.PAGE_ADMIN_DL_HISTORY} component={DlHistory} />
                         {/*<Redirect to={Define.PAGE_MANUAL} component={Manual} />*/}
 
                         {/* How to pass props */}

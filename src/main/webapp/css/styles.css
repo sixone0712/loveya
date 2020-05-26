@@ -2163,6 +2163,7 @@ a:hover {
     border-radius: 3px;
 }
 
+.auto-plan-collection-list table tbody tr td > .icon-area-administrator,
 .auto-plan-collection-list table tbody tr td > .icon-area {
     display: inline-block;
     width: 30px;
@@ -2175,12 +2176,18 @@ a:hover {
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 100%;
 }
+.auto-plan-collection-list table tbody tr td > .icon-area-administrator:hover {
+    background-color: rgba(23, 162, 184, 0.2);
+    border-radius: 100%;
+}
 
+.auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
 .auto-plan-collection-list table tbody tr td > .icon-area > svg {
     position: relative;
     top: 3px;
 }
 
+.auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
 .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
     left: 1px;
 }
@@ -2211,7 +2218,7 @@ a:hover {
 }
 
 .auto-plan-collection-list table tbody tr td > .permission:hover {
-    background-color: rgba(92, 124, 250, 0.2);
+    background-color: rgba(23, 162, 184, 0.5);
 }
 /* auto download style end */
 

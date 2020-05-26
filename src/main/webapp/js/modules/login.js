@@ -93,7 +93,7 @@ export default handleActions({
             type: CHANGE_USER_PASSWORD,
             onSuccess: (state, action) => {
                 const setValue = action.payload;
-                return state.setIn(["loginInfo", "password"], setValue);
+                return state.setIn(["loginInfo", "errCode"], action.payload.data);
             }
         }
     ),

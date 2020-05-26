@@ -273,7 +273,7 @@ class UserList extends Component {
                                                     <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
                                                     <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>
                                                     <td>
-                                                        <div className="icon-area" onClick={ () => this.uDelete(user.id) }>
+                                                        <div className="icon-area-administrator" onClick={ () => this.uDelete(user.id) }>
                                                             <FontAwesomeIcon icon={faTrashAlt} />
                                                         </div>
                                                     </td>

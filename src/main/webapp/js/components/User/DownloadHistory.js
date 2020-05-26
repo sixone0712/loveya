@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import {Col, CardHeader, CardBody, Table, Card, Container, Breadcrumb, BreadcrumbItem, Button} from "reactstrap";
 import * as API from "../../api";
+import * as Define from "../../define";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import * as dwHistoryAction from "../../modules/dwHistory";
+import * as dlHistoryAction from "../../modules/dlHistory";
 import { Select } from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
@@ -21,6 +22,18 @@ import moment from "moment";
 
 const { Option } = Select;
 
+
+
+function getDownloadType(type) {
+    let typeString = 0;
+    console.log("type: ",type);
+    typeString = (type == Define.RSS_TYPE_FTP_MANUAL)  ? "Manual download(ftp)"
+        : (type == Define.RSS_TYPE_FTP_AUTO)  ? "Auto download(ftp)"
+        : (type == Define.RSS_TYPE_VFTP_SSS)  ? "Manual download(VFTP/SSS)"
+        : (type == Define.RSS_TYPE_VFTP_COMPAT)  ? "Manual download(VFTP/COMPAT)"
+        : " ";
+    return typeString;
+}
 const scrollStyle = {
     backgroundColor: "#343a40",
     width: "40px",
@@ -29,7 +42,6 @@ const scrollStyle = {
     borderRadius: "3px",
     zIndex: "101"
 };
-
 class DownloadHistory extends Component {
     constructor(props) {
         super(props);
@@ -43,7 +55,7 @@ class DownloadHistory extends Component {
     async componentDidMount()
     {
         console.log("componentDidMount");
-        await API.getDBDwHistoryList(this.props);
+        await API.loadDlHistoryList(this.props);
     };
 
     handlePaginationChange = page => {
@@ -65,19 +77,20 @@ class DownloadHistory extends Component {
 
      render() {
         const formatDate = 'YYYY/MM/DD HH:mm:ss';
-        const historyList = API.getDwHistoryList(this.props);
+        const historyList = API.getDlHistoryList(this.props);
         const {length:count} = historyList;
         console.log("historyList: ",historyList);
         console.log("count: ",count);
 
         const {currentPage, pageSize} = this.state;
         const lists = filePaginate(historyList, currentPage, pageSize);
-        const pagination = renderPagination(
-            pageSize,
-            count,
-            this.handlePaginationChange,
-            "custom-pagination"
-        );
+         const pagination = renderPagination(
+             pageSize,
+             count,
+             this.handlePaginationChange,
+             currentPage,
+             "custom-pagination"
+         );
 
         if (count === 0) {
          return (
@@ -140,21 +153,23 @@ class DownloadHistory extends Component {
                                             <th>No.</th>
                                             <th>User Name</th>
                                             <th>Downloaded Date</th>
-                                            <th>Download Type</th>
-                                            <th>Detail</th>
+                                            <th>Downloaded File name</th>
+                                            <th>Downloaded Type</th>
+                                            <th>Status</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         {lists.map((history, idx) => {
-                                            return (
-                                                <tr key={idx}>
-                                                    <td>{idx + 1}</td>
-                                                    <td>{history.dw_user}</td>
-                                                    <td>{(history.dw_date != null) ? moment(history.dw_date).format(formatDate) : ""}</td>
-                                                    <td>{(history.dw_type != null) ? "Auto(Ftp)" : "Manual(Ftp)"}</td>
-                                                    <td>Detail</td>
-                                                </tr>
-                                            );
+                                        return (
+                                            <tr key={idx}>
+                                            	<td>{idx + 1}</td>
+                                                <td>{history.dl_user}</td>
+                                                <td>{(history.dl_date != null) ? moment(history.dl_date).format(formatDate) : ""}</td>
+                                                <td>{history.dl_filename}</td>
+                                                <td>{getDownloadType(history.dl_type)}</td>
+                                                <td>{history.dl_status}</td>
+                                            </tr>
+                                        );
                                         })}
                                         </tbody>
                                     </Table>
@@ -163,10 +178,10 @@ class DownloadHistory extends Component {
                             {pagination}
                         </Card>
                     </Container>
+                    <Footer/>
                     <ScrollToTop showUnder={160} style={scrollStyle}>
                         <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
                     </ScrollToTop>
-                    <Footer/>
                 </>
             );
         }
@@ -175,9 +190,9 @@ class DownloadHistory extends Component {
 
 export default connect(
     (state) => ({
-        dwHistoryInfo: state.dwHis.get('dwHistoryInfo'),
+        dlHistoryInfo: state.dlHistory.get('dlHistoryInfo'),
     }),
     (dispatch) => ({
-        dwHistoryAction: bindActionCreators(dwHistoryAction, dispatch),
+        dlHistoryAction: bindActionCreators(dlHistoryAction, dispatch),
     })
 )(DownloadHistory);

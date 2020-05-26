@@ -58,13 +58,8 @@ class Login extends Component {
             console.log("isLoggedIn", isLoggedIn);
             console.log("errCode", errCode);
             if (isLoggedIn) {
-                window.sessionStorage.setItem('isLoggedIn', true);
-                window.sessionStorage.setItem('username', this.state.username);
-                window.sessionStorage.setItem('password', this.state.password);
-                window.sessionStorage.setItem('auth', '100');
-
                 API.setLoginUserName(this.props, this.state.username);
-                API.setLoginPassword(this.props, this.state.password);
+                API.setLoginPassword(this.props, md5(this.state.password));
                 API.setLoginAuth(this.props, '100'); //temp
                 this.props.history.push(Define.PAGE_MANUAL);
             } else {

@@ -10,6 +10,7 @@ import CheckBox from "../../Common/CheckBox";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../../modules/searchList";
+import * as dlHistoryAction from "../../../modules/dlHistory";
 import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
@@ -89,7 +90,6 @@ class FileList extends Component {
     const requestId = await API.requestDownload(this.props);
     console.log("requestId", requestId);
     searchListActions.searchSetDlStatus({dlId: requestId});
-
     // SetInterval에서 사용할 Modal Func 추가
     const modalFunc = {
       closeProcessModal: this.closeProcessModal,
@@ -180,8 +180,16 @@ class FileList extends Component {
 
     if(isSave) {
       const { downloadStatus } = this.props;
-      result = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
-      this.setErrorStatus(result);
+      let res = 0;
+      res = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      console.log("res: ",res);
+      (res.result == Define.RSS_SUCCESS)
+          ? API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Completed")
+          : API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Fail");
+      this.setErrorStatus(res.result);
+    }
+    else {
+      API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,"unknown", "User Cancel");
     }
     // Initialize state
     const { searchListActions } = this.props;
@@ -556,6 +564,7 @@ export default connect(
       resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
     }),
     (dispatch) => ({
-      searchListActions: bindActionCreators(searchListActions, dispatch)
+      searchListActions: bindActionCreators(searchListActions, dispatch),
+      dlHistoryAction: bindActionCreators(dlHistoryAction, dispatch)
     })
 )(FileList);

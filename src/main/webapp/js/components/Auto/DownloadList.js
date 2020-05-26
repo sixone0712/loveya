@@ -17,6 +17,8 @@ import moment from "moment";
 import queryString from "query-string";
 import * as Define from "../../define";
 import {setRowsPerPage} from "../../api";
+import * as API from "../../api";
+import * as dlHistoryAction from "../../modules/dlHistory";
 
 const { Option } = Select;
 
@@ -171,15 +173,17 @@ class RSSAutoDownloadList extends Component {
         console.log("[DownladList][saveDownloadFile]id", this.state.download.id);
         if(this.state.download.id !== "") {
             const res = await services.axiosAPI.downloadFile(Define.REST_API_URL + '/plan/download?id=' + this.state.download.id);
-            if(res === Define.RSS_SUCCESS) {
+            if(res.result == Define.RSS_SUCCESS) {
                 this.closeModal();
+                API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Completed")
             } else {
                 this.closeModal();
-                if(res === Define.COMMON_FAIL_NOT_FOUND) {
+                if(res.result == Define.COMMON_FAIL_NOT_FOUND) {
                     this.openModal(modalType.MODAL_FILE_NOT_FOUND)
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
                 }
+                API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Fail")
             }
         } else {
             console.error("[DownladList][saveDownloadFile]id is null");
@@ -229,7 +233,6 @@ class RSSAutoDownloadList extends Component {
             console.error("[DownladList][deleteDownloadFile]id is null");
             this.closeModal();
         }
-
         this.loadDownloadList(this.state.requestId, this.state.requestId.name);
     }
 

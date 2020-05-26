@@ -66,6 +66,11 @@ export const post = async (url, postData) => {
 
 export const downloadFile = async (url) => {
     const method = 'GET';
+    let fileName = 'unknown';
+    let state = {
+        result:  Define.RSS_FAIL,
+        fileName: "unknown"
+    };
     const result = await axios.request({
         url,
         method,
@@ -75,7 +80,7 @@ export const downloadFile = async (url) => {
             // Since IE cannot directly process the blob data, msSaveOrOpenBlob should be used.
             if (window.navigator && window.navigator.msSaveOrOpenBlob) {
                 const contentDisposition = res.headers['content-disposition'];  // file name
-                let fileName = 'unknown';
+
                 if (contentDisposition) {
                     const [fileNameMatch] = contentDisposition.split(';').filter(str => str.includes('filename'));
                     if (fileNameMatch)
@@ -86,7 +91,7 @@ export const downloadFile = async (url) => {
                 const url = window.URL.createObjectURL(new Blob([res.data]));
                 const link = document.createElement('a');
                 const contentDisposition = res.headers['content-disposition'];  // file name
-                let fileName = 'unknown';
+
                 if (contentDisposition) {
                     const [fileNameMatch] = contentDisposition.split(';').filter(str => str.includes('filename'));
                     if (fileNameMatch)
@@ -102,21 +107,22 @@ export const downloadFile = async (url) => {
                 link.remove();
                 window.URL.revokeObjectURL(url);
             }
-
-            return Define.RSS_SUCCESS;
+            state.result = Define.RSS_SUCCESS;
+            state.fileName =  fileName;
+           return state;
         })
         .catch(error => {
             const errResp = error.response;
-            let res = Define.COMMON_FAIL_SERVER_ERROR;
+            state.result =  Define.COMMON_FAIL_SERVER_ERROR;
             if(typeof errResp == "undefined") {
-                return res;
+                return state;
             }
             console.error("[axioAPI][downloadFile]errResp", error.response);
             console.error("[axioAPI][downloadFile]errResp.status", error.response.status);
             if(errResp.status === 404) {
-                res = Define.COMMON_FAIL_NOT_FOUND;
+                state.result =  Define.COMMON_FAIL_NOT_FOUND;
             }
-            return res;
+            return state;
         });
 
     return result;

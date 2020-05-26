@@ -41,14 +41,14 @@ class SignOut extends Component {
     }
 
     SignOutProcess = async (e) => {
-        const {uInfo} = this.state;
+        const {uInfo, errors} = this.state;
 
         this.handleInput("name", uInfo.name);
         this.handleInput("pwd", uInfo.pwd);
         this.handleInput("cfpwd", uInfo.cfpwd);
 
-        if (uInfo.name.length === 0 || uInfo.pwd.length === 0 || uInfo.cfpwd.length === 0) {
-            console.log();
+        if (errors.pwd !== '' || errors.name !== ''  || errors.cfpwd !== '') {
+            console.log(errors);
         } else if (uInfo.pwd !== uInfo.cfpwd) {
             this.setState(() => (
                 {
@@ -71,7 +71,8 @@ class SignOut extends Component {
                         ...this.state,
                         errors: {
                             ...this.state.errors,
-                            pwd: API.getErrorMsg(result)
+                            pwd: (result !== Define.USER_SET_FAIL_SAME_NAME) ? API.getErrorMsg(result) : "",
+                            name: (result === Define.USER_SET_FAIL_SAME_NAME) ? API.getErrorMsg(result) : ""
                         }
                     })
                 );
@@ -101,16 +102,14 @@ class SignOut extends Component {
             case 'name':
                 nState.uInfo.name = value;
                 nState.errors.name =
-                    value.length < 1
-                        ? 'Please enter your name'
+                    (value.length < 6 || value === ' ')? 'Please must be at least 6 characters'
                         : '';
                 break;
             case 'pwd':
                 nState.uInfo.pwd = value;
                 nState.errors.pwd =
-                    value.length < 1
-                        ? 'Please enter the password'
-                        : '';
+                    (value.length < 3 || value === ' ')? 'Please must be at least 3 characters'
+                    : '';
                 break;
             case 'cfpwd':
                 nState.uInfo.cfpwd = value;
@@ -130,7 +129,16 @@ class SignOut extends Component {
     close = () => {
         this.setState(() => (
             {...this.state,
-                error:{},
+                uInfo : {
+                    ...this.state.uInfo,
+                    authValue: "100",
+                },
+                errors: {
+                    name: '',
+                    pwd: '',
+                    cfpwd: '',
+                    ModalMsg: '',
+                },
             })
         );
         this.props.right();

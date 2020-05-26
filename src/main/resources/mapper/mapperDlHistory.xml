@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="dwHistory">
+<mapper namespace="dlHistory">
 
     <select id="selectAll" resultType="DownloadHistoryVo">
-        select * from rsss."download_history" where validity is true order by dw_id
+        select * from rsss."download_history" where validity is true order by id
     </select>
 
     <select id="select" resultType="DownloadHistoryVo">
         select * from rsss."download_history"
-        where
-                and dw_id = #{dw_id}
+        where and id = #{id}
     </select>
 
     <insert id="insert" parameterType="DownloadHistoryVo">
         insert into rsss."download_history" (
-                dw_user
-                ,dw_date
-                ,dw_type
-                ,dw_filelist
+                dl_user
+                ,dl_date
+                ,dl_type
+                ,dl_filename
                 ,validity
+                ,dl_status
             ) values (
-                #{username}
+                #{dl_user}
                 ,now()
-                ,#{dwType}
-                ,#{dwFileList}
+                ,#{dl_type}
+                ,#{dl_filename}
                 ,true
+                ,#{dl_status}
         )
     </insert>
 
     <delete id="delete">
         delete
             from rsss."download_history"
-            where dw_id = #{dw_id}
+            where id = #{id}
     </delete>
 
 </mapper>

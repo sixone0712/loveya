@@ -23,9 +23,10 @@ class ChangePwModal extends Component {
 
     handleSubmit = () => {
         const { oldPw, newPw, confirmPw } = this.state;
-        const originalPw = window.sessionStorage.getItem('password');
 
-        if (oldPw !== originalPw) {
+        const originalPw = API.getLoginPassword(this.props);
+
+        if (md5(oldPw) !== originalPw) {
             this.setState({
                 errors: {
                     oldPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD)
@@ -71,11 +72,10 @@ class ChangePwModal extends Component {
         console.log("isError: " + isError);
 
         if(!isError) {
-            const username = window.sessionStorage.getItem('username');
+            const username = API.getLoginUserName(this.props);
             API.changePassword(this.props, `${Define.REST_API_URL}/user/changePw?username=${username}&password=${md5(newPw)}`);
-            window.sessionStorage.setItem('password', newPw);
-            API.setLoginPassword(this.props, newPw);
-            this.props.right(); //pw change modal Close
+            API.setLoginPassword(this.props, md5(newPw));
+            this.closeModal(); //pw change modal Close
             this.props.alertOpen("password");
         }
     }

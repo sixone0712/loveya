@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface DownloadHistoryService {
     List<DownloadHistoryVo> getHistoryList();
+    boolean addDlHistory(DownloadHistoryVo dlHistory);
 }
