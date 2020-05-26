@@ -490,8 +490,7 @@ class FileList extends Component {
                     return (
                         <tr
                             key={key}
-                            //onClick={(e) => this.handleTrClick(e)}
-                            onClick={() => this.handleTrClick(file.keyIndex)}
+                            onClick={(e) => this.handleTrClick(e)}
                             cbinfo={file.keyIndex}
                         >
                           <td>
