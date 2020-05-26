@@ -20,14 +20,17 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private static final String[] allowedRegex = {
             "/",
+            "/index.html",
+            "/rss/index.bundle.*.js",
+            "/rss/main.*.css",
             "/error",
-            "/rss/login",
-            "/user/login",
+            "/rss/page/login",
+            "/rss/rest/user/login",
+            "/rss/rest/user/isLogin",
             "/favicon\\.ico",
             "/dbtest/[\\w./]*",
             "/dbtest",
             "/rss",
-            "/user/isLogin",
             "/build/react/[\\w.]*"
     };
 

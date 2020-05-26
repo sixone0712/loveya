@@ -43,6 +43,12 @@ public class Request implements PropertyChangeListener {
         list.addReady(req);
     }
 
+    public void stop(){
+        for (FtpWorker worker : workerList){
+            worker.stopWorker();
+        }
+    }
+
     public void execute(boolean waitToComplete) {
         for (Entry<String, SubRequestList> x : readyQueueMap.entrySet()) {
             SubRequestList list = x.getValue();

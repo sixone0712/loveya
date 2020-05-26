@@ -39,6 +39,7 @@ public class GetRequest implements PropertyChangeListener {
     private Map<String, ServerInfo> serverInfoMap = new HashMap<>();
 
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private boolean stopped = false;
 
     public GetRequest(){
         this.createdTime = Calendar.getInstance();
@@ -79,6 +80,11 @@ public class GetRequest implements PropertyChangeListener {
         if (serverInfoMap.get(serverName) == null) {
             serverInfoMap.put(serverName, serverInfo);
         }
+    }
+
+    public void stop(){
+        stopped = true;
+        request.stop();
     }
 
     public void add(ServerInfo serverInfo, String path, String filename){

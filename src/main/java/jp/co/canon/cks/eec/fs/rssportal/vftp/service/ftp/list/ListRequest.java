@@ -23,6 +23,7 @@ public class ListRequest implements PropertyChangeListener {
     private @Getter @Setter String path;
     private @Getter @Setter String directory;
     private @Getter Status status = Status.NONE;
+    private boolean stopped = false;
 
     /* 결과 정보 */
     private @Getter ArrayList<FileItem> filelist = new ArrayList<>();
@@ -32,6 +33,11 @@ public class ListRequest implements PropertyChangeListener {
 
     public ListRequest() {
         this.createdTime = Calendar.getInstance();        
+    }
+
+    public void stop(){
+        stopped = true;
+        request.stop();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener){

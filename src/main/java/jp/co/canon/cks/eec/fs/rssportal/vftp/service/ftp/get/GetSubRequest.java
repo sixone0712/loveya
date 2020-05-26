@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.FileItem;
+import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.FtpWorker;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.SubRequest;
 import jp.co.canon.cks.eec.util.ftp.FTP;
 import jp.co.canon.cks.eec.util.ftp.FTPException;
@@ -35,7 +35,7 @@ public class GetSubRequest extends SubRequest {
         propertyChangeSupport.firePropertyChange("downloaded", null, item);
     }
 
-    private void processGetRequest(FTP ftp, GetFileItem item){
+    private void processGetRequest(FTP ftp, GetFileItem item) throws Exception {
         String filename = item.getName();
         String destDir = item.getDestDir();
         
@@ -45,15 +45,7 @@ public class GetSubRequest extends SubRequest {
         
         try {
             ftp.cd(item.getPath());
-        } catch (SocketTimeoutException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (FTPException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
 
-        try {
             is = ftp.openFileStream(filename);
             File destDirFile = new File(new File(destDir), serverName);
             if (!destDirFile.exists()){
@@ -70,20 +62,12 @@ public class GetSubRequest extends SubRequest {
                     total_file_bytes += readed_bytes;
                 }
             } while (readed_bytes > 0);
-            
-        } catch (SocketTimeoutException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (FTPException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SocketException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw e;
         }
+
         if (os != null){
             try {
                 os.close();
@@ -113,11 +97,14 @@ public class GetSubRequest extends SubRequest {
     }
 
     @Override
-    public void processRequest(FTP ftp) {
+    public void processRequest(FtpWorker worker, FTP ftp) throws Exception {
         GetFileItem item = null;
 
         item = fileList.readyToProgress();
         while (item != null){
+            if (worker.isWorkerStopped()){
+                break;
+            }
             processGetRequest(ftp, item);
             item = fileList.readyToProgress();
         }

@@ -4,7 +4,7 @@ import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import { Col, FormGroup, Label } from "reactstrap";
 import moment from "moment";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 
 class RSSautoplanchecksetting extends Component {
     render() {
@@ -39,7 +39,7 @@ class RSSautoplanchecksetting extends Component {
                             <FormGroup>
                                 <Label>Mode</Label>
                                 <div className="setting-info">
-                                    { collectType == DEFINE.AUTO_MODE_CONTINUOUS
+                                    { collectType == Define.AUTO_MODE_CONTINUOUS
                                         ? "Continous"
                                         : `Cycle / ${interval} ${intervalUnit}`
                                     }

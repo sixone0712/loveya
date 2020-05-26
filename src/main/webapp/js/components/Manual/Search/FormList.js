@@ -89,11 +89,11 @@ class FormList extends Component{
         const errCode = await API.setSearchList(this.props);
 
         if (this.onSetErrorState(errCode)) {
-            this.openModal(modalType.ALERT);
+            await this.openModal(modalType.ALERT);
             return;
         }
 
-        this.openModal(modalType.PROCESS);
+        await this.openModal(modalType.PROCESS);
 
         API.startSearchList(this.props);
 
@@ -136,8 +136,10 @@ class FormList extends Component{
 
             case modalType.CANCEL_COMPLETE:
                 //this.closeModal();
-                services.axiosAPI.postCancel();
-                clearTimeout(this.getIntervalFunc());
+                if(this.props.responseListCnt === 0) {
+                    services.axiosAPI.postCancel();
+                    clearTimeout(this.getIntervalFunc());
+                }
                 await this.setState({
                     ...this.state,
                     isProcessOpen: false,
@@ -147,12 +149,14 @@ class FormList extends Component{
                     intervalValue: null
                 })
 
-                setTimeout(() => {
-                    this.setState({
-                        isAlertOpen: true,
-                        alertMsg: "Search was canceled."
-                    });
-                }, 500);
+                if(this.props.responseListCnt === 0) {
+                    setTimeout(() => {
+                        this.setState({
+                            isAlertOpen: true,
+                            alertMsg: "Search was canceled."
+                        });
+                    }, 200);
+                }
                 break;
 
             default:
@@ -272,6 +276,7 @@ export default connect(
       toolInfoList: state.viewList.get('toolInfoList'),
       logInfoList: state.viewList.get('logInfoList'),
       requestList: state.searchList.get('requestList'),
+      responseListCnt: state.searchList.get('responseListCnt'),
       startDate: state.searchList.get('startDate'),
       endDate: state.searchList.get('endDate'),
       resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { NavLink } from "react-router-dom";
 import ScrollToTop from "react-scroll-up";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 import AutoPlanAdd from "./AutoRegistAdd";
 import AutoPlanEdit from "./AutoRegistEdit";
 import AutoStatus from "./AutoPlanStatus";
@@ -26,18 +26,18 @@ class Auto extends Component {
     constructor() {
         super();
         this.state = {
-            page: DEFINE.AUTO_CUR_PAGE_INIT
+            page: Define.AUTO_CUR_PAGE_INIT
         }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        let page = DEFINE.AUTO_CUR_PAGE_ADD
-        if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_STATUS)) {
-            page = DEFINE.AUTO_CUR_PAGE_STATUS;
-        } else if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_DOWNLOAD)) {
-            page = DEFINE.AUTO_CUR_PAGE_DOWNLOAD;
-        } else if(nextProps.location.pathname.includes(DEFINE.PAGE_AUTO_PLAN_EDIT)) {
-            page = DEFINE.AUTO_CUR_PAGE_EDIT;
+        let page = Define.AUTO_CUR_PAGE_ADD
+        if(nextProps.location.pathname.includes(Define.PAGE_AUTO_STATUS)) {
+            page = Define.AUTO_CUR_PAGE_STATUS;
+        } else if(nextProps.location.pathname.includes(Define.PAGE_AUTO_DOWNLOAD)) {
+            page = Define.AUTO_CUR_PAGE_DOWNLOAD;
+        } else if(nextProps.location.pathname.includes(Define.PAGE_AUTO_PLAN_EDIT)) {
+            page = Define.AUTO_CUR_PAGE_EDIT;
         }
 
         return {
@@ -54,10 +54,10 @@ class Auto extends Component {
                 <Container className="rss-container" fluid={true}>
                     <CreateBreadCrumb page={page}/>
                     <Switch>
-                        <Route path={DEFINE.PAGE_AUTO_PLAN_ADD} component={AutoPlanAdd}/>
-                        <Route path={DEFINE.PAGE_AUTO_PLAN_EDIT} component={AutoPlanEdit}/>
-                        <Route path={DEFINE.PAGE_AUTO_STATUS} component={AutoStatus}/>
-                        <Route path={DEFINE.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_ADD} component={AutoPlanAdd}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_EDIT} component={AutoPlanEdit}/>
+                        <Route path={Define.PAGE_AUTO_STATUS} component={AutoStatus}/>
+                        <Route path={Define.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
                     </Switch>
                 </Container>
                 <Footer />
@@ -75,7 +75,7 @@ const CreateBreadCrumb = props => {
     const { page } = props;
 
     switch (page) {
-        case DEFINE.AUTO_CUR_PAGE_ADD:
+        case Define.AUTO_CUR_PAGE_ADD:
             return (
                 <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
@@ -83,7 +83,7 @@ const CreateBreadCrumb = props => {
                 </Breadcrumb>
             )
 
-        case DEFINE.AUTO_CUR_PAGE_STATUS:
+        case Define.AUTO_CUR_PAGE_STATUS:
             return (
                 <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
@@ -91,12 +91,12 @@ const CreateBreadCrumb = props => {
                 </Breadcrumb>
             );
 
-        case DEFINE.AUTO_CUR_PAGE_EDIT:
+        case Define.AUTO_CUR_PAGE_EDIT:
             return (
                 <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
                     <BreadcrumbItem>
-                        <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
+                        <NavLink to={Define.PAGE_REFRESH_AUTO_STATUS} className="link">
                             Plan Status
                         </NavLink>
                     </BreadcrumbItem>
@@ -104,13 +104,13 @@ const CreateBreadCrumb = props => {
                 </Breadcrumb>
             );
 
-        case DEFINE.AUTO_CUR_PAGE_DOWNLOAD:
+        case Define.AUTO_CUR_PAGE_DOWNLOAD:
             return (
                 <>
                     <Breadcrumb className="topic-path">
                         <BreadcrumbItem>Auto Download</BreadcrumbItem>
                         <BreadcrumbItem>
-                            <NavLink to={DEFINE.PAGE_REFRESH_AUTO_STATUS} className="link">
+                            <NavLink to={Define.PAGE_REFRESH_AUTO_STATUS} className="link">
                                 Plan Status
                             </NavLink>
                         </BreadcrumbItem>

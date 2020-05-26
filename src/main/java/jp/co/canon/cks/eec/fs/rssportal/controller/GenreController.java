@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/db")
+@RequestMapping("/rss/rest/db")
 public class GenreController {
 
     private final GenreService serviceGenre;

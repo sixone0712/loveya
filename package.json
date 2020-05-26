@@ -14,9 +14,12 @@
     "babel-jest": "^26.0.1",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "clean-webpack-plugin": "^3.0.0",
     "cross-env": "^7.0.2",
     "css-loader": "^3.4.2",
+    "html-webpack-plugin": "^4.3.0",
     "jest": "^26.0.1",
+    "mini-css-extract-plugin": "^0.9.0",
     "node-sass": "^4.13.1",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
@@ -70,7 +73,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "gradlew bootRun",
-    "watch": "cross-env NODE_PATH=src node_modules\\.bin\\webpack --watch -d"
+    "watch": "cross-env NODE_PATH=src node_modules/.bin/webpack --mode development --watch -d",
+    "build": "cross-env NODE_PATH=src node_modules/.bin/webpack --mode production --process",
+    "build-dev": "cross-env NODE_PATH=src node_modules/.bin/webpack --mode development --process"
   },
   "browserslist": {
     "production": [

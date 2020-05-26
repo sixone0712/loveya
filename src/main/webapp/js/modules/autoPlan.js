@@ -2,7 +2,7 @@ import { createAction, handleActions } from 'redux-actions';
 import { Map, List, fromJS, Record } from 'immutable';
 import { pender , applyPenders } from 'redux-pender';
 import services from '../services';
-import * as DEFINE from '../define';
+import * as Define from '../define';
 import moment from "moment";
 
 const AUTO_PLAN_INIT = "autoPlan/AUTO_PLAN_INIT";
@@ -33,9 +33,9 @@ const initialState = Map({
         collectStart: moment().startOf('day'),
         from: moment().startOf('day'),
         to : moment().endOf('day'),
-        collectType: DEFINE.AUTO_MODE_CONTINUOUS,
+        collectType: Define.AUTO_MODE_CONTINUOUS,
         interval: 1,
-        intervalUnit: DEFINE.AUTO_UNIT_MINUTE,
+        intervalUnit: Define.AUTO_UNIT_MINUTE,
         description: ""
     })
 });
@@ -87,13 +87,13 @@ const reducer =  handleActions({
         const days = (intervalInt / (1000 * 60 * 60 * 24)).toFixed(0);
 
         if(days > 0) {
-            intervalUnit = DEFINE.AUTO_UNIT_DAY;
+            intervalUnit = Define.AUTO_UNIT_DAY;
             convInterval = String(days);
         } else if( hours > 0) {
-            intervalUnit = DEFINE.AUTO_UNIT_HOUR;
+            intervalUnit = Define.AUTO_UNIT_HOUR;
             convInterval = String(hours);
         } else {
-            intervalUnit = DEFINE.AUTO_UNIT_MINUTE;
+            intervalUnit = Define.AUTO_UNIT_MINUTE;
             convInterval = String(minutes);
         }
 

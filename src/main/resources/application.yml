@@ -1,11 +1,40 @@
+log4j:
+  # A1 is set to be a ConsoleAppender.
+#  appender:
+#    A1: org.apache.log4j.ConsoleAppender
+#    A1.layout: org.apache.log4j.PatternLayout
+#    A1.layout.ConversionPattern: '%-4r %-5p %c - %m%n'
+  debug: true
+  logger:
+    org:
+      mybatis:
+        # MBG logging configuration...
+        generator: DEBUG
+  # Set root logger
+  rootLogger: DEBUG, stdout
+
 spring:
+  profiles:
+    active: dev
+  datasource:
+    password: 1234  
+    platform: postgresql
+    url: jdbc:postgresql://localhost:5432/rssdb
+    username: rssadmin
   http:
     encoding:
       charset:    UTF-8
-  mvc:
-    view:
-      prefix:     /jsp/
-      suffix:     .jsp
+#  mvc:
+#    view:
+#      prefix:     /jsp/
+#      suffix:     .jsp
+
+  # Hot reload
+  devtools:
+    livereload:
+      enabled: true
+  freemarker:
+    cache: false
 server:
   tomcat:
     uri-encoding: UTF-8
@@ -14,4 +43,17 @@ rssportal:
   vftp:
     directory:
       request: /LOG/VFTP/Requests
-    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions.ObjectList.xml
+    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
+---
+spring:
+  profiles: dev
+rssportal:
+  property:
+    constructdisplay: devTemp/ConstructDisplay.xml
+
+---
+spring:
+  profiles: release
+rssportal:
+  property:
+    constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml

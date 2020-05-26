@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileDownloadStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.FileListStatus;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.ServerInfoRepository;
-import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpConfig;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.VFtpManager;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.checker.CompatChecker;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.controller.checker.SSSChecker;
@@ -39,8 +38,6 @@ public class VFtpController {
     ServerInfoRepository serverInfoRepository;
     @Autowired
     VFtpManager manager;
-    @Autowired
-    VFtpConfig vftpConfig;
 
     @PostMapping("/vftp/compat/getrequest")
     @ResponseBody
@@ -125,7 +122,6 @@ public class VFtpController {
                         .header("Content-Disposition", "attachment; filename="+sts.getDownloadFileName())
                         .body(isr);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return ResponseEntity.notFound().build();
@@ -134,7 +130,8 @@ public class VFtpController {
     @DeleteMapping(value = "/vftp/compat/getrequest/{requestNo}")
     @ResponseBody
     public ResponseEntity<?> deleteCompatGetRequest(@PathVariable String requestNo) {
-        return ResponseEntity.ok("not implemented");
+        manager.deleteRequestDownload(requestNo);
+        return ResponseEntity.ok("ok");
     }
 
     @PostMapping(value = "/vftp/sss/listrequest")
@@ -185,8 +182,8 @@ public class VFtpController {
     @DeleteMapping(value = "/vftp/sss/listrequest/{requestNo}")
     @ResponseBody
     public ResponseEntity<?> deleteSssListRequest(@PathVariable String requestNo) {
-
-        return ResponseEntity.ok("not implemented");
+        manager.deleteRequestFileList(requestNo);
+        return ResponseEntity.ok("ok");
     }
 
     private String getSssCompressFilenameFromPath(String path) {
@@ -285,7 +282,8 @@ public class VFtpController {
     @DeleteMapping(value = "/vftp/sss/getrequest/{requestNo}")
     @ResponseBody
     public ResponseEntity<?> deleteSssGetRequest(@PathVariable String requestNo){
-        return ResponseEntity.ok("not implemented");
+        manager.deleteRequestDownload(requestNo);
+        return ResponseEntity.ok("ok");
     }
 
     @Getter

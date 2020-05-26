@@ -4,20 +4,34 @@ import * as API from "../../api";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as userActions from "../../modules/User";
-import Select from "react-select";
+import { Select } from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheckCircle, faUser, faExclamationCircle, faPlus, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faCheckCircle, faUser, faExclamationCircle, faTrashAlt, faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
 import {filePaginate, renderPagination} from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import moment from "moment";
 import ChangeAuthModal from "./ChangeAuth";
 import SignOut from "./SignOut";
+import ScrollToTop from "react-scroll-up";
 import AlertModal from "../Common/AlertModal";
+import Footer from "../Common/Footer";
+
+const { Option } = Select;
 
 const AUTH_ALERT_MESSAGE = "Permission change completed.";
 const CREATE_ALERT_MESSAGE = "New Account create completed.";
 const DELETE_ALERT_MESSAGE = "Account delete completed.";
 const DELETE_CONFIRM_MESSAGE ="Do you want to delete account?";
+
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
+
 
 class UserList extends Component {
     constructor(props) {
@@ -73,7 +87,7 @@ class UserList extends Component {
                     console.log("invalid type!!");
                     break;
             }
-        }, 800);
+        }, 200);
     };
 
     closeAlert = () => {
@@ -115,14 +129,13 @@ class UserList extends Component {
         });
     };
 
-    handleSelectBoxChange = newValue => {
+    handleSelectBoxChange = value => {
         const { pageSize, currentPage } = this.state;
         const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
 
         this.setState({
-            ...this.state,
-            pageSize: parseInt(newValue.value),
-            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
+            pageSize: value,
+            currentPage: Math.ceil(startIndex / value)
         });
     };
 
@@ -151,183 +164,137 @@ class UserList extends Component {
             await API.getDBUserList(this.props);//user list refresh
         }
     };
-    render()
-    {
+
+    render() {
         const formatDate = 'YYYY/MM/DD HH:mm:ss';
-    const UserList  = API.getUserList(this.props);
-   const { length: count } = UserList;
-    console.log(UserList);
-    if (count === 0) {
-        return (
-            <Card className="auto-plan-box">
-                <CardHeader className="auto-plan-card-header">
-                    User List
-                </CardHeader>
-                <CardBody className="auto-plan-card-body">
-                    <Col className="auto-plan-collection-list">
-                        <p className="no-registered-plan">
-                            <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
-                        </p>
-                        <p className="no-registered-plan">
-                            No registered User List
-                        </p>
-                    </Col>
-                </CardBody>
-            </Card>
-        );
-    } else {
-    const { currentPage, pageSize, isConfirmOpen, selected } = this.state;
-    const users = filePaginate(UserList, currentPage, pageSize);
-    const pagination = renderPagination(
-        pageSize,
-        count,
-        this.handlePaginationChange,
-        currentPage,
-        "custom-pagination"
-    );
-    const optionList = [
-        { value: 10, label: "10" },
-        { value: 30, label: "30" },
-        { value: 50, label: "50" },
-        { value: 100, label: "100" }
-    ];
+        const UserList  = API.getUserList(this.props);
+        const { length: count } = UserList;
+        console.log(UserList);
+        if (count === 0) {
+            return (
+                <>
+                    <Container className="rss-container" fluid={true}>
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Administrator</BreadcrumbItem>
+                            <BreadcrumbItem active>User Account</BreadcrumbItem>
+                        </Breadcrumb>
+                        <Card className="auto-plan-box">
+                            <CardHeader className="auto-plan-card-header">
+                                User Account
+                            </CardHeader>
+                            <CardBody className="auto-plan-card-body">
+                                <Col className="auto-plan-collection-list">
+                                    <p className="no-registered-plan">
+                                        <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
+                                    </p>
+                                    <p className="no-registered-plan">
+                                        No registered User List
+                                    </p>
+                                </Col>
+                            </CardBody>
+                        </Card>
+                    </Container>
+                    <Footer/>
+                    <ScrollToTop showUnder={160} style={scrollStyle}>
+                        <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                    </ScrollToTop>
+                </>
+            );
+        } else {
+            const { currentPage, pageSize, isConfirmOpen, selected } = this.state;
+            const users = filePaginate(UserList, currentPage, pageSize);
+            const pagination = renderPagination(
+                pageSize,
+                count,
+                this.handlePaginationChange,
+                currentPage,
+                "custom-pagination"
+            );
 
-    const customSelectStyles = {
-        container: styles => ({
-            ...styles,
-            display: "inline-block",
-            width: "85px",
-            fontSize: "14px",
-            marginLeft: "10px"
-        }),
-        option: (styles, { isFocused, isSelected }) => {
-            return {
-                ...styles,
-                backgroundColor: isSelected
-                    ? "rgba(92, 124, 250, 0.5)"
-                    : isFocused
-                        ? "rgba(92, 124, 250, 0.3)"
-                        : null,
-                color: "black",
-                ":active": {
-                    ...styles[":active"],
-                    backgroundColor: isSelected
-                        ? "rgba(92, 124, 250, 0.9)"
-                        : isFocused
-                            ? "rgba(92, 124, 250, 0.7)"
-                            : null
-                }
-            };
-        },
-        control: () => ({
-            display: "flex",
-            border: "1px solid rgb(92, 124, 250)",
-            borderRadius: "3px",
-            caretColor: "transparent",
-            transition: "all .15s ease-in-out",
-            ":hover": {
-                outline: "0",
-                boxShadow: "0 0 0 0.2em rgba(92, 124, 250, 0.5)"
-            }
-        }),
-        dropdownIndicator: styles => ({
-            ...styles,
-            color: "rgba(92, 124, 250, 0.6)",
-            ":hover": {
-                ...styles[":hover"],
-                color: "rgb(92, 124, 250)"
-            }
-        }),
-        indicatorSeparator: styles => ({
-            ...styles,
-            backgroundColor: "rgba(92, 124, 250, 0.6)"
-        }),
-        menu: styles => ({
-            ...styles,
-            borderRadius: "3px",
-            boxShadow:
-                "0 0 0 1px rgba(92, 124, 250, 0.6), 0 4px 11px rgba(92, 124, 250, 0.6)"
-        })
-    };
-        const { isModalOpen, isAlertOpen, alertMessage} = this.state;
-        const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "gray", this.closeAlert);
-        const deleteModal = ConfirmModal((isModalOpen && this.state.isMode==='deleteUser'), faTrashAlt, DELETE_CONFIRM_MESSAGE, "gray", this.closeModal,this.DeleteAccount,this.closeModal);
+            const { isModalOpen, isAlertOpen, alertMessage} = this.state;
+            const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "administrator", this.closeAlert);
+            const deleteModal = ConfirmModal((isModalOpen && this.state.isMode==='deleteUser'), faTrashAlt, DELETE_CONFIRM_MESSAGE, "administrator", this.closeModal,this.DeleteAccount,this.closeModal);
 
-        return (
-        <>
-            {renderAlert}
-            {deleteModal}
-            <ChangeAuthModal isOpen={isModalOpen && this.state.isMode==='ChangAuth'} right={this.closeModal} alertOpen={this.openAlert} userID = {selected} />
-            <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
-
-            <Container className="rss-container" fluid={true}>
-
-            <Card className="auto-plan-box">
-                <CardHeader className="auto-plan-card-header">
-                    User Account
-                    <p>Manage user accounts.</p>
-                    <div className="select-area">
-                        <label>Rows per page : </label>
-                        <Select
-                            options={optionList}
-                            styles={customSelectStyles}
-                            defaultValue={optionList[0]}
-                            onChange={this.handleSelectBoxChange}
-                        />
-                    </div>
-                </CardHeader>
-                <CardBody className="auto-plan-card-body not-flex">
-                    <div>
-                        <Button outline size="sm" className="new-account-btn"
-                                onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>
-                            <FontAwesomeIcon icon={faUser} /> New Account
-                        </Button>
-                    </div>
-                    <div className="auto-plan-collection-list">
-                        <Table>
-                            <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>User Name</th>
-                                <th>Permission</th>
-                                <th>Account Created Date</th>
-                                <th>last access Date</th>
-                                <th>Delete</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {users.map((user, idx) => {
-                                return (
-                                    <tr key={idx}>
-                                        <td>{idx+1}</td>
-                                        <td>{user.name}</td>
-                                        <td>
-                                            <div className="plan-id-area"
-                                                onClick={()=> this.uChangeAuth(user.id)}>
-                                              {user.auth}
-                                            </div>
-                                        </td>
-                                        <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
-                                        <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>
-                                        <td>
-                                            <div className="icon-area" onClick={ () => this.uDelete(user.id) }>
-                                                <FontAwesomeIcon icon={faTrashAlt} />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            </tbody>
-                        </Table>
-                    </div>
-                </CardBody>
-                {pagination}
-            </Card>
-            </Container>
-        </>
-    );
-}
-}
+            return (
+                <>
+                    {renderAlert}
+                    {deleteModal}
+                    <ChangeAuthModal isOpen={isModalOpen && this.state.isMode==='ChangAuth'} right={this.closeModal} alertOpen={this.openAlert} userID={selected} />
+                    <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
+                    <Container className="rss-container" fluid={true}>
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Administrator</BreadcrumbItem>
+                            <BreadcrumbItem active>User Account</BreadcrumbItem>
+                        </Breadcrumb>
+                        <Card className="auto-plan-box administrator">
+                            <CardHeader className="auto-plan-card-header administrator">
+                                User Account
+                                <p>Manage <span>user accounts.</span></p>
+                                <div className="select-area">
+                                    <label>Rows per page : </label>
+                                    <Select defaultValue={10} onChange={this.handleSelectBoxChange} className="administrator">
+                                        <Option value={10}>10</Option>
+                                        <Option value={30}>30</Option>
+                                        <Option value={50}>50</Option>
+                                        <Option value={100}>100</Option>
+                                    </Select>
+                                </div>
+                            </CardHeader>
+                            <CardBody className="auto-plan-card-body not-flex">
+                                <div className="user-create-btn">
+                                    <Button outline size="sm" color="info"
+                                            onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>
+                                        <FontAwesomeIcon icon={faUser} /> New Account
+                                    </Button>
+                                </div>
+                                <div className="auto-plan-collection-list">
+                                    <Table>
+                                        <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>User name</th>
+                                            <th>Permission</th>
+                                            <th>Account created date</th>
+                                            <th>Last access date</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {users.map((user, idx) => {
+                                            return (
+                                                <tr key={idx}>
+                                                    <td>{idx+1}</td>
+                                                    <td>{user.name}</td>
+                                                    <td>
+                                                        <span onClick={()=> this.uChangeAuth(user.id)} className="permission">
+                                                          {user.auth}
+                                                        </span>
+                                                    </td>
+                                                    <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
+                                                    <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>
+                                                    <td>
+                                                        <div className="icon-area" onClick={ () => this.uDelete(user.id) }>
+                                                            <FontAwesomeIcon icon={faTrashAlt} />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </CardBody>
+                            {pagination}
+                        </Card>
+                    </Container>
+                    <Footer/>
+                    <ScrollToTop showUnder={160} style={scrollStyle}>
+                        <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+                    </ScrollToTop>
+                </>
+            );
+        }
+    }
 }
 
 export default connect(

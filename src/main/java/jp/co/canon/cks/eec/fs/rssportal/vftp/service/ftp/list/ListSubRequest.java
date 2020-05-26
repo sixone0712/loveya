@@ -2,14 +2,13 @@ package jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.list;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.FileItem;
+import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.FtpWorker;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.SubRequest;
 import jp.co.canon.cks.eec.util.ftp.FTP;
-import jp.co.canon.cks.eec.util.ftp.FTPException;
 import lombok.Getter;
 
 public class ListSubRequest extends SubRequest {
@@ -78,47 +77,24 @@ public class ListSubRequest extends SubRequest {
         return item;
     }
 
-    public void processRequest(FTP ftp) {
+    public void processRequest(FtpWorker worker, FTP ftp) throws Exception {
+        List<String> result = null;
         try {
             ftp.cd(path);
-        } catch (SocketTimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FTPException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        if (directory != null){
-            try {
+            if (directory != null){
                 ftp.cd(directory);
-            } catch (SocketTimeoutException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (FTPException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
-        }
-
-        List<String> result = null;
-        
-        try {
+            
             result = ftp.ls("");
-        } catch (SocketTimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FTPException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw e;
         }
-        if (result != null){
-            ArrayList<FileItem> list = new ArrayList<>();
-            for (String line : result){
-                FileItem item = createFileItemFromLsLine(line);
-                list.add(item);
-            }
-            notifySuccess(list);
+        ArrayList<FileItem> list = new ArrayList<>();
+        for (String line : result){
+            FileItem item = createFileItemFromLsLine(line);
+            list.add(item);
         }
+        notifySuccess(list);
     }
 }

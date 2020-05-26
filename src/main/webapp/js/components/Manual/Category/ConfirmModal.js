@@ -95,7 +95,7 @@ class ConfirmModal extends Component {
 
             if(result === Define.GENRE_SET_FAIL_NOT_EXIST_GENRE) {
                 const { genreListActions } = this.props;
-                await genreListActions.genreGetDbList("/db/genre/get");
+                await genreListActions.genreGetDbList(Define.REST_API_URL + "/db/genre/get");
             }
             this.closeConfirmModal();
             setTimeout(() => {

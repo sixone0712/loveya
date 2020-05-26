@@ -4,17 +4,17 @@ plugins {
     id 'java'
     // Build War
     //id 'war'
+    id 'jacoco'
 }
 
 // Build War
 /*
-rssportalWar {
-    archiveBaseName = '-'
-    archiveFileName = '-.war'
-    archiveVersion = "0.0.0"
+bootWar {
+    archiveBaseName = 'rssportal'
+    archiveFileName = 'rssportal.war'
+    archiveVersion = "0.0.1"
 }
-*/
-
+ */
 
 group = 'jp.co.canon.cks.eec.fs'
 version = '0.0.1-SNAPSHOT'
@@ -64,10 +64,29 @@ dependencies {
     // Sql logging
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
 
+    // XML to Json Parsing
+    compile group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
+    compile group: 'org.json', name: 'json', version: '20190722'
+    compile group: 'org.apache.directory.studio', name: 'org.apache.commons.io', version: '2.4'
+
     implementation 'com.google.code.gson:gson:2.8.6'
 
 }
 
 test {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = '0.8.5'
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled true
+        xml.enabled false
+        csv.enabled false
+
+        html.destination file("$buildDir/jacocoHtml")
+    }
 }

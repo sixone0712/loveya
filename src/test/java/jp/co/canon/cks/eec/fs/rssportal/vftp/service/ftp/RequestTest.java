@@ -6,6 +6,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.list.ListSubRequest;
 
 public class RequestTest {
     private String host = "10.1.36.118";
+    /*
     @Test
     public void test_001(){
         Request req = new Request();
@@ -37,4 +38,5 @@ public class RequestTest {
     public void test_002(){
 
     }
+    */
 }

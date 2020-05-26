@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Col, Card, CardHeader, CardBody, Button, Table } from "reactstrap";
-import Select from "react-select";
+import { Select } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faTrashAlt,
@@ -13,11 +13,12 @@ import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services"
-import * as DEFINE from "../../define";
 import moment from "moment";
 import queryString from "query-string";
 import * as Define from "../../define";
 import {setRowsPerPage} from "../../api";
+
+const { Option } = Select;
 
 const modalMessage = {
     MODAL_DELETE_MESSAGE: "Are you sure you want to delete the selected file?",
@@ -42,71 +43,6 @@ const modalType = {
     MODAL_NETWORK_ERROR: 5,
     MODAL_FILE_NOT_FOUND: 6
 };
-
-const customSelectStyles = {
-    container: styles => ({
-        ...styles,
-        display: "inline-block",
-        width: "85px",
-        fontSize: "14px",
-        marginLeft: "10px"
-    }),
-    option: (styles, { isFocused, isSelected }) => {
-        return {
-            ...styles,
-            backgroundColor: isSelected
-                ? "rgba(92, 124, 250, 0.5)"
-                : isFocused
-                    ? "rgba(92, 124, 250, 0.3)"
-                    : null,
-            color: "black",
-            ":active": {
-                ...styles[":active"],
-                backgroundColor: isSelected
-                    ? "rgba(92, 124, 250, 0.9)"
-                    : isFocused
-                        ? "rgba(92, 124, 250, 0.7)"
-                        : null
-            }
-        };
-    },
-    control: () => ({
-        display: "flex",
-        border: "1px solid rgb(92, 124, 250)",
-        borderRadius: "3px",
-        caretColor: "transparent",
-        transition: "all .15s ease-in-out",
-        ":hover": {
-            outline: "0",
-            boxShadow: "0 0 0 0.2em rgba(92, 124, 250, 0.5)"
-        }
-    }),
-    dropdownIndicator: styles => ({
-        ...styles,
-        color: "rgba(92, 124, 250, 0.6)",
-        ":hover": {
-            ...styles[":hover"],
-            color: "rgb(92, 124, 250)"
-        }
-    }),
-    indicatorSeparator: styles => ({
-        ...styles,
-        backgroundColor: "rgba(92, 124, 250, 0.6)"
-    }),
-    menu: styles => ({
-        ...styles,
-        borderRadius: "3px",
-        boxShadow:
-            "0 0 0 1px rgba(92, 124, 250, 0.6), 0 4px 11px rgba(92, 124, 250, 0.6)"
-    })
-};
-
-const optionList = [
-    { value: 10, label: "10" },
-    { value: 30, label: "30" },
-    { value: 50, label: "50" },
-    { value: 100, label: "100" }
-];
 
 class RSSAutoDownloadList extends Component {
     state = {
@@ -190,13 +126,13 @@ class RSSAutoDownloadList extends Component {
         });
     };
 
-    handleSelectBoxChange = newValue => {
+    handleSelectBoxChange = value => {
         const { pageSize, currentPage } = this.state;
         const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
 
         this.setState({
-            pageSize: parseInt(newValue.value),
-            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
+            pageSize: parseInt(value),
+            currentPage: Math.ceil(startIndex / parseInt(value))
         });
     };
 
@@ -234,12 +170,12 @@ class RSSAutoDownloadList extends Component {
     saveDownloadFile = async () => {
         console.log("[DownladList][saveDownloadFile]id", this.state.download.id);
         if(this.state.download.id !== "") {
-            const res = await services.axiosAPI.downloadFile('/plan/download?id=' + this.state.download.id);
-            if(res === DEFINE.RSS_SUCCESS) {
+            const res = await services.axiosAPI.downloadFile(Define.REST_API_URL + '/plan/download?id=' + this.state.download.id);
+            if(res === Define.RSS_SUCCESS) {
                 this.closeModal();
             } else {
                 this.closeModal();
-                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                if(res === Define.COMMON_FAIL_NOT_FOUND) {
                     this.openModal(modalType.MODAL_FILE_NOT_FOUND)
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
@@ -253,7 +189,7 @@ class RSSAutoDownloadList extends Component {
     }
 
     requestDelete = async () => {
-        const res = await services.axiosAPI.get('/downloadlist/delete?id=' + this.state.delete.id)
+        const res = await services.axiosAPI.get(Define.REST_API_URL + '/downloadlist/delete?id=' + this.state.delete.id)
             .then( res  => {
                 return Define.RSS_SUCCESS;
             })
@@ -279,11 +215,11 @@ class RSSAutoDownloadList extends Component {
         if(this.state.delete.id !== "") {
             const res = await this.requestDelete();
             console.log("[DownladList][deleteDownloadFile]res", res);
-            if(res === DEFINE.RSS_SUCCESS) {
+            if(res === Define.RSS_SUCCESS) {
                 this.closeModal();
             } else {
                 this.closeModal();
-                if(res === DEFINE.COMMON_FAIL_NOT_FOUND) {
+                if(res === Define.COMMON_FAIL_NOT_FOUND) {
                     this.openModal(modalType.MODAL_FILE_NOT_FOUND)
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
@@ -300,7 +236,7 @@ class RSSAutoDownloadList extends Component {
 
     loadDownloadList = async (id, name) => {
         let result = false;
-        const res = await services.axiosAPI.get("/downloadlist/list?planId=" + id);
+        const res = await services.axiosAPI.get(Define.REST_API_URL + "/downloadlist/list?planId=" + id);
         const { data } = res;
         console.log("[DownloadList][componentDidMount]res", res);
         let newRequestList = [];
@@ -432,11 +368,15 @@ class RSSAutoDownloadList extends Component {
                             <div className="select-area">
                                 <label>Rows per page : </label>
                                 <Select
-                                    options={optionList}
-                                    styles={customSelectStyles}
-                                    defaultValue={optionList[0]}
+                                    defaultValue= {10}
                                     onChange={this.handleSelectBoxChange}
-                                />
+                                    className="planlist"
+                                >
+                                    <Option value={10}>10</Option>
+                                    <Option value={30}>30</Option>
+                                    <Option value={50}>50</Option>
+                                    <Option value={100}>100</Option>
+                                </Select>
                             </div>
                         </CardHeader>
                         <CardBody className="auto-plan-card-body">
@@ -463,7 +403,7 @@ class RSSAutoDownloadList extends Component {
                                         return (
                                             <tr key={idx}>
                                                 <td>
-                                                    <div className="request-id-area"
+                                                    <span className="request-id-area"
                                                          onClick={ () => {
                                                              this.setState({
                                                                  ...this.state,
@@ -473,7 +413,7 @@ class RSSAutoDownloadList extends Component {
                                                              });
                                                          }}>
                                                         {request.requestId}
-                                                    </div>
+                                                    </span>
                                                 </td>
                                                 <td>{CreateStatus(request.requestStatus)}</td>
                                                 <td>

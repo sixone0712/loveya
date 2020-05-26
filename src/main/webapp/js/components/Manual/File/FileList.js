@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faChevronCircleDown, faDownload, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import Select from "react-select";
+import { Select } from "antd";
 import CheckBox from "../../Common/CheckBox";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -18,69 +18,7 @@ import { filePaginate, renderPagination } from "../../Common/Pagination";
 import ConfirmModal from "../../Common/ConfirmModal";
 import AlertModal from "../../Common/AlertModal";
 
-const customSelectStyles = {
-  container: styles => ({
-    ...styles,
-    width: "85px",
-    fontSize: "14px",
-    marginLeft: "10px",
-    marginRight: "20px"
-  }),
-  option: (styles, { isFocused, isSelected }) => {
-    return {
-      ...styles,
-      backgroundColor: isSelected
-        ? "rgba(133, 164, 179, 0.5)"
-        : isFocused
-        ? "rgba(133, 164, 179, 0.3)"
-        : null,
-      color: "black",
-      ":active": {
-        ...styles[":active"],
-        backgroundColor: isSelected
-          ? "rgba(133, 164, 179, 0.9)"
-          : isFocused
-          ? "rgba(133, 164, 179, 0.7)"
-          : null
-      }
-    };
-  },
-  control: () => ({
-    display: "flex",
-    border: "1px solid #85a4b3",
-    borderRadius: "3px",
-    caretColor: "transparent",
-    transition: "all .15s ease-in-out",
-    ":hover": {
-      outline: "0",
-      boxShadow: "0 0 0 0.2em rgba(133, 164, 179, 0.5)"
-    }
-  }),
-  dropdownIndicator: styles => ({
-    ...styles,
-    color: "rgba(133, 164, 179, 0.6)",
-    ":hover": {
-      ...styles[":hover"],
-      color: "rgba(133, 164, 179, 1)"
-    }
-  }),
-  indicatorSeparator: styles => ({
-    ...styles,
-    backgroundColor: "rgba(133, 164, 179, 0.6)"
-  }),
-  menu: styles => ({
-    ...styles,
-    borderRadius: "3px",
-    boxShadow: "0 0 0 1px rgba(133, 164, 179, 0.6), 0 4px 11px rgba(133, 164, 179, 0.6)"
-  })
-};
-
-const optionList = [
-  { value: 10, label: "10" },
-  { value: 30, label: "30" },
-  { value: 50, label: "50" },
-  { value: 100, label: "100" }
-];
+const { Option } = Select;
 
 class FileList extends Component {
   constructor(props) {
@@ -192,7 +130,7 @@ class FileList extends Component {
       if(func !== null){
         clearInterval(func);
         // Reauest Cancel
-        const res = await services.axiosAPI.get("/dl/cancel?dlId=" + dlId);
+        const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/cancel?dlId=" + dlId);
         console.log("res", res)
         // 에러 처리 추가 필요
       }
@@ -242,7 +180,7 @@ class FileList extends Component {
 
     if(isSave) {
       const { downloadStatus } = this.props;
-      result = await services.axiosAPI.downloadFile("/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      result = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
       this.setErrorStatus(result);
     }
     // Initialize state
@@ -285,22 +223,33 @@ class FileList extends Component {
     });
   };
 
-  onChangeRowsPerPage = (option) => {
-    setRowsPerPage(this.props, option.value);
+  onChangeRowsPerPage = (value) => {
+    setRowsPerPage(this.props, value);
+
+    const { pageSize, currentPage } = this.state;
+    const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
+
     this.setState({
-      pageSize: parseInt(option.value),
-      currentPage: 1
+      pageSize: parseInt(value),
+      currentPage: Math.ceil(startIndex / parseInt(value))
     });
   };
 
-  checkFileItem = (e) => {
-    const idx = e.target.id.split('_{#div#}_')[1];
-    API.checkResponseList(this.props, idx);
+  checkFileItem = e => {
+    let idx = "";
+    idx = e.target.id.split('_{#div#}_')[1];
+    if(idx !== null) {
+      API.checkResponseList(this.props, idx);
+    }
+    e.stopPropagation();
   };
 
-  handleTrClick = e => {
-    const id = e.target.parentElement.getAttribute("cbinfo");
-    API.checkResponseList(this.props, id);
+  handleTrClick = e => {
+    let id = "";
+    id = e.target.parentElement.getAttribute("cbinfo");
+    if (id !== null) {
+      API.checkResponseList(this.props, id);
+    }
     e.stopPropagation();
   };
 
@@ -421,8 +370,8 @@ class FileList extends Component {
 
       const renderComplete = ConfirmModal(
           isCompleteOpen,
-          faBan,
           faChevronCircleDown,
+          modalMessage,
           "secondary",
           null,
           () => this.closeCompleteModal(true),
@@ -575,11 +524,15 @@ class FileList extends Component {
               <div className="filelist-item-area">
                 <label>Rows per page:</label>
                 <Select
+                    defaultValue= {10}
                     onChange={this.onChangeRowsPerPage}
-                    options={optionList}
-                    styles={customSelectStyles}
-                    defaultValue={optionList[0]}
-                />
+                    className="filelist"
+                >
+                  <Option value={10}>10</Option>
+                  <Option value={30}>30</Option>
+                  <Option value={50}>50</Option>
+                  <Option value={100}>100</Option>
+                </Select>
                 <Button
                     outline
                     size="sm"

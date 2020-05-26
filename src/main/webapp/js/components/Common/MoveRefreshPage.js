@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import queryString from "query-string";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
@@ -17,25 +17,25 @@ class MoveRefreshPage extends Component {
         console.log("query", query);
         console.log("target", target);
 
-        if (target.includes(DEFINE.PAGE_AUTO_PLAN_EDIT)) {
+        if (target.includes(Define.PAGE_AUTO_PLAN_EDIT)) {
             console.log("PAGE_AUTO_PLAN_EDIT");
             const { editId } = query;
             console.log("editId", editId);
-            history.replace(DEFINE.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
-        } else if (target.includes(DEFINE.PAGE_AUTO_PLAN_ADD)) {
+            history.replace(Define.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
+        } else if (target.includes(Define.PAGE_AUTO_PLAN_ADD)) {
             console.log("PAGE_AUTO_PLAN_ADD");
             const {viewListActions} = this.props;
             const {autoPlanActions} = this.props;
             await viewListActions.viewCheckAllToolList(false);
             await viewListActions.viewCheckAllLogTypeList(false)
             await autoPlanActions.autoPlanInit();
-            history.replace(DEFINE.PAGE_AUTO_PLAN_ADD);
-        } else if (target.includes(DEFINE.PAGE_MANUAL)) {
+            history.replace(Define.PAGE_AUTO_PLAN_ADD);
+        } else if (target.includes(Define.PAGE_MANUAL)) {
             console.log("PAGE_MANUAL");
-            history.replace(DEFINE.PAGE_MANUAL);
-        } else if (target.includes(DEFINE.PAGE_AUTO_STATUS)) {
+            history.replace(Define.PAGE_MANUAL);
+        } else if (target.includes(Define.PAGE_AUTO_STATUS)) {
             console.log("PAGE_AUTO_STATUS");
-            history.replace(DEFINE.PAGE_AUTO_STATUS);
+            history.replace(Define.PAGE_AUTO_STATUS);
         }
     }
 

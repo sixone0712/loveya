@@ -12,7 +12,7 @@ public class FtpWorkerTest {
         serverInfo.setHost("10.1.36.118");
         serverInfo.setPort(22001);
         serverInfo.setUsername("trkang");
-        serverInfo.setPassword("1234");
+        serverInfo.setPassword("123456");
 
         SubRequestList list = new SubRequestList();
 

@@ -33,22 +33,18 @@ public class VFtpManager {
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getPropertyName().equals("completed")){
                 Object o = evt.getSource();
-                if (o instanceof ListRequest){
-                    ListRequest srcreq = (ListRequest)o;
-                    listRequestRepository.save(srcreq);
+                ListRequest srcreq = (ListRequest)o;
+                listRequestRepository.save(srcreq);
 
-                    synchronized(this){
-                        listRequestMap.remove(srcreq.getRequestNo());
-                    }
+                synchronized(this){
+                    listRequestMap.remove(srcreq.getRequestNo());
                 }
                 return;
             }
             if (evt.getPropertyName().equals("statusChanged")){
                 Object o = evt.getSource();
-                if (o instanceof ListRequest){
-                    ListRequest srcreq = (ListRequest)o;
-                    listRequestRepository.save(srcreq);
-                }
+                ListRequest srcreq = (ListRequest)o;
+                listRequestRepository.save(srcreq);
                 return;
             }
         }
@@ -60,22 +56,18 @@ public class VFtpManager {
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getPropertyName().equals("completed")){
                 Object o = evt.getSource();
-                if (o instanceof GetRequest){
-                    GetRequest srcreq = (GetRequest)o;
-                    getRequestRepository.save(srcreq);
+                GetRequest srcreq = (GetRequest)o;
+                getRequestRepository.save(srcreq);
 
-                    synchronized(this){
-                        getRequestMap.remove(srcreq.getRequestNo());
-                    }
+                synchronized(this){
+                    getRequestMap.remove(srcreq.getRequestNo());
                 }
                 return;
             }
             if (evt.getPropertyName().equals("statusChanged")){
                 Object o = evt.getSource();
-                if (o instanceof ListRequest){
-                    ListRequest srcreq = (ListRequest)o;
-                    listRequestRepository.save(srcreq);
-                }
+                GetRequest srcreq = (GetRequest)o;
+                getRequestRepository.save(srcreq);
                 return;
             }
         }
@@ -149,5 +141,27 @@ public class VFtpManager {
             return req.convertToFileDownloadStatus();
         }
         return null;
+    }
+
+    public void deleteRequestDownload(String requestNo){
+        GetRequest req = getRequestMap.get(requestNo);
+        if (req != null){
+            req.stop();
+            synchronized(this){
+                getRequestMap.remove(requestNo);    
+            }
+            getRequestRepository.delete(requestNo);
+        }
+    }
+
+    public void deleteRequestFileList(String requestNo){
+        ListRequest req = listRequestMap.get(requestNo);
+        if (req != null){
+            req.stop();
+            synchronized(this){
+                listRequestMap.remove(requestNo);
+            }
+            listRequestRepository.delete(requestNo);
+        }
     }
 }

@@ -13,11 +13,11 @@ import {
     faPause
 } from "@fortawesome/free-solid-svg-icons";
 import ClockLoader from "react-spinners";
-import Select from "react-select";
+import { Select } from "antd";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
-import * as DEFINE from "../../define";
+import * as Define from "../../define";
 import services from "../../services"
 import moment from "moment";
 import {connect} from "react-redux";
@@ -27,8 +27,12 @@ import * as viewListActions from "../../modules/viewList"
 import {setRowsPerPage} from "../../api";
 import {message} from "antd";
 
+const { Option } = Select;
+
 const messageType = {
-    CONFIRM_MESSAGE: "Are you sure you want to delete this collection plan?",
+    CONFIRM_DELETE_MESSAGE: "Are you sure you want to delete this collection plan?",
+    CONFIRM_STOP_MESSAGE: "Are you sure you want to stop this collection plan?",
+    CONFIRM_START_MESSAGE: "Are you sure you want to run this collection plan?",
     EDIT_ALERT_MESSAGE: "Because of the current collecting it can not be edited.",
     DELETE_ALERT_MESSAGE: "Because of the current collecting it can not be deleted."
 };
@@ -59,76 +63,10 @@ const DETAIL_SUSPENDED = "suspended";
 const DETAIL_HALTED = "halted";
 const DETAIL_COMPLETED = "completed";
 
-
-const optionList = [
-    { value: 10, label: "10" },
-    { value: 30, label: "30" },
-    { value: 50, label: "50" },
-    { value: 100, label: "100" }
-];
-
 const spinnerStyles = {
     display: "inline-block",
     top: "2px"
 }
-
-const customSelectStyles = {
-    container: styles => ({
-        ...styles,
-        display: "inline-block",
-        width: "85px",
-        fontSize: "14px",
-        marginLeft: "10px"
-    }),
-    option: (styles, { isFocused, isSelected }) => {
-        return {
-            ...styles,
-            backgroundColor: isSelected
-                ? "rgba(92, 124, 250, 0.5)"
-                : isFocused
-                    ? "rgba(92, 124, 250, 0.3)"
-                    : null,
-            color: "black",
-            ":active": {
-                ...styles[":active"],
-                backgroundColor: isSelected
-                    ? "rgba(92, 124, 250, 0.9)"
-                    : isFocused
-                        ? "rgba(92, 124, 250, 0.7)"
-                        : null
-            }
-        };
-    },
-    control: () => ({
-        display: "flex",
-        border: "1px solid rgb(92, 124, 250)",
-        borderRadius: "3px",
-        caretColor: "transparent",
-        transition: "all .15s ease-in-out",
-        ":hover": {
-            outline: "0",
-            boxShadow: "0 0 0 0.2em rgba(92, 124, 250, 0.5)"
-        }
-    }),
-    dropdownIndicator: styles => ({
-        ...styles,
-        color: "rgba(92, 124, 250, 0.6)",
-        ":hover": {
-            ...styles[":hover"],
-            color: "rgb(92, 124, 250)"
-        }
-    }),
-    indicatorSeparator: styles => ({
-        ...styles,
-        backgroundColor: "rgba(92, 124, 250, 0.6)"
-    }),
-    menu: styles => ({
-        ...styles,
-        borderRadius: "3px",
-        boxShadow:
-            "0 0 0 1px rgba(92, 124, 250, 0.6), 0 4px 11px rgba(92, 124, 250, 0.6)"
-    })
-};
 
 class RSSautoplanlist extends Component {
     constructor(props) {
@@ -149,19 +87,22 @@ class RSSautoplanlist extends Component {
             ],
             pageSize: 10,
             currentPage: 1,
-            isConfirmOpen: false,
+            isDeleteOpen: false,
+            isStatusOpen: false,
             isAlertOpen: false,
             alertMessage: "",
+            statusMessage: "",
             selectedPlanId: "",
+            selectedPlanStatus: ""
         };
     }
 
-    componentDidMount() {
-        this.loadPlanList();
+    async componentDidMount() {
+        await this.loadPlanList();
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get("/plan/list?withExpired=yes");
+        const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list?withExpired=yes");
         console.log("[AUTO][loadPlanList]res", res);
         const { data } = res;
         const newData = data.map(item => {
@@ -173,7 +114,7 @@ class RSSautoplanlist extends Component {
                     planTarget: targetArray.length,
                     planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
                     planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: item.status,
+                    planStatus: item.stop,
                     planLastRun: item.lastCollect == null ? "-" : moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),
                     planDetail: item.detail,
                     id: item.id,
@@ -189,15 +130,17 @@ class RSSautoplanlist extends Component {
 
         console.log("[AUTO][loadPlanList]newData", newData);
 
-        this.setState({
+        await this.setState({
             ...this.state,
             registeredList: newData
         })
 
+        return true;
     }
 
     setEditPlanList = (id, status) => {
-        if (status === statusType.RUNNING) {
+        //if (status === statusType.RUNNING) {
+        if (!status) {
             this.openAlert(messageType.EDIT_ALERT_MESSAGE);
         } else {
             console.log("[AUTO][setEditPlanList]setEditPlanList");
@@ -219,36 +162,64 @@ class RSSautoplanlist extends Component {
                 description: findList.planDescription
             });
             console.log("id", id);
-            this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
+            this.props.history.push(Define.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
         }
     }
 
-    openModal = async (planId, status) => {
-        if (status === statusType.RUNNING) {
+    openDeleteModal = async (planId, status) => {
+        //if (status === statusType.RUNNING) {
+        if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
         } else {
             await this.setState({
                 ...this.state,
-                isConfirmOpen: true,
+                isDeleteOpen: true,
                 selectedPlanId: planId,
             });
         }
     };
 
-    closeModal = async (deleting, selectedPlanId) => {
+    closeDeleteModal = async (deleting, selectedPlanId) => {
         let res;
         if(deleting) {
-            res = await services.axiosAPI.get('/plan/delete?id='+selectedPlanId);
+            res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
         }
 
         await this.setState({
             ...this.state,
-            isConfirmOpen: false,
+            isDeleteOpen: false,
             selectedPlanId: ""
         });
 
         setTimeout(this.loadPlanList, 300);
     };
+
+    openStatusModal = (status, planId) => {
+        if(!status) {
+            this.setState({
+                isStatusOpen: true,
+                statusMessage: messageType.CONFIRM_STOP_MESSAGE,
+                selectedPlanId: planId,
+                selectedPlanStatus: statusType.RUNNING
+            });
+        } else {
+            this.setState({
+                isStatusOpen: true,
+                statusMessage: messageType.CONFIRM_START_MESSAGE,
+                selectedPlanId: planId,
+                selectedPlanStatus: statusType.STOPPED
+            });
+        }
+    }
+
+    closeStatusModal = () => {
+        this.setState({
+           isStatusOpen: false,
+           statusMessage: "",
+           selectedPlanId: "",
+           selectedPlanStatus: ""
+        });
+    }
 
     openAlert = (message) => {
         this.setState({
@@ -272,16 +243,43 @@ class RSSautoplanlist extends Component {
     };
 
 
-    handleSelectBoxChange = newValue => {
+    handleSelectBoxChange = value => {
         const { pageSize, currentPage } = this.state;
         const startIndex = (currentPage - 1) * pageSize === 0 ? 1 : (currentPage - 1) * pageSize + 1;
 
         this.setState({
-            ...this.state,
-            pageSize: parseInt(newValue.value),
-            currentPage: Math.ceil(startIndex / parseInt(newValue.value))
+            pageSize: parseInt(value),
+            currentPage: Math.ceil(startIndex / parseInt(value))
         });
     };
+
+    stopDownload = async (planId) => {
+        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/stop?id=${planId}`);
+        await this.loadPlanList();
+    }
+
+    restartDownload = async (planId) => {
+        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/restart?id=${planId}`);
+        await this.loadPlanList();
+    }
+
+    handleStatusChange = async (status, planId) => {
+        switch(status) {
+            case statusType.RUNNING:
+                await this.stopDownload(planId);
+                break;
+
+            case statusType.STOPPED:
+                await this.restartDownload(planId);
+                break;
+
+            default:
+                console.log("[planlist.js] plan status error!!!");
+                break;
+        }
+
+        this.closeStatusModal();
+    }
 
     render() {
         const { registeredList } = this.state;
@@ -309,7 +307,7 @@ class RSSautoplanlist extends Component {
                 </Card>
             );
         } else {
-            const { currentPage, pageSize, isConfirmOpen, isAlertOpen, alertMessage, selectedPlanId } = this.state;
+            const { currentPage, pageSize, isStatusOpen, isDeleteOpen, isAlertOpen, alertMessage, statusMessage, selectedPlanId, selectedPlanStatus } = this.state;
             const plans = filePaginate(registeredList, currentPage, pageSize);
             const pagination = renderPagination(
                 pageSize,
@@ -319,14 +317,24 @@ class RSSautoplanlist extends Component {
                 "custom-pagination"
             );
 
-            const renderConfirmModal = ConfirmModal(
-                isConfirmOpen,
-                faTrashAlt,
-                messageType.CONFIRM_MESSAGE,
+            const renderStatusModal = ConfirmModal(
+                isStatusOpen,
+                faExclamationCircle,
+                statusMessage,
                 "auto-plan",
-                () => this.closeModal(false, selectedPlanId),
-                () => this.closeModal(true, selectedPlanId),
-                () => this.closeModal(false, selectedPlanId)
+                this.closeStatusModal,
+                () => this.handleStatusChange(selectedPlanStatus, selectedPlanId),
+                this.closeStatusModal
+            );
+
+            const renderDeleteModal = ConfirmModal(
+                isDeleteOpen,
+                faTrashAlt,
+                messageType.CONFIRM_DELETE_MESSAGE,
+                "auto-plan",
+                () => this.closeDeleteModal(false, selectedPlanId),
+                () => this.closeDeleteModal(true, selectedPlanId),
+                () => this.closeDeleteModal(false, selectedPlanId)
             );
 
             const renderAlertModal = AlertModal(
@@ -338,7 +346,8 @@ class RSSautoplanlist extends Component {
 
             return (
                 <>
-                    {renderConfirmModal}
+                    {renderStatusModal}
+                    {renderDeleteModal}
                     {renderAlertModal}
                     <Card className="auto-plan-box">
                         <CardHeader className="auto-plan-card-header">
@@ -349,11 +358,15 @@ class RSSautoplanlist extends Component {
                             <div className="select-area">
                                 <label>Rows per page : </label>
                                 <Select
-                                    options={optionList}
-                                    styles={customSelectStyles}
-                                    defaultValue={optionList[0]}
+                                    defaultValue= {10}
                                     onChange={this.handleSelectBoxChange}
-                                />
+                                    className="planlist"
+                                >
+                                    <Option value={10}>10</Option>
+                                    <Option value={30}>30</Option>
+                                    <Option value={50}>50</Option>
+                                    <Option value={100}>100</Option>
+                                </Select>
                             </div>
                         </CardHeader>
                         <CardBody className="auto-plan-card-body">
@@ -374,30 +387,30 @@ class RSSautoplanlist extends Component {
                                     </thead>
                                     <tbody>
                                     {plans.map((plan, idx) => {
+                                        const renderStatus = CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id));
                                         return (
                                             <tr key={idx}>
                                                 <td>
-                                                    <div
+                                                    <span
                                                         className="plan-id-area"
                                                         onClick={ () => {
                                                             const param = `?id=${plan.id}&name=${plan.planId}`;
-                                                            this.props.history.push(DEFINE.PAGE_AUTO_DOWNLOAD + param);
-                                                            }
-                                                        }
+                                                            this.props.history.push(Define.PAGE_AUTO_DOWNLOAD + param);
+                                                        }}
                                                     >
                                                         {plan.planId}
-                                                    </div>
+                                                    </span>
                                                 </td>
                                                 <td>{plan.planDescription}</td>
                                                 <td>{plan.planTarget}</td>
                                                 <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
-                                                <td>{CreateStatus(plan.planStatus)}</td>
+                                                <td>{renderStatus}</td>
                                                 <td>{plan.planLastRun}</td>
                                                 <td>{CreateDetail(plan.planDetail)}</td>
                                                 <td>
                                                     <div
                                                         className="icon-area move-left"
-                                                        /*onClick={ () =>  this.props.history.push(DEFINE.PAGE_AUTO_PLAN_EDIT) }*/
+                                                        /*onClick={ () =>  this.props.history.push(Define.PAGE_AUTO_PLAN_EDIT) }*/
                                                         onClick={ () =>  this.setEditPlanList(plan.id, plan.planStatus) }
 
                                                     >
@@ -405,7 +418,7 @@ class RSSautoplanlist extends Component {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openModal(plan.id, plan.planStatus) }>
+                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>
@@ -424,15 +437,22 @@ class RSSautoplanlist extends Component {
     }
 }
 
-function CreateStatus(status) {
+function CreateStatus(status, modalOpen) {
     let component = null;
+    /*
     switch (status) {
         case statusType.RUNNING:
-            component = (<><FontAwesomeIcon className="running" icon={faPlay} /> Running</>);    break;
+            component = <div onClick={stop}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;    break;
         case statusType.STOPPED:
-            component = (<><FontAwesomeIcon className="stopped" icon={faStop} /> Stopped</>);    break;
+            component = <div onClick={start}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;    break;
         default:
             console.error("plan detail error");   break;
+    }
+    */
+    if (!status) {
+        component = <div onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;
+    } else {
+        component = <div onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;
     }
 
     return component;

@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -23,20 +24,15 @@ import lombok.Setter;
 
 @Component
 public class ServerInfoRepository {
-    VFtpConfig vftpconfig;
+    @Value("${rssportal.vftp.objectlistfile}")
+    private String objectListFilePath;
 
     Map<String, ServerInfo> serverNameToServerInfoMap = new HashMap<>();
     Map<String, ServerInfo> deviceNameToServerInfoMap = new HashMap<>();
 
-    @Autowired
-    public ServerInfoRepository(VFtpConfig vftpconfig){
-        this.vftpconfig = vftpconfig;
-
-        this.reload();
-    }
-
+    @PostConstruct
     public void reload(){
-        String filename = vftpconfig.getObjectListFilePath();;
+        String filename = objectListFilePath;
 
         File f = new File(filename);
 
@@ -103,10 +99,10 @@ class DssInfo{
 
 class FileServiceInfo {
     private @Getter @Setter String id;
-    private @Getter @Setter String name;
-    private @Getter @Setter String host;
-    private @Getter @Setter String structId;
-    private @Getter @Setter NetworkDlInfo networkDlInfo;
+    private @Setter String name;
+    private @Setter String host;
+    private @Setter String structId;
+    private @Setter NetworkDlInfo networkDlInfo;
 
     private ServerInfo serverInfo = null;
 

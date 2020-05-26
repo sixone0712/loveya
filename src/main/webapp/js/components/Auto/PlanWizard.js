@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import services from '../../services';
-import * as DEFINE from "../../define"
+import * as Define from "../../define"
 import {
   Col,
   Card,
@@ -75,15 +75,15 @@ class RSSautoplanwizard extends Component {
     const intervalInt = Number(interval);
     let millisec = 0;
 
-    if(collectType === DEFINE.AUTO_MODE_CYCLE) {
+    if(collectType === Define.AUTO_MODE_CYCLE) {
       switch (intervalUnit) {
-        case DEFINE.AUTO_UNIT_MINUTE:
+        case Define.AUTO_UNIT_MINUTE:
           millisec = intervalInt * 60 * 1000;
           break;
-        case DEFINE.AUTO_UNIT_HOUR:
+        case Define.AUTO_UNIT_HOUR:
           millisec = intervalInt * 60 * 60 * 1000;
           break;
-        case DEFINE.AUTO_UNIT_DAY:
+        case Define.AUTO_UNIT_DAY:
           millisec = intervalInt * 60 * 60 * 24 * 1000;
           break;
       }
@@ -125,11 +125,11 @@ class RSSautoplanwizard extends Component {
   handleRequestAutoPlanAdd = async () => {
     const reqData = this.makeRequestAutoPlanData();
     console.log("reqData", reqData);
-    const res = await services.axiosAPI.post("/plan/add", reqData);
+    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/add", reqData);
     console.log(res);
 
     console.log("this.props.history", this.props.history);
-    this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_STATUS);
+    this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
     // 에러 처리 추가 필요
   }
 
@@ -137,10 +137,10 @@ class RSSautoplanwizard extends Component {
     const reqData = this.makeRequestAutoPlanData();
     console.log("reqData", reqData);
     console.log("editID", editId);
-    const res = await services.axiosAPI.post("/plan/modify?id=" + editId, reqData);
+    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/modify?id=" + editId, reqData);
     console.log(res);
     console.log("this.props.history", this.props.history);
-    this.props.history.push(DEFINE.PAGE_REFRESH_AUTO_STATUS);
+    this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
     // 에러 처리 추가 필요
   }
 
@@ -406,7 +406,7 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
         return modalMessage.PLAN_ID_ALERT_MESSAGE;
       } else if (from.isAfter(to)) {
         return modalMessage.FROM_TO_ALERT_MESSAGE;
-      } else if (collectType === DEFINE.AUTO_MODE_CYCLE) {
+      } else if (collectType === Define.AUTO_MODE_CYCLE) {
         if (interval < 1) {
           return modalMessage.CYCLE_ALERT_MESSAGE;
         } else {
