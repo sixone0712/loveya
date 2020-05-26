@@ -43,7 +43,7 @@ rssportal:
   vftp:
     directory:
       request: /LOG/VFTP/Requests
-    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions.ObjectList.xml
+    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
 ---
 spring:
   profiles: dev
