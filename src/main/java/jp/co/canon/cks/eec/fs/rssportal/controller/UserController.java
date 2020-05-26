@@ -134,40 +134,44 @@ public class UserController {
     }
     @GetMapping("/changeAuth")
     @ResponseBody
-    public int changeAuth(@RequestParam Map<String, Object> param)  throws Exception {
+    public Map<String, Object> changeAuth(@RequestParam Map<String, Object> param)  throws Exception {
         int res = 0;
         log.info("/user/changeAuth");
         String id = param.containsKey("id")?(String)param.get("id"):null;
         String permission = param.containsKey("permission")?(String)param.get("permission"):null;
 
         log.info("id: "+id);
+        Map<String, Object> returnData = new HashMap<>();
 
         if(id==null || permission==null || id.isEmpty() || permission.isEmpty())
         {
-            res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
+            returnData.put("result", 32 );// LOGIN_FAIL_NO_USERNAME_PASSWORD
         }
         else
         {
             UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
             if(userObj != null && (userObj.getId() >= 10000)) {
                 boolean DbResult = false;
+
                 userObj.setPermissions(permission);
                 DbResult = serviceUser.modifyUser(userObj);
                 if(!DbResult)
                 {
-                    res = 32;
+                    returnData.put("result", 32 );
                     log.info("DB update fail");
                 }
                 else
                 {
                     log.info("DB update Success");
+                    returnData.put("result", 0 );
+                    returnData.put("Auth", userObj.getPermissions());
                 }
             }
             else {
-                res =  100; // DB_UPDATE_ERROR_NO_SUCH_USER
+                returnData.put("result", 100 );// DB_UPDATE_ERROR_NO_SUCH_USER
             }
         }
-        return res;
+        return returnData;
     }
     @GetMapping("/create")
     @ResponseBody

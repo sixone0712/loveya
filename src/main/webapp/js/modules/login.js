@@ -13,7 +13,6 @@ const LOGIN_SET_ERROR_CODE = "login/LOGIN_SET_ERROR_CODE";
 const LOGIN_CHECK_AUTH = "login/LOGIN_CHECK_AUTH";
 const LOGIN_SET_LOGOFF = "login/LOGIN_SET_LOGOFF";
 const CHANGE_USER_PASSWORD = "login/CHANGE_USER_PASSWORD";
-const CHANGE_USER_PERMISSION = "login/CHANGE_USER_PERMISSION"
 
 export const loginInitAllData = createAction(LOGIN_INIT_ALL_DATA);
 export const loginSetIsLoggedIn = createAction(LOGIN_SET_ISLOGGEDIN);
@@ -24,7 +23,6 @@ export const loginSetErrCode = createAction(LOGIN_SET_ERROR_CODE);
 export const loginCheckAuth = createAction(LOGIN_CHECK_AUTH, services.axiosAPI.get);
 export const loginSetLogOff = createAction(LOGIN_SET_LOGOFF,services.axiosAPI.get);
 export const changeUserPassword = createAction(CHANGE_USER_PASSWORD,services.axiosAPI.get);
-export const changeUserPermission = createAction(CHANGE_USER_PERMISSION,services.axiosAPI.get);
 
 const initialState = Map({
     loginInfo : Map({
@@ -94,18 +92,6 @@ export default handleActions({
             onSuccess: (state, action) => {
                 const setValue = action.payload;
                 return state.setIn(["loginInfo", "errCode"], action.payload.data);
-            }
-        }
-    ),
-    ...pender(
-        {
-            type: CHANGE_USER_PERMISSION,
-            onSuccess: (state, action) => {
-                if (action.payload.data === 0) {
-                    return state.setIn(["loginInfo", "auth"], true);
-                } else {
-                    return state.setIn(["loginInfo", "errCode"], action.payload.data);
-                }
             }
         }
     )

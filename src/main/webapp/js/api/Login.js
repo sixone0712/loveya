@@ -70,7 +70,3 @@ export const changePassword = (props, url) => {
     return loginActions.changeUserPassword(url);
 };
 
-export const changePermission = (props, url) => {
-    const { loginActions } = props;
-    return loginActions.changeUserPermission(url);
-};

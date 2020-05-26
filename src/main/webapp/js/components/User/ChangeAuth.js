@@ -26,7 +26,7 @@ class ChangeAuthModal extends Component {
     changePermissionProcess = async id => {
         console.log("changePermission");
         await API.changePermission(this.props, `${Define.REST_API_URL}/user/changeAuth?id=${id}&permission=${(this.state.selectedValue)}`);
-        const err = API.getErrCode(this.props);
+        const err = API.getUserInfoErrorCode(this.props);
         console.log("changePermission err: ", err);
         if (!err) {
             await API.getDBUserList(this.props);//user list refresh
@@ -110,6 +110,5 @@ export default connect(
     (dispatch) => ({
         loginActions: bindActionCreators(loginActions, dispatch),
         userActions: bindActionCreators(userActions, dispatch),
-
     })
 )(ChangeAuthModal);

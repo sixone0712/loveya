@@ -39,3 +39,7 @@ export const getUserAuth = (props, id) => {
     }
     return '';
 };
+export const changePermission = (props, url) => {
+    const { userActions } = props;
+    return userActions.changeUserPermission(url);
+};

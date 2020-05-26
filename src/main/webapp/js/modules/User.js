@@ -6,6 +6,7 @@ import services from '../services';
 
 const USER_CREATE = "user/USER_CREATE";
 const USER_DELETE = "user/USER_DELETE";
+const USER_MODIFY_AUTH = "user/USER_MODIFY_AUTH";
 const USER_GET_LIST = "user/USER_GET_LIST";
 const USER_INIT_ALL_LIST = "user/USER_INIT_ALL_LIST";
 const USER_INIT_SERVER_ERROR = "user/USER_INIT_SERVER_ERROR";
@@ -13,6 +14,7 @@ const USER_INIT_SERVER_ERROR = "user/USER_INIT_SERVER_ERROR";
 export const createUser = createAction(USER_CREATE, services.axiosAPI.get);
 export const deleteUser = createAction(USER_DELETE, services.axiosAPI.get);
 export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.get);
+export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.get);
 
 const initialState = Map({
     UserInfo : Map({
@@ -61,6 +63,20 @@ export default handleActions({
             type: USER_DELETE,
             onSuccess: (state, action) => {
                 return  state.setIn(["UserInfo","result"], action.payload.data);
+            }
+        }
+    ),
+    ...pender(
+        {
+            type: USER_MODIFY_AUTH,
+            onSuccess: (state, action) => {
+                const {auth, result} = action.payload.data;
+                if(result !== 0)
+                {
+                    return state.setIn(["UserInfo", "result"], result);
+                }
+                return state.setIn(["UserInfo", "result"], result)
+                            .setIn(["UserInfo", "auth"], auth);
             }
         }
     ),
