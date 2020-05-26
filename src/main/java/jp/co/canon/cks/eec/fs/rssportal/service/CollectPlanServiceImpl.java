@@ -89,8 +89,9 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         } else {
             plan.setOwner(context.getUser().getId());
         }
-
-        return dao.addPlan(plan);
+        int planId = dao.addPlan(plan);
+        notifyChanges();
+        return planId;
     }
 
     private int toCollectTypeInteger(@NonNull String collectType) {

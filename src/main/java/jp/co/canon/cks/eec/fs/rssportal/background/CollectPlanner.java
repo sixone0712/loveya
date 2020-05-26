@@ -212,12 +212,12 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo getNext() {
         if(planUpdated) {
             nextPlan = service.getNextPlan();
-            if(nextPlan!=null && nextPlan.getNextAction()!=null) {
+            if(nextPlan==null)
+                return null;
+            if(nextPlan!=null && nextPlan.getNextAction()!=null)
                 log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
-            }
-            if(nextPlan!=null) {
+            if(nextPlan!=null)
                 planUpdated = false;
-            }
         }
         return nextPlan.getNextAction()!=null?nextPlan:null;
     }
