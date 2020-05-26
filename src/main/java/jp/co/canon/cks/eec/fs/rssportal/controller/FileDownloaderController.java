@@ -47,6 +47,7 @@ public class FileDownloaderController {
             log.warn("no target to download");
             return null;
         }
+        param.forEach((key, value)->log.info("key="+key+"\nvalue="+value));
 
         Map<String, Map<String, DownloadForm>> map = new HashMap<>();
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("list");
@@ -107,7 +108,7 @@ public class FileDownloaderController {
             @RequestParam(value="dlId", defaultValue="") String dlId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        log.info(String.format("request \"%s?dlId=%d\"", request.getServletPath(), dlId));
+        log.info(String.format("request \"%s?dlId=%s\"", request.getServletPath(), dlId));
         if(dlId.isEmpty()) {
             log.error("invalid param");
             return null;
@@ -146,7 +147,7 @@ public class FileDownloaderController {
     @ResponseBody
     public ResponseEntity<String> cancelDownload(HttpServletRequest request,
                                                  @RequestParam(value="dlId") String downloadId) {
-        log.info(String.format("request \"%s?dlId=%d\"", request.getServletPath(), downloadId));
+        log.info(String.format("request \"%s?dlId=%s\"", request.getServletPath(), downloadId));
         if(!fileDownloader.cancelRequest(downloadId))
             return new ResponseEntity("invalid download id", HttpStatus.NOT_FOUND);
         return new ResponseEntity("ok", HttpStatus.OK);
