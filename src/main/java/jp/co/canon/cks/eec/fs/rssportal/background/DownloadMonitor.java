@@ -48,26 +48,28 @@ public class DownloadMonitor extends Thread {
         log.info("download monitor start");
         try {
             while(true) {
-                if(targets.size()==0) {
-                    sleep(500);
-                }
+                synchronized (targets) {
+                    if (targets.size() == 0) {
+                        sleep(500);
+                    }
 
-                for(Target target: targets) {
-                    if(target.activated) {
-                        synchronized (target) {
-                            try {
-                                RequestListBean requestList = target.service.createRequestList(
-                                        target.system, target.tool, target.requestNo);
-                                if (requestList != null) {
-                                    target.info = requestList.get(target.requestNo);
-                                    if (target.info != null) {
+                    for (Target target : targets) {
+                        if (target.activated) {
+                            synchronized (target) {
+                                try {
+                                    RequestListBean requestList = target.service.createRequestList(
+                                            target.system, target.tool, target.requestNo);
+                                    if (requestList != null) {
+                                        target.info = requestList.get(target.requestNo);
+                                        if (target.info != null) {
                                     /*log.info("monitor: " + target.info.getRequestNo() + ": " + target.info.getNumerator() + "/" +
                                             target.info.getDenominator());*/
-                                        target.ts = System.currentTimeMillis();
+                                            target.ts = System.currentTimeMillis();
+                                        }
                                     }
+                                } catch (ServiceException e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (ServiceException e) {
-                                e.printStackTrace();
                             }
                         }
                     }
@@ -81,9 +83,11 @@ public class DownloadMonitor extends Thread {
     }
 
     private Target getTarget(String system, String tool, String requestNo) {
-        for(Target target: targets) {
-            if(target.system.equals(system) && target.tool.equals(tool) && target.requestNo.equals(requestNo)) {
-                return target;
+        synchronized (targets) {
+            for (Target target : targets) {
+                if (target.system.equals(system) && target.tool.equals(tool) && target.requestNo.equals(requestNo)) {
+                    return target;
+                }
             }
         }
         return null;
