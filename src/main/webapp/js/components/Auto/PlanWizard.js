@@ -68,8 +68,7 @@ class RSSautoplanwizard extends Component {
       planDescription: "",
       isAlertOpen: false,
       isConfirmOpen: false,
-      modalMessage: null,
-      animating: false
+      modalMessage: null
     };
   }
 
@@ -148,7 +147,6 @@ class RSSautoplanwizard extends Component {
 
 
   handleNext = () => {
-    if (this.animating) return;
     const { currentStep, isNew } = this.state;
     const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt } = this.props;
     const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan);
@@ -172,7 +170,6 @@ class RSSautoplanwizard extends Component {
   };
 
   handlePrev = () => {
-    if (this.animating) return;
     const currentStep =
         this.state.currentStep <= wizardStep.MACHINE ? wizardStep.MACHINE : this.state.currentStep - 1;
 
@@ -272,22 +269,10 @@ class RSSautoplanwizard extends Component {
     });
   }
 
-  onExiting = () => {
-    this.setState({
-      animating: true
-    });
-  }
-
-  onExited = () => {
-    this.setState({
-      animating: false
-    });
-  }
-
   render() {
     console.log("render");
     console.log("this.state.editID", this.state.editID);
-    const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage, animating } = this.state;
+    const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
     const { logTypeSuccess,
             toolInfoSuccess,
             logTypeFailure,
@@ -366,17 +351,18 @@ class RSSautoplanwizard extends Component {
                     next={this.handleNext}
                     previous={this.handlePrev}
                     keyboard={false}
+                    interval={false}
                 >
-                  <CarouselItem key={wizardStep.MACHINE} onExiting={this.onExiting} onExited={this.onExited}>
+                  <CarouselItem key={wizardStep.MACHINE}>
                     <Machine isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.TARGET} onExiting={this.onExiting} onExited={this.onExited}>
+                  <CarouselItem key={wizardStep.TARGET}>
                     <Target isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.OPTION} onExiting={this.onExiting} onExited={this.onExited}>
+                  <CarouselItem key={wizardStep.OPTION}>
                     <Option isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.CHECK} onExiting={this.onExiting} onExited={this.onExited}>
+                  <CarouselItem key={wizardStep.CHECK}>
                     <Check isNew={isNew} />
                   </CarouselItem>
                 </Carousel>

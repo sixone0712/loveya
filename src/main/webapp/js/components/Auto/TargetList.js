@@ -175,13 +175,15 @@ class RSSautoTargetlist extends Component {
                   >
                     <FontAwesomeIcon icon={faSearch} />
                   </ButtonToggle>
-                  <Input
-                      type="text"
-                      className="form-search-input"
-                      placeholder="Enter the Target name to search."
-                      value={query}
-                      onChange={this.handleSearch}
-                  />
+                  <FormGroup>
+                    <Input
+                        type="text"
+                        className="form-search-input"
+                        placeholder="Enter the Target name to search."
+                        value={query}
+                        onChange={this.handleSearch}
+                    />
+                  </FormGroup>
                 </div>
                 <ButtonToggle
                     outline
