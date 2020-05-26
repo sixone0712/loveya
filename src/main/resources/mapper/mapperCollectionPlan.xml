@@ -23,7 +23,7 @@
         tsnext as nextAction,
         tslastpoint as lastPoint,
         laststatus as detail,
-        case when laststatus='halted' or laststatus='completed' then 'stop' else 'running' end as status,
+        case when laststatus='halted' or laststatus='completed' or stop=true then 'stop' else 'running' end as status,
         case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
     </sql>
 

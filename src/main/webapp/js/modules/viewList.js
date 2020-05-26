@@ -95,7 +95,12 @@ export default handleActions({
 			console.log("tree", tree);
 			console.log("equipments", equipments);
 			console.log("equipments.Child", equipments.Child);
-			return state.set("constructDisplay",fromJS(equipments.Child));
+			const newEquipments = equipments.Child.map(item => ({
+				name: String(item.name),
+				id: String(item.id)
+			}))
+			console.log("newEquipments.Child", newEquipments);
+			return state.set("constructDisplay",fromJS(newEquipments));
 		}
 	}),
 	...pender(
