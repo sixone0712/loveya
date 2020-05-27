@@ -41,6 +41,7 @@ class Login extends Component {
 
         if (!isModalOpen) {
             if (e.key === "Enter") {
+                e.target.blur();
                 e.preventDefault();
                 e.stopPropagation();
                 this.loginProcess();
@@ -152,6 +153,7 @@ class Login extends Component {
                                                     <input
                                                         type = "text"
                                                         name="username"
+                                                        id="username"
                                                         value={this.state.username}
                                                         className="px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:shadow-outline w-full"
                                                         placeholder="Enter your name"
@@ -174,6 +176,7 @@ class Login extends Component {
                                                     <input
                                                         type = "password"
                                                         name = "password"
+                                                        id="password"
                                                         value={this.state.password}
                                                         className="px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:shadow-outline w-full"
                                                         placeholder="Enter your password"

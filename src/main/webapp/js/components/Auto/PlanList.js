@@ -12,7 +12,7 @@ import {
     faRegistered,
     faPause
 } from "@fortawesome/free-solid-svg-icons";
-import ClockLoader from "react-spinners";
+import ClockLoader from "react-spinners/ClockLoader";
 import { Select } from "antd";
 import { filePaginate, renderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";

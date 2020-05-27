@@ -246,12 +246,17 @@ class FileList extends Component {
 
   checkFileItem = (e) => {
     const idx = e.target.id.split('_{#div#}_')[1];
-    API.checkResponseList(this.props, idx);
+    if(idx !== null) {
+      API.checkResponseList(this.props, idx);
+    }
+    e.stopPropagation();
   };
 
   handleTrClick = e => {
     const id = e.target.parentElement.getAttribute("cbinfo");
-    API.checkResponseList(this.props, id);
+    if(id !== null) {
+      API.checkResponseList(this.props, id);
+    }
     e.stopPropagation();
   };
 
