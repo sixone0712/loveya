@@ -106,34 +106,49 @@ public class UserController {
     public int changePw(@RequestParam Map<String, Object> param)  throws Exception {
         int res = 0;
         log.info("/user/changePw");
-        String username = param.containsKey("username")?(String)param.get("username"):null;
-        String password = param.containsKey("password")?(String)param.get("password"):null;
 
-        if(username==null || password==null || username.isEmpty() || password.isEmpty())
-        {
-            res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
-        }
-        else
-        {
-            UserVo userObj = serviceUser.getUser(username);
-            if(userObj != null && (userObj.getId() >= 10000)) {
-                boolean DbResult = false;
-                userObj.setPassword(password);
-                DbResult = serviceUser.modifyUser(userObj);
-                if(!DbResult)
-                {
-                    res = 32;
-                    log.info("DB update fail");
+        String oldPw = param.containsKey("oldPw")?(String)param.get("oldPw"):null;
+        String newPw = param.containsKey("newPw")?(String)param.get("newPw"):null;
+
+        if(httpSession.getAttribute("context") != null) {
+            SessionContext context = (SessionContext)httpSession.getAttribute("context");
+            String username =  context.getUser().getUsername();
+            if(newPw==null || oldPw==null || newPw.isEmpty() || oldPw.isEmpty())
+            {
+                res = 40;   // CHANGE_PW_FAIL_EMPTY_PASSWORD
+            }
+            else
+            {
+                UserVo userObj = serviceUser.getUser(username);
+                if(userObj != null && (userObj.getId() >= 10000)) {
+                    boolean DbResult = false;
+                    if(!oldPw.equals(userObj.getPassword()))
+                    {
+                        res = 41;   //CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD;
+                        log.info("DB update fail");
+                    }
+                    else
+                    {
+                        userObj.setPassword(newPw);
+                        DbResult = serviceUser.modifyUser(userObj);
+                        if(!DbResult)
+                        {
+                            res = 32;
+                            log.info("DB update fail");
+                        }
+                        else
+                        {
+                            log.info("DB update Success");
+                        }
+                    }
+
                 }
-                else
-                {
-                    log.info("DB update Success");
+                else {
+                    res =  33; // LOGIN_FAIL_NO_REGISTER_USER
                 }
             }
-            else {
-                res =  33; // LOGIN_FAIL_NO_REGISTER_USER
-            }
         }
+
         return res;
     }
     @GetMapping("/changeAuth")

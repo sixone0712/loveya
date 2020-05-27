@@ -1,4 +1,5 @@
 import * as Define from "../define";
+import md5 from "md5-hash";
 
 export const setLoginInit= (props) => {
     const { loginActions } = props;
@@ -65,8 +66,9 @@ export const startLogout = (props, url) => {
     return loginActions.loginSetLogOff(url);
 };
 
-export const changePassword = (props, url) => {
+export const changePassword = (props, state) => {
     const { loginActions } = props;
-    return loginActions.changeUserPassword(url);
+    const { oldPw, newPw} = state;
+    return loginActions.changeUserPassword(`${Define.REST_API_URL}/user/changePw?oldPw=${md5(oldPw)}&newPw=${md5(newPw)}`);
 };
 

@@ -22,25 +22,8 @@ class ChangePwModal extends Component {
     }
 
     handleSubmit = () => {
-        const { oldPw, newPw, confirmPw } = this.state;
-
-        const originalPw = API.getLoginPassword(this.props);
-
-        if (md5(oldPw) !== originalPw) {
-            this.setState({
-                errors: {
-                    oldPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD)
-                }
-            });
-            return true;
-        } else if (oldPw === newPw) {
-            this.setState({
-                errors: {
-                    newPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_CURRENT_NEW_SAME_PASSWORD)
-                }
-            });
-            return true;
-        } else if (newPw.length < 1 ) {
+        const { newPw, confirmPw } = this.state;
+        if (newPw.length < 1 ) {
             this.setState({
                 errors: {
                     newPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_EMPTY_PASSWORD)
@@ -65,18 +48,29 @@ class ChangePwModal extends Component {
         }
     }
 
-    changePwProcess = () => {
+    changePwProcess = async () => {
         console.log("changePwProcess");
-        const { newPw } = this.state;
         const isError = this.handleSubmit();
         console.log("isError: " + isError);
 
-        if(!isError) {
-            const username = API.getLoginUserName(this.props);
-            API.changePassword(this.props, `${Define.REST_API_URL}/user/changePw?username=${username}&password=${md5(newPw)}`);
-            API.setLoginPassword(this.props, md5(newPw));
-            this.closeModal(); //pw change modal Close
-            this.props.alertOpen("password");
+        if (!isError) {
+            await API.changePassword(this.props, this.state);
+            let  errCode = API.getErrCode(this.props);
+            if(errCode)
+            {
+                this.setState(() => (
+                    {  ...this.state,
+                        errors: {
+                            ...this.state.errors,
+                            oldPw: API.getErrorMsg(errCode)
+                        }
+                    })
+                );
+            }
+            else {
+                this.closeModal(); //pw change modal Close
+                this.props.alertOpen("password");
+            }
         }
     }
 
