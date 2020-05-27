@@ -26,7 +26,7 @@ export const changeUserPassword = createAction(CHANGE_USER_PASSWORD,services.axi
 
 const initialState = Map({
     loginInfo : Map({
-        errCode: "",
+        errCode: 0,
         isLoggedIn: false,
         username: "",
         password: "",
@@ -68,12 +68,17 @@ export default handleActions({
         {
             type: LOGIN_CHECK_AUTH,
             onSuccess: (state, action) => {
-                if (action.payload.data === 0) {
-                    return state.setIn(["loginInfo", "isLoggedIn"], true);
+                const { error, name, auth } = action.payload.data;
+
+                if (parseInt(error) === 0) {
+                    return state.setIn(["loginInfo", "isLoggedIn"], true)
+                                .setIn(["loginInfo", "username"], name)
+                                .setIn(["loginInfo", "auth"], parseInt(auth));
+
                 } else {
                     return state
                         .setIn(["loginInfo", "isLoggedIn"], false)
-                        .setIn(["loginInfo", "errCode"], action.payload.data);
+                        .setIn(["loginInfo", "errCode"], parseInt(error));
                 }
             }
         }

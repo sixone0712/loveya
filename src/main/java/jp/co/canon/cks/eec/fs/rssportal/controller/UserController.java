@@ -60,15 +60,18 @@ public class UserController {
 
     @GetMapping("/login")
     @ResponseBody
-    public int login(@RequestParam Map<String, Object> param)  throws Exception {
-        int res = 0;
+    public Map<String, Object>  login(@RequestParam Map<String, Object> param)  throws Exception {
         log.info("/user/login");
         String username = param.containsKey("user")?(String)param.get("user"):null;
         String password = param.containsKey("password")?(String)param.get("password"):null;
+        Map<String, Object> res = new HashMap<>();
+        res.put("error", 0);
+        res.put("name", "");
+        res.put("auth", "");
 
         if(username==null || username.isEmpty() || password==null || password.isEmpty())
         {
-            res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
+            res.put("error", 32);       // LOGIN_FAIL_NO_USERNAME_PASSWORD
         }
         else
         {
@@ -80,10 +83,11 @@ public class UserController {
                 context.setUser(LoginUser);
                 context.setAuthorized(true);
                 httpSession.setAttribute("context", context);
-                res= 0;
+                res.put("name", LoginUser.getUsername());
+                res.put("auth", LoginUser.getPermissions());
             }
             else {
-              res =  userId;
+                res.put("error", userId);
             }
         }
         return res;

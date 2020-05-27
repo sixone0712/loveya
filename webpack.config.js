@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const banner = require('./banner');
 
 module.exports = (env, options) => {
     //context: path.resolve(__dirname, 'src/main/webapp/js'),
@@ -47,9 +48,7 @@ module.exports = (env, options) => {
             }]
         },
         plugins: [
-            new webpack.BannerPlugin({
-                banner: () => `Build Date: ${new Date().toLocaleString()}\n`
-            }),
+            new webpack.BannerPlugin(banner),
             new HtmlWebpackPlugin({
                 template: './src/main/webapp/index.html', // ���ø� ��θ� ����
                 filename: '../index.html'

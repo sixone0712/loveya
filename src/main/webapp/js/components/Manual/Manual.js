@@ -49,7 +49,7 @@ class Manual extends Component {
             console.log("[Manual][componentDidMount]targetname", targetname);
             await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
         }
-        await genreListActions.genreLoadDbList(Define.REST_API_URL + "/db/genre/get");
+        await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
     }
 
     render() {

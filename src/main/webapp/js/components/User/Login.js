@@ -59,10 +59,7 @@ class Login extends Component {
             console.log("isLoggedIn", isLoggedIn);
             console.log("errCode", errCode);
             if (isLoggedIn) {
-                API.setLoginUserName(this.props, this.state.username);
-                API.setLoginPassword(this.props, md5(this.state.password));
-                API.setLoginAuth(this.props, '100'); //temp
-                this.props.history.push(Define.PAGE_MANUAL);
+                this.props.history.replace(Define.PAGE_MANUAL);
             } else {
                 const msg = API.getErrorMsg(errCode);
                 if (msg.length > 0) {
