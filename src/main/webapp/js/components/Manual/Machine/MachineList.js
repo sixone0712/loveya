@@ -74,7 +74,6 @@ export default connect(
       toolInfoList: state.viewList.get('toolInfoList'),
     }),
     (dispatch) => ({
-      // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
       viewListActions: bindActionCreators(viewListActions, dispatch),
     })
 )(MachineList);
