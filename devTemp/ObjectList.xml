@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ObjectList>
+    <Tool collectFsId="01" name="MPA_1" structId="1" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <Tool collectFsId="01" name="MPA_2" structId="1" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <Tool collectFsId="02" name="MPA_3" structId="2" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <Tool collectFsId="02" name="MPA_4" structId="2" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <Tool collectFsId="02" name="MPA_5" structId="2" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <Tool collectFsId="02" name="MPA_6" structId="2" toolType="eesp_data_CKBSTest_1.0.0"/>
+    <OTS collectFsId="01" name="OTS01" structId="3"/>
+    <OTS collectFsId="02" name="OTS02" structId="3"/>
+    <FileService host="10.1.31.237:80" id="00" name="ESP01" structId="3">
+        <NetworkDL ftpMode="" password="EEC-user" urlPrefix="ftp://10.1.31.237/LOG/downloads" user="eespuser"/>
+    </FileService>
+    <FileService host="10.1.31.239:80" id="01" name="OTS01_FS" structId="3">
+        <NetworkDL ftpMode="" password="EEC-user" urlPrefix="ftp://10.1.31.239/LOG/downloads" user="eespuser"/>
+    </FileService>
+    <FileService host="10.1.31.241:80" id="02" name="OTS02_FS" structId="3">
+        <NetworkDL ftpMode="" password="EEC-user" urlPrefix="ftp://10.1.31.241/LOG/downloads" user="eespuser"/>
+    </FileService>
+    <Common collectFsId="00" name="Common" structId="3"/>
+</ObjectList>

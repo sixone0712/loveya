@@ -38,7 +38,7 @@ rssportal:
   vftp:
     directory:
       request: /LOG/VFTP/Requests
-    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
+    #objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
 
 ---
 spring:
@@ -53,6 +53,8 @@ spring:
 rssportal:
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
+  vftp:
+    objectlistfile: devTemp/ObjectList.xml
 
 ---
 spring:
@@ -60,3 +62,5 @@ spring:
 rssportal:
   property:
     constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml
+  vftp:
+    objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
