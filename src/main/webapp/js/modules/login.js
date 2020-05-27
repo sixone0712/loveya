@@ -30,7 +30,7 @@ const initialState = Map({
         isLoggedIn: false,
         username: "",
         password: "",
-        auth: 0
+        auth: ""
     })
 });
 
@@ -73,7 +73,7 @@ export default handleActions({
                 if (parseInt(error) === 0) {
                     return state.setIn(["loginInfo", "isLoggedIn"], true)
                                 .setIn(["loginInfo", "username"], name)
-                                .setIn(["loginInfo", "auth"], parseInt(auth));
+                                .setIn(["loginInfo", "auth"], String(auth));
 
                 } else {
                     return state

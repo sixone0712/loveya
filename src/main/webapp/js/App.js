@@ -54,7 +54,7 @@ class App extends Component {
         console.log("[App][componentDidMount]isLoggedIn", isLoggedIn);
         if(isLoggedIn) {
             await API.setLoginUserName(this.props, username);
-            await API.setLoginAuth(this.props, permissions);
+            await API.setLoginAuth(this.props, String(permissions));
             this.onMovePage(Define.PAGE_MANUAL);
         } else {
             this.onMovePage(Define.PAGE_LOGIN);
