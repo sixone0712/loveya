@@ -127,9 +127,13 @@ public class CollectPlanner extends Thread {
         // figure out a list the plan has to collect.
         List<DownloadForm> downloadList = createDownloadList(plan);
 
+        PlanStatus lastStatus = PlanStatus.collected;
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
+            // jobType 'virtual' is for developing.
             String jobType = useVirtualFileService?"virtual":"auto";
+
+            // request downloading files
             FileDownloadExecutor executor = new FileDownloadExecutor(
                     jobType,
                     plan.getPlanName(),
@@ -140,17 +144,21 @@ public class CollectPlanner extends Thread {
             executor.setMonitor(monitor);
             executor.start();
 
+            // wait downloading done
             while(executor.isRunning())
                 sleep(100);
+
+            // check that error occurs
             if(!executor.getStatus().equalsIgnoreCase("complete")) {
                 log.error("file download failed [planId="+plan.getId()+"]");
-                service.setLastStatus(plan, PlanStatus.suspended);
+                lastStatus = PlanStatus.suspended;
             } else {
+                // copy downloaded files to the plan's directory.
                 int copied = copyFiles(plan, executor.getBaseDir());
-                PlanStatus lastStatus = PlanStatus.collected;
                 if(copied==0) {
                     log.info("collection complete.. but no updated files");
                 } else {
+                    // compress files.
                     String outputPath = compress(plan);
                     if (outputPath == null) {
                         log.error("failed to pack logs");
@@ -160,14 +168,26 @@ public class CollectPlanner extends Thread {
                         log.info("plan " + plan.getPlanName()+" "+copied+" files collecting success");
                     }
                 }
-                service.setLastStatus(plan, lastStatus);
-                service.updateLastCollect(plan);
+                // stop flag might be changed while the plan was on work.
+                // if someone stopped the plan, we have to update status and don't have to reschedule.
+                if(planUpdated) {
+                    CollectPlanVo dbPlan = service.getPlan(plan.getId());
+                    if(dbPlan.isStop()) {
+                        log.info("stopped plan on work");
+                        plan.setStop(true);
+                        service.setLastStatus(plan, lastStatus);
+                        service.updateLastCollect(plan);
+                        return true;
+                    }
+                }
             }
         } else {
             log.error("no files to collect");
-            service.setLastStatus(plan, PlanStatus.suspended);
-            service.updateLastCollect(plan);
+            lastStatus = PlanStatus.suspended;
         }
+        // update status and reschedule the plan.
+        service.setLastStatus(plan, lastStatus);
+        service.updateLastCollect(plan);
         service.schedulePlan(plan);
         return true;
     }
