@@ -224,6 +224,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         long cur = System.currentTimeMillis();
         long endTime = plan.getEnd().getTime();
 
+        // when a plan stop, nextAction has to be null.
+        // nextAction null means there is no plan to work.
         if(plan.isStop())
             return;
 
@@ -231,7 +233,11 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setNextAction(null);
             log.info("plan "+plan.getPlanName()+" has been completed");
             plan.setLastStatus(PlanStatus.completed.name());
+            // this plan has been completed collecting.
         } else {
+            // plans which have to do collecting operation
+            // are rescheduled as doing work after a specified interval after now.
+            // if 'collectType' is 'continuous', it set interval to default minimum value.
             Date last = plan.getLastCollect();
             long interval = plan.getCollectionType()==COLLECTTYPE_CYCLE ?plan.getInterval():CONTINUOUS_DEFAULT_INTERVAL;
             long nextTime;

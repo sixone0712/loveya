@@ -91,6 +91,7 @@ public class CollectPlanner extends Thread {
 
         try {
             while(true) {
+                // halted flag means there are no space anymore to collect files.
                 if(!halted) {
                     CollectPlanVo plan = getNext();
                     if (plan == null) {
@@ -99,9 +100,8 @@ public class CollectPlanner extends Thread {
                     }
 
                     Date cur = new Date(System.currentTimeMillis());
-                    if (plan.getNextAction().before(cur)) {
+                    if (plan.getNextAction().before(cur))
                         collect(plan);
-                    }
                 }
                 sleep(1000);
             }
