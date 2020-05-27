@@ -127,4 +127,13 @@ public class GenreDaoImpl implements GenreDao {
         session.close();
         return true;
     }
+
+    @Override
+    public boolean addUpdate() {
+        SqlSession session = sessionFactory.openSession();
+        session.insert("genres.insertUpdate");
+        session.commit();
+        session.close();
+        return true;
+    }
 }

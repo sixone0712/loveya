@@ -13,6 +13,7 @@ public class PostgresDataSource {
     public PostgresDataSource() {
         DataSourceBuilder builder = DataSourceBuilder.create();
         builder.driverClassName("org.postgresql.Driver")
+                // CKBS [set ip address]
                 .url("jdbc:postgresql://10.1.31.237:5432/rssdb")
                 .username("rssadmin")
                 .password("1234");

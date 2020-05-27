@@ -63,12 +63,9 @@
         update rsss."genreUpdate" set update = now()
     </update>
 
-
-
-
-
-
-
+    <insert id="insertUpdate">
+        insert into rsss."genreUpdate" (update) values (now())
+    </insert>
 
     <!--
     <select id="selectAll" resultType="GenreVo">

@@ -16,4 +16,5 @@ public interface GenreDao {
     boolean delete(Map<String, Object> param);
     Date findUpdate();
     boolean modifyUpdate();
+    boolean addUpdate();
 }

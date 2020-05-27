@@ -138,8 +138,6 @@ class InputModal extends Component {
         } else {
             let msg = "";
 
-            this.props.setErrorStatus(result);
-
             switch (result) {
                 case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The genre name is duplicated."; break;
                 case Define.GENRE_SET_FAIL_EMPTY_NAME: msg = "Please input genre name"; break;
@@ -153,7 +151,9 @@ class InputModal extends Component {
                 alertMsg: alertMsg
             });
 
-            if(genreList.needUpdate) {
+            const needUpdate = this.props.genreList.get("needUpdate")
+            console.log("needUpdate", needUpdate);
+            if(needUpdate) {
                 this.openAlertModal();
             }
         }

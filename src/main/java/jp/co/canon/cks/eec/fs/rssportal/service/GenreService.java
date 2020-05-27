@@ -15,4 +15,5 @@ public interface GenreService {
     boolean deleteGenre(int id);
     Date getGenreUpdate();
     boolean setGenreUpdate();
+    boolean addGenreUpdate();
 }

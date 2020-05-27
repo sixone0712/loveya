@@ -49,6 +49,11 @@ public class GenreController {
         List<GenreVo> list = serviceGenre.getGenreList();
         // get update
         Date date = serviceGenre.getGenreUpdate();
+        if(date == null) {
+            serviceGenre.addGenreUpdate();
+            date = serviceGenre.getGenreUpdate();
+        }
+        log.info("[/genre/get] date : " + date);
 
         returnData.put(GENRE_RESULT, RSS_SUCCESS);
         returnData.put(GENRE_UPDATE, date);
@@ -116,6 +121,11 @@ public class GenreController {
 
         // get update
         Date date = serviceGenre.getGenreUpdate();
+        if(date == null) {
+            serviceGenre.addGenreUpdate();
+            date = serviceGenre.getGenreUpdate();
+        }
+        log.info("[/genre/get] date : " + date);
 
         // return json data
         Map<String, Object> returnData = new HashMap<>();
@@ -225,6 +235,11 @@ public class GenreController {
 
         // get update
         Date date = serviceGenre.getGenreUpdate();
+        if(date == null) {
+            serviceGenre.addGenreUpdate();
+            date = serviceGenre.getGenreUpdate();
+        }
+        log.info("[/genre/get] date : " + date);
 
         // return json data
         Map<String, Object> returnData = new HashMap<>();
@@ -286,6 +301,11 @@ public class GenreController {
 
         // get update
         Date date = serviceGenre.getGenreUpdate();
+        if(date == null) {
+            serviceGenre.addGenreUpdate();
+            date = serviceGenre.getGenreUpdate();
+        }
+        log.info("[/genre/get] date : " + date);
 
         // return json data
         Map<String, Object> returnData = new HashMap<>();

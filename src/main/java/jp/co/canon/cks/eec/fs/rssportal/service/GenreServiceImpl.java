@@ -76,4 +76,9 @@ public class GenreServiceImpl implements GenreService {
     public boolean setGenreUpdate() {
         return dao.modifyUpdate();
     }
+
+    @Override
+    public boolean addGenreUpdate() {
+        return dao.addUpdate();
+    }
 }
