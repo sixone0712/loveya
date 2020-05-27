@@ -22,7 +22,7 @@ public class FileServiceManageServiceLocator extends org.apache.axis.client.Serv
     }
 
     // Use to get a proxy class for FileServiceManage
-    private java.lang.String FileServiceManage_address = "http://10.1.36.118:8080/FileServiceManage/services/FileServiceManage";
+    private java.lang.String FileServiceManage_address = "http://10.1.31.237/FileServiceManage/services/FileServiceManage";
 
     public java.lang.String getFileServiceManageAddress() {
         return FileServiceManage_address;

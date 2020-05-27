@@ -57,7 +57,7 @@ public class PlanController {
     public ResponseEntity<Integer> addPlan(HttpServletRequest request,
                                            @RequestBody Map<String, Object> param) {
         log.info(String.format("request \"%s\"", request.getServletPath()));
-        param.forEach((key,value)->log.info("key="+key+" value="+value));
+        //param.forEach((key,value)->log.info("key="+key+" value="+value));
         if(param==null) {
             log.error("no param");
             return new ResponseEntity(HttpStatus.BAD_REQUEST);

@@ -90,7 +90,7 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setOwner(context.getUser().getId());
         }
         int planId = dao.addPlan(plan);
-        notifyChanges();
+        schedulePlan(plan);
         return planId;
     }
 
