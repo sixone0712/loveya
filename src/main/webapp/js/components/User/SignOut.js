@@ -6,6 +6,9 @@ import ErrorModalOneButton from "../Common/ErrorModal";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import UserAuthFrom from "../Form/UserAuthForm";
 import InputForm from "../Form/InputForm";
+import {UncontrolledPopover, PopoverHeader, PopoverBody} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamation} from "@fortawesome/free-solid-svg-icons";
 import {bindActionCreators} from "redux";
 import * as userActions from "../../modules/User";
 
@@ -19,7 +22,7 @@ class SignOut extends Component {
                 name:'',
                 pwd:'',
                 cfpwd:'',
-                authValue:'100',
+                authValue:'100'
             },
             errors: {
                 name: '',
@@ -42,13 +45,27 @@ class SignOut extends Component {
 
     SignOutProcess = async (e) => {
         const {uInfo, errors} = this.state;
+        const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,28})([a-zA-Z0-9]$)/g;
+        const pwRegex = /[0-9a-zA-Z]{6,30}/g;
 
-        this.handleInput("name", uInfo.name);
-        this.handleInput("pwd", uInfo.pwd);
-        this.handleInput("cfpwd", uInfo.cfpwd);
-
-        if (errors.pwd !== '' || errors.name !== ''  || errors.cfpwd !== '') {
-            console.log(errors);
+        if(!nameRegex.test(uInfo.name)) {
+            this.setState({
+                errors: {
+                    name: "Name is invalid."
+                }
+            });
+        } else if (!pwRegex.test(uInfo.pwd)) {
+            this.setState({
+                errors: {
+                    pwd: "Password is invalid."
+                }
+            });
+        } else if (uInfo.cfpwd.length === 0) {
+            this.setState({
+                errors: {
+                    cfpwd: "Please enter the confirm password."
+                }
+            });
         } else if (uInfo.pwd !== uInfo.cfpwd) {
             this.setState(() => (
                 {
@@ -64,8 +81,7 @@ class SignOut extends Component {
             await API.createUser(this.props, uInfo);
             result = API.getUserInfoErrorCode(this.props);
             console.log("result:" + result);
-            if(result !== 0)
-            {
+            if (result !== 0) {
                 this.setState(() => (
                     {
                         ...this.state,
@@ -76,9 +92,7 @@ class SignOut extends Component {
                         }
                     })
                 );
-            }
-            else
-            {
+            } else {
                 await API.getDBUserList(this.props);
                 this.close(); //create modal Close
                 this.props.alertOpen("create");
@@ -95,32 +109,24 @@ class SignOut extends Component {
             })
         );
     }
-    handleInput = (name,value) => {
+    handleInput = (e) => {
+        const { name, value } = e.target;
         let nState = this.state;
 
         switch (name) {
             case 'name':
                 nState.uInfo.name = value;
-                nState.errors.name =
-                    (value.length < 6 || value === ' ')? 'Please must be at least 6 characters'
-                        : '';
                 break;
             case 'pwd':
                 nState.uInfo.pwd = value;
-                nState.errors.pwd =
-                    (value.length < 3 || value === ' ')? 'Please must be at least 3 characters'
-                    : '';
                 break;
             case 'cfpwd':
                 nState.uInfo.cfpwd = value;
-                nState.errors.cfpwd =
-                    value.length < 1
-                        ? 'Please enter the confirm password'
-                        : '';
                 break;
             default:
                 break;
         }
+
         this.setState({...nState});
     };
     data = {
@@ -146,70 +152,112 @@ class SignOut extends Component {
     render() {
         const {errors, uInfo} = this.state;
         const {isOpen, right} = this.props;
-        {
-            return (
-                <>
-                    {
-                        isOpen ? (
-                            <ReactTransitionGroup
-                                transitionName={'Custom-modal-anim'}
-                                transitionEnterTimeout={200}
-                                transitionLeaveTimeout={200}>
-                                <div className="Custom-modal-overlay" onClick={right} />
-                                <div className="Custom-modal">
-                                    <p className="title font-lg">{this.data.titleMsg}</p>
-                                    <div className="content-with-title user-modal">
-                                        <InputForm iType ={"text"}
-                                                   iName={"name"}
-                                                   iLabel={"YOUR NAME"}
-                                                   iPlaceholder ={"Enter the name"}
-                                                   changeFunc={this.handleInput}
-                                                   iErrMsg ={errors.name}
-                                        />
 
-                                        <InputForm iType ={"password"}
-                                                   iName={"pwd"}
-                                                   iLabel={"PASSWORD"}
-                                                   iPlaceholder ={"Enter the password."}
-                                                   changeFunc={this.handleInput}
-                                                   iErrMsg ={errors.pwd}
-                                         />
-                                        <InputForm iType ={"password"}
-                                                   iName={"cfpwd"}
-                                                   iLabel={"CONFIRM PASSWORD"}
-                                                   changeFunc={this.handleInput}
-                                                   iPlaceholder ={"Enter the confirm password."}
-                                                   iErrMsg ={errors.cfpwd}
-                                        />
-                                        <UserAuthFrom  sValue={uInfo.authValue}
-                                                       changeFunc={this.handleRadio}/>
-
-                                    </div>
-                                    <div className="button-wrap no-margin">
-                                        <button className="administrator form-type left-btn" onClick={this.SignOutProcess}>
-                                            Save
-                                        </button>
-                                        <button className="administrator form-type right-btn" onClick={this.close}>
-                                            Cancel
-                                        </button>
-                                    </div>
+        return (
+            <>
+                {
+                    isOpen ? (
+                        <ReactTransitionGroup
+                            transitionName={'Custom-modal-anim'}
+                            transitionEnterTimeout={200}
+                            transitionLeaveTimeout={200}>
+                            <div className="Custom-modal-overlay" onClick={right} />
+                            <div className="Custom-modal">
+                                <p className="title font-lg">{this.data.titleMsg}</p>
+                                <div className="content-with-title user-modal">
+                                    <InputForm iType ={"text"}
+                                               iName={"name"}
+                                               iId="name"
+                                               iErrMsg={errors.name}
+                                               iLabel={"YOUR NAME"}
+                                               iPlaceholder ={"Enter the name"}
+                                               changeFunc={(e) => this.handleInput(e)}
+                                               maxLength={30}
+                                    />
+                                    <UncontrolledPopover
+                                        placement="bottom-end"
+                                        target="name"
+                                        trigger="hover"
+                                        delay={{ show: 300, hide: 0 }}
+                                    >
+                                        <PopoverHeader>Name</PopoverHeader>
+                                        <PopoverBody>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Start and end must be entered in alphabet or number.
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Allowed to be at least 3 characters long and up to 30 characters long.
+                                            </p>
+                                        </PopoverBody>
+                                    </UncontrolledPopover>
+                                    <InputForm iType ={"password"}
+                                               iName={"pwd"}
+                                               iId="pwd"
+                                               iLabel={"PASSWORD"}
+                                               iErrMsg={errors.pwd}
+                                               iPlaceholder ={"Enter the password."}
+                                               changeFunc={(e) => this.handleInput(e)}
+                                               maxLength={30}
+                                     />
+                                    <UncontrolledPopover
+                                        placement="top-end"
+                                        target="pwd"
+                                        trigger="hover"
+                                        delay={{ show: 300, hide: 0 }}
+                                    >
+                                        <PopoverHeader>Password</PopoverHeader>
+                                        <PopoverBody>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Characters that can be entered: alphabet, number.
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Allowed to be at least 6 characters long and up to 30 characters long.
+                                            </p>
+                                        </PopoverBody>
+                                    </UncontrolledPopover>
+                                    <InputForm iType ={"password"}
+                                               iName={"cfpwd"}
+                                               iId="cfpwd"
+                                               iErrMsg={errors.cfpwd}
+                                               iLabel={"CONFIRM PASSWORD"}
+                                               changeFunc={(e) => this.handleInput(e)}
+                                               iPlaceholder ={"Enter the confirm password."}
+                                               maxLength={30}
+                                    />
+                                    <UserAuthFrom sValue={uInfo.authValue} changeFunc={this.handleRadio}/>
                                 </div>
+                                <div className="button-wrap no-margin">
+                                    <button className="administrator form-type left-btn" onClick={this.SignOutProcess}>
+                                        Save
+                                    </button>
+                                    <button className="administrator form-type right-btn" onClick={this.close}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
 
-                                {
-                                    (this.state.isModalOpen === true) &&
-                                    <ErrorModalOneButton isOpen={this.state.isModalOpen}
-                                                         errorMsg={this.state.errors.ModalMsg}
-                                                         ActionCloseButton={this.closeModal}/>
-                                }
-                            </ReactTransitionGroup>
-                        ) : (
-                            <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200}
-                                                  transitionLeaveTimeout={200}/>
-                        )
-                    }
-                </>
-            );
-        }
+                            {
+                                (this.state.isModalOpen === true) &&
+                                <ErrorModalOneButton isOpen={this.state.isModalOpen}
+                                                     errorMsg={this.state.errors.ModalMsg}
+                                                     ActionCloseButton={this.closeModal}/>
+                            }
+                        </ReactTransitionGroup>
+                    ) : (
+                        <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200}
+                                              transitionLeaveTimeout={200}/>
+                    )
+                }
+            </>
+        );
     }
 }
 

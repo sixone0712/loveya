@@ -6,6 +6,9 @@ import md5 from "md5-hash";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
+import {UncontrolledPopover, PopoverHeader, PopoverBody} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamation} from "@fortawesome/free-solid-svg-icons";
 
 class ChangePwModal extends Component {
     constructor(props) {
@@ -23,10 +26,19 @@ class ChangePwModal extends Component {
 
     handleSubmit = () => {
         const { newPw, confirmPw } = this.state;
-        if (newPw.length < 1 ) {
+        const passwordRegex = /[0-9a-zA-Z]{6,30}/g;
+
+        if (newPw.length === 0) {
             this.setState({
                 errors: {
                     newPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_EMPTY_PASSWORD)
+                }
+            });
+            return true;
+        } else if (!passwordRegex.test(newPw)) {
+            this.setState({
+                errors: {
+                    newPw: "New password is invalid."
                 }
             });
             return true;
@@ -126,10 +138,29 @@ class ChangePwModal extends Component {
                                     <input
                                         type="password"
                                         name="newPw"
+                                        id="newPw"
                                         placeholder={"Enter new password."}
                                         autoComplete="off"
                                         onChange={this.changeHandler}
                                     />
+                                    <UncontrolledPopover
+                                        placement="top-end"
+                                        target="newPw"
+                                        trigger="hover"
+                                        delay={{ show: 300, hide: 0 }}
+                                    >
+                                        <PopoverHeader>Password</PopoverHeader>
+                                        <PopoverBody>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Characters that can be entered: alphabet, number.
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Allowed to be at least 6 characters long and up to 30 characters long.
+                                            </p>
+                                        </PopoverBody>
+                                    </UncontrolledPopover>
                                     <span className="error">{errors.newPw}</span>
                                 </div>
                                 <div className="password-input-area">
@@ -137,10 +168,29 @@ class ChangePwModal extends Component {
                                     <input
                                         type="password"
                                         name="confirmPw"
+                                        id="confirmPw"
                                         placeholder={"Enter confirm password."}
                                         autoComplete="off"
                                         onChange={this.changeHandler}
                                     />
+                                    <UncontrolledPopover
+                                        placement="top-end"
+                                        target="confirmPw"
+                                        trigger="hover"
+                                        delay={{ show: 300, hide: 0 }}
+                                    >
+                                        <PopoverHeader>Password</PopoverHeader>
+                                        <PopoverBody>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Characters that can be entered: alphabet, number.
+                                            </p>
+                                            <p>
+                                                <FontAwesomeIcon icon={faExclamation} />{" "}
+                                                Allowed to be at least 6 characters long and up to 30 characters long.
+                                            </p>
+                                        </PopoverBody>
+                                    </UncontrolledPopover>
                                 </div>
                             </div>
                             <div className="button-wrap">
