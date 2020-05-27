@@ -51,18 +51,6 @@ const detailType = {
     COMPLETED: "completed"
 }
 
-const MODAL_MESSAGE = "Are you sure you want to delete this collection plan?";
-
-const STATUS_RUNNING = "running";
-const STATUS_STOPPED = "stop";
-
-const DETAIL_REGISTERED = "registered";
-const DETAIL_COLLECTING = "collecting";
-const DETAIL_COLLECTED = "collected";
-const DETAIL_SUSPENDED = "suspended";
-const DETAIL_HALTED = "halted";
-const DETAIL_COMPLETED = "completed";
-
 const spinnerStyles = {
     display: "inline-block",
     top: "2px"
@@ -114,7 +102,7 @@ class RSSautoplanlist extends Component {
                     planTarget: targetArray.length,
                     planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
                     planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: item.stop,
+                    planStatus: item.status,
                     planLastRun: item.lastCollect == null ? "-" : moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),
                     planDetail: item.detail,
                     id: item.id,
@@ -195,7 +183,7 @@ class RSSautoplanlist extends Component {
     };
 
     openStatusModal = (status, planId) => {
-        if(!status) {
+        if(status === statusType.RUNNING) {
             this.setState({
                 isStatusOpen: true,
                 statusMessage: messageType.CONFIRM_STOP_MESSAGE,
@@ -441,9 +429,11 @@ function CreateStatus(status, modalOpen) {
 
     switch (status) {
         case statusType.RUNNING:
-            component = <div onClick={stop}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;    break;
+            component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</span>;
+            break;
         case statusType.STOPPED:
-            component = <div onClick={start}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</div>;    break;
+            component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</span>;
+            break;
         default:
             console.error("plan detail error");   break;
     }
