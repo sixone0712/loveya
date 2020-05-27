@@ -74,7 +74,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         }
 
         response.addHeader("userauth", "true");
-        log.info(sb.toString());
+        //log.info(sb.toString());
         return true;
     }
 
