@@ -4,7 +4,7 @@
 <mapper namespace="dlHistory">
 
     <select id="selectAll" resultType="DownloadHistoryVo">
-        select * from rsss."download_history" where validity is true order by id
+        select * from rsss."download_history" where validity is true order by dl_date DESC
     </select>
 
     <select id="select" resultType="DownloadHistoryVo">
