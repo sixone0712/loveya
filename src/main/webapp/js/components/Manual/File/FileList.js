@@ -53,7 +53,7 @@ class FileList extends Component {
 
   openDownloadModal = () => {
     if(this.props.downloadCnt <= 0) {
-      this.setErrorStatus(Define.FILE_FAIL_NO_ITEM);is
+      this.setErrorStatus(Define.FILE_FAIL_NO_ITEM);
       this.setErrorMsg(Define.FILE_FAIL_NO_ITEM);
       this.openAlertModal();
     } else {
