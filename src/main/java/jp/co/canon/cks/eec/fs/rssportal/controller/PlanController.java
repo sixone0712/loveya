@@ -58,10 +58,6 @@ public class PlanController {
                                            @RequestBody Map<String, Object> param) {
         log.info(String.format("request \"%s\"", request.getServletPath()));
         param.forEach((key,value)->log.info("key="+key+" value="+value));
-        if(checkSession()==false) {
-            log.error("unauthorized session");
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-        }
         if(param==null) {
             log.error("no param");
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -83,10 +79,6 @@ public class PlanController {
     public ResponseEntity<List<CollectPlanVo>> listPlan(HttpServletRequest request,
                                                         @RequestParam Map<String, Object> param) {
         log.info(String.format("request \"%s\"", request.getServletPath()));
-        if(checkSession()==false) {
-            log.error("unauthorized session");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         if(param==null) {
             log.error("no param");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -105,8 +97,6 @@ public class PlanController {
     @ResponseBody
     public ResponseEntity deletePlan(HttpServletRequest request, @RequestParam(name="id") int id) {
         log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
-        if(checkSession()==false)
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         boolean ret = service.deletePlan(id);
         if(ret)
@@ -119,8 +109,6 @@ public class PlanController {
                                                         HttpServletResponse response,
                                                         @RequestParam(name="id") int id) {
         log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
-        if(checkSession()==false)
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         DownloadListVo item = downloadService.get(id);
         if(item==null) {
@@ -283,17 +271,6 @@ public class PlanController {
 
     private Date toDate(@NonNull String str) throws ParseException {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(str);
-    }
-
-    private boolean checkSession() {
-        if(session==null) {
-            return false;
-        }
-        SessionContext context = (SessionContext) session.getAttribute("context");
-        if(context==null) {
-            log.warn("## TODO ##");
-        }
-        return true; //context.isAuthorized();
     }
 
     private final Log log = LogFactory.getLog(getClass());
