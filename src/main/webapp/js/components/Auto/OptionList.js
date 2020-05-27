@@ -20,7 +20,8 @@ class RSSautoformlist extends Component {
     super();
     this.state = {
       currentModal: 0,
-      modalOpen: false
+      modalOpen: false,
+      cycleIntervalMax: 2
     };
   }
 
@@ -93,6 +94,25 @@ class RSSautoformlist extends Component {
   handleIntervalUnitChange = value => {
     const { autoPlanActions } = this.props;
     autoPlanActions.autoPlanSetIntervalUnit(value);
+
+    switch(value) {
+      case Define.AUTO_UNIT_MINUTE:
+      case Define.AUTO_UNIT_HOUR:
+        this.setState({
+          cycleIntervalMax: 2
+        });
+        break;
+
+      case Define.AUTO_UNIT_DAY:
+        this.setState({
+          cycleIntervalMax: 3
+        });
+        break;
+
+      default:
+        console.log("[OptionList.js] cycle interval unit error!!!");
+        break;
+    }
   }
 
   handleDiscriptionChange = e => {
@@ -101,10 +121,7 @@ class RSSautoformlist extends Component {
   }
 
   render() {
-    const {
-      currentModal,
-      modalOpen
-    } = this.state;
+    const { currentModal, modalOpen, cycleIntervalMax } = this.state;
 
     const { autoPlan } = this.props;
     const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
@@ -133,16 +150,22 @@ class RSSautoformlist extends Component {
                       maxLength="32"
                       onChange={this.handlePlanIdChange}
                   />
-                  <UncontrolledPopover placement="top-end" target="plan_id" className="auto-plan" trigger="hover">
+                  <UncontrolledPopover
+                      placement="top-end"
+                      target="plan_id"
+                      className="auto-plan"
+                      trigger="hover"
+                      delay={{ show: 300, hide: 0 }}
+                  >
                     <PopoverHeader>Plan ID</PopoverHeader>
                     <PopoverBody>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}
-                        Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                        There are no restrictions on the types of characters that can be entered.
                       </p>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}
-                        Start and end must be entered in alphabet or number.
+                        Special characters cannot be entered at the beginning or end.
                       </p>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}
@@ -219,9 +242,34 @@ class RSSautoformlist extends Component {
                       <Input
                           type="text"
                           bsSize="sm"
+                          id="plan_cycle_interval"
                           value={interval}
+                          maxLength={cycleIntervalMax}
                           onChange={this.handleIntervalChange}
                       />
+                      <UncontrolledPopover
+                          placement="top"
+                          target="plan_cycle_interval"
+                          className="auto-plan"
+                          trigger="hover"
+                          delay={{ show: 300, hide: 0 }}
+                      >
+                        <PopoverHeader>Cycle Interval</PopoverHeader>
+                        <PopoverBody>
+                          <p>
+                            <FontAwesomeIcon icon={faExclamation} />{" "}
+                            Minute: You can enter from 1 to 59.
+                          </p>
+                          <p>
+                            <FontAwesomeIcon icon={faExclamation} />{" "}
+                            Hour: You can enter from 1 to 23.
+                          </p>
+                          <p>
+                            <FontAwesomeIcon icon={faExclamation} />{" "}
+                            Day: You can enter from 1 to 365.
+                          </p>
+                        </PopoverBody>
+                      </UncontrolledPopover>
                       <Select
                           defaultValue= {intervalUnit}
                           onChange={this.handleIntervalUnitChange}
@@ -246,7 +294,13 @@ class RSSautoformlist extends Component {
                       value={description}
                       onChange={this.handleDiscriptionChange}
                   />
-                  <UncontrolledPopover placement="top-end" target="plan_desc" className="auto-plan" trigger="hover">
+                  <UncontrolledPopover
+                      placement="top-end"
+                      target="plan_desc"
+                      className="auto-plan"
+                      trigger="hover"
+                      delay={{ show: 300, hide: 0 }}
+                  >
                     <PopoverHeader>Description</PopoverHeader>
                     <PopoverBody>
                       <p>
@@ -255,11 +309,11 @@ class RSSautoformlist extends Component {
                       </p>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}
-                        Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                        There are no restrictions on the types of characters that can be entered.
                       </p>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}
-                        Start and end must be entered in alphabet or number.
+                        Special characters cannot be entered at the beginning or end.
                       </p>
                       <p>
                         <FontAwesomeIcon icon={faExclamation} />{" "}

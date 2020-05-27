@@ -32,9 +32,7 @@ const customSelectStyles = {
       ...styles,
       backgroundColor: isSelected
           ? "rgba(255, 169, 77, 0.5)"
-          : isFocused
-              ? "rgba(255, 169, 77, 0.3)"
-              : null,
+          : null,
       color: "black",
       ":active": {
         ...styles[":active"],
@@ -43,6 +41,9 @@ const customSelectStyles = {
             : isFocused
                 ? "rgba(255, 169, 77, 0.7)"
                 : null
+      },
+      ":hover": {
+        backgroundColor: isSelected ? "rgba(255, 169, 77, 0.9)" : "rgba(255, 169, 77, 0.3)"
       }
     };
   },

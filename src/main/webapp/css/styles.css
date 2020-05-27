@@ -435,7 +435,7 @@ a:hover {
 .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     position: relative;
     background-color: #fff;
-    border: 1px solid rgb(92, 124, 250);
+    border: 1px solid #ced4da;
     border-radius: 3px;
     -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -443,6 +443,12 @@ a:hover {
     height: 32px;
     padding: 0 11px;
 }
+
+.planlist .ant-select-single:not(.ant-select-customize-input) .ant-select-selector,
+.downloadlist .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
+    border: 1px solid rgb(92, 124, 250);
+}
+
 .administrator .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
     border: 1px solid rgb(23, 162, 184);
 }
@@ -844,6 +850,13 @@ a:hover {
     pointer-events: none;
 }
 
+.navbar .navbar-nav {
+    -ms-flex-direction: row !important;
+    flex-direction: row !important;
+    -ms-flex-wrap: nowrap !important;
+    flex-wrap: nowrap !important;
+}
+
 .navbar .navbar-nav .nav-item {
     margin-left: 10px;
 }
@@ -852,7 +865,7 @@ a:hover {
     margin-right: 10px;
 }
 
-.navbar .navbar-nav .nav-item:last-child {
+.navbar .navbar-nav .nav-item:nth-child(3) {
     margin-left: 0;
 }
 
@@ -1224,10 +1237,6 @@ a:hover {
 /* machinelist style end */
 
 /* categorylist set */
-.catlist-card {
-    min-width: 500px;
-}
-
 .catlist-card .cmdlist-btn-toggle,
 .catlist-card .catlist-btn,
 .catlist-card .catlist-btn-toggle:hover {
@@ -2003,6 +2012,7 @@ a:hover {
 .auto-plan-optionlist-form-group .mode-section .sub-option > input[type="text"] {
     width: 20%;
     margin-right: 10px;
+    height: 32px;
 }
 
 .auto-plan-optionlist-form-group .mode-section .sub-option.hidden {

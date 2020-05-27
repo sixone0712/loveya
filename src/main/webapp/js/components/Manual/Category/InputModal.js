@@ -118,7 +118,14 @@ class InputModal extends Component {
 
     actionFunc = async (openbtn) => {
         const genreName = this.state.genreName;
-        const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,18})([a-zA-Z0-9]$)/g;
+        const nameRegex = /^([\p{L}0-9]).{1,18}([\p{L}0-9]$)/gu;
+
+        if(genreName.length === 0) {
+            this.setState({
+                errMsg: "Please input genre name."
+            });
+            return;
+        }
 
         if(!nameRegex.test(genreName)) {
             this.setState({
@@ -202,16 +209,22 @@ class InputModal extends Component {
                                         //onChange={(e) => this.props.onChangeGenreName(e.target.value)}
                                         onChange={(e) => this.setState({...this.state, genreName: e.target.value})}
                                     />
-                                    <UncontrolledPopover placement="top-end" target={inputname} className="catlist" trigger="hover">
+                                    <UncontrolledPopover
+                                        placement="top-end"
+                                        target={inputname}
+                                        className="catlist"
+                                        trigger="hover"
+                                        delay={{ show: 300, hide: 0 }}
+                                    >
                                         <PopoverHeader>Genre Name</PopoverHeader>
                                         <PopoverBody>
                                             <p>
                                                 <FontAwesomeIcon icon={faExclamation} />{" "}
-                                                Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                                                There are no restrictions on the types of characters that can be entered.
                                             </p>
                                             <p>
                                                 <FontAwesomeIcon icon={faExclamation} />{" "}
-                                                Start and end must be entered in alphabet or number.
+                                                Special characters cannot be entered at the beginning or end.
                                             </p>
                                             <p>
                                                 <FontAwesomeIcon icon={faExclamation} />{" "}

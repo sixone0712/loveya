@@ -37,7 +37,7 @@ const modalMessage = {
   TARGET_ALERT_MESSAGE: "You must select at least one or more targets.",
   PLAN_ID_ALERT_MESSAGE: "Plan ID is invalid.",
   FROM_TO_ALERT_MESSAGE: "Please set the from(Period) time before the To(Period) time.",
-  CYCLE_ALERT_MESSAGE: "Cycle mode must have a minimum of 1 interval.",
+  CYCLE_ALERT_MESSAGE: "Interval is invalid.",
   DESCRIPTION_ALERT_MESSAGE: "Description is invalid.",
   PLAN_ADD_MESSAGE: "Are you sure you want to create a collection plan with this setting?",
   PLAN_EDIT_MESSAGE: "Are you sure you want to change the collection plan with this setting?"
@@ -401,9 +401,9 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
       }
 
     case wizardStep.OPTION:
-      const { planId, collectType, interval, from, to, description } = optionList.toJS();
-      const planIdRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,30})([a-zA-Z0-9]$)/g;
-      const planDescRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,38})([a-zA-Z0-9]$)/g;
+      const { planId, collectType, interval, from, to, description, intervalUnit } = optionList.toJS();
+      const planIdRegex = /^([\p{L}0-9]).{1,30}([\p{L}0-9]$)/gu;
+      const planDescRegex = /^([\p{L}0-9]).{1,38}([\p{L}0-9]$)/gu;
 
       if (!planIdRegex.test(planId)) {
         return modalMessage.PLAN_ID_ALERT_MESSAGE;
@@ -417,6 +417,29 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
         if (interval < 1) {
           return modalMessage.CYCLE_ALERT_MESSAGE;
         }
+
+        switch(intervalUnit) {
+          case Define.AUTO_UNIT_MINUTE:
+            if (interval > 59) {
+              return modalMessage.CYCLE_ALERT_MESSAGE;
+            }
+            break;
+
+          case Define.AUTO_UNIT_HOUR:
+            if (interval > 23) {
+              return modalMessage.CYCLE_ALERT_MESSAGE;
+            }
+            break;
+
+          case Define.AUTO_UNIT_DAY:
+            if (interval > 365) {
+              return modalMessage.CYCLE_ALERT_MESSAGE;
+            }
+            break;
+
+          default:
+            break;
+        }
       }
 
       if (description.toString().length > 0) {
@@ -425,10 +448,6 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
         }
       }
 
-      return null;
-
-    case wizardStep.CHECK:
-    default:
       return null;
   }
 }

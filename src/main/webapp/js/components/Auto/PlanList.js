@@ -139,8 +139,8 @@ class RSSautoplanlist extends Component {
     }
 
     setEditPlanList = (id, status) => {
-        //if (status === statusType.RUNNING) {
-        if (!status) {
+        if (status === statusType.RUNNING) {
+        //if (!status) {
             this.openAlert(messageType.EDIT_ALERT_MESSAGE);
         } else {
             console.log("[AUTO][setEditPlanList]setEditPlanList");
@@ -167,8 +167,8 @@ class RSSautoplanlist extends Component {
     }
 
     openDeleteModal = async (planId, status) => {
-        //if (status === statusType.RUNNING) {
-        if(!status) {
+        if (status === statusType.RUNNING) {
+        //if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
         } else {
             await this.setState({
@@ -438,7 +438,7 @@ class RSSautoplanlist extends Component {
 
 function CreateStatus(status, modalOpen) {
     let component = null;
-    /*
+
     switch (status) {
         case statusType.RUNNING:
             component = <div onClick={stop}><FontAwesomeIcon className="running" icon={faPlay}/> Running</div>;    break;
@@ -447,13 +447,14 @@ function CreateStatus(status, modalOpen) {
         default:
             console.error("plan detail error");   break;
     }
-    */
+
+    /*
     if (!status) {
         component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="running" icon={faPlay}/> Running</span>;
     } else {
         component = <span className="status-area" onClick={modalOpen}><FontAwesomeIcon className="stopped" icon={faStop}/> Stopped</span>;
     }
-
+    */
     return component;
 }
 
