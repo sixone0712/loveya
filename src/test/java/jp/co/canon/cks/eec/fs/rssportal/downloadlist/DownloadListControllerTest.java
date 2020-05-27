@@ -31,15 +31,6 @@ class DownloadListControllerTest {
         this.downloadService = downloadService;
     }
 
-    @BeforeEach
-    void setUp() {
-        log.info("setup");
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void getList() {
         log.info("test getList()");
