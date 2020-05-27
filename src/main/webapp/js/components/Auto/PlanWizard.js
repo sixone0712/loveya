@@ -449,6 +449,10 @@ function invalidCheck(step, toolCnt, targetCnt, optionList) {
       }
 
       return null;
+
+    case wizardStep.CHECK:
+    default:
+      return null;
   }
 }
 
