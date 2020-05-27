@@ -565,7 +565,7 @@ export default connect(
       resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
     }),
     (dispatch) => ({
-      searchListActions: bindActionCreators(searchListActions, dispatch)
+      searchListActions: bindActionCreators(searchListActions, dispatch),
       dlHistoryAction: bindActionCreators(dlHistoryAction, dispatch)
     })
 )(FileList);
