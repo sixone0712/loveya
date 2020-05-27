@@ -120,7 +120,11 @@ public class CollectPlanner extends Thread {
     private boolean collect(CollectPlanVo plan) throws InterruptedException, IOException {
 
         log.info("collect: "+plan.toString());
+
+        // change the status of this plan to 'collecting'
         service.setLastStatus(plan, PlanStatus.collecting);
+
+        // figure out a list the plan has to collect.
         List<DownloadForm> downloadList = createDownloadList(plan);
 
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
@@ -143,23 +147,21 @@ public class CollectPlanner extends Thread {
                 service.setLastStatus(plan, PlanStatus.suspended);
             } else {
                 int copied = copyFiles(plan, executor.getBaseDir());
+                PlanStatus lastStatus = PlanStatus.collected;
                 if(copied==0) {
                     log.info("collection complete.. but no updated files");
-                    service.setLastStatus(plan, PlanStatus.collected);
-                    service.updateLastCollect(plan);
                 } else {
                     String outputPath = compress(plan);
                     if (outputPath == null) {
                         log.error("failed to pack logs");
-                        service.setLastStatus(plan, PlanStatus.suspended);
-                        service.updateLastCollect(plan);
+                        lastStatus = PlanStatus.suspended;
                     } else {
-                        service.setLastStatus(plan, PlanStatus.collected);
                         downloadListService.insert(plan, outputPath);
-                        service.updateLastCollect(plan);
                         log.info("plan " + plan.getPlanName()+" "+copied+" files collecting success");
                     }
                 }
+                service.setLastStatus(plan, lastStatus);
+                service.updateLastCollect(plan);
             }
         } else {
             log.error("no files to collect");
