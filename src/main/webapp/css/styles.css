@@ -1166,8 +1166,8 @@ a:hover {
     margin: 0 10px;
 }
 
-.datepicker-item-area .datetime-picker .time .sliders .slider .handle:focus,
-.datepicker-item-area .datetime-picker .time .sliders .slider .handle:active {
+.datepicker-item-area .datetime-picker .time .sliders .slider .thumb:focus,
+.datepicker-item-area .datetime-picker .time .sliders .slider .thumb:active {
     background-color: rgb(55, 178, 77);
     border-color: rgb(55, 178, 77);
 }
@@ -1178,7 +1178,7 @@ a:hover {
     max-width: 120px;
 }
 
-.datepicker-item-area .datetime-picker .time .sliders .slider .handle {
+.datepicker-item-area .datetime-picker .time .sliders .slider .thumb {
     top: 3px;
 }
 /* datepicker style end */
@@ -1480,7 +1480,12 @@ a:hover {
 .filelist-card-body table {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
     margin: 0.5em 0;
-    border-collapse: separate;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .filelist-card-body table {
+        border-collapse: separate;
+    }
 }
 
 .filelist-card-body table thead tr {
@@ -2153,7 +2158,12 @@ a:hover {
 .auto-plan-collection-list table {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
     margin: 0.5em 0;
-    border-collapse: separate;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .auto-plan-collection-list table {
+        border-collapse: separate;
+    }
 }
 
 .auto-plan-collection-list table thead tr {
@@ -2238,6 +2248,18 @@ a:hover {
 .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
 .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
     left: 1px;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+    .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+        top: 4px !important;
+    }
+
+    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+    .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
+        left: 0 !important;
+    }
 }
 
 .auto-plan-collection-list table tbody tr td span > svg.stopped,

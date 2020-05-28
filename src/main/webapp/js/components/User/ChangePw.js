@@ -173,24 +173,6 @@ class ChangePwModal extends Component {
                                         autoComplete="off"
                                         onChange={this.changeHandler}
                                     />
-                                    <UncontrolledPopover
-                                        placement="top-end"
-                                        target="confirmPw"
-                                        trigger="hover"
-                                        delay={{ show: 300, hide: 0 }}
-                                    >
-                                        <PopoverHeader>Password</PopoverHeader>
-                                        <PopoverBody>
-                                            <p>
-                                                <FontAwesomeIcon icon={faExclamation} />{" "}
-                                                Characters that can be entered: alphabet, number.
-                                            </p>
-                                            <p>
-                                                <FontAwesomeIcon icon={faExclamation} />{" "}
-                                                Allowed to be at least 6 characters long and up to 30 characters long.
-                                            </p>
-                                        </PopoverBody>
-                                    </UncontrolledPopover>
                                 </div>
                             </div>
                             <div className="button-wrap">
