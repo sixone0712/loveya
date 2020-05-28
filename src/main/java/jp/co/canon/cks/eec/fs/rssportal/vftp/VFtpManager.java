@@ -14,8 +14,10 @@ import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get.GetRequest;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get.GetRequestRepository;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.list.ListRequest;
 import jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.list.ListRequestRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class VFtpManager {
     @Autowired
     private ServerInfoRepository serverInfoRepository;
@@ -34,9 +36,9 @@ public class VFtpManager {
             if (evt.getPropertyName().equals("completed")){
                 Object o = evt.getSource();
                 ListRequest srcreq = (ListRequest)o;
-                listRequestRepository.save(srcreq);
 
-                synchronized(this){
+                synchronized(VFtpManager.this){
+                    listRequestRepository.save(srcreq);
                     listRequestMap.remove(srcreq.getRequestNo());
                 }
                 return;
@@ -44,7 +46,9 @@ public class VFtpManager {
             if (evt.getPropertyName().equals("statusChanged")){
                 Object o = evt.getSource();
                 ListRequest srcreq = (ListRequest)o;
-                listRequestRepository.save(srcreq);
+                synchronized(VFtpManager.this){
+                    listRequestRepository.save(srcreq);
+                }
                 return;
             }
         }
@@ -57,9 +61,9 @@ public class VFtpManager {
             if (evt.getPropertyName().equals("completed")){
                 Object o = evt.getSource();
                 GetRequest srcreq = (GetRequest)o;
-                getRequestRepository.save(srcreq);
 
-                synchronized(this){
+                synchronized(VFtpManager.this){
+                    getRequestRepository.save(srcreq);
                     getRequestMap.remove(srcreq.getRequestNo());
                 }
                 return;
@@ -67,7 +71,9 @@ public class VFtpManager {
             if (evt.getPropertyName().equals("statusChanged")){
                 Object o = evt.getSource();
                 GetRequest srcreq = (GetRequest)o;
-                getRequestRepository.save(srcreq);
+                synchronized(VFtpManager.this){
+                    getRequestRepository.save(srcreq);
+                }
                 return;
             }
         }
@@ -104,13 +110,17 @@ public class VFtpManager {
     }
 
     public FileListStatus requestFileListStatus(String requestNo){
-        ListRequest req = listRequestMap.get(requestNo);
-        if (req == null){
-            req = listRequestRepository.getRequestById(requestNo);
+        ListRequest req = null;
+        synchronized(this){
+            req = listRequestMap.get(requestNo);
+            if (req == null){
+                req = listRequestRepository.getRequestById(requestNo);
+            }
         }
         if (req != null){
             return req.convertToFileListStatus();
         }
+
         return null;
     }
 
@@ -133,13 +143,19 @@ public class VFtpManager {
     }
     
     public FileDownloadStatus requestDownloadStatus(String requestNo){
-        GetRequest req = getRequestMap.get(requestNo);
-        if (req == null){
-            req = getRequestRepository.getRequestById(requestNo);
+        GetRequest req = null;
+        log.debug("requestDownloadStatus " + requestNo);
+        synchronized(this){
+            req = getRequestMap.get(requestNo);
+            if (req == null){
+                log.debug("find from map failed");
+                req = getRequestRepository.getRequestById(requestNo);
+            }
         }
         if (req != null){            
             return req.convertToFileDownloadStatus();
         }
+        log.debug("request No : " + requestNo);
         return null;
     }
 
@@ -149,8 +165,8 @@ public class VFtpManager {
             req.stop();
             synchronized(this){
                 getRequestMap.remove(requestNo);    
+                getRequestRepository.delete(requestNo);
             }
-            getRequestRepository.delete(requestNo);
         }
     }
 
@@ -160,8 +176,8 @@ public class VFtpManager {
             req.stop();
             synchronized(this){
                 listRequestMap.remove(requestNo);
+                listRequestRepository.delete(requestNo);
             }
-            listRequestRepository.delete(requestNo);
         }
     }
 }

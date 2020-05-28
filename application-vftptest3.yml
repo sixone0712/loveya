@@ -16,4 +16,11 @@ rssportal:
     directory:
       request: testroot/VFTPREQUEST03
     objectlistfile: testroot/CanonFileService03/definitions/ObjectList.xml
+  property:
+    constructdisplay: devTemp/ConstructDisplay.xml
+
+logging:
+  level:
+    root: info
+    jp.co.canon.cks.eec.fs.rssportal.vftp: debug
     

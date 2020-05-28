@@ -120,10 +120,10 @@ public class GetRequest implements PropertyChangeListener {
                     
                     compressor.compress(requestDir + "/down", destFile.getAbsolutePath());
                     
+                    GetRequest.this.setDownloadPath(requestDir);
+                    GetRequest.this.setDownloadFilename(compressFilename);
                     GetRequest.this.setStatus(Status.COMPLETED);
                     propertyChangeSupport.firePropertyChange("completed", null, null);
-                    GetRequest.this.setDownloadPath(requestDir + "/down");
-                    GetRequest.this.setDownloadFilename(compressFilename);
                 }
             });
             compressThread.start();
@@ -176,6 +176,7 @@ public class GetRequest implements PropertyChangeListener {
         sts.setRequestFileCount(requestFileCount);
         sts.setDownloadFileCount(downloadFileCount);
         switch(this.status){
+            default:
             case NONE:
                 sts.setStatus(FileDownloadStatus.Status.NONE);
                 break;
@@ -190,8 +191,6 @@ public class GetRequest implements PropertyChangeListener {
                 break;
             case PROCESSING_DOWNLOAD:
                 sts.setStatus(FileDownloadStatus.Status.PROCESSING_DOWNLOAD);
-                break;
-            default:
                 break;
         }
         sts.setDownloadPath(this.getDownloadPath());
