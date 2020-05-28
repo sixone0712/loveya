@@ -49,39 +49,35 @@ public class ListRequestRepository extends RequestRepository{
         return "LIST_";
     }
 
+    
+
     public ListRequest getRequestById(String requestNo) {
         File requestDir = new File(getRootDir(), requestNo);
 
-        if (requestDir.exists() && requestDir.isDirectory()) {
-            File requestInfoFile = new File(requestDir, getRequestInfoFileName());
-            if (requestInfoFile.exists() && requestInfoFile.isFile()) {
-                FileInputStream is;
-                try {
-                    is = new FileInputStream(requestInfoFile);
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    return null;
-                }
-
-                ListRequest req = null;
-                try {
-                    req = objectMapper.readValue(is, ListRequest.class);
-                } catch (JsonParseException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (JsonMappingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return req;
-            }
+        File requestInfoFile = new File(requestDir, getRequestInfoFileName());
+        FileInputStream is;
+        try {
+            is = new FileInputStream(requestInfoFile);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
             return null;
         }
-        return null;
+
+        ListRequest req = null;
+        try {
+            req = objectMapper.readValue(is, ListRequest.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return req;
     }
 
 
@@ -114,7 +110,8 @@ public class ListRequestRepository extends RequestRepository{
             }
             if (out != null){
                 try {
-                    out.write(json.getBytes());
+                    out.write(json.getBytes("UTF-8"));
+                    out.flush();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

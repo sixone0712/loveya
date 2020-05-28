@@ -58,6 +58,9 @@ public class SSSChecker {
     }
 
     public String getDeviceName(){
+        if (this.contextChecker == null){
+            return null;
+        }
         return this.contextChecker.getDeviceName();
     }
 }

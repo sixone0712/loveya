@@ -16,4 +16,6 @@ rssportal:
     directory:
       request: testroot/VFTPREQUEST01
     objectlistfile: testroot/CanonFileService01/definitions/ObjectList.xml
+  property:
+    constructdisplay: devTemp/ConstructDisplay.xml
     

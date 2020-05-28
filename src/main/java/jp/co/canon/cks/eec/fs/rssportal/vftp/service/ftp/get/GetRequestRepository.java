@@ -57,9 +57,10 @@ public class GetRequestRepository extends RequestRepository{
         return getRequestDirectory(requestNo).getAbsolutePath();
     }
 
-    public GetRequest getRequestById(String requestNo){
+    public synchronized GetRequest getRequestById(String requestNo){
         File requestDir = getRequestDirectory(requestNo);
-
+        log.debug("GetRequest getRequestById " + requestNo);
+        log.debug("requestDir + " + requestDir);
         if (requestDir.exists() && requestDir.isDirectory()) {
             File requestInfoFile = new File(requestDir, getRequestInfoFileName());
             if (requestInfoFile.exists() && requestInfoFile.isFile()) {
@@ -87,17 +88,20 @@ public class GetRequestRepository extends RequestRepository{
                 }
                 return req;
             }
+            log.debug("file not exists");
             return null;
         }
+        log.debug("directory not exists");
         return null;
     }
 
-    public void save(GetRequest req){
+    public synchronized void save(GetRequest req){
         if (req.getRequestNo() == null){
             String requestNo = createRequestNo(req.getCreatedTime().getTime());
             req.setRequestNo(requestNo);
             req.setRequestDir(this.getRequestDirectoryPath(requestNo));
         }
+        log.debug("GetRequestRepository Save " + req.getRequestNo());
         String json = null;
         try {
             json = objectMapper.writeValueAsString(req);
@@ -121,8 +125,9 @@ public class GetRequestRepository extends RequestRepository{
                 e.printStackTrace();
             }
             if (out != null){
-                try {
-                    out.write(json.getBytes());
+                try {                    
+                    out.write(json.getBytes("UTF-8"));
+                    out.flush();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

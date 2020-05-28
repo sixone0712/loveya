@@ -77,16 +77,36 @@ test {
     useJUnitPlatform()
 }
 
+test {
+    finalizedBy jacocoTestReport
+}
+
 jacoco {
     toolVersion = '0.8.5'
 }
 
 jacocoTestReport {
+    dependsOn test
+    
     reports {
         html.enabled true
         xml.enabled false
         csv.enabled false
 
         html.destination file("$buildDir/jacocoHtml")
+    }
+
+    afterEvaluate {
+        classDirectories.from = files(classDirectories.files.collect {
+            fileTree(
+                dir: it,
+                exclude: [
+/*                    "jp/co/canon/cks/eec/fs/manage/**",
+                    "jp/co/canon/cks/eec/fs/portal/**",
+                    "jp/co/canon/cks/eec/util/ftp/**",
+                    "jp/co/canon/cks/eec/fs/rssportal/dummy/**",
+                    "jp/co/canon/cks/eec/fs/rssportal/test/**" */
+                ])
+        })
     }
 }

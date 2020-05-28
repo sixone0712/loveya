@@ -154,9 +154,6 @@ public class VFtpController {
         }
         // Call Request
         String requestNo = manager.requestFileList(server, "/VROOT/SSS/Optional", directory);
-        if (requestNo == null) {
-            return ResponseEntity.badRequest().body("request failed...");
-        }
 
         // Make Response
         FileListStatus sts = manager.requestFileListStatus(requestNo);
@@ -189,7 +186,7 @@ public class VFtpController {
     private String getSssCompressFilenameFromPath(String path) {
         final String prefix = "/VROOT/SSS/Optional";
         if (path.startsWith(prefix)) {
-            String filename = path.substring(prefix.length());
+            String filename = path.substring(prefix.length()+1);
             return filename + ".zip";
         }
         return null;
@@ -224,9 +221,6 @@ public class VFtpController {
             return ResponseEntity.badRequest().body("requested parameter is not valid");
         }
         String requestNo = manager.requestDownload(param.toGetFileParamList().toArray(), compressFilename);
-        if (requestNo == null) {
-            return ResponseEntity.badRequest().body("cannot start download");
-        }
 
         FileDownloadStatus sts = manager.requestDownloadStatus(requestNo);
 

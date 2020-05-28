@@ -209,7 +209,7 @@ class FileDownloaderControllerTest {
         return content;
     }
 
-    @Test
+    // @Test
     void request() throws Exception {
         final int testToolCount = 2;
         log.info("test dl/request");
@@ -259,8 +259,8 @@ class FileDownloaderControllerTest {
     }
 
 
-    @Test
-    @Timeout(300)
+    //@Test
+    //@Timeout(300)
     void getStatus() throws Exception {
         log.info("test /dl/status");
         assertThat(toolList).isNotNull();
@@ -284,8 +284,8 @@ class FileDownloaderControllerTest {
         }
     }
 
-    @Test
-    @Timeout(360)
+    //@Test
+    //@Timeout(360)
     void downloadFile() throws Exception {
         log.info("test /dl/download");
         assertThat(toolList).isNotNull();
@@ -314,7 +314,7 @@ class FileDownloaderControllerTest {
 
     }
 
-    @Test
+    //@Test
     void cancelDownload() throws Exception {
         log.info("test /dl/cancel");
         String downloadId = requestDownload(toolList.get(0));

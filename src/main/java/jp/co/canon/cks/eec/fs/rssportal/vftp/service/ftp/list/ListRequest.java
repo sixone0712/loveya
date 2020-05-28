@@ -72,6 +72,18 @@ public class ListRequest implements PropertyChangeListener {
         }
     }
 
+    private void notifyCompleted(String[] errorList){
+        completedTime = Calendar.getInstance();        
+        if (errorList.length == 0){
+            this.setStatus(Status.COMPLETED);
+            propertyChangeSupport.firePropertyChange("completed", null, null);
+            return;
+        }
+        this.setStatus(Status.FAILED);
+        propertyChangeSupport.firePropertyChange("completed", null, null);
+        return;
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("listresult")){
@@ -90,15 +102,8 @@ public class ListRequest implements PropertyChangeListener {
             return;
         }
         if (evt.getPropertyName().equals("completed")){
-            completedTime = Calendar.getInstance();
             errorList = request.getErrorList();
-            if (errorList.length == 0){
-                this.setStatus(Status.COMPLETED);
-                propertyChangeSupport.firePropertyChange("completed", null, null);
-                return;
-            }
-            this.setStatus(Status.FAILED);
-            propertyChangeSupport.firePropertyChange("completed", null, null);
+            notifyCompleted(errorList);
             return;
         }
     }
@@ -110,6 +115,7 @@ public class ListRequest implements PropertyChangeListener {
         sts.setDirectory(directory);
         sts.setFilelist(filelist.toArray(new FileItem[0]));
         switch(status){
+            default:
             case NONE:  
                 sts.setStatus(FileListStatus.Status.NONE);
                 break;
@@ -121,8 +127,6 @@ public class ListRequest implements PropertyChangeListener {
                 break;
             case PROCESSING:
                 sts.setStatus(FileListStatus.Status.PROCESSING);
-                break;
-            default:
                 break;
         }
         return sts;

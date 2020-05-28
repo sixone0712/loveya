@@ -26,10 +26,14 @@ public class VFtpManagerGetTest {
         requestNo = manager.requestDownload(list.toArray(), "a.zip");
         Assertions.assertNotNull(requestNo);
 
+        System.out.println("requestNo : " + requestNo);
         FileDownloadStatus sts = manager.requestDownloadStatus(requestNo);
+        Assertions.assertNotNull(sts, "requestNo : " + requestNo);
 
-        while (sts.getStatus() != FileDownloadStatus.Status.COMPLETED
-                && sts.getStatus() != FileDownloadStatus.Status.FAILED) {
+        FileDownloadStatus.Status currentStatus = sts.getStatus();
+
+        while (currentStatus != FileDownloadStatus.Status.COMPLETED
+                && currentStatus != FileDownloadStatus.Status.FAILED) {
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {
@@ -37,6 +41,8 @@ public class VFtpManagerGetTest {
                 e.printStackTrace();
             }
             sts = manager.requestDownloadStatus(requestNo);
+            Assertions.assertNotNull(sts, "requestNo : " + requestNo);
+            currentStatus = sts.getStatus();
         }
     }
 }
