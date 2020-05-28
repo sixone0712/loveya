@@ -312,9 +312,6 @@ class FileList extends Component {
     } = this.state;
 
     console.log("responseList", responseList);
-    console.log("responseListSort", responseList.sort((a, b) => { // 오름차순
-      return a.fileName < b.fileName ? -1 : a.fileName > b.fileName ? 1 : 0;
-    }));
 
     if (count === 0 || this.props.resError || this.props.resPending) {
       return (
