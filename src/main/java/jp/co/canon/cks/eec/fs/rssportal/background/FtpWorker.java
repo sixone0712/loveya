@@ -120,6 +120,7 @@ public class FtpWorker {
 
     public void close() {
         log.trace("FtpWorker.close()");
+        ftp.close();
     }
 
 }

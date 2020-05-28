@@ -6,6 +6,7 @@ import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServicePr
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.VirtualFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -201,8 +202,13 @@ public class FileDownloadExecutor implements DownloadConfig {
         log.info("    .ReplaceFileForSameFileName"+attrReplaceFileForSameFileName);
         log.info("path.base="+baseDir);
         log.info("download");
-        for(DownloadForm form: downloadForms)
-            log.info("    "+form.getTool()+" / "+form.getLogType()+" ("+form.getFiles().size()+" files)");
+        for(DownloadForm form: downloadForms) {
+            log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
+            /*for(FileInfo f:form.getFiles()) {
+                log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
+            }*/
+        }
+
     }
 
     /*public List<String> getFileList() {

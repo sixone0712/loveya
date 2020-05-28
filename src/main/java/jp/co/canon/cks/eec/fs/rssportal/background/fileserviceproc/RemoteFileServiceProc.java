@@ -47,7 +47,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
 
     @Override
     void download() {
-        log.info("download()");
+        log.info("download() (tool="+context.getTool()+" type="+context.getLogType()+")");
         FileServiceManage manager = context.getFileManager();
         FileServiceModel service = context.getFileService();
 
@@ -66,6 +66,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
                 sleep(100);
             }
 
+            log.info("ready to download (tool="+context.getTool()+" type="+context.getLogType()+")");
             while(true) {
                 RequestListBean requestList = service.createDownloadList(context.getSystem(), context.getTool(), context.getRequestNo());
                 RequestInfoBean reqInfo = requestList.get(context.getRequestNo());
