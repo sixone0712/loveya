@@ -76,8 +76,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         plan.setCollectStart(new Timestamp(collectStart.getTime()));
         plan.setStart(new Timestamp(start.getTime()));
         plan.setEnd(new Timestamp(end.getTime()));
-        plan.setNextAction(new Timestamp(start.getTime()));
-        plan.setLastPoint(new Timestamp(start.getTime()-(3600*1000)));
+        plan.setNextAction(new Timestamp(collectStart.getTime()));
+        plan.setLastPoint(new Timestamp(start.getTime()));
         plan.setLastStatus(PlanStatus.registered.name());
 
         if(description!=null) {
@@ -90,7 +90,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             plan.setOwner(context.getUser().getId());
         }
         int planId = dao.addPlan(plan);
-        schedulePlan(plan);
+        //schedulePlan(plan);
+        notifyChanges();
         return planId;
     }
 

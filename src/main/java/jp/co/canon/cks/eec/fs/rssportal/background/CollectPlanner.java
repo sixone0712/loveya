@@ -6,7 +6,6 @@ import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
-import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
 import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
@@ -155,6 +154,7 @@ public class CollectPlanner extends Thread {
             } else {
                 // copy downloaded files to the plan's directory.
                 int copied = copyFiles(plan, executor.getBaseDir());
+                log.info("updated files="+copied);
                 if(copied==0) {
                     log.info("collection complete.. but no updated files");
                 } else {
@@ -182,8 +182,7 @@ public class CollectPlanner extends Thread {
                 }
             }
         } else {
-            log.error("no files to collect");
-            lastStatus = PlanStatus.suspended;
+            log.info("no files to collect");
         }
         // update status and reschedule the plan.
         service.setLastStatus(plan, lastStatus);
@@ -197,10 +196,9 @@ public class CollectPlanner extends Thread {
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
         String[] typeStrs = plan.getLogTypeStr().split(",");
-        log.info("createDownloadList: tools="+tools.length+" types="+types.length);
-
         long lastTime = plan.getLastPoint().getTime();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        log.info("createDownloadList: tools="+tools.length+" types="+types.length+" lastPoint="+dateFormat.format(lastTime));
 
         Calendar from = Calendar.getInstance();
         from.setTimeInMillis(lastTime-1000);
@@ -276,13 +274,13 @@ public class CollectPlanner extends Thread {
             if(!outParent.exists()) {
                 outParent.mkdirs();
             }
-            if(outPath.exists()) {
-                log.info(outPath.getName()+" is already exist");
-                return copied;
+            if(!outPath.exists()) {
+                FileCopyUtils.copy(in, outPath);
+                return copied+1;
             }
-            FileCopyUtils.copy(in, outPath);
+            log.info(outPath.getName()+" is already exist");
         }
-        return copied+1;
+        return copied;
     }
 
     private String compress(CollectPlanVo plan) {
