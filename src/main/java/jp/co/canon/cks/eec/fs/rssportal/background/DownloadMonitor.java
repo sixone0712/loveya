@@ -39,7 +39,6 @@ public class DownloadMonitor extends Thread {
     private List<Target> targets = new ArrayList<>();
 
     private DownloadMonitor() {
-
         this.start();
     }
 

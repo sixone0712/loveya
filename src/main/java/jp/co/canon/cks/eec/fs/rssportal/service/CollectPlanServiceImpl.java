@@ -194,17 +194,17 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     @Override
     public void scheduleAllPlans() {
         log.info("scheduling all plans");
-
         List<CollectPlanVo> plans = getAllPlans();
         plans.forEach(plan->{
             if(!plan.isStop()) {
                 if (!plan.getDetail().equals(PlanStatus.completed.name())) {
-                    long intv = plan.getCollectionType() == COLLECTTYPE_CYCLE ?
-                            plan.getInterval() :
-                            CONTINUOUS_DEFAULT_INTERVAL;
+                    // set interval. if 'collectType' is 'continuous', it set interval to minimum value 60 sec.
+                    long interval = CONTINUOUS_DEFAULT_INTERVAL;
+                    if(plan.getCollectionType()==COLLECTTYPE_CYCLE)
+                        interval = plan.getInterval();
 
                     long cur = System.currentTimeMillis();
-                    Date next = new Date(cur + intv);
+                    Date next = new Date(cur + interval);
                     if (next.after(plan.getEnd())) {
                         log.info("plan " + plan.getPlanName() + " has been completed");
                         plan.setLastStatus(PlanStatus.completed.name());
@@ -238,9 +238,12 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             // plans which have to do collecting operation
             // are rescheduled as doing work after a specified interval after now.
             // if 'collectType' is 'continuous', it set interval to default minimum value.
-            Date last = plan.getLastCollect();
-            long interval = plan.getCollectionType()==COLLECTTYPE_CYCLE ?plan.getInterval():CONTINUOUS_DEFAULT_INTERVAL;
+            long interval = CONTINUOUS_DEFAULT_INTERVAL;
+            if(plan.getCollectionType()==COLLECTTYPE_CYCLE)
+                interval = plan.getInterval();
+
             long nextTime;
+            Date last = plan.getLastCollect();
             if (last == null)
                 nextTime = plan.getStart().getTime() + interval;
             else
