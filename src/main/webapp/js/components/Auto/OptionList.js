@@ -348,7 +348,7 @@ class RSSautoformlist extends Component {
                         className="auto-plan alert-type"
                         onClick={this.closeModal}
                     >
-                      OK
+                      Close
                     </button>
                   </div>
                 </div>

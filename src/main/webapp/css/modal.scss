@@ -55,7 +55,7 @@
     margin: 0;
   }
   p.title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     color: #333;
     margin-bottom: 4px
@@ -129,15 +129,15 @@
     font-size: 14px;
     margin: 0 10px;
   }
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle:focus,
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle:active {
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb:focus,
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb:active {
     background-color: rgb(92, 124, 250);
     border-color: rgb(92, 124, 250);
   }
   .auto-plan-optionlist-form-group .datetime-picker .time .sliders {
     flex: 0 1 100%;
   }
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .handle {
+  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb {
     top: 3px;
   }
 
