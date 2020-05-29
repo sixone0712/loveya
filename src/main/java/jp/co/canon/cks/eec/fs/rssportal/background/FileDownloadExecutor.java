@@ -4,7 +4,6 @@ import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
-import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.VirtualFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.apache.commons.logging.Log;
@@ -135,9 +134,6 @@ public class FileDownloadExecutor implements DownloadConfig {
                         case "manual":
                         case "auto":
                             proc = new RemoteFileServiceProc(context);
-                            break;
-                        case "virtual":
-                            proc = new VirtualFileServiceProc(context);
                             break;
                         default:
                             throw new IllegalArgumentException("invalid jobType");

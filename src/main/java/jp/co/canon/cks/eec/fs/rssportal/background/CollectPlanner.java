@@ -1,14 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
-import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceManagerImpl;
-import jp.co.canon.cks.eec.fs.rssportal.dummy.VirtualFileServiceModelImpl;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
@@ -37,12 +31,9 @@ import java.util.List;
 @Component
 public class CollectPlanner extends Thread {
 
-    private static final boolean useVirtualFileService = false;
     private static final String planRootDir = "planroot";
     private final CollectPlanService service;
     private final DownloadListService downloadListService;
-    private final FileServiceManage fileServiceManage;
-    private final FileServiceModel fileService;
     private final DownloadMonitor monitor;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
@@ -61,32 +52,7 @@ public class CollectPlanner extends Thread {
         this.service = service;
         this.downloadListService = downloadListService;
         service.addNotifier(notifyUpdate);
-        //service.scheduleAllPlans();
-
-        if(useVirtualFileService) {
-            fileService = new VirtualFileServiceModelImpl();
-            fileServiceManage = new VirtualFileServiceManagerImpl();
-            createVirtualFiles();
-        } else {
-            fileService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
-            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-            fileServiceManage = serviceLocator.getFileServiceManage();
-        }
         this.start();
-    }
-
-    private void createVirtualFiles() {
-        if(fileServiceManage instanceof VirtualFileServiceManagerImpl) {
-            long cur = System.currentTimeMillis();
-            Date from = new Date(cur);
-            Date to = new Date(cur + (24 * 3600 * 1000));
-            String[] tools = {"EQVM88", "EQVM87"};
-            String[] types = {"001", "002", "003", "004", "005"};
-
-            ((VirtualFileServiceManagerImpl) fileServiceManage).createVfs(from, to, 60000, tools, types);
-        } else {
-            throw new BeanInitializationException("couldn't resolve fileService type");
-        }
     }
 
     @Override
@@ -189,7 +155,7 @@ public class CollectPlanner extends Thread {
         log.info("createDownloadList: tools="+tools.length+" types="+types.length+" lastPoint="+dateFormat.format(lastTime));
 
         Calendar from = Calendar.getInstance();
-        from.setTimeInMillis(lastTime-1000);
+        from.setTimeInMillis(lastTime+1000);
         Calendar to = Calendar.getInstance();
         if(plan.getEnd().before(new Timestamp(System.currentTimeMillis()))) {
             to.setTimeInMillis(plan.getEnd().getTime());
@@ -200,21 +166,11 @@ public class CollectPlanner extends Thread {
         for(String tool: tools) {
             tool = tool.trim();
             for(int i=0; i<types.length; ++i) {
-                String type = types[i].trim();
-                String typeStr = typeStrs[i].trim();
-                DownloadForm form = new DownloadForm("undefined", tool, type, typeStr);
-
-                FileInfoModel[] fileInfos = fileServiceManage.createFileList(tool, type, from, to, "", "");
-                for(FileInfoModel file: fileInfos) {
-                    long fileTime = file.getTimestamp().getTimeInMillis();
-                    if(lastTime<fileTime) {
-                        lastTime = fileTime;
-                    }
-
-                    dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
-                    String time = dateFormat.format(file.getTimestamp().getTime());
-
-                    form.addFile(file.getName(), file.getSize(), time);
+                DownloadForm form = downloader.createDownloadFileList("undefined", tool, types[i].trim(),
+                        typeStrs[i].trim(), from, to);
+                for(FileInfo file: form.getFiles()) {
+                    if(lastTime<file.getMilliTime())
+                        lastTime = file.getMilliTime();
                 }
                 downloadList.add(form);
             }
@@ -227,7 +183,6 @@ public class CollectPlanner extends Thread {
                 dateFormat.format(lastTime)));
 
         expectedLastPoint = lastTime;
-        //plan.setLastPoint(new Timestamp(lastTime));
         return downloadList;
     }
 

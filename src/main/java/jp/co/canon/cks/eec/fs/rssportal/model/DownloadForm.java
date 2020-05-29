@@ -28,6 +28,10 @@ public class DownloadForm {
         files.add(new FileInfo(file, size, date));
     }
 
+    public void addFile(final String file, final long size, final String date, final long millis) {
+        files.add(new FileInfo(file, size, date, millis));
+    }
+
     /* Getters */
     public String getSystem() {return system;}
     public String getFab() {return fab;}
