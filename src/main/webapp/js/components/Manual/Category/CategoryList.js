@@ -253,6 +253,7 @@ class CategoryList extends Component {
                   <div className="catlist-genre-area">
                     <div className="genre-select-area">
                       <Select
+                          isClearable={ this.state.selectedGenre !== 0 }
                           isSearchable={ genreList.totalCnt > 0 }
                           isDisabled={ genreList.totalCnt === 0 }
                           onChange={this.handleSelectBoxChange}
