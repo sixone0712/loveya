@@ -205,9 +205,9 @@ public class FileDownloadExecutor implements DownloadConfig {
         log.info("download");
         for(DownloadForm form: downloadForms) {
             log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
-            for(FileInfo f:form.getFiles()) {
+            /*for(FileInfo f:form.getFiles()) {
                 log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
-            }
+            }*/
         }
 
     }
