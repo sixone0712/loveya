@@ -288,8 +288,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     @Override
     public void updateLastCollect(@NonNull CollectPlanVo plan) {
-        log.info("updateLastCollect: planId="+plan.getId()+" lastCollect="+plan.getLastCollect());
         plan.setLastCollect(new Timestamp(System.currentTimeMillis()));
+        log.info("updateLastCollect: planId="+plan.getId()+" lastCollect="+plan.getLastCollect());
         dao.updatePlan(plan);
     }
 

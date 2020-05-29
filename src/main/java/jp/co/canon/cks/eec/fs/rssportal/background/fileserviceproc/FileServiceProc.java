@@ -10,17 +10,17 @@ public abstract class FileServiceProc extends Thread {
 
     protected final FileDownloadContext context;
     protected DownloadMonitor monitor;
-    protected boolean completed;
+    protected int completed;
     protected final Log log;
 
     protected FileServiceProc(@NonNull FileDownloadContext context, @NonNull Class clazz) {
         log = LogFactory.getLog(clazz);
         this.context = context;
-        this.completed = false;
+        this.completed = 1; // 1 means it is on work.
     }
 
     abstract void register();
-    abstract void download();
+    abstract boolean download();
     abstract void transfer();
     abstract void extract();
 
@@ -28,13 +28,17 @@ public abstract class FileServiceProc extends Thread {
     public void run() {
         log.info("running");
         register();
-        download();
+        if(!download()) {
+            log.info(context.getRequestNo()+" download failed");
+            completed = -1; // negative means an error occurs.
+            return;
+        }
         transfer();
         extract();
-        completed = true;
+        completed = 0;
     }
 
-    public boolean isCompleted() {
+    public int getCompleted() {
         return completed;
     }
 

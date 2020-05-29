@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
@@ -12,6 +13,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import javax.xml.rpc.ServiceException;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -95,16 +99,23 @@ public class FileDownloader extends Thread {
     }
 
     public String getDownloadInfo(@NonNull final String dlId) {
-
         if(mHolders.containsKey(dlId)==false) {
             return null;
         }
-
         FileDownloadExecutor holder = mHolders.get(dlId);
         if(holder.isRunning()==true) {
             return null;
         }
         return holder.getDownloadPath();
+    }
+
+    public String getBaseDir(@NonNull final String dlId) {
+        if(mHolders.containsKey(dlId)==false)
+            return null;
+        FileDownloadExecutor executor = mHolders.get(dlId);
+        if(executor.isRunning())
+            return null;
+        return executor.getBaseDir();
     }
 
     public int getTotalFiles(@NonNull final String dlId) {
@@ -125,6 +136,25 @@ public class FileDownloader extends Thread {
         if(!isValidId(dlId))
             return null;
         return mHolders.get(dlId).getFabs();
+    }
+
+    public DownloadForm createDownloadFileList(@NonNull String fab, @NonNull String tool,
+                                               @NonNull String type, @NonNull String typeStr,
+                                               @NonNull Calendar from, @NonNull Calendar to) {
+        DownloadForm form = new DownloadForm(fab, tool, type, typeStr);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            FileInfoModel[] fileInfos = mServiceManager.createFileList(tool, type, from, to, "", "");
+            for(FileInfoModel file: fileInfos) {
+                dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
+                String time = dateFormat.format(file.getTimestamp().getTime());
+                form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return form;
     }
 
     private final Log log = LogFactory.getLog(getClass());
