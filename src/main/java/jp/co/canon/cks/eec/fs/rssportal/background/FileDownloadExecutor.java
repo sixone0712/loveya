@@ -127,7 +127,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             status = Status.download;
             List<FileServiceProc> procs = new ArrayList<>();
             for(FileDownloadContext context: downloadContexts) {
-                if(status==Status.stop)
+                if(status==Status.stop || status==Status.error)
                     break;
                 try {
                     FileServiceProc proc = null;
@@ -146,19 +146,24 @@ public class FileDownloadExecutor implements DownloadConfig {
                     proc.start();
                     procs.add(proc);
 
-                    if(attrDownloadFilesViaMultiSessions==false)
-                        while(proc.isCompleted()==false)
+                    if(attrDownloadFilesViaMultiSessions==false) {
+                        while (proc.getCompleted()>0)
                             Thread.sleep(100);
+                        // check error
+                        if(proc.getCompleted()<0) {
+                            status = Status.error;
+                        }
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
             for(FileServiceProc proc:procs)
-                while(proc.isCompleted()==false)
+                while(proc.getCompleted()>0)
                     Thread.sleep(100);
 
-            if(status==Status.stop)
+            if(status==Status.stop || status==Status.error)
                 return;
 
             if(attrCompression)
@@ -204,9 +209,9 @@ public class FileDownloadExecutor implements DownloadConfig {
         log.info("download");
         for(DownloadForm form: downloadForms) {
             log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
-            /*for(FileInfo f:form.getFiles()) {
+            for(FileInfo f:form.getFiles()) {
                 log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
-            }*/
+            }
         }
 
     }

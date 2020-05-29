@@ -46,7 +46,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
     }
 
     @Override
-    void download() {
+    boolean download() {
         log.info("download() (tool="+context.getTool()+" type="+context.getLogType()+")");
         FileServiceManage manager = context.getFileManager();
         FileServiceModel service = context.getFileService();
@@ -54,16 +54,33 @@ public class RemoteFileServiceProc extends FileServiceProc {
         monitor.add(context.getSystem(), context.getTool(), context.getRequestNo(), service);
 
         try {
+            int retry = 0;
+            int lastDownloadFiles = 0;
             while(true) {
+                int downloadFiles = 0;
                 RequestInfoBean requestInfoBean = monitor.get(context.getSystem(), context.getTool(), context.getRequestNo());
                 if (requestInfoBean != null) {
-                    context.setDownloadFiles(requestInfoBean.getNumerator());
-                    if(requestInfoBean.getNumerator() == requestInfoBean.getDenominator()) {
+                    downloadFiles = requestInfoBean.getNumerator();
+                    context.setDownloadFiles(downloadFiles);
+                    log.info("downloading... "+downloadFiles+"/"+requestInfoBean.getDenominator());
+                    if(downloadFiles==requestInfoBean.getDenominator()) {
+                        log.info("download complete");
                         monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
                         break;
                     }
                 }
-                sleep(100);
+                if(downloadFiles==lastDownloadFiles) {
+                    retry++;
+                } else {
+                    retry = 0;
+                    lastDownloadFiles = downloadFiles;
+                }
+                log.info("retry="+retry);
+                if(retry>=10) {
+                    monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
+                    return false;
+                }
+                sleep(500);
             }
 
             log.info("ready to download (tool="+context.getTool()+" type="+context.getLogType()+")");
@@ -88,6 +105,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     @Override

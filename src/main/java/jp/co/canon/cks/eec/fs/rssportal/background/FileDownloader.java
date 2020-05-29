@@ -95,16 +95,23 @@ public class FileDownloader extends Thread {
     }
 
     public String getDownloadInfo(@NonNull final String dlId) {
-
         if(mHolders.containsKey(dlId)==false) {
             return null;
         }
-
         FileDownloadExecutor holder = mHolders.get(dlId);
         if(holder.isRunning()==true) {
             return null;
         }
         return holder.getDownloadPath();
+    }
+
+    public String getBaseDir(@NonNull final String dlId) {
+        if(mHolders.containsKey(dlId)==false)
+            return null;
+        FileDownloadExecutor executor = mHolders.get(dlId);
+        if(executor.isRunning())
+            return null;
+        return executor.getBaseDir();
     }
 
     public int getTotalFiles(@NonNull final String dlId) {

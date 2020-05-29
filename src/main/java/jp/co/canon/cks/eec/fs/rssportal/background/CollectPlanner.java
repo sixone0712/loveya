@@ -23,6 +23,7 @@ import org.springframework.util.FileCopyUtils;
 import javax.xml.rpc.ServiceException;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
@@ -46,9 +47,13 @@ public class CollectPlanner extends Thread {
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
     private boolean halted = false;
+    private long expectedLastPoint;
+
+    private final FileDownloader downloader;
 
     @Autowired
-    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService) throws ServiceException {
+    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService, FileDownloader downloader) throws ServiceException, MalformedURLException {
+        this.downloader = downloader;
         if(service==null || monitor==null || downloadListService==null)
             throw new BeanInitializationException("service injection failed");
 
@@ -86,7 +91,7 @@ public class CollectPlanner extends Thread {
 
     @Override
     public void run() {
-        log.info("AutoCollector start");
+        log.info("CollectPlanner start");
 
         try {
             while(true) {
@@ -97,9 +102,7 @@ public class CollectPlanner extends Thread {
                         sleep(5000);
                         continue;
                     }
-
-                    Date cur = new Date(System.currentTimeMillis());
-                    if (plan.getNextAction().before(cur))
+                    if (plan.getNextAction().before(new Date(System.currentTimeMillis())))
                         collect(plan);
                 }
                 sleep(1000);
@@ -117,7 +120,6 @@ public class CollectPlanner extends Thread {
     }
 
     private boolean collect(CollectPlanVo plan) throws InterruptedException, IOException {
-
         log.info("collect: "+plan.toString());
 
         // change the status of this plan to 'collecting'
@@ -129,31 +131,16 @@ public class CollectPlanner extends Thread {
         PlanStatus lastStatus = PlanStatus.collected;
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
         if(totalFiles!=0) {
-            // jobType 'virtual' is for developing.
-            String jobType = useVirtualFileService?"virtual":"auto";
+            String downloadId = downloader.addRequest(downloadList);
+            while(downloader.getStatus(downloadId).equalsIgnoreCase("in-progress"))
+                sleep(500);
 
-            // request downloading files
-            FileDownloadExecutor executor = new FileDownloadExecutor(
-                    jobType,
-                    plan.getPlanName(),
-                    fileServiceManage,
-                    fileService,
-                    downloadList,
-                    false);
-            executor.setMonitor(monitor);
-            executor.start();
-
-            // wait downloading done
-            while(executor.isRunning())
-                sleep(100);
-
-            // check that error occurs
-            if(!executor.getStatus().equalsIgnoreCase("complete")) {
+            if(!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
                 log.error("file download failed [planId="+plan.getId()+"]");
                 lastStatus = PlanStatus.suspended;
             } else {
                 // copy downloaded files to the plan's directory.
-                int copied = copyFiles(plan, executor.getBaseDir());
+                int copied = copyFiles(plan, downloader.getBaseDir(downloadId));
                 log.info("updated files="+copied);
                 if(copied==0) {
                     log.info("collection complete.. but no updated files");
@@ -165,6 +152,7 @@ public class CollectPlanner extends Thread {
                         lastStatus = PlanStatus.suspended;
                     } else {
                         downloadListService.insert(plan, outputPath);
+                        plan.setLastPoint(new Timestamp(expectedLastPoint));
                         log.info("plan " + plan.getPlanName()+" "+copied+" files collecting success");
                     }
                 }
@@ -203,7 +191,11 @@ public class CollectPlanner extends Thread {
         Calendar from = Calendar.getInstance();
         from.setTimeInMillis(lastTime-1000);
         Calendar to = Calendar.getInstance();
-        to.setTimeInMillis(System.currentTimeMillis());
+        if(plan.getEnd().before(new Timestamp(System.currentTimeMillis()))) {
+            to.setTimeInMillis(plan.getEnd().getTime());
+        } else {
+            to.setTimeInMillis(System.currentTimeMillis());
+        }
 
         for(String tool: tools) {
             tool = tool.trim();
@@ -211,7 +203,6 @@ public class CollectPlanner extends Thread {
                 String type = types[i].trim();
                 String typeStr = typeStrs[i].trim();
                 DownloadForm form = new DownloadForm("undefined", tool, type, typeStr);
-                //downloadList.add(form);
 
                 FileInfoModel[] fileInfos = fileServiceManage.createFileList(tool, type, from, to, "", "");
                 for(FileInfoModel file: fileInfos) {
@@ -229,8 +220,14 @@ public class CollectPlanner extends Thread {
             }
         }
         int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
-        log.info("totalFiles="+totalFiles+" lastpoint="+new Timestamp(lastTime).toString());
-        plan.setLastPoint(new Timestamp(lastTime));
+        log.info(String.format("totalFiles=%d (%s~%s) lastPoint=%s",
+                totalFiles,
+                new Timestamp(from.getTimeInMillis()).toString(),
+                new Timestamp(to.getTimeInMillis()).toString(),
+                dateFormat.format(lastTime)));
+
+        expectedLastPoint = lastTime;
+        //plan.setLastPoint(new Timestamp(lastTime));
         return downloadList;
     }
 
@@ -290,27 +287,6 @@ public class CollectPlanner extends Thread {
             log.error("sequence error. no files to compress");
             return null;
         }
-        /* Planner doesn't delete result files here.
-           Let's implement another process to clean old files up.
-
-        File[] files = dir.listFiles();
-        File oldTmp = null, oldZip = null;
-        for(File file: files) {
-            if(file.isFile()) {
-                String fileName = file.getName();
-                if(fileName.endsWith(".tmp"))
-                    oldTmp = file;
-                else if(fileName.endsWith(".zip"))
-                    oldZip = file;
-            }
-        }
-        if(oldTmp!=null)
-            oldTmp.delete();
-        if(oldZip!=null) {
-            File rename = new File(oldZip.getAbsolutePath()+".tmp");
-            oldZip.renameTo(rename);
-        }
-        */
         Compressor compressor = new Compressor();
         compressor.addExcludeExtension("zip");
         String zipName = plan.getId()+"_"+System.currentTimeMillis()+".zip";
