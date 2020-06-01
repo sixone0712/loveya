@@ -49,7 +49,7 @@ public class Request implements PropertyChangeListener {
         }
     }
 
-    public void execute(boolean waitToComplete) {
+    public void execute() {
         for (Entry<String, SubRequestList> x : readyQueueMap.entrySet()) {
             SubRequestList list = x.getValue();
             String serverName = x.getKey();
@@ -60,20 +60,6 @@ public class Request implements PropertyChangeListener {
             workerList.add(ftpWorker);
             ftpWorker.start();
         }
-        if (waitToComplete) {
-            for (FtpWorker worker : workerList) {
-                try {
-                    worker.join();
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public void execute() {
-        this.execute(false);
     }
 
     @Override

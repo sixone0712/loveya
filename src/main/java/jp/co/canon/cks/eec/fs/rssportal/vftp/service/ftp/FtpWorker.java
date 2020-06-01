@@ -69,14 +69,7 @@ public class FtpWorker extends Thread {
         try {
             ftp.login(serverInfo.getUsername(), serverInfo.getPassword());
             setWorkerState(FtpWorkerState.LOGIN_COMPLETED);
-        } catch (SocketTimeoutException e) {
-            e.printStackTrace();
-            this.setWorkerState(FtpWorkerState.LOGIN_FAILED);
-            propertyChangeSupport.firePropertyChange("error", null, "login failed(timeout)");
-            ftp.close();
-            ftp = null;
-            return;
-        } catch (FTPException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             this.setWorkerState(FtpWorkerState.LOGIN_FAILED);
             propertyChangeSupport.firePropertyChange("error", null, "login failed(...)");            
@@ -96,11 +89,7 @@ public class FtpWorker extends Thread {
     private void processRequests() throws Exception {
         SubRequest req = list.readyToProgress();
         while(req != null && this.stop == false){
-            try {
-                req.processRequest(this, ftp);
-            } catch (Exception e){
-                throw e;
-            }
+            req.processRequest(this, ftp);
             list.progressToCompleted(req);
 
             req = list.readyToProgress();
