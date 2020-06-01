@@ -101,11 +101,9 @@ jacocoTestReport {
             fileTree(
                 dir: it,
                 exclude: [
-/*                    "jp/co/canon/cks/eec/fs/manage/**",
+                    "jp/co/canon/cks/eec/fs/manage/**",
                     "jp/co/canon/cks/eec/fs/portal/**",
                     "jp/co/canon/cks/eec/util/ftp/**",
-                    "jp/co/canon/cks/eec/fs/rssportal/dummy/**",
-                    "jp/co/canon/cks/eec/fs/rssportal/test/**" */
                 ])
         })
     }
