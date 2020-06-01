@@ -37,6 +37,11 @@ public class DlHistoryController {
         this.serviceDlHistory = serviceDlHistory;
     }
 
+/*
+    public void setHttpSession(HttpSession httpSession) {
+        this.httpSession = httpSession;
+    }
+*/
     @GetMapping("/getHistoryList")
     @ResponseBody
     public Map<String, Object> getHistoryList() throws Exception {
@@ -61,18 +66,12 @@ public class DlHistoryController {
         log.info("/dlHistory/addDlHistory");
         DownloadHistoryVo dlVo = new DownloadHistoryVo();
 
-        if(param==null || param.size()==0 ) {
-            log.warn("no target to download history");
-            return false;
-        }
-
+        if(param==null || param.size()==0 ) return false;
         if(httpSession.getAttribute("context") != null) {
             SessionContext context = (SessionContext)httpSession.getAttribute("context");
-
             String type = param.containsKey("type")?param.get("type").toString():null;
             String filename = param.containsKey("filename")?(String)param.get("filename"):null;
-            String status = param.containsKey("filename")?(String)param.get("status"):null;
-
+            String status = param.containsKey("status")?(String)param.get("status"):null;
             dlVo.setDl_user(context.getUser().getUsername());
             dlVo.setDl_type(type);
             dlVo.setDl_filename(filename);
@@ -83,7 +82,7 @@ public class DlHistoryController {
             log.info("getDl_status : " + dlVo.getDl_status());
         } else {
             // List<DownloadHistoryVo> list = serviceDwHistory.getHistoryList();
-            log.info("username is empty ");
+            log.info("context is empty ");
             return false;
         }
         return serviceDlHistory.addDlHistory(dlVo);

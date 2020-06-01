@@ -45,10 +45,16 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public CommandVo findCommand(String name, String type) {
         Map<String, Object> param = new HashMap<>();
-        param.put("cmd_name",name);
         param.put("cmd_type",type);
-
-        return dao.find(param);
+        List<CommandVo> list = dao.findCommandList(param);
+        if(list!=null) {
+            for (CommandVo commandVo : list) {
+                if (commandVo.getCmd_name().equals(name)) {
+                    return commandVo;
+                }
+            }
+        }
+        return null;
     }
 
     @Override

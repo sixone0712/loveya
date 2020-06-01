@@ -50,8 +50,11 @@ public class CmdController {
         else
         {
             List<CommandVo> list = serviceCmd.getCommandList(type);
-            if(list == null)
+            log.info("List size is  "+list.size());
+
+            if(list == null || list.size() == 0 )
             {
+                returnData.put(CMD_RESULT,  1);
                 log.info("List data is null");
             }
             else {
@@ -77,7 +80,6 @@ public class CmdController {
         }
         else
         {
-
             CommandVo returnObj = serviceCmd.findCommand(name,type);
             if(returnObj != null )
             {
@@ -86,11 +88,19 @@ public class CmdController {
             }
             else
             {
+                Boolean result = false;
                 CommandVo cmdObj = new CommandVo();
                 cmdObj.setCmd_type(type);
                 cmdObj.setCmd_name(name);
-                serviceCmd.addCmd(cmdObj);
-                log.info("add new Command");
+                result= serviceCmd.addCmd(cmdObj);
+                if(result) {
+                    log.info("add new Command success");
+                }
+                else
+                {
+                    res = 1;
+                    log.info("add new Command fail");
+                }
             }
         }
         return res;
@@ -115,11 +125,17 @@ public class CmdController {
             CommandVo returnObj = serviceCmd.getCommand(Integer.parseInt(id));
             if(returnObj != null )
             {
-                log.info("delete Command");
-                log.info("delete Command id = " + returnObj.getId());
-                log.info("delete Command id = " + returnObj.getCmd_type());
-                log.info("delete Command id = " + returnObj.getCmd_name());
-                serviceCmd.deleteCmd(Integer.parseInt(id));
+                Boolean result = false;
+
+                result = serviceCmd.deleteCmd(Integer.parseInt(id));
+                if(result) {
+                    log.info("delete Command success");
+                }
+                else
+                {
+                    res = 1;
+                    log.info("delete Command fail");
+                }
             }
             else
             {

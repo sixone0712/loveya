@@ -18,6 +18,12 @@
                 and cmd_name = #{cmd_name}
             </if>
     </select>
+    <select id="selectById" resultType="CommandVo">
+        select * from rsss."cmd"
+        where
+            validity is true
+            and id = #{id}
+    </select>
 
     <insert id="insert" parameterType="CommandVo">
         insert into rsss."cmd" (
@@ -56,14 +62,7 @@
             and cmd_name = #{cmd_name}
         </if>
     </select>
-    <select id="selectById" resultType="CommandVo">
-        select * from rsss."cmd"
-        where
-        validity is true
-        <if test="id!=null and id!=''">
-            and id = #{id}
-        </if>
-    </select>
+
 
     <select id="getList" resultType="CommandVo">
         select * from rsss."cmd"

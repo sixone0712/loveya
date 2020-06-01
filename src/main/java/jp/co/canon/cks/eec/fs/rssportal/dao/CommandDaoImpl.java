@@ -26,7 +26,7 @@ public class CommandDaoImpl implements CommandDao {
     @Override
     public List<CommandVo> findAll() {
         List<CommandVo> list;
-        SqlSession session = sessionFactory.openSession();
+        SqlSession session = sessionFactory.openSession(true);
         list = session.selectList("cmd.selectAll");
         session.close();
         return list;
@@ -49,7 +49,7 @@ public class CommandDaoImpl implements CommandDao {
             return null;
         }
         SqlSession session = sessionFactory.openSession();
-        CommandVo result = session.selectOne("cmd.selectById", param);
+        CommandVo result = session.selectOne("cmd.selectById",param);
         session.close();
         return result;
     }
