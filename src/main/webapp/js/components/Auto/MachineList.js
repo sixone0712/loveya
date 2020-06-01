@@ -76,7 +76,7 @@ class RSSautomachinelist extends Component {
   }
 }
 
-class MachineCollapse extends Component {
+export class MachineCollapse extends Component {
   constructor(props) {
     super(props);
     this.state = {

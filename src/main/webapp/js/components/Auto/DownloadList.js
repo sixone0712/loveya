@@ -32,12 +32,12 @@ const modalMessage = {
     MODAL_FILE_NOT_FOUND: "File not found."
 };
 
-const statusType = {
+export const statusType = {
     STATUS_NEW: "new",
     STATUS_FINISHED: "finished"
 };
 
-const modalType = {
+export const modalType = {
     MODAL_DELETE: 1,
     MODAL_DOWNLOAD_1: 2,
     MODAL_DOWNLOAD_2: 3,
@@ -189,7 +189,7 @@ class RSSAutoDownloadList extends Component {
             console.error("[DownladList][saveDownloadFile]id is null");
             this.closeModal();
         }
-        this.loadDownloadList(this.state.requestId, this.state.requestId.name);
+        this.loadDownloadList(this.state.requestId, this.state.requestName);
     }
 
     requestDelete = async () => {
@@ -210,7 +210,7 @@ class RSSAutoDownloadList extends Component {
                 return res;
             });
 
-        console.error("[DownLoadList][deleteDownloadFile]res", res);
+        console.log("[DownLoadList][deleteDownloadFile]res", res);
         return res;
     }
 
@@ -233,7 +233,7 @@ class RSSAutoDownloadList extends Component {
             console.error("[DownladList][deleteDownloadFile]id is null");
             this.closeModal();
         }
-        this.loadDownloadList(this.state.requestId, this.state.requestId.name);
+        this.loadDownloadList(this.state.requestId, this.state.requestName);
     }
 
 
@@ -447,7 +447,7 @@ class RSSAutoDownloadList extends Component {
     }
 }
 
-function CreateStatus(status) {
+export function CreateStatus(status) {
     switch (status) {
         case statusType.STATUS_NEW:
             return (

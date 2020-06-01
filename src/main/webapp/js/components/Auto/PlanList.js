@@ -37,12 +37,12 @@ const messageType = {
     DELETE_ALERT_MESSAGE: "Because of the current collecting it can not be deleted."
 };
 
-const statusType = {
+export const statusType = {
     RUNNING: "running",
     STOPPED: "stop"
 };
 
-const detailType = {
+export const detailType = {
     REGISTERED: "registered",
     COLLECTING: "collecting",
     COLLECTED: "collected",
@@ -424,7 +424,7 @@ class RSSautoplanlist extends Component {
     }
 }
 
-function CreateStatus(status, modalOpen) {
+export function CreateStatus(status, modalOpen) {
     let component = null;
 
     switch (status) {
@@ -448,7 +448,7 @@ function CreateStatus(status, modalOpen) {
     return component;
 }
 
-function CreateDetail(detail) {
+export function CreateDetail(detail) {
     let component = null;
     switch (detail) {
         case detailType.REGISTERED:

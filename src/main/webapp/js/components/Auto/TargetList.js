@@ -225,7 +225,7 @@ class RSSautoTargetlist extends Component {
   }
 }
 
-const CreateCheckBox = props => {
+export const CreateCheckBox = props => {
   const { title, list, handleCheckboxClick } = props;
 
   return (

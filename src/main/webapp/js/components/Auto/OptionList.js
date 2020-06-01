@@ -365,7 +365,7 @@ class RSSautoformlist extends Component {
   }
 }
 
-class CreateDatetimePicker extends Component {
+export class CreateDatetimePicker extends Component {
 
   handleChange = moment => {
     const { idx, changer } = this.props;

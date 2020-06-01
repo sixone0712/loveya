@@ -294,7 +294,8 @@ describe('PlanWiard', () => {
         invalidCheck(wizardStep.OPTION, 0, 0, optionList);
 
         optionList = initOptionsList.set("planId", "test")
-                                    .set("to", moment().subtract(10, 'days').calendar());
+                                    .set("from", moment().endOf('day'))
+                                    .set("to", moment().startOf('day'));
         invalidCheck(wizardStep.OPTION, 0, 0, optionList);
 
         optionList = initOptionsList.set("planId", "test")
