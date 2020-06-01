@@ -35,20 +35,14 @@ class Manual extends Component {
         await searchListActions.searchSetInitAllList();
         await genreListActions.genreInitAllList();
 
-        const TEST = 0;
-        if(TEST) {
-            await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
-            await viewListActions.viewLoadToolInfoList("/test/createToolList");
-            await viewListActions.viewLoadLogTypeList("/test/createFileTypeList");
-        } else {
-            await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
-            await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
-            const { toolInfoList } = this.props;
-            const targetname = toolInfoList.getIn([0, "targetname"]);
-            console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
-            console.log("[Manual][componentDidMount]targetname", targetname);
-            await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
-        }
+        await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
+        await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
+        const { toolInfoList } = this.props;
+        const targetname = toolInfoList.getIn([0, "targetname"]);
+        console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
+        console.log("[Manual][componentDidMount]targetname", targetname);
+        await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
+
         await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
     }
 

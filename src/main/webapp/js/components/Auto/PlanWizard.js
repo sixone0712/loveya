@@ -25,7 +25,7 @@ import { faExclamationCircle, faCheckCircle } from "@fortawesome/free-solid-svg-
 import AlertModal from "../Common/AlertModal";
 import ConfirmModal from "../Common/ConfirmModal";
 
-const wizardStep = {
+export const wizardStep = {
   MACHINE: 1,
   TARGET: 2,
   OPTION: 3,
@@ -43,7 +43,7 @@ const modalMessage = {
   PLAN_EDIT_MESSAGE: "Are you sure you want to change the collection plan with this setting?"
 };
 
-const modalType = {
+export const modalType = {
   ALERT: 1,
   CONFIRM: 2
 };
@@ -384,7 +384,7 @@ class RSSautoplanwizard extends Component {
   }
 }
 
-function invalidCheck(step, toolCnt, targetCnt, optionList) {
+export function invalidCheck(step, toolCnt, targetCnt, optionList) {
   switch(step) {
     case wizardStep.MACHINE:
       if (toolCnt === 0) {

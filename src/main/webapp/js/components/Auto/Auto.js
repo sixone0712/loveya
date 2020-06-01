@@ -71,7 +71,7 @@ class Auto extends Component {
 
 export default Auto;
 
-const CreateBreadCrumb = props => {
+export const CreateBreadCrumb = props => {
     const { page } = props;
 
     switch (page) {
