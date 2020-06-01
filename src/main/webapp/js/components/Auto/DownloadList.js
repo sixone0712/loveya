@@ -318,50 +318,33 @@ class RSSAutoDownloadList extends Component {
                 "custom-pagination"
             );
 
-            const renderDeleteModal = ConfirmModal(
-                isDeleteOpen,
-                faTrashAlt,
-                modalMessage,
-                "auto-plan",
-                this.closeModal,
-                this.deleteDownloadFile,
-                this.closeModal
-            );
-
-            const renderSelectDownloadModal = ConfirmModal(
-                isSelectDownloadOpen,
-                faDownload,
-                modalMessage,
-                "auto-plan",
-                this.closeModal,
-                this.saveDownloadFile,
-                this.closeModal
-            );
-
-            const renderNewDownloadModal = ConfirmModal(
-                isNewDownloadOpen,
-                faDownload,
-                modalMessage,
-                "auto-plan",
-                this.closeModal,
-                this.saveDownloadFile,
-                this.closeModal
-            );
-
-            const renderAlertModal = AlertModal(
-                isAlertOpen,
-                faExclamationCircle,
-                modalMessage,
-                "auto-plan",
-                this.closeModal
-            );
-
             return (
                 <>
-                    {renderDeleteModal}
-                    {renderSelectDownloadModal}
-                    {renderNewDownloadModal}
-                    {renderAlertModal}
+                    <ConfirmModal isOpen={isDeleteOpen}
+                                  icon={faTrashAlt}
+                                  message={modalMessage}
+                                  style={"auto-plan"}
+                                  actionBg={this.closeModal}
+                                  actionLeft={this.deleteDownloadFile}
+                                  actionRight={this.closeModal}
+                    />
+                    <ConfirmModal isOpen={isSelectDownloadOpen}
+                                  icon={faDownload}
+                                  message={modalMessage}
+                                  style={"auto-plan"}
+                                  actionBg={this.closeModal}
+                                  actionLeft={this.saveDownloadFile}
+                                  actionRight={this.closeModal}
+                    />
+                    <ConfirmModal isOpen={isNewDownloadOpen}
+                                  icon={faDownload}
+                                  message={modalMessage}
+                                  style={"auto-plan"}
+                                  actionBg={this.closeModal}
+                                  actionLeft={this.saveDownloadFile}
+                                  actionRight={this.closeModal}
+                    />
+                    <AlertModal isOpen={isAlertOpen} icon={faExclamationCircle} message={modalMessage} style={"auto-plan"} closer={this.closeModal} />
                     <Card className="auto-plan-box">
                         <CardHeader className="auto-plan-card-header">
                             Download List

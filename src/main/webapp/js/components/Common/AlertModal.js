@@ -2,7 +2,7 @@ import React from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function AlertModal(isOpen, icon, message, style, closer) {
+const AlertModal = ({isOpen, icon, message, style, closer}) => {
     return (
         <>
         {isOpen ? (
@@ -36,3 +36,5 @@ export default function AlertModal(isOpen, icon, message, style, closer) {
         </>
     );
 }
+
+export default AlertModal;

@@ -118,11 +118,10 @@ class RSSNavbar extends Component{
 
   render() {
     const { isPasswordOpen, isAuthOpen, isLogoutOpen, isAlertOpen, alertMessage } = this.state;
-    const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "gray", this.closeAlert);
 
     return (
         <>
-          {renderAlert}
+          <AlertModal isOpen={isAlertOpen} icon={faCheckCircle} message={alertMessage} style={"gray"} closer={this.closeAlert} />
           <ChangePwModal isOpen={isPasswordOpen} right={this.closeModal} alertOpen={this.openAlert}/>
           <LogOutModal isOpen={isLogoutOpen} left={this.onLogout} right={this.closeModal} />
           <div className="navbar-container">

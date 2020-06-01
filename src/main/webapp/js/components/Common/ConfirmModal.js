@@ -2,7 +2,7 @@ import React from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export default function ConfirmModal(isOpen, icon, message, style, actionBg, actionLeft, actionRight) {
+const ConfirmModal = ({isOpen, icon, message, style, actionBg, actionLeft, actionRight}) => {
     return (
         <>
             {isOpen ? (
@@ -42,3 +42,5 @@ export default function ConfirmModal(isOpen, icon, message, style, actionBg, act
         </>
     );
 }
+
+export default ConfirmModal;

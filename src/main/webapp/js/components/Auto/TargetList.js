@@ -233,14 +233,15 @@ export const CreateCheckBox = props => {
         {list.map((item, key) => {
           if (item.title === title) {
             return (
-                <CheckBox
-                    key={key}
-                    index={item.keyIndex}
-                    name={item.logName}
-                    isChecked={item.checked}
-                    handleCheckboxClick={handleCheckboxClick}
-                    labelClass="form-check-label"
-                />
+                <div className="custom-control custom-checkbox" key={key}>
+                  <CheckBox
+                      index={item.keyIndex}
+                      name={item.logName}
+                      isChecked={item.checked}
+                      labelClass={"form-check-label"}
+                      handleCheckboxClick={handleCheckboxClick}
+                  />
+                </div>
             );
           } else {
             return "";

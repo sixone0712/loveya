@@ -103,17 +103,19 @@ export class MachineCollapse extends Component {
             {machineList.map((machine, key) => {
               if (machine.structId === structId) {
                 return (
-                    <CheckBox
-                        key={key}
-                        index={machine.keyIndex}
-                        name={machine.targetname}
-                        isChecked={machine.checked}
-                        handleCheckboxClick={checkItem}
-                        labelClass="form-check-label"
-                    />
+                    <div className="custom-control custom-checkbox" key={key}>
+                      <CheckBox
+                          index={machine.keyIndex}
+                          name={machine.targetname}
+                          isChecked={machine.checked}
+                          labelClass={"form-check-label"}
+                          handleCheckboxClick={checkItem}
+                      />
+                    </div>
                 );
+              } else {
+                return "";
               }
-              return "";
             })}
           </Collapse>
         </>

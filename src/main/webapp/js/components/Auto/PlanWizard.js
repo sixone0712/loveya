@@ -273,30 +273,7 @@ class RSSautoplanwizard extends Component {
     console.log("render");
     console.log("this.state.editID", this.state.editID);
     const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
-    const { logTypeSuccess,
-            toolInfoSuccess,
-            logTypeFailure,
-            toolInfoFailure } = this.props;
-    const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, modalMessage, "auto-plan", this.modalClose);
-    let renderConfirmModal;
-
-    if (isNew) {
-      renderConfirmModal = ConfirmModal(isConfirmOpen,
-                                        faCheckCircle,
-                                        modalMessage,
-                                        "auto-plan",
-                                        this.modalClose,
-                                        () => this.handleRequestAutoPlanAdd(),
-                                        this.modalClose);
-    } else {
-      renderConfirmModal = ConfirmModal(isConfirmOpen,
-                                        faCheckCircle,
-                                        modalMessage,
-                                        "auto-plan",
-                                        this.modalClose,
-                                        () => this.handleRequestAutoPlanEdit(editId),
-                                        this.modalClose);
-    }
+    const { logTypeSuccess, toolInfoSuccess, logTypeFailure, toolInfoFailure } = this.props;
 
     return (
       <>
@@ -377,8 +354,26 @@ class RSSautoplanwizard extends Component {
         { logTypeFailure && toolInfoFailure &&
           <div className="network-connection-error auto-plan">Network Connection Error</div>
         }
-        {renderAlertModal}
-        {renderConfirmModal}
+        <AlertModal isOpen={isAlertOpen} icon={faExclamationCircle} message={modalMessage} style={"auto-plan"} closer={this.modalClose} />
+        {isNew ? (
+            <ConfirmModal isOpen={isConfirmOpen}
+                          icon={faCheckCircle}
+                          message={modalMessage}
+                          style={"auto-plan"}
+                          actionBg={this.modalClose}
+                          actionLeft={() => this.handleRequestAutoPlanAdd()}
+                          actionRight={this.modalClose}
+            />
+        ) : (
+            <ConfirmModal isOpen={isConfirmOpen}
+                          icon={faCheckCircle}
+                          message={modalMessage}
+                          style={"auto-plan"}
+                          actionBg={this.modalClose}
+                          actionLeft={() => this.handleRequestAutoPlanEdit(editId)}
+                          actionRight={this.modalClose}
+            />
+        )}
       </>
     );
   }

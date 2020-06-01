@@ -28,7 +28,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import DatePicker from "./Search/DatePicker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import ModalTwoButton from "../Common/ModalTwoButton";
 import Filelist from "./File/FileList";
 import * as API from "../../api";
 import cmd from "../../modules/Command";
@@ -61,7 +60,7 @@ const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
             {
                 isOpen ? (
                     <ReactTransitionGroup
-                        transitionName={'Modal-anim'}
+                        transitionName={'Custom-modal-anim'}
                         transitionEnterTimeout={200}
                         transitionLeaveTimeout={200} >
                         <div className="Custom-modal-overlay" onClick={close} />
@@ -75,11 +74,14 @@ const CommandAddModal = ({ isOpen, left,right , chgfunc, errorMsg}) => {
                                     <span className="text-red-700 uppercase font-bold text-xxs">{errorMsg}</span>}
                                 </FormGroup>
                             </div>
-                            <ModalTwoButton data={buttonMsg} actionRightFunc={right} actionLeftFunc={left}/>
+                            <div className="button-wrap">
+                                <button className="gray form-type left-btn"  onClick={left}>{buttonMsg.rightMsg}</button>
+                                <button className="gray form-type right-btn"  onClick={right}>{buttonMsg.leftMsg}</button>
+                            </div>
                         </div>
                     </ReactTransitionGroup>
                 ):(
-                    <ReactTransitionGroup transitionName={'Modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
+                    <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
                 )
             }
         </React.Fragment>
@@ -237,10 +239,16 @@ class ManualVftpSss extends Component {
         const {editShow} = this.state;
         const cmdlist  = API.getCmdList(this.props);
         const {startDate, endDate} = this.props;
-        const deleteModal = ConfirmModal((this.state.isModalOpen && this.state.isMode==='DeleteCommand'), faTrashAlt, DELETE_MESSAGE, "auto-plan", this.closeModal,this.DeleteCommand,this.closeModal);
         return (
             <>
-                {deleteModal}
+                <ConfirmModal isOpen={(this.state.isModalOpen && this.state.isMode==='DeleteCommand')}
+                              icon={faTrashAlt}
+                              message={DELETE_MESSAGE}
+                              style={"auto-plan"}
+                              actionBg={this.closeModal}
+                              actionLeft={this.deleteCommand}
+                              actionRight={this.closeModal}
+                />
                 <Container className="rss-container" fluid={true}>
                     <Row>
                         <Col sm={8}>

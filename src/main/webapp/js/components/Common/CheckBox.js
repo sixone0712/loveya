@@ -1,44 +1,31 @@
-import React, { Component } from "react";
+import React from "react";
 
-class CheckBox extends Component {
-    constructor() {
-        super();
+const CheckBox = ({index, name, isChecked, labelClass, handleCheckboxClick}) => {
+    if (name === null || index === null) {
+      return null;
+    } else {
+        const labelName = labelClass === "filelist-label" ? "" : name;
+        const setChecked = isChecked === true;
+
+        return (
+            <>
+              <input
+                  type="checkbox"
+                  className="custom-control-input"
+                  id={name + "_{#div#}_" + index}
+                  value={name}
+                  checked={setChecked}
+                  onChange={handleCheckboxClick}
+              />
+              <label
+                  className={"custom-control-label " + labelClass}
+                  htmlFor={name + "_{#div#}_" + index}
+              >
+                  {labelName}
+              </label>
+          </>
+        );
     }
-
-  render() {
-    const { index, name, isChecked, labelClass, handleCheckboxClick } = this.props;
-
-    let labelName = name;
-    if(labelClass === "filelist-label"){
-        labelName ="";
-    }
-
-    let setChecked = false;
-    if(isChecked) {
-        setChecked = true;
-    }
-
-    return (
-      <div className="custom-control custom-checkbox">
-        <input
-          type="checkbox"
-          className="custom-control-input"
-          id={name+"_{#div#}_"+index}
-          value={name || ""}
-          checked={setChecked}
-          onChange={handleCheckboxClick}
-        />
-
-        <label
-            className={"custom-control-label " + labelClass}
-            htmlFor={name + "_{#div#}_" + index}
-        >
-            {labelName}
-        </label>
-
-      </div>
-    );
-  }
 }
 
 export default CheckBox;

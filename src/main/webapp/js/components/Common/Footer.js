@@ -1,7 +1,7 @@
 import React from "react";
 import { Row, Col } from "reactstrap";
 
-export default function RSSfooter() {
+const RSSfooter = () => {
   return (
     <footer className="footer-container">
       <Row>
@@ -14,3 +14,5 @@ export default function RSSfooter() {
     </footer>
   );
 }
+
+export default RSSfooter;

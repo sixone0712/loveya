@@ -2245,7 +2245,6 @@ a:hover {
     top: 3px;
 }
 
-.auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
 .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
     left: 1px;
 }
@@ -2256,7 +2255,6 @@ a:hover {
         top: 4px !important;
     }
 
-    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
     .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
         left: 0 !important;
     }

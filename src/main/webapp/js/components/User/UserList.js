@@ -212,13 +212,18 @@ class UserList extends Component {
             );
 
             const { isModalOpen, isAlertOpen, alertMessage} = this.state;
-            const renderAlert = AlertModal(isAlertOpen, faCheckCircle, alertMessage, "administrator", this.closeAlert);
-            const deleteModal = ConfirmModal((isModalOpen && this.state.isMode==='deleteUser'), faTrashAlt, DELETE_CONFIRM_MESSAGE, "administrator", this.closeModal,this.DeleteAccount,this.closeModal);
 
             return (
                 <>
-                    {renderAlert}
-                    {deleteModal}
+                    <AlertModal isOpen={isAlertOpen} icon={faCheckCircle} message={alertMessage} style={"administrator"} closer={this.closeAlert} />
+                    <ConfirmModal isOpen={(isModalOpen && this.state.isMode==='deleteUser')}
+                                  icon={faTrashAlt}
+                                  message={DELETE_CONFIRM_MESSAGE}
+                                  style={"administrator"}
+                                  actionBg={this.closeModal}
+                                  actionLeft={this.DeleteAccount}
+                                  actionRight={this.closeModal}
+                    />
                     <ChangeAuthModal isOpen={isModalOpen && this.state.isMode==='ChangAuth'} right={this.closeModal} alertOpen={this.openAlert} userID={selected} />
                     <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
                     <Container className="rss-container" fluid={true}>

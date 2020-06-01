@@ -6,7 +6,8 @@ import * as API from "../../api";
 import * as Define from "../../define";
 import "../../../css/user.css";
 import md5 from 'md5-hash'
-import ErrorModalOneButton from "../Common/ErrorModal";
+import AlertModal from "../Common/AlertModal";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
 
 class Login extends Component {
@@ -185,20 +186,6 @@ class Login extends Component {
                                                     {errors.password.length > 0 &&
                                                     <span className="text-red-700 uppercase font-bold text-xxs">{errors.password}</span>}
                                                 </div>
-                                                <div>
-                                                    <label className="inline-flex items-center cursor-pointer">
-                                                        <input
-                                                            id="customCheckLogin"
-                                                            type="checkbox"
-                                                            className="form-checkbox text-gray-800 ml-1 w-5 h-5"
-                                                            style={{ transition: "all .15s ease" }}
-                                                        />
-                                                        <span className="ml-2 text-sm font-semibold text-gray-700">
-                                                       Remember me
-                                                    </span>
-                                                    </label>
-                                                </div>
-
                                                 <div className="text-center mt-6">
                                                     <button
                                                         className="bg-gray-900 text-white active:bg-gray-700 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
@@ -209,8 +196,13 @@ class Login extends Component {
                                                         Sign In
                                                     </button>
                                                 </div>
-                                                { this.state.isModalOpen &&
-                                                    <ErrorModalOneButton  isOpen={this.state.isModalOpen } errorMsg={this.state.errors.ModalMsg} ActionCloseButton={this.closeModal}/>}
+                                                <AlertModal
+                                                    isOpen={this.state.isModalOpen}
+                                                    icon={faExclamationCircle}
+                                                    message={this.state.errors.ModalMsg}
+                                                    style={"gray"}
+                                                    closer={this.closeModal}
+                                                />
                                             </form>
                                         </div>
                                     </div>
