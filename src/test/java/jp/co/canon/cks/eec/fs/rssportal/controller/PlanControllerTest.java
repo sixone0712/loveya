@@ -4,6 +4,7 @@ import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSLogInfoBean;
 import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
+import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
@@ -19,9 +20,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 
-import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,15 +34,17 @@ class PlanControllerTest {
     private final PlanController planController;
     private final FileServiceController fileServiceController;
     private final DownloadListService downloadListService;
-
+    private final CollectPlanService collectPlanService;
 
     @Autowired
     public PlanControllerTest(PlanController planController,
                               FileServiceController fileServiceController,
-                              DownloadListService downloadListService) {
+                              DownloadListService downloadListService,
+                              CollectPlanService collectPlanService) {
         this.planController = planController;
         this.fileServiceController = fileServiceController;
         this.downloadListService = downloadListService;
+        this.collectPlanService = collectPlanService;
     }
 
     @Test
@@ -146,6 +147,7 @@ class PlanControllerTest {
             }
             Thread.sleep(1000);
         }
+        collectPlanService.scheduleAllPlans();
 
         request.setServletPath("/rss/rest/plan/download");
         assertEquals(planController.download(request, response, downloadId).getStatusCode(), HttpStatus.OK);
