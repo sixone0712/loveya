@@ -14,7 +14,7 @@ import AlertModal from "../../Common/AlertModal";
 import ConfirmModal from "../../Common/ConfirmModal";
 import services from "../../../services";
 
-const modalType = {
+export const modalType = {
     PROCESS: 1,
     CANCEL: 2,
     ALERT: 3,
@@ -283,7 +283,6 @@ export default connect(
       resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
     }),
     (dispatch) => ({
-      // bindActionCreators 는 액션함수들을 자동으로 바인딩해줍니다.
       viewListActions: bindActionCreators(viewListActions, dispatch),
       searchListActions: bindActionCreators(searchListActions, dispatch)
     })

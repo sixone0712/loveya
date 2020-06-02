@@ -286,6 +286,43 @@ describe('PlanList', () => {
         wrapper.instance().handleStatusChange(statusType.STOPPED, 245);
         wrapper.instance().handleStatusChange(-1, 245);
     });
+
+    it('lastCollect is null', () => {
+        services.axiosAPI.get = jest.fn().mockResolvedValue({
+            data: [
+                {
+                    collectStart: "2020-05-31T15:00:00.000+0000",
+                    collectTypeStr: "cycle",
+                    collectionType: 1,
+                    created: "2020-06-01T06:54:24.099+0000",
+                    description: "test1234",
+                    detail: "collected",
+                    end: "2020-06-01T14:59:59.000+0000",
+                    fab: "Fab1",
+                    id: 235,
+                    interval: 86400000,
+                    lastCollect: null,
+                    lastPoint: "2020-06-01T06:44:34.000+0000",
+                    lastStatus: null,
+                    logType: "001",
+                    logTypeStr: "001_RUNNING_STATUS",
+                    nextAction: "2020-06-02T06:54:10.334+0000",
+                    owner: 10005,
+                    planName: "test1",
+                    planStatus: null,
+                    start: "2020-05-31T15:00:00.000+0000",
+                    status: "running",
+                    stop: false,
+                    tool: "MPA_1",
+                }
+            ]});
+        store = mockStore(initialState);
+        const wrapper = shallow(<PlanList
+            dispatch={dispatch}
+            store={store}
+            {...props}
+        />).dive().dive();
+    });
 });
 
 describe('CreateStatus', () => {
