@@ -107,51 +107,6 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    @Deprecated
-    public boolean modifyPlan(int planId,
-                              List<String> fabs,
-                              List<String> tools,
-                              List<String> logTypes,
-                              List<String> logTypeStr,
-                              Date collectStart,
-                              Date start,
-                              Date end,
-                              String collectType,
-                              long interval,
-                              String description) {
-
-        CollectPlanVo plan = getPlan(planId);
-        if(plan==null) {
-            log.error("invalid planId="+planId);
-            return false;
-        }
-        if(tools!=null)
-            plan.setTool(toSingleString(tools));
-        if(logTypes!=null)
-            plan.setLogType(toSingleString(logTypes));
-        if(collectStart!=null)
-            plan.setCollectStart(new Timestamp(collectStart.getTime()));
-        if(start!=null)
-            plan.setStart(new Timestamp(start.getTime()));
-        if(end!=null)
-            plan.setEnd(new Timestamp(end.getTime()));
-        if(collectType!=null) {
-            int iCollectType = toCollectTypeInteger(collectType);
-            if(iCollectType<0) {
-                log.error("invalid collectionType "+collectType);
-                return false;
-            }
-            plan.setCollectionType(iCollectType);
-        }
-        if(interval!=plan.getInterval())
-            plan.setInterval(interval);
-        if(description!=null)
-            plan.setDescription(description);
-
-        return false;
-    }
-
-    @Override
     public boolean deletePlan(int planId) {
         CollectPlanVo plan = dao.find(planId);
         if(plan==null) {

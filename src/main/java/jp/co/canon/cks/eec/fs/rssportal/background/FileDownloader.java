@@ -141,7 +141,7 @@ public class FileDownloader extends Thread {
     public DownloadForm createDownloadFileList(@NonNull String fab, @NonNull String tool,
                                                @NonNull String type, @NonNull String typeStr,
                                                @NonNull Calendar from, @NonNull Calendar to) {
-        DownloadForm form = new DownloadForm(fab, tool, type, typeStr);
+        DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         try {
             FileInfoModel[] fileInfos = mServiceManager.createFileList(tool, type, from, to, "", "");

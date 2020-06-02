@@ -58,11 +58,8 @@ public class FtpWorker {
             ftp.login(user, pass);
             ftp.binary();
             ftp.setDataConnectionMode(activeMode?1:2);
-        } catch (FTPException e) {
+        } catch (FTPException | SocketTimeoutException e) {
             log.error("error! ftp connection failed");
-            e.printStackTrace();
-        } catch (SocketTimeoutException e) {
-            log.error("Error! ftp login timeout");
             e.printStackTrace();
         }
     }

@@ -58,12 +58,13 @@ public class RemoteFileServiceProc extends FileServiceProc {
             int lastDownloadFiles = 0;
             while(true) {
                 int downloadFiles = 0;
-                RequestInfoBean requestInfoBean = monitor.get(context.getSystem(), context.getTool(), context.getRequestNo());
-                if (requestInfoBean != null) {
-                    downloadFiles = requestInfoBean.getNumerator();
+                RequestInfoBean downloadInfo = monitor.getDownloadInfo(context.getSystem(),
+                        context.getTool(), context.getRequestNo());
+                if(downloadInfo!=null) {
+                    downloadFiles = downloadInfo.getFileListCount();
                     context.setDownloadFiles(downloadFiles);
-                    log.info("downloading... "+downloadFiles+"/"+requestInfoBean.getDenominator());
-                    if(downloadFiles==requestInfoBean.getDenominator()) {
+                    log.info("downloading... "+downloadFiles+"/"+context.getFileCount());
+                    if(downloadFiles==context.getFileCount()) {
                         log.info("download complete");
                         monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
                         break;
@@ -76,7 +77,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
                     lastDownloadFiles = downloadFiles;
                 }
                 log.info("retry="+retry);
-                if(retry>=10) {
+                if(retry>=20) {
                     monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
                     return false;
                 }
