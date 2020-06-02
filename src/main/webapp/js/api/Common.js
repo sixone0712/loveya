@@ -10,6 +10,7 @@ export const convertErrMsg = (error) => {
         case Define.GENRE_SET_FAIL_NOT_SELECT_GENRE: msg = "Please choose a genre."; break;
         case Define.GENRE_SET_FAIL_NOT_EXIST_GENRE: msg = "The selected genre does not exist in the DB. Update the DB."; break;
         case Define.GENRE_SET_FAIL_NEED_UPDATE: msg = "DB has been changed. Update the DB."; break;
+        case Define.GENRE_SET_FAIL_INVALID_NAME: msg = "Genre name is invalid. Please re-enter."; break;
         case Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY: msg = "Please choose a machine and category."; break;
         case Define.SEARCH_FAIL_NO_MACHINE: msg = "Please choose a machine."; break;
         case Define.SEARCH_FAIL_NO_CATEGORY: msg = "Please choose a category."; break;

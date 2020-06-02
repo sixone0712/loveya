@@ -21,7 +21,7 @@ import * as genreListActions from "../../../modules/genreList";
 import * as API from '../../../api'
 import {element, object} from "prop-types";
 
-const customSelectStyles = {
+export const customSelectStyles = {
   container: (styles, { isDisabled }) => ({
     ...styles,
     transition: "all .2s ease-in-out",
@@ -253,7 +253,7 @@ class CategoryList extends Component {
                   <div className="catlist-genre-area">
                     <div className="genre-select-area">
                       <Select
-                          isClearable={ this.state.selectedGenre !== 0 }
+                          isClearable={ selectedGenre !== 0 }
                           isSearchable={ genreList.totalCnt > 0 }
                           isDisabled={ genreList.totalCnt === 0 }
                           onChange={this.handleSelectBoxChange}
@@ -335,14 +335,15 @@ class CategoryList extends Component {
                 {filteredData.length > 0 ? (
                     filteredData.map((cat, key) => {
                       return (
-                          <CheckBox
-                              key={key}
-                              index={cat.keyIndex}
-                              name={cat.logName}
-                              isChecked={cat.checked}
-                              handleCheckboxClick={this.checkCategoryItem}
-                              labelClass="catlist-label"
-                          />
+                          <div className="custom-control custom-checkbox" key={key}>
+                            <CheckBox
+                                index={cat.keyIndex}
+                                name={cat.logName}
+                                isChecked={cat.checked}
+                                labelClass={"catlist-label"}
+                                handleCheckboxClick={this.checkCategoryItem}
+                            />
+                          </div>
                       );
                     })
                 ) : (

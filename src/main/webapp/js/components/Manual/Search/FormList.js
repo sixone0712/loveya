@@ -199,14 +199,6 @@ class FormList extends Component{
 
     render() {
         const { isProcessOpen, isCancelOpen, isAlertOpen, alertMsg } = this.state;
-        const renderAlertModal = AlertModal(isAlertOpen, faExclamationCircle, alertMsg, "green", () => this.closeModal(modalType.ALERT));
-        const renderCancelModal = ConfirmModal(isCancelOpen,
-                                               faExclamationCircle,
-                                               "Are you sure want to cancel the search?",
-                                               "green",
-                                               null,
-                                               () => this.openModal(modalType.CANCEL_COMPLETE),
-                                               () => this.closeModal(modalType.CANCEL));
 
         return (
             <Card className="ribbon-wrapper formlist-card">
@@ -260,8 +252,15 @@ class FormList extends Component{
                                 transitionLeaveTimeout={200}
                             />
                         )}
-                        {renderCancelModal}
-                        {renderAlertModal}
+                        <ConfirmModal isOpen={isCancelOpen}
+                                      icon={faExclamationCircle}
+                                      message={"Are you sure want to cancel the search?"}
+                                      style={"green"}
+                                      actionBg={null}
+                                      actionLeft={() => this.openModal(modalType.CANCEL_COMPLETE)}
+                                      actionRight={() => this.closeModal(modalType.CANCEL)}
+                        />
+                        <AlertModal isOpen={isAlertOpen} icon={faExclamationCircle} message={alertMsg} style={"green"} closer={() => this.closeModal(modalType.ALERT)} />
                     </div>
                 </CardBody>
             </Card>

@@ -8,6 +8,7 @@ import * as Define from "../../../define";
 import * as genreListActions from "../../../modules/genreList";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
+import AlertModal from "../../Common/AlertModal";
 
 class ConfirmModal extends Component {
     constructor(props) {
@@ -58,7 +59,8 @@ class ConfirmModal extends Component {
 
     closeAlertModal = async () => {
         console.log("closeAlertModal Start", this.state.alertOpen);
-        const { genreListActions } = this.props;
+        const { genreListActions, handleSelectBoxChange } = this.props;
+        handleSelectBoxChange(0);
         await genreListActions.genreInitServerError();
         await this.setState({
             ...this.state,
@@ -158,38 +160,7 @@ class ConfirmModal extends Component {
                         transitionLeaveTimeout={200}
                     />
                 )}
-                {alertOpen ? (
-                    <ReactTransitionGroup
-                        transitionName={"Custom-modal-anim"}
-                        transitionEnterTimeout={200}
-                        transitionLeaveTimeout={200}
-                    >
-                        <div className="Custom-modal-overlay" onClick={this.closeAlertModal} />
-                        <div className="Custom-modal">
-                            <div className="content-without-title">
-                                <p>
-                                    <FontAwesomeIcon icon={faExclamationCircle} size="6x" />
-                                </p>
-                                {/*<p>Please choose a genre.</p>*/}
-                                <p>{this.state.errMsg}</p>
-                            </div>
-                            <div className="button-wrap">
-                                <button
-                                    className="primary alert-type"
-                                    onClick={this.closeAlertModal}
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </ReactTransitionGroup>
-                ) : (
-                    <ReactTransitionGroup
-                        transitionName={"Custom-modal-anim"}
-                        transitionEnterTimeout={200}
-                        transitionLeaveTimeout={200}
-                    />
-                )}
+                <AlertModal isOpen={alertOpen} icon={faExclamationCircle} message={this.state.errMsg} style={"primary"} closer={this.closeAlertModal} />
             </>
         );
     }

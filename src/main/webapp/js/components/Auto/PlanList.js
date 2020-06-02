@@ -305,38 +305,25 @@ class RSSautoplanlist extends Component {
                 "custom-pagination"
             );
 
-            const renderStatusModal = ConfirmModal(
-                isStatusOpen,
-                faExclamationCircle,
-                statusMessage,
-                "auto-plan",
-                this.closeStatusModal,
-                () => this.handleStatusChange(selectedPlanStatus, selectedPlanId),
-                this.closeStatusModal
-            );
-
-            const renderDeleteModal = ConfirmModal(
-                isDeleteOpen,
-                faTrashAlt,
-                messageType.CONFIRM_DELETE_MESSAGE,
-                "auto-plan",
-                () => this.closeDeleteModal(false, selectedPlanId),
-                () => this.closeDeleteModal(true, selectedPlanId),
-                () => this.closeDeleteModal(false, selectedPlanId)
-            );
-
-            const renderAlertModal = AlertModal(
-                isAlertOpen,
-                faExclamationCircle,
-                alertMessage,
-                "auto-plan",
-                this.closeAlert);
-
             return (
                 <>
-                    {renderStatusModal}
-                    {renderDeleteModal}
-                    {renderAlertModal}
+                    <ConfirmModal isOpen={isStatusOpen}
+                                  icon={faExclamationCircle}
+                                  message={statusMessage}
+                                  style={"auto-plan"}
+                                  actionBg={this.closeStatusModal}
+                                  actionLeft={() => this.handleStatusChange(selectedPlanStatus, selectedPlanId)}
+                                  actionRight={this.closeStatusModal}
+                    />
+                    <ConfirmModal isOpen={isDeleteOpen}
+                                  icon={faTrashAlt}
+                                  message={messageType.CONFIRM_DELETE_MESSAGE}
+                                  style={"auto-plan"}
+                                  actionBg={() => this.closeDeleteModal(false, selectedPlanId)}
+                                  actionLeft={() => this.closeDeleteModal(true, selectedPlanId)}
+                                  actionRight={() => this.closeDeleteModal(false, selectedPlanId)}
+                    />
+                    <AlertModal isOpen={isAlertOpen} icon={faExclamationCircle} message={alertMessage} style={"auto-plan"} closer={this.closeAlert} />
                     <Card className="auto-plan-box">
                         <CardHeader className="auto-plan-card-header">
                             Plan Status

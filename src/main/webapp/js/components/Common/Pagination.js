@@ -1,18 +1,12 @@
 import React from "react";
 import PaginationComponent from "react-reactstrap-pagination";
 
- export function filePaginate(items, pageNumber, pageSize) {
+export const filePaginate = (items, pageNumber, pageSize) => {
      const startIndex = (pageNumber - 1) * pageSize;
      return items.slice( startIndex, startIndex +  pageSize);
 }
 
-export function renderPagination(
-    pageSize,
-    itemsCount,
-    onPageChange,
-    currentPage,
-    className
-) {
+export const renderPagination = (pageSize, itemsCount, onPageChange, currentPage, className) => {
     const pageCount = Math.ceil(itemsCount / pageSize);
 
     if (pageCount === 1) {

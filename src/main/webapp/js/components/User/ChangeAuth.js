@@ -1,7 +1,6 @@
 import React, {Component} from "react"
 import ReactTransitionGroup from 'react-addons-css-transition-group';
 import * as API from "../../api";
-import ErrorModalOneButton from "../Common/ErrorModal";
 import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -66,7 +65,6 @@ class ChangeAuthModal extends Component {
         const { isModalOpen, errors, selectedValue } = this.state;
         const selected = (selectedValue ==='') ? API.getUserAuth(this.props, userID) : selectedValue;
 
-        const renderAlert = AlertModal(isModalOpen, faExclamationCircle, errors.ModalMsg, "administrator", this.closeModal);
         return (
             <>
                 {
@@ -95,7 +93,7 @@ class ChangeAuthModal extends Component {
                         <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200} transitionLeaveTimeout={200} />
                     )
                 }
-                {renderAlert}
+                <AlertModal isOpen={isModalOpen} icon={faExclamationCircle} message={errors.ModalMsg} style={"administrator"} closer={this.closeModal} />
             </>
         );
     }

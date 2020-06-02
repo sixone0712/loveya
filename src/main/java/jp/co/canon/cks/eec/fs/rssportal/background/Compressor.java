@@ -63,19 +63,11 @@ public class Compressor {
                         }
                     });
             zos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
         return true;
-    }
-
-    public boolean extract(@NonNull final String sourceFile,
-                           @NonNull final String destDir) {
-        return false;
     }
 
     public void addExcludeExtension(@NonNull String extension) {

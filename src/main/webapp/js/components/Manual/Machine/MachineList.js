@@ -28,7 +28,7 @@ class MachineList extends Component {
   };
 
   render() {
-    const { checkedList, ItemsChecked } = this.state;
+    const { ItemsChecked } = this.state;
     const titleList = API.getEquipmentList(this.props);
     const machineList = API.getToolInfoList(this.props);
 
@@ -44,7 +44,6 @@ class MachineList extends Component {
                     key={index}
                     structId={title.equipmentId}
                     machineList={machineList}
-                    checkedList={checkedList}
                     checkMachineItem={this.checkMachineItem}
                   />
                 );

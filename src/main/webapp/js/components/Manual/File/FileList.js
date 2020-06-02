@@ -354,38 +354,16 @@ class FileList extends Component {
 
       const { totalFiles, downloadFiles } = this.props.downloadStatus.toJS();
 
-      const renderDownload = ConfirmModal(
-          isDownloadOpen,
-          faDownload,
-          modalMessage,
-          "secondary",
-          this.closeDownloadModal,
-          this.openProcessModal,
-          this.closeDownloadModal);
-
-      const renderCancel = ConfirmModal(
-          isCancelOpen,
-          faBan,
-          modalMessage,
-          "secondary",
-          null,
-          () => this.closeCancelModal(true),
-          () => this.closeCancelModal(false));
-
-      const renderComplete = ConfirmModal(
-          isCompleteOpen,
-          faChevronCircleDown,
-          modalMessage,
-          "secondary",
-          null,
-          () => this.closeCompleteModal(true),
-          () => this.closeCompleteModal(false));
-
-      const renderAlert = AlertModal(isAlertOpen, faExclamationCircle, modalMessage,"secondary", this.closeAlertModal);
-
       return (
         <>
-          {renderDownload}
+          <ConfirmModal isOpen={isDownloadOpen}
+                        icon={faDownload}
+                        message={modalMessage}
+                        style={"secondary"}
+                        actionBg={this.closeDownloadModal}
+                        actionLeft={this.openProcessModal}
+                        actionRight={this.closeDownloadModal}
+          />
           {isProcessOpen ? (
               <ReactTransitionGroup
                   transitionName={"Custom-modal-anim"}
@@ -430,9 +408,23 @@ class FileList extends Component {
                   transitionLeaveTimeout={200}
               />
           )}
-          {renderCancel}
-          {renderComplete}
-          {renderAlert}
+          <ConfirmModal isOpen={isCancelOpen}
+                        icon={faBan}
+                        message={modalMessage}
+                        style={"secondary"}
+                        actionBg={null}
+                        actionLeft={() => this.closeCancelModal(true)}
+                        actionRight={() => this.closeCancelModal(false)}
+          />
+          <ConfirmModal isOpen={isCompleteOpen}
+                        icon={faChevronCircleDown}
+                        message={modalMessage}
+                        style={"secondary"}
+                        actionBg={null}
+                        actionLeft={() => this.closeCompleteModal(true)}
+                        actionRight={() => this.closeCompleteModal(false)}
+          />
+          <AlertModal isOpen={isAlertOpen} icon={faExclamationCircle} message={modalMessage} style={"secondary"} closer={this.closeAlertModal} />
           <div className="filelist-container">
             <Card className="ribbon-wrapper filelist-card">
               <CardBody className="filelist-card-body">
@@ -498,14 +490,15 @@ class FileList extends Component {
                             cbinfo={file.keyIndex}
                         >
                           <td>
-                            <CheckBox
-                                key={key}
-                                index={file.keyIndex}
-                                name={file.fileName}
-                                isChecked={file.checked}
-                                handleCheckboxClick={this.checkFileItem}
-                                labelClass="filelist-label"
-                            />
+                            <div className="custom-control custom-checkbox">
+                              <CheckBox
+                                  index={file.keyIndex}
+                                  name={file.fileName}
+                                  isChecked={file.checked}
+                                  labelClass={"filelist-label"}
+                                  handleCheckboxClick={this.checkFileItem}
+                              />
+                            </div>
                           </td>
                           <td>{file.targetName}</td>
                           <td>{file.logName}</td>

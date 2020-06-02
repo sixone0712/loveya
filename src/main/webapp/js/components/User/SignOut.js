@@ -2,15 +2,15 @@ import React, {Component} from 'react';
 import { connect } from 'react-redux'
 import * as API from "../../api";
 import * as Define from "../../define";
-import ErrorModalOneButton from "../Common/ErrorModal";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import UserAuthFrom from "../Form/UserAuthForm";
 import InputForm from "../Form/InputForm";
 import {UncontrolledPopover, PopoverHeader, PopoverBody} from "reactstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamation} from "@fortawesome/free-solid-svg-icons";
+import {faExclamation, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import {bindActionCreators} from "redux";
 import * as userActions from "../../modules/User";
+import AlertModal from "../Common/AlertModal";
 
 
 class SignOut extends Component {
@@ -243,19 +243,19 @@ class SignOut extends Component {
                                     </button>
                                 </div>
                             </div>
-
-                            {
-                                (this.state.isModalOpen === true) &&
-                                <ErrorModalOneButton isOpen={this.state.isModalOpen}
-                                                     errorMsg={this.state.errors.ModalMsg}
-                                                     ActionCloseButton={this.closeModal}/>
-                            }
                         </ReactTransitionGroup>
                     ) : (
                         <ReactTransitionGroup transitionName={'Custom-modal-anim'} transitionEnterTimeout={200}
                                               transitionLeaveTimeout={200}/>
                     )
                 }
+                <AlertModal
+                    isOpen={this.state.isModalOpen}
+                    icon={faExclamationCircle}
+                    message={this.state.errors.ModalMsg}
+                    style={"administrator"}
+                    closer={this.closeModal}
+                />
             </>
         );
     }

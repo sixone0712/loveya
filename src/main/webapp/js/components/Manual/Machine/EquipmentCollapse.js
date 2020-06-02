@@ -34,17 +34,19 @@ class EquipmentCollapse extends Component {
                     {machineList.map((machine, key) => {
                         if (machine.structId === this.props.structId) {
                             return (
-                                <CheckBox
-                                    key={key}
-                                    index={machine.keyIndex}
-                                    name={machine.targetname}
-                                    isChecked={machine.checked}
-                                    handleCheckboxClick={checkMachineItem}
-                                    labelClass="machinelist-label"
-                                />
+                                <div className="custom-control custom-checkbox" key={key}>
+                                    <CheckBox
+                                        index={machine.keyIndex}
+                                        name={machine.targetname}
+                                        isChecked={machine.checked}
+                                        labelClass={"machinelist-label"}
+                                        handleCheckboxClick={checkMachineItem}
+                                    />
+                                </div>
                             );
+                        } else {
+                            return "";
                         }
-                        return "";
                     })}
                 </Collapse>
             </>

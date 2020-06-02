@@ -1,6 +1,5 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
@@ -21,16 +20,19 @@ public class DownloadMonitor extends Thread {
         String system;
         String tool;
         String requestNo;
-        RequestInfoBean info;
+        RequestInfoBean reqInfo;
+        RequestInfoBean downloadInfo;
         long ts;
         boolean activated;
 
-        private Target(FileServiceModel service, String system, String tool, String requestNo, RequestInfoBean info, long ts) {
+        private Target(FileServiceModel service, String system, String tool, String requestNo,
+                       RequestInfoBean reqInfo, RequestInfoBean downloadInfo, long ts) {
             this.service = service;
             this.system = system;
             this.tool = tool;
             this.requestNo = requestNo;
-            this.info = info;
+            this.reqInfo = reqInfo;
+            this.downloadInfo = downloadInfo;
             this.ts = ts;
             this.activated = true;
         }
@@ -56,13 +58,28 @@ public class DownloadMonitor extends Thread {
                         if (target.activated) {
                             synchronized (target) {
                                 try {
+                                    log.info("request downloadInfo");
+                                    RequestListBean downloadList = target.service.createDownloadList(target.system,
+                                            target.tool, target.requestNo);
+                                    if (downloadList != null) {
+                                        for (Object item : downloadList.getRequestList()) {
+                                            RequestInfoBean bean = (RequestInfoBean) item;
+                                            if (bean.getRequestNo().equalsIgnoreCase(target.requestNo)) {
+                                                log.info(String.format("downloadList: %s fileListCount=%d",
+                                                        bean.getRequestNo(),
+                                                        bean.getFileListCount()));
+                                                target.downloadInfo = bean;
+                                            }
+                                        }
+                                    }
                                     RequestListBean requestList = target.service.createRequestList(
                                             target.system, target.tool, target.requestNo);
                                     if (requestList != null) {
-                                        target.info = requestList.get(target.requestNo);
-                                        if (target.info != null) {
-                                    /*log.info("monitor: " + target.info.getRequestNo() + ": " + target.info.getNumerator() + "/" +
-                                            target.info.getDenominator());*/
+                                        target.reqInfo = requestList.get(target.requestNo);
+                                        if (target.reqInfo != null) {
+                                            log.info("monitor: " + target.reqInfo.getRequestNo() + ": " +
+                                                    target.reqInfo.getNumerator() + "/" +
+                                                    target.reqInfo.getDenominator());
                                             target.ts = System.currentTimeMillis();
                                         }
                                     }
@@ -73,7 +90,7 @@ public class DownloadMonitor extends Thread {
                         }
                     }
                 }
-                sleep(100);
+                sleep(1000);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -96,7 +113,7 @@ public class DownloadMonitor extends Thread {
             @NonNull final String system,
             @NonNull final String tool,
             @NonNull final String requestNo,
-            @NonNull final FileServiceModel service ) {
+            @NonNull final FileServiceModel service) {
 
         log.info("monitor.add(system="+system+" tool="+tool+" reqNo="+requestNo+")");
         if(getTarget(system, tool, requestNo)==null) {
@@ -104,7 +121,8 @@ public class DownloadMonitor extends Thread {
                 RequestListBean requestList = service.createDownloadList(system, tool, requestNo);
                 RequestInfoBean inf = requestList.get(requestNo);
                 synchronized (targets) {
-                    targets.add(new Target(service, system, tool, requestNo, inf, System.currentTimeMillis()));
+                    targets.add(new Target(service, system, tool, requestNo, inf, null,
+                            System.currentTimeMillis()));
                 }
             } catch (ServiceException e) {
                 e.printStackTrace();
@@ -124,7 +142,12 @@ public class DownloadMonitor extends Thread {
 
     public RequestInfoBean get(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
         Target target = getTarget(system, tool, requestNo);
-        return target!=null?target.info:null;
+        return target!=null?target.reqInfo:null;
+    }
+
+    public RequestInfoBean getDownloadInfo(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
+        Target target = getTarget(system, tool, requestNo);
+        return target!=null?target.downloadInfo:null;
     }
 
     private final Log log = LogFactory.getLog(getClass());
