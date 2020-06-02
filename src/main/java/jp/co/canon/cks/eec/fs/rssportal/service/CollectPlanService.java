@@ -22,19 +22,6 @@ public interface CollectPlanService {
                 long interval,
                 String description);
 
-    @Deprecated
-    boolean modifyPlan(int planId,
-                       List<String> fabs,
-                       List<String> tools,
-                       List<String> logTypes,
-                       List<String> logTypeStr,
-                       Date collectStart,
-                       Date start,
-                       Date end,
-                       String collectType,
-                       long interval,
-                       String description);
-
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);
     List<CollectPlanVo> getAllPlans();
