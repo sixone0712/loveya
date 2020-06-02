@@ -54,7 +54,6 @@ public class UserController {
             res.put("permissions", "");
             log.info("false");
         }
-
         return res;
     }
 
@@ -250,6 +249,7 @@ public class UserController {
         }
         return returnData;
     }
+
     private final Log log = LogFactory.getLog(getClass());
 
     @GetMapping("/delete")

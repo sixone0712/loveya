@@ -37,11 +37,6 @@ public class DlHistoryController {
         this.serviceDlHistory = serviceDlHistory;
     }
 
-/*
-    public void setHttpSession(HttpSession httpSession) {
-        this.httpSession = httpSession;
-    }
-*/
     @GetMapping("/getHistoryList")
     @ResponseBody
     public Map<String, Object> getHistoryList() throws Exception {
@@ -49,7 +44,7 @@ public class DlHistoryController {
         log.info("/dwHistory/getHistoryList");
         Map<String, Object> returnData = new HashMap<>();
         List<DownloadHistoryVo> list = serviceDlHistory.getHistoryList();
-        if (list == null) {
+        if (list == null || list.size() == 0) {
             log.info("List data is null");
             returnData.put(HISTORY_RESULT, -1);
         } else {
