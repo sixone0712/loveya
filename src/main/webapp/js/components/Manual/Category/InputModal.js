@@ -65,10 +65,12 @@ class InputModal extends Component {
     };
 
     closeAlertModal = async () => {
-        const { genreListActions } = this.props;
+        const { genreListActions, handleSelectBoxChange } = this.props;
+        handleSelectBoxChange(0);
         await genreListActions.genreInitServerError();
         await this.setState({
             ...this.state,
+            inputOpen: false,
             alertOpen: false
         });
     };
@@ -143,25 +145,18 @@ class InputModal extends Component {
             const reflectingID = this.props.getSelectedIdByName(genreName);
             this.props.handleSelectBoxChange(reflectingID);
         } else {
-            let msg = "";
-
-            switch (result) {
-                case Define.GENRE_SET_FAIL_SAME_NAME: msg = "The genre name is duplicated."; break;
-                case Define.GENRE_SET_FAIL_EMPTY_NAME: msg = "Please input genre name"; break;
-                case Define.GENRE_SET_FAIL_SEVER_ERROR: msg = "Network connection error"; break;
-                default: msg="what's error : " + error; break;
-            }
-
             await this.setState({
                 ...this.state,
                 errMsg: API.convertErrMsg(result),
-                alertMsg: alertMsg
+                alertMsg: API.convertErrMsg(result),
             });
 
-            const needUpdate = this.props.genreList.get("needUpdate")
-            console.log("needUpdate", needUpdate);
-            if(needUpdate) {
-                this.openAlertModal();
+            if(result === Define.GENRE_SET_FAIL_NOT_EXIST_GENRE) {
+                const { genreListActions } = this.props;
+                await genreListActions.genreGetDbList(Define.REST_API_URL + "/genre/get");
+                setTimeout(() => {
+                    this.openAlertModal();
+                }, 400);
             }
         }
     };

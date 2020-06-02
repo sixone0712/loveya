@@ -59,7 +59,8 @@ class ConfirmModal extends Component {
 
     closeAlertModal = async () => {
         console.log("closeAlertModal Start", this.state.alertOpen);
-        const { genreListActions } = this.props;
+        const { genreListActions, handleSelectBoxChange } = this.props;
+        handleSelectBoxChange(0);
         await genreListActions.genreInitServerError();
         await this.setState({
             ...this.state,

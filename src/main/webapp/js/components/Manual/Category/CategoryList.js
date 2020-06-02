@@ -21,7 +21,7 @@ import * as genreListActions from "../../../modules/genreList";
 import * as API from '../../../api'
 import {element, object} from "prop-types";
 
-const customSelectStyles = {
+export const customSelectStyles = {
   container: (styles, { isDisabled }) => ({
     ...styles,
     transition: "all .2s ease-in-out",
