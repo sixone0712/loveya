@@ -202,11 +202,11 @@ public class FileDownloaderController {
             if(submap.containsKey(logType)) {
                 form = submap.get(logType);
             } else {
-                form = new DownloadForm(fab, tool, logType, logTypeStr);
+                form = new DownloadForm("FS_P#M", fab, tool, logType, logTypeStr);
                 submap.put(logType, form);
             }
         } else {
-            form = new DownloadForm(fab, tool, logType, logTypeStr);
+            form = new DownloadForm("FS_P#M", fab, tool, logType, logTypeStr);
             Map<String, DownloadForm> submap = new HashMap<>();
             submap.put(logType, form);
             map.put(tool, submap);

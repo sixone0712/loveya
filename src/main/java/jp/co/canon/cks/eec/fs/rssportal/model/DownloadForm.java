@@ -11,9 +11,9 @@ public class DownloadForm {
     private final String logTypeStr;
     private List<FileInfo> files;
 
-    public DownloadForm(String fab, String tool, String logType, String logTypeStr) {
+    /*public DownloadForm(String system, String fab, String tool, String logType, String logTypeStr) {
         this("FS_P", fab, tool, logType, logTypeStr);
-    }
+    }*/
 
     public DownloadForm(String system, String fab, String tool, String logType, String logTypeStr) {
         this.system = system;
