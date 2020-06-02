@@ -85,9 +85,17 @@ class PlanControllerTest {
         assertEquals(resp.getStatusCode(), HttpStatus.OK);
         assertTrue(resp.getBody().size()>=3);
 
+        collectPlanService.scheduleAllPlans();
+        assertFalse(collectPlanService.stopPlan(-1));
+        assertFalse(collectPlanService.restartPlan(-1));
+        collectPlanService.deletePlan(-1);
+
         // delete the plans
         request.setServletPath("/rss/rest/plan//delete");
         for(int i=0; i<planIds.length; ++i) {
+            assertTrue(collectPlanService.stopPlan(planIds[i]));
+            assertTrue(collectPlanService.stopPlan(planIds[i]));
+            assertTrue(collectPlanService.restartPlan(planIds[i]));
             assertEquals(planController.deletePlan(request, planIds[i]).getStatusCode(), HttpStatus.OK);
         }
     }
@@ -147,7 +155,6 @@ class PlanControllerTest {
             }
             Thread.sleep(1000);
         }
-        collectPlanService.scheduleAllPlans();
 
         request.setServletPath("/rss/rest/plan/download");
         assertEquals(planController.download(request, response, downloadId).getStatusCode(), HttpStatus.OK);
