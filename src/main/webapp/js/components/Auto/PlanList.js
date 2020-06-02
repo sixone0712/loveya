@@ -81,7 +81,8 @@ class RSSautoplanlist extends Component {
             alertMessage: "",
             statusMessage: "",
             selectedPlanId: "",
-            selectedPlanStatus: ""
+            selectedPlanStatus: "",
+            deleteIndex: ""
         };
     }
 
@@ -93,7 +94,7 @@ class RSSautoplanlist extends Component {
         const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list?withExpired=yes");
         console.log("[AUTO][loadPlanList]res", res);
         const { data } = res;
-        const newData = data.map(item => {
+        const newData = data.map((item, idx) => {
             const targetArray = item.logType.split(",")
             return (
                 {
@@ -112,6 +113,7 @@ class RSSautoplanlist extends Component {
                     collectStart: moment(item.collectStart).format("YYYY-MM-DD HH:mm:ss"),
                     collectTypeStr: item.collectTypeStr,
                     expired: item.expired,
+                    keyIndex: idx + 1
                 }
             );
         })
@@ -154,7 +156,7 @@ class RSSautoplanlist extends Component {
         }
     }
 
-    openDeleteModal = async (planId, status) => {
+    openDeleteModal = async (planId, status, index) => {
         if (status === statusType.RUNNING) {
         //if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
@@ -163,12 +165,15 @@ class RSSautoplanlist extends Component {
                 ...this.state,
                 isDeleteOpen: true,
                 selectedPlanId: planId,
+                deleteIndex: index
             });
         }
     };
 
     closeDeleteModal = async (deleting, selectedPlanId) => {
         let res;
+        const { registeredList, deleteIndex } = this.state;
+
         if(deleting) {
             res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
         }
@@ -179,7 +184,14 @@ class RSSautoplanlist extends Component {
             selectedPlanId: ""
         });
 
-        setTimeout(this.loadPlanList, 300);
+        if(res.status === 200) {
+            await this.setState({
+                currentPage: Math.ceil(registeredList.length / deleteIndex),
+                deleteIndex: ""
+            });
+        }
+
+        setTimeout(this.loadPlanList, 200);
     };
 
     openStatusModal = (status, planId) => {
@@ -392,7 +404,7 @@ class RSSautoplanlist extends Component {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus) }>
+                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus, plan.keyIndex) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>

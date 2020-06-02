@@ -45,7 +45,9 @@ class UserList extends Component {
             isAlertOpen: false,
             alertMessage: "",
             isMode:"",
-            Permission:""
+            Permission:"",
+            registeredList: [],
+            deleteIndex: ""
         };
 
     }
@@ -53,10 +55,34 @@ class UserList extends Component {
     async componentDidMount()
     {
         console.log("componentDidMount");
-        await API.getDBUserList(this.props);
+        await this.loadUserList();
     };
 
-    openAlert = (type) => {
+    loadUserList = async () => {
+        const res = await API.getDBUserList(this.props);
+        const { data } = res;
+        const newData = data.data.map((item, idx) => {
+            return (
+                {
+                    keyIndex: idx + 1,
+                    userAuth: item.permissions,
+                    userId: item.id,
+                    userName: item.username,
+                    userCreated: item.created,
+                    userLastAccess: item.lastAccess
+                }
+            );
+        });
+
+        await this.setState({
+            ...this.state,
+            registeredList: newData
+        })
+
+        return true;
+    }
+
+    openAlert = async (type) => {
         setTimeout(() => {
             switch(type) {
                 case "permission":
@@ -88,6 +114,8 @@ class UserList extends Component {
                     break;
             }
         }, 200);
+
+        await this.loadUserList();
     };
 
     closeAlert = () => {
@@ -105,12 +133,13 @@ class UserList extends Component {
             selected:'',
         }));
     };
-    uDelete = (id) => {
+    uDelete = (id, index) => {
         this.setState(() => ({
             ...this.state,
             isMode:'deleteUser',
             isModalOpen:true,
             selected:id,
+            deleteIndex: index
         }));
     }
     uChangeAuth = (id) => {
@@ -139,13 +168,13 @@ class UserList extends Component {
         });
     };
 
-    DeleteAccount = async (e) => {
+    DeleteAccount = async () => {
         console.log("[VFT .....] DeleteAccount");
         console.log(this.state.selected);
         await API.deleteUser(this.props, this.state.selected);
         let result = API.getUserInfoErrorCode(this.props);
         console.log("result:" + result);
-        if(result !== 0 )
+        if(result !== 0)
         {
             let msg = API.getErrorMsg(result) ;
             if (msg.length > 0) {
@@ -159,17 +188,24 @@ class UserList extends Component {
         }
         else
         {
+            const { registeredList, deleteIndex } = this.state;
             await this.closeModal(); //delete modal Close
+
+            this.setState({
+                currentPage: Math.ceil(registeredList.length / deleteIndex),
+                deleteIndex: ""
+            });
+
             this.openAlert("delete"); //delete complete
-            await API.getDBUserList(this.props);//user list refresh
         }
     };
 
     render() {
         const formatDate = 'YYYY/MM/DD HH:mm:ss';
-        const UserList  = API.getUserList(this.props);
-        const { length: count } = UserList;
-        console.log(UserList);
+        const { registeredList } = this.state;
+        const { length: count } = registeredList;
+        console.log(registeredList);
+        console.log("deleteIndex: ", this.state.deleteIndex);
         if (count === 0) {
             return (
                 <>
@@ -202,7 +238,7 @@ class UserList extends Component {
             );
         } else {
             const { currentPage, pageSize, isConfirmOpen, selected } = this.state;
-            const users = filePaginate(UserList, currentPage, pageSize);
+            const users = filePaginate(registeredList, currentPage, pageSize);
             const pagination = renderPagination(
                 pageSize,
                 count,
@@ -265,20 +301,20 @@ class UserList extends Component {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {users.map((user, idx) => {
+                                        {users.map((user) => {
                                             return (
-                                                <tr key={idx}>
-                                                    <td>{idx+1}</td>
-                                                    <td>{user.name}</td>
+                                                <tr key={user.keyIndex}>
+                                                    <td>{user.keyIndex}</td>
+                                                    <td>{user.userName}</td>
                                                     <td>
-                                                        <span onClick={()=> this.uChangeAuth(user.id)} className="permission">
-                                                          {user.auth}
+                                                        <span onClick={()=> this.uChangeAuth(user.userId)} className="permission">
+                                                          {user.userAuth}
                                                         </span>
                                                     </td>
-                                                    <td>{(user.created!=null) ? moment(user.created).format(formatDate): ""}</td>
-                                                    <td>{(user.last_access!=null) ? moment(user.last_access).format(formatDate): ""}</td>
+                                                    <td>{(user.userCreated!=null) ? moment(user.userCreated).format(formatDate): ""}</td>
+                                                    <td>{(user.userLastAccess!=null) ? moment(user.userLastAccess).format(formatDate): ""}</td>
                                                     <td>
-                                                        <div className="icon-area-administrator" onClick={ () => this.uDelete(user.id) }>
+                                                        <div className="icon-area-administrator" onClick={ () => this.uDelete(user.userId, user.keyIndex) }>
                                                             <FontAwesomeIcon icon={faTrashAlt} />
                                                         </div>
                                                     </td>
