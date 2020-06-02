@@ -494,17 +494,4 @@ describe('FileList', () => {
         });
         wrapper.instance().sortIconRender("targetName");
     });
-
-    it.only('click', () => {
-        store = mockStore(initialStore);
-        const wrapper = shallow(<FileList
-            dispatch={dispatch}
-            store={store}
-            {...initProps}
-        />).dive().dive();
-
-        wrapper.find("tr").simulate("click");
-
-    });
-
 });
