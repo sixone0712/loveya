@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.vftp.service.ftp.get;
 
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Assertions;
@@ -56,5 +57,15 @@ public class GetRequestTest {
         } catch (Exception e) {
             Assertions.fail();
         } 
+    }
+
+    @Test
+    public void test_003(){
+        GetRequest req = new GetRequest();
+        PropertyChangeEvent evt = new PropertyChangeEvent("ABC", "another", null, "another");
+        req.propertyChange(evt);
+
+        evt = new PropertyChangeEvent("ABC", "downloaded", null, "another");
+        req.propertyChange(evt);
     }
 }

@@ -114,7 +114,6 @@ public class GetRequest implements PropertyChangeListener {
             
                 @Override
                 public void run() {
-                    // TODO Auto-generated method stub
                     Compressor compressor = new Compressor();
                     File destFile = new File(new File(requestDir), compressFilename);
                     
@@ -151,17 +150,6 @@ public class GetRequest implements PropertyChangeListener {
             if (errorList.length == 0){
                 this.setStatus(Status.PROCESSING_COMPRESS);
                 processCompress();
-                /* 다음 단계는 신규 Thread를 생성하여 파일 압축, 또는 로그 머지 */
-/*                Thread compressThread = new Thread(new Runnable(){
-                
-                    @Override
-                    public void run() {
-                        // TODO Auto-generated method stub
-                        Compressor compressor = new Compressor();
-//                        compressor.compress(requestDir + "/");
-                    }
-                });
-                compressThread.run(); */
                 return;
             }
             this.setStatus(Status.FAILED);

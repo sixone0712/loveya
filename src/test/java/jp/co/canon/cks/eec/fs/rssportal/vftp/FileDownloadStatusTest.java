@@ -1,5 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.vftp;
 
+import java.io.File;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,5 +28,17 @@ public class FileDownloadStatusTest {
         Assertions.assertEquals("abcdefg.log", sts.getDownloadFileName());
 
         sts.setDownloadPath("/VROOT");
+
+        File f = sts.createDownloadFile();
+        Assertions.assertNull(f);
     }
+
+    @Test
+    public void test_001(){
+        FileDownloadStatus sts = new FileDownloadStatus();
+        File f = sts.createDownloadFile();
+
+        Assertions.assertNull(f);
+    }
+
 }
