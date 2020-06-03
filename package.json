@@ -94,6 +94,13 @@
     ]
   },
   "jest": {
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/src/main/webapp/js/api/",
+      "/src/main/webapp/js/define/",
+      "/src/main/webapp/js/modules/",
+      "/src/main/webapp/js/services/"
+    ],
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.js"
     ],

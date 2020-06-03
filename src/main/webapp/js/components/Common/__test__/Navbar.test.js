@@ -6,6 +6,7 @@ import Navbar from "../Navbar";
 import sinon from "sinon";
 import { Map } from "immutable";
 import service from "../../../services";
+import axios from "axios";
 
 const initProps = {
     onMovePage: jest.fn()
@@ -120,7 +121,7 @@ describe("Common Navbar test", () => {
 
     it("Check onLogout method", async () => {
         store = mockStore(adminStore);
-        service.axiosAPI.get = jest.fn().mockResolvedValue();
+        axios.get = jest.fn().mockResolvedValue();
         const component = shallow(<Navbar {...initProps} dispatch={dispatch} store={store} />).dive().dive();
         component.setProps({
             onMovePage: jest.fn()
