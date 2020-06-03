@@ -1,15 +1,15 @@
 import 'babel-polyfill';
 import React from 'react';
 import renderer from 'react-test-renderer'
-import ConnectedLogin, {Login} from '../Login';
+import ConnectedLogin, {Login} from '../../Login';
 import configureMockStore from 'redux-mock-store'
 import configureStore from 'redux-mock-store'
 import { shallow, mount } from 'enzyme';
 import {createStore} from 'redux';
-import login from '../../../modules/login';
+import login from '../../../../modules/login';
 import {Provider} from 'react-redux';
-import * as Define from "../../../define";
-import * as API from "../../../api";
+import * as Define from "../../../../define";
+import * as API from "../../../../api";
 
 
 

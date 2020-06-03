@@ -1,13 +1,13 @@
 import 'babel-polyfill';
 import React from 'react';
 import renderer from 'react-test-renderer'
-import ConnectedChangePwModal, {ChangePwModal} from '../ChangePw';
+import ConnectedChangePwModal, {ChangePwModal} from '../../ChangePw';
 import configureMockStore from 'redux-mock-store'
 import configureStore from 'redux-mock-store'
 import { shallow, mount } from 'enzyme';
 import {createStore} from 'redux';
 import {Provider} from 'react-redux';
-import ConnectedLogin from "../Login";
+import ConnectedLogin from "../../Login";
 // import * as API from "../../../api";
 
 const initialState = {

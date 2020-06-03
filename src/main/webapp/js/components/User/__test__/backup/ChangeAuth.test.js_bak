@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import ConnectedChangeAuthModal, {ChangeAuthModal, ChangePwModal} from '../ChangeAuth';
+import ConnectedChangeAuthModal, {ChangeAuthModal, ChangePwModal} from '../../ChangeAuth';
 import React from 'react';
 import configureStore from 'redux-mock-store'
 import { shallow, mount } from 'enzyme';

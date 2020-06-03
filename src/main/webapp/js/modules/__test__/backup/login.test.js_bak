@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import login, * as loginActions from '../login';
+import login, * as loginActions from '../../login';
 import {Map} from "immutable";
 
 // http://velopert.com/3591 참고
