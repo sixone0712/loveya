@@ -138,8 +138,6 @@ public class PlanController {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             response.setHeader("Content-Disposition", "attachment; filename="+downloadFileName);
             return new ResponseEntity(isr, headers, HttpStatus.OK);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -73,14 +73,8 @@ public class CollectPlanner extends Thread {
                 }
                 sleep(1000);
             }
-        } catch (InterruptedException e) {
-            log.error("sleep exception occurs");
-            e.printStackTrace();
-        } catch (RemoteException e) {
-            log.error("failed to access esp web service");
-            e.printStackTrace();
-        } catch (IOException e) {
-            log.error("file operation failed");
+        } catch (IOException | InterruptedException e) {
+            log.error("file or thread operation failed");
             e.printStackTrace();
         }
     }
@@ -126,7 +120,7 @@ public class CollectPlanner extends Thread {
                 // if someone stopped the plan, we have to update status and don't have to reschedule.
                 if(planUpdated) {
                     CollectPlanVo dbPlan = service.getPlan(plan.getId());
-                    if(dbPlan.isStop()) {
+                    if (dbPlan==null || dbPlan.isStop()) {
                         log.info("stopped plan on work");
                         plan.setStop(true);
                         service.setLastStatus(plan, lastStatus);
@@ -192,7 +186,7 @@ public class CollectPlanner extends Thread {
             if(nextPlan==null)
                 return null;
             if(nextPlan!=null && nextPlan.getNextAction()!=null)
-                log.info("nextPlan=" + nextPlan.getDescription() + " nextaction=" + nextPlan.getNextAction().toString());
+                log.info("nextPlan=" + nextPlan.getPlanName() + " nextaction=" + nextPlan.getNextAction().toString());
             if(nextPlan!=null)
                 planUpdated = false;
         }
