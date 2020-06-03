@@ -72,8 +72,15 @@ class DlHistoryControllerTest {
 
         /*test 1 - in case : list is null*/
         EmptyResp = dlHistoryController.getHistoryList();
-        assertEquals(-1, EmptyResp.get(HISTORY_RESULT));
-        assertNull(EmptyResp.get(HISTORY_DATA));
+        if(EmptyResp.get(HISTORY_RESULT) =="-1")
+        {
+            assertNull(EmptyResp.get(HISTORY_DATA));
+        }
+        else
+        {
+            assertEquals(0,EmptyResp.get(HISTORY_RESULT));
+            assertNotNull(EmptyResp.get(HISTORY_DATA));
+        }
 
         /*test 2 - in case : param is null*/
         resp = dlHistoryController.addDlHistory(null);

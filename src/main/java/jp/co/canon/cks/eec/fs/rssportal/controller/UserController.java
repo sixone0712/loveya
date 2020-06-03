@@ -153,6 +153,7 @@ public class UserController {
     @GetMapping("/changeAuth")
     @ResponseBody
     public Map<String, Object> changeAuth(@RequestParam Map<String, Object> param)  throws Exception {
+
         int res = 0;
         log.info("/user/changeAuth");
         String id = param.containsKey("id")?(String)param.get("id"):null;
@@ -191,9 +192,11 @@ public class UserController {
         }
         return returnData;
     }
+
     @GetMapping("/create")
     @ResponseBody
     public int create(@RequestParam Map<String, Object> param)  throws Exception {
+
         int res = 0;
         log.info("/user/create");
         String name = param.containsKey("name")?(String)param.get("name"):null;
@@ -222,9 +225,7 @@ public class UserController {
                 {
                     res = 350;//USER_SET_FAIL_NO_REASON
                     log.info("DB create fail");
-                }
-                else
-                {
+                }else{
                     log.info("DB create Success");
                 }
             }
@@ -234,13 +235,13 @@ public class UserController {
 
     @GetMapping("/loadUserList")
     @ResponseBody
-    public Map<String, Object> loadUserList()  throws Exception {
-
+    public Map<String, Object> loadUserList() throws Exception {
         log.info("/user/loadUserList");
         Map<String, Object> returnData = new HashMap<>();
         List<UserVo> list = serviceUser.getUserList();
-        if(list == null)
-        {
+        if(list == null || list.size()== 0) {
+            returnData.put(USER_RESULT,  -1);
+            returnData.put(USER_DATA, null);
             log.info("List data is null");
         }
         else {
@@ -250,11 +251,10 @@ public class UserController {
         return returnData;
     }
 
-    private final Log log = LogFactory.getLog(getClass());
-
     @GetMapping("/delete")
     @ResponseBody
     public int deleteUser(@RequestParam Map<String, Object> param)  throws Exception {
+
         int res = 0;
         log.info("/user/deleteUser");
         String id = param.containsKey("id")?(String)param.get("id"):null;
@@ -263,27 +263,46 @@ public class UserController {
         if(id==null || id.isEmpty())
         {
             res = 33;  //LOGIN_FAIL_NO_REGISTER_USER
-        }
-        else
-        {
+        } else {
             UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
             if(userObj == null) {
                 res= 33;//LOGIN_FAIL_NO_REGISTER_USER
-            }
-            else {
+            } else {
                 boolean DbResult = false;
                 DbResult = serviceUser.deleteUser(userObj);
-                if(!DbResult)
-                {
+                if(!DbResult) {
                     res = 350;//USER_SET_FAIL_NO_REASON
                     log.info("DB delete fail");
-                }
-                else
-                {
-                    log.info("DB delelte Success");
                 }
             }
         }
         return res;
     }
+
+    public Map<String, Object>  getUser(@RequestParam Map<String, Object> param)  throws Exception {
+
+        Map<String, Object> res = new HashMap<>();
+
+        log.info("/user/getUser");
+        String name = param.containsKey("name")?(String)param.get("name"):null;
+        log.info("name: "+name);
+
+        if(name==null || name.isEmpty())
+        {
+            res.put(USER_RESULT,33); //LOGIN_FAIL_NO_REGISTER_USER
+        } else {
+            UserVo userObj = serviceUser.getUser(name);
+            if(userObj == null) {
+                res.put(USER_RESULT,33); //LOGIN_FAIL_NO_REGISTER_USER
+            } else {
+                res.put(USER_RESULT,0); //LOGIN_FAIL_NO_REGISTER_USER
+                res.put(USER_DATA,userObj); //LOGIN_FAIL_NO_REGISTER_USER
+                log.info("getId: "+userObj.getId());
+            }
+        }
+        return res;
+    }
+
+    private final Log log = LogFactory.getLog(getClass());
+
 }
