@@ -7,7 +7,7 @@ import * as userActions from "../../modules/User";
 import { Select } from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheckCircle, faUser, faExclamationCircle, faTrashAlt, faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
-import {filePaginate, renderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import moment from "moment";
 import ChangeAuthModal from "./ChangeAuth";
@@ -206,7 +206,6 @@ class UserList extends Component {
         const { registeredList } = this.state;
         const { length: count } = registeredList;
         console.log(registeredList);
-        console.log("deleteIndex: ", this.state.deleteIndex);
         if (count === 0) {
             return (
                 <>
@@ -238,17 +237,8 @@ class UserList extends Component {
                 </>
             );
         } else {
-            const { currentPage, pageSize, isConfirmOpen, selected } = this.state;
+            const { currentPage, pageSize, isConfirmOpen, selected, isModalOpen, isAlertOpen, alertMessage } = this.state;
             const users = filePaginate(registeredList, currentPage, pageSize);
-            const pagination = renderPagination(
-                pageSize,
-                count,
-                this.handlePaginationChange,
-                currentPage,
-                "custom-pagination"
-            );
-
-            const { isModalOpen, isAlertOpen, alertMessage} = this.state;
 
             return (
                 <>
@@ -326,7 +316,13 @@ class UserList extends Component {
                                     </Table>
                                 </div>
                             </CardBody>
-                            {pagination}
+                            <RenderPagination
+                                pageSize={pageSize}
+                                itemsCount={count}
+                                onPageChange={this.handlePaginationChange}
+                                currentPage={currentPage}
+                                className={"custom-pagination"}
+                            />
                         </Card>
                     </Container>
                     <Footer/>

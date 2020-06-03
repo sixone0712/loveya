@@ -35,6 +35,15 @@ describe("Common CheckBox test", () => {
         expect(component).toMatchSnapshot();
     });
 
+    it("Renders when labelClass is filelist-label", () => {
+        const newProps = {
+            ...initProps,
+            labelClass: "filelist-label"
+        }
+        const component = mount(<CheckBox {...newProps} />);
+        expect(component).toMatchSnapshot();
+    });
+
     it("Renders when isChecked is false", () => {
         const newProps = {
             ...initProps,

@@ -15,7 +15,7 @@ import {
     faTrashAlt,
     faAngleDoubleUp
 } from "@fortawesome/free-solid-svg-icons";
-import {filePaginate, renderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/Pagination";
 import Footer from "../Common/Footer";
 import ScrollToTop from "react-scroll-up";
 import moment from "moment";
@@ -84,13 +84,6 @@ class DownloadHistory extends Component {
 
         const {currentPage, pageSize} = this.state;
         const lists = filePaginate(historyList, currentPage, pageSize);
-         const pagination = renderPagination(
-             pageSize,
-             count,
-             this.handlePaginationChange,
-             currentPage,
-             "custom-pagination"
-         );
 
         if (count === 0) {
          return (
@@ -175,7 +168,13 @@ class DownloadHistory extends Component {
                                     </Table>
                                 </div>
                             </CardBody>
-                            {pagination}
+                            <RenderPagination
+                                pageSize={pageSize}
+                                itemsCount={count}
+                                onPageChange={this.handlePaginationChange}
+                                currentPage={currentPage}
+                                className={"custom-pagination"}
+                            />
                         </Card>
                     </Container>
                     <Footer/>

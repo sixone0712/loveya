@@ -6,7 +6,7 @@ export const filePaginate = (items, pageNumber, pageSize) => {
      return items.slice( startIndex, startIndex +  pageSize);
 }
 
-export const renderPagination = (pageSize, itemsCount, onPageChange, currentPage, className) => {
+export const RenderPagination = ({pageSize, itemsCount, onPageChange, currentPage, className}) => {
     const pageCount = Math.ceil(itemsCount / pageSize);
 
     if (pageCount === 1) {

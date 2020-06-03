@@ -15,7 +15,7 @@ import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
 import services from "../../../services";
-import { filePaginate, renderPagination } from "../../Common/Pagination";
+import { filePaginate, RenderPagination } from "../../Common/Pagination";
 import ConfirmModal from "../../Common/ConfirmModal";
 import AlertModal from "../../Common/AlertModal";
 
@@ -348,14 +348,6 @@ class FileList extends Component {
         }
       });
       const files = filePaginate(sortedList, currentPage, pageSize);
-      const pagination = renderPagination(
-          pageSize,
-          count,
-          this.handlePageChange,
-          currentPage,
-          "custom-pagination"
-      );
-
       const { totalFiles, downloadFiles } = this.props.downloadStatus.toJS();
 
       return (
@@ -518,7 +510,13 @@ class FileList extends Component {
                   </tbody>
                 </Table>
               </CardBody>
-              {pagination}
+              <RenderPagination
+                  pageSize={pageSize}
+                  itemsCount={count}
+                  onPageChange={this.handlePageChange}
+                  currentPage={currentPage}
+                  className={"custom-pagination"}
+              />
               <div className="filelist-info-area">
                 <label>{this.props.downloadCnt} File Selected</label>
               </div>

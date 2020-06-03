@@ -9,7 +9,7 @@ import {
     faExclamationCircle,
     faDownload
 } from "@fortawesome/free-solid-svg-icons";
-import { filePaginate, renderPagination } from "../Common/Pagination";
+import { filePaginate, RenderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services"
@@ -315,13 +315,6 @@ class RSSAutoDownloadList extends Component {
             );
         } else {
             const requests = filePaginate(requestList, currentPage, pageSize);
-            const pagination = renderPagination(
-                pageSize,
-                count,
-                this.handlePaginationChange,
-                currentPage,
-                "custom-pagination"
-            );
 
             return (
                 <>
@@ -427,7 +420,13 @@ class RSSAutoDownloadList extends Component {
                                 </Table>
                             </Col>
                         </CardBody>
-                        {pagination}
+                        <RenderPagination
+                            pageSize={pageSize}
+                            itemsCount={count}
+                            onPageChange={this.handlePaginationChange}
+                            currentPage={currentPage}
+                            className={"custom-pagination"}
+                        />
                     </Card>
                 </>
             );

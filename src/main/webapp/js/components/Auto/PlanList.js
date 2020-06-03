@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import ClockLoader from "react-spinners/ClockLoader";
 import { Select } from "antd";
-import { filePaginate, renderPagination } from "../Common/Pagination";
+import { filePaginate, RenderPagination } from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import * as Define from "../../define";
@@ -310,13 +310,6 @@ class RSSautoplanlist extends Component {
         } else {
             const { currentPage, pageSize, isStatusOpen, isDeleteOpen, isAlertOpen, alertMessage, statusMessage, selectedPlanId, selectedPlanStatus } = this.state;
             const plans = filePaginate(registeredList, currentPage, pageSize);
-            const pagination = renderPagination(
-                pageSize,
-                count,
-                this.handlePaginationChange,
-                currentPage,
-                "custom-pagination"
-            );
 
             return (
                 <>
@@ -416,7 +409,13 @@ class RSSautoplanlist extends Component {
                                 </Table>
                             </Col>
                         </CardBody>
-                        {pagination}
+                        <RenderPagination
+                            pageSize={pageSize}
+                            itemsCount={count}
+                            onPageChange={this.handlePaginationChange}
+                            currentPage={currentPage}
+                            className={"custom-pagination"}
+                        />
                     </Card>
                 </>
             );

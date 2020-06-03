@@ -5,8 +5,6 @@ import {
   Navbar,
   NavbarBrand,
   Nav,
-  NavItem,
-  NavLink,
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
@@ -24,9 +22,7 @@ import ChangePwModal from "../User/ChangePw";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services";
 
-
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
-
 
 class RSSNavbar extends Component{
   constructor(props) {
@@ -34,7 +30,6 @@ class RSSNavbar extends Component{
     this.state = {
       currentPage: "Manual",
       isPasswordOpen : false,
-      isAuthOpen : false,
       isLogoutOpen : false,
       isAlertOpen: false,
       alertMessage: "",
@@ -44,7 +39,6 @@ class RSSNavbar extends Component{
 
   getClassName = page => {
     const { currentPage } = this.state;
-
     return currentPage === page ? "nav-item-custom-select" : null;
   };
 
@@ -73,7 +67,6 @@ class RSSNavbar extends Component{
   closeModal = async () => {
   	await this.setState(() => ({
       isPasswordOpen: false,
-      isAuthOpen: false,
       isLogoutOpen: false,
       isMode:''
   	}));
@@ -103,21 +96,14 @@ class RSSNavbar extends Component{
     });
   }
 
-  initViewListCheck = async () => {
-    await API.checkAllToolInfoList(this.props, false);
-    await API.checkAllLogInfoList(this.props, false);
-    return true;
-  }
-
-
   onLogout = async () => {
     await API.setLoginInit(this.props);
     await services.axiosAPI.get(Define.REST_API_URL + "/user/logout");
-    this.props.onMovePage(Define.PAGE_LOGIN)
+    this.props.onMovePage(Define.PAGE_LOGIN);
   };
 
   render() {
-    const { isPasswordOpen, isAuthOpen, isLogoutOpen, isAlertOpen, alertMessage } = this.state;
+    const { isPasswordOpen, isLogoutOpen, isAlertOpen, alertMessage } = this.state;
 
     return (
         <>
@@ -188,21 +174,21 @@ class RSSNavbar extends Component{
                   </UncontrolledDropdown>
                : null
               }
-            </Nav>
-            <Nav className="ml-auto" navbar>
-              <UncontrolledDropdown nav inNavbar>
-                <DropdownToggle nav>
-                  <FontAwesomeIcon icon={faUserCircle} size="lg"/> {API.getLoginUserName(this.props)}
-                </DropdownToggle>
-                <DropdownMenu right>
-                  <DropdownItem onClick={() => this.openModal("password")}>Change Password</DropdownItem>
-                  <DropdownItem divider/>
-                  <DropdownItem onClick={() => this.openModal("logout")}>Logout</DropdownItem>
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </Nav>
-          </Navbar>
-        </div>
+              </Nav>
+              <Nav className="ml-auto" navbar>
+                <UncontrolledDropdown nav inNavbar>
+                  <DropdownToggle nav>
+                    <FontAwesomeIcon icon={faUserCircle} size="lg"/> {API.getLoginUserName(this.props)}
+                  </DropdownToggle>
+                  <DropdownMenu right>
+                    <DropdownItem onClick={() => this.openModal("password")}>Change Password</DropdownItem>
+                    <DropdownItem divider/>
+                    <DropdownItem onClick={() => this.openModal("logout")}>Logout</DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledDropdown>
+              </Nav>
+            </Navbar>
+          </div>
         </>
     );
   }
