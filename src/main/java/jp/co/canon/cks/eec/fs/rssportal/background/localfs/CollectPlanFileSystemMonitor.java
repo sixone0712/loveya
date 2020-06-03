@@ -6,8 +6,10 @@ import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -18,11 +20,13 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
 
     private final Log log = LogFactory.getLog(getClass());
     private static final String name = "collect-plan-fs-monitor";
-    private static final String _path = "planroot";
-    private static final int _minFreeSpace = 10;    // gigabytes
-    private static final int _minFreeSpacePercent = 20;
-    private static final long _interval = 1800*1000;
-    private static final long _keepPeriod = 24*3600*1000;
+
+    @Value("${rssportal.collect.logBase}")
+    private String _path;
+    private int _minFreeSpace = 10;    // gigabytes
+    private int _minFreeSpacePercent = 20;
+    private long _interval = 1800*1000;
+    private long _keepPeriod = 24*3600*1000;
 
     private final DownloadListService downloadService;
     private final CollectPlanner collectPlanner;
@@ -31,10 +35,16 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
 
     @Autowired
     public CollectPlanFileSystemMonitor(DownloadListService downloadService, CollectPlanner collectPlanner) {
-        super(name, _path, _minFreeSpace, _minFreeSpacePercent, _interval);
+        super(name);
         this.downloadService = downloadService;
         this.collectPlanner = collectPlanner;
         cleanupList = new ArrayList<>();
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        log.info("===================path="+_path);
+        configure(_path, _minFreeSpace, _minFreeSpacePercent, _interval);
         log.info(name+" thread starts");
     }
 

@@ -10,10 +10,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
+import javax.annotation.PostConstruct;
 import javax.xml.rpc.ServiceException;
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +33,8 @@ import java.util.List;
 @Component
 public class CollectPlanner extends Thread {
 
-    private static final String planRootDir = "planroot";
+    @Value("${rssportal.collect.logBase}")
+    private String planRootDir;
     private final CollectPlanService service;
     private final DownloadListService downloadListService;
     private final DownloadMonitor monitor;
