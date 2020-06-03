@@ -188,11 +188,12 @@ class UserList extends Component {
         }
         else
         {
-            const { registeredList, deleteIndex } = this.state;
+            const { pageSize, deleteIndex } = this.state;
+            const numerator = deleteIndex - 1 === 0 ? 1 : deleteIndex - 1;
             await this.closeModal(); //delete modal Close
 
             this.setState({
-                currentPage: Math.ceil(registeredList.length / deleteIndex),
+                currentPage: Math.ceil(numerator / pageSize),
                 deleteIndex: ""
             });
 

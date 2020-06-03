@@ -172,7 +172,8 @@ class RSSautoplanlist extends Component {
 
     closeDeleteModal = async (deleting, selectedPlanId) => {
         let res;
-        const { registeredList, deleteIndex } = this.state;
+        const { pageSize, deleteIndex } = this.state;
+        const numerator = deleteIndex - 1 === 0 ? 1 : deleteIndex - 1;
 
         if(deleting) {
             res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
@@ -186,7 +187,7 @@ class RSSautoplanlist extends Component {
 
         if(res.status === 200) {
             await this.setState({
-                currentPage: Math.ceil(registeredList.length / deleteIndex),
+                currentPage: Math.ceil(numerator / pageSize),
                 deleteIndex: ""
             });
         }

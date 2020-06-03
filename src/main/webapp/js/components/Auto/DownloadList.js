@@ -220,6 +220,10 @@ class RSSAutoDownloadList extends Component {
             const res = await this.requestDelete();
             console.log("[DownladList][deleteDownloadFile]res", res);
             if(res === Define.RSS_SUCCESS) {
+                const numerator = this.state.delete.keyIndex - 1 === 0 ? 1 : this.state.delete.keyIndex - 1;
+                this.setState({
+                    currentPage: Math.ceil(numerator / this.state.pageSize)
+                });
                 this.closeModal();
             } else {
                 this.closeModal();
@@ -244,13 +248,14 @@ class RSSAutoDownloadList extends Component {
         console.log("[DownloadList][componentDidMount]res", res);
         let newRequestList = [];
         if(data !== "") {
-            newRequestList = data.map(item => {
+            newRequestList = data.map((item, idx) => {
                 return {
                     requestId: item.title,
                     requestStatus: item.status,
                     id: item.id,
                     planId: item.planId,
-                    path: item.path
+                    path: item.path,
+                    keyIndex: idx + 1
                 }
             })
             result = true;

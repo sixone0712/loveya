@@ -245,19 +245,23 @@ class FileList extends Component {
   };
 
   checkFileItem = (e) => {
-    const idx = e.target.id.split('_{#div#}_')[1];
-    if(idx !== null) {
-      API.checkResponseList(this.props, idx);
+    if(e !== null && e !== undefined) {
+      const idx = e.target.id.split('_{#div#}_')[1];
+      if (idx !== null && idx !== undefined) {
+        API.checkResponseList(this.props, idx);
+      }
+      e.stopPropagation();
     }
-    e.stopPropagation();
   };
 
   handleTrClick = e => {
-    const id = e.target.parentElement.getAttribute("cbinfo");
-    if(id !== null) {
-      API.checkResponseList(this.props, id);
+    if(e !== null && e !== undefined) {
+      const id = e.target.parentElement.getAttribute("cbinfo");
+      if (id !== null && id !== undefined) {
+        API.checkResponseList(this.props, id);
+      }
+      e.stopPropagation();
     }
-    e.stopPropagation();
   };
 
   checkAllFileItem = (checked) => {

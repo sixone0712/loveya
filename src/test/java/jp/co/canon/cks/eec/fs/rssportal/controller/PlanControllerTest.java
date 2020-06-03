@@ -20,8 +20,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 
+import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -49,8 +53,15 @@ class PlanControllerTest {
 
     @Test
     void addPlan() throws Exception {
+        printSeparator("addPlan");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath("/rss/rest/plan/add");
+
+        // first off, test fail cases.
+        assertEquals(planController.addPlan(request, null).getStatusCode(), HttpStatus.BAD_REQUEST);
+        Map failParam = new HashMap<>();
+        failParam.put("unused", "value");
+        assertEquals(planController.addPlan(request,failParam).getStatusCode(), HttpStatus.BAD_REQUEST);
 
         // generate parameters
         Map<String, Object> param = createAddPlanRequestBody();
@@ -68,9 +79,15 @@ class PlanControllerTest {
 
     @Test
     void listPlan() throws Exception {
+        printSeparator("listPlan");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        // fail cases.
+        request.setServletPath("list");
+        assertEquals(planController.listPlan(request, null).getStatusCode(), HttpStatus.BAD_REQUEST);
+
         int[] planIds = new int[3];
         // add plans
-        MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath("/rss/rest/plan/add");
         Map<String, Object> param = createAddPlanRequestBody();
         for(int i=0; i<planIds.length; ++i) {
@@ -90,12 +107,33 @@ class PlanControllerTest {
         assertFalse(collectPlanService.restartPlan(-1));
         collectPlanService.deletePlan(-1);
 
+        // stop/restart
+        assertTrue(collectPlanService.stopPlan(planIds[0]));
+        assertTrue(collectPlanService.stopPlan(planIds[0]));
+        assertTrue(collectPlanService.restartPlan(planIds[0]));
+
         // delete the plans
-        request.setServletPath("/rss/rest/plan//delete");
+        for(int i=0; i<planIds.length; ++i)
+            assertTrue(collectPlanService.stopPlan(planIds[i]));
+
+        Map<String, Object> listParam = new HashMap<>();
+        listParam.put("withExpired", "true");
         for(int i=0; i<planIds.length; ++i) {
-            assertTrue(collectPlanService.stopPlan(planIds[i]));
-            assertTrue(collectPlanService.stopPlan(planIds[i]));
-            assertTrue(collectPlanService.restartPlan(planIds[i]));
+            loop_top:
+            while(true) {
+                request.setServletPath("listPlan");
+                ResponseEntity<List<CollectPlanVo>> responseEntity =
+                        planController.listPlan(request, listParam);
+                assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+                for(CollectPlanVo plan: responseEntity.getBody()) {
+                    if(plan.getId()==planIds[i] &&
+                            !plan.getDetail().equalsIgnoreCase("collecting")) {
+                        break loop_top;
+                    }
+                }
+                Thread.sleep(1000);
+            }
+            request.setServletPath("/rss/rest/plan//delete");
             assertEquals(planController.deletePlan(request, planIds[i]).getStatusCode(), HttpStatus.OK);
         }
     }
@@ -103,6 +141,7 @@ class PlanControllerTest {
     @Test
     @Timeout(300)
     void deletePlan() throws Exception {
+        printSeparator("deletePlan");
         // deletePlan() method will be tested many place in this file.
         MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -112,6 +151,7 @@ class PlanControllerTest {
 
     @Test
     void download() throws Exception {
+        printSeparator("download");
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.setServletPath("/rss/rest/plan/download");
@@ -165,13 +205,17 @@ class PlanControllerTest {
 
     @Test
     void modify() throws Exception {
+        printSeparator("modify");
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setServletPath("/rss/rest/plan/add");
+
+        request.setServletPath("modify");
+        assertEquals(planController.modify(request, -1, null).getStatusCode(), HttpStatus.NOT_FOUND);
 
         // generate parameters
         Map<String, Object> param = createAddPlanRequestBody();
 
         // add a plan
+        request.setServletPath("/rss/rest/plan/add");
         ResponseEntity<Integer> addPlanResponse = planController.addPlan(request, param);
         assertEquals(addPlanResponse.getStatusCode(), HttpStatus.OK);
         int planId = addPlanResponse.getBody();
@@ -216,6 +260,7 @@ class PlanControllerTest {
 
     @Test
     void stopPlan() {
+        printSeparator("stopPlan");
         // stopPlan() method will be tested another test case in this file.
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath("/rss/rest/plan/stop");
@@ -224,10 +269,56 @@ class PlanControllerTest {
 
     @Test
     void restartPlan() {
+        printSeparator("restartPlan");
         // restartPlan() method will be tested another test case in this file.
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath("/rss/rest/plan/restart");
         assertEquals(planController.restartPlan(request, -1).getStatusCode(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void createDownloadFilename() throws Exception {
+        printSeparator("createDownloadFilename");
+        Method method = PlanController.class.getDeclaredMethod("createDownloadFilename",
+                CollectPlanVo.class, DownloadListVo.class);
+        assertNotNull(method);
+        method.setAccessible(true);
+        CollectPlanVo plan = new CollectPlanVo();
+        DownloadListVo item = new DownloadListVo();
+        setSession(null);
+
+        // with null session
+        assertNull(method.invoke(planController, plan, item));
+
+        // with null context in the session
+        MockHttpSession session = new MockHttpSession();
+        setSession(session);
+        assertNull(method.invoke(planController, plan, item));
+
+        // without username
+        SessionContext context = new SessionContext();
+        UserVo user = new UserVo();
+        user.setUsername(null);
+        context.setUser(user);
+        context.setAuthorized(true);
+        session.setAttribute("context", context);
+        assertNull(method.invoke(planController, plan, item));
+
+        user.setUsername("testuser");
+        assertNull(method.invoke(planController, plan, item));
+
+        plan.setFab("");
+        item.setCreated(new Timestamp(System.currentTimeMillis()));
+        assertNotNull(method.invoke(planController, plan, item));
+
+        plan.setFab("fab1,fab2");
+        assertNotNull(method.invoke(planController, plan, item));
+    }
+
+    private void setSession(HttpSession newSession) throws Exception {
+        Field sessionField = PlanController.class.getDeclaredField("session");
+        sessionField.setAccessible(true);
+        sessionField.set(planController, newSession);
     }
 
     private Map<String, Object> createAddPlanRequestBody() throws Exception {
@@ -260,5 +351,9 @@ class PlanControllerTest {
         param.put("interval", "3600000");
         param.put("description", "desc: if you can see this..");
         return param;
+    }
+
+    private void printSeparator(String name) {
+        log.info("-------------------- "+name+" --------------------");
     }
 }

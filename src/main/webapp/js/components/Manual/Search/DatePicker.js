@@ -9,7 +9,7 @@ import {bindActionCreators} from "redux";
 import * as searchListActions from "../../../modules/searchList";
 import * as API from "../../../api";
 
-const CreateDatetimePicker = (props) => {
+export const CreateDatetimePicker = (props) => {
     const {label, date, onChangeDate} = props;
 
     return (
