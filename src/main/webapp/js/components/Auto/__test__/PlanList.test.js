@@ -175,7 +175,7 @@ describe('PlanList', () => {
         wrapper.instance().openDeleteModal (235, statusType.STOPPED);
     });
 
-    it('closeDeleteModal', () => {
+    it('closeDeleteModal', async () => {
         store = mockStore(initialState);
         const wrapper = shallow(<PlanList
             dispatch={dispatch}
@@ -183,9 +183,20 @@ describe('PlanList', () => {
             {...props}
         />).dive().dive();
         wrapper.setState(localState);
-        services.axiosAPI.get = jest.fn().mockResolvedValue();
-        wrapper.instance().closeDeleteModal(false, 235);
-        wrapper.instance().closeDeleteModal(true, 235);
+
+        await wrapper.instance().closeDeleteModal(false, 235);
+
+        services.axiosAPI.get = jest.fn().mockResolvedValue({status: 200});
+        await wrapper.instance().closeDeleteModal(true, 235);
+
+        services.axiosAPI.get = jest.fn().mockResolvedValue({status: 0});
+        await wrapper.instance().closeDeleteModal(true, 235);
+
+        wrapper.setState({
+            ...localState,
+            deleteIndex: 1
+        })
+        await wrapper.instance().closeDeleteModal(false, 235);
     });
 
     it('openStatusModal', () => {

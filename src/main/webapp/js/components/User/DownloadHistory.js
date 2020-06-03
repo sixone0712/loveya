@@ -24,7 +24,7 @@ const { Option } = Select;
 
 
 
-function getDownloadType(type) {
+export function getDownloadType(type) {
     let typeString = 0;
     console.log("type: ",type);
     typeString = (type == Define.RSS_TYPE_FTP_MANUAL)  ? "Manual download(ftp)"

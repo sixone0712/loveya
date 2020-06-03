@@ -50,7 +50,7 @@ class Login extends Component {
         }
     }
 
-    loginProcess =async(e) => {
+    loginProcess =async () => {
         let errCode = this.handleSubmit();
         if (!errCode)
         {

@@ -43,7 +43,7 @@ class SignOut extends Component {
         this.setState(() => ({isModalOpen: false}));
     }
 
-    SignOutProcess = async (e) => {
+    SignOutProcess = async () => {
         const {uInfo, errors} = this.state;
         const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,28})([a-zA-Z0-9]$)/g;
         const pwRegex = /[0-9a-zA-Z]{6,30}/g;

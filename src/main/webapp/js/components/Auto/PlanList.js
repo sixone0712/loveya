@@ -171,7 +171,7 @@ class RSSautoplanlist extends Component {
     };
 
     closeDeleteModal = async (deleting, selectedPlanId) => {
-        let res;
+        let res = 0;
         const { pageSize, deleteIndex } = this.state;
         const numerator = deleteIndex - 1 === 0 ? 1 : deleteIndex - 1;
 
