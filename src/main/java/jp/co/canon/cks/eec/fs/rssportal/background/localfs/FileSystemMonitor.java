@@ -6,13 +6,17 @@ import java.io.File;
 
 public abstract class FileSystemMonitor extends Thread {
 
-    protected final String monitorName;
-    protected final String monitorPath;
-    protected final int minFreeSpace;
-    protected final int minFreeSpacePercent;
-    protected final long interval;
+    protected String monitorName;
+    protected String monitorPath;
+    protected int minFreeSpace;
+    protected int minFreeSpacePercent;
+    protected long interval;
 
     private boolean halted;
+
+    protected FileSystemMonitor(@NonNull String monitorName) {
+        this.monitorName = monitorName;
+    }
 
     protected FileSystemMonitor(@NonNull String monitorName,
                                 @NonNull String monitorPath,
@@ -20,6 +24,14 @@ public abstract class FileSystemMonitor extends Thread {
                                 int minFreeSpacePercent,
                                 long interval) {
         this.monitorName = monitorName;
+        this.monitorPath = monitorPath;
+        this.minFreeSpace = minFreeSpace;
+        this.minFreeSpacePercent = minFreeSpacePercent;
+        this.interval = interval;
+        this.start();
+    }
+
+    protected void configure(@NonNull String monitorPath, int minFreeSpace, int minFreeSpacePercent, long interval) {
         this.monitorPath = monitorPath;
         this.minFreeSpace = minFreeSpace;
         this.minFreeSpacePercent = minFreeSpacePercent;

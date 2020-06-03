@@ -55,6 +55,9 @@ rssportal:
     constructdisplay: devTemp/ConstructDisplay.xml
   vftp:
     objectlistfile: devTemp/ObjectList.xml
+  collect:
+    logBase: planroot
+    cacheBase: download
 
 ---
 spring:
@@ -64,3 +67,6 @@ rssportal:
     constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml
   vftp:
     objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
+  collect:
+    logBase: /LOG/autocollect
+    cacheBase: /LOG/cache
