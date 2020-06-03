@@ -81,17 +81,17 @@ class FileList extends Component {
       });
     }, 100);
 
-    // 초기화
+    // Init
     const { searchListActions } = this.props;
     searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
     this.setErrorStatus(Define.RSS_SUCCESS);
 
-    // Download Request 요청
+    // Request Download
     const requestId = await API.requestDownload(this.props);
     console.log("requestId", requestId);
     searchListActions.searchSetDlStatus({dlId: requestId});
 
-    // SetInterval에서 사용할 Modal Func 추가
+    // Add Modal Func to use in SetInterval
     const modalFunc = {
       closeProcessModal: this.closeProcessModal,
       openCompleteModal: this.openCompleteModal,
@@ -102,7 +102,7 @@ class FileList extends Component {
       setSearchListActions: this.setSearchListActions
     };
 
-    // Download Status 요청
+    // Request Download Status
     if(requestId !== "") {
       const intervalFunc = await API.setWatchDlStatus(requestId, modalFunc);
       searchListActions.searchSetDlStatus({func: intervalFunc});
@@ -133,7 +133,7 @@ class FileList extends Component {
         // Reauest Cancel
         const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/cancel?dlId=" + dlId);
         console.log("res", res)
-        // 에러 처리 추가 필요
+        // error process
       }
 
       const {searchListActions } = this.props;

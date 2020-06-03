@@ -131,7 +131,7 @@ class RSSautoplanwizard extends Component {
 
     console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
-    // 에러 처리 추가 필요
+    // error process
   }
 
   handleRequestAutoPlanEdit = async (editId) => {
@@ -142,7 +142,7 @@ class RSSautoplanwizard extends Component {
     console.log(res);
     console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
-    // 에러 처리 추가 필요
+    // error process
   }
 
 
