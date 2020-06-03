@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
 import PropTypes from 'prop-types';
 
-const CreateDatetimePicker = (props) => {
+export const CreateDatetimePicker = (props) => {
     const {label, date, onChangeDate} = props;
 
     return (
