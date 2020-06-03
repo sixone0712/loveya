@@ -27,6 +27,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             "/rss/page/login",
             "/rss/rest/user/login",
             "/rss/rest/user/isLogin",
+            "/rss/rest/user/logout",
             "/favicon\\.ico",
             "/dbtest/[\\w./]*",
             "/dbtest",
@@ -91,7 +92,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     }
 
     private boolean isPageMove(@NonNull String url) {
-        return url.startsWith("/rss");
+        return url.startsWith("/rss/page");
     }
 
     @SuppressWarnings("unused")

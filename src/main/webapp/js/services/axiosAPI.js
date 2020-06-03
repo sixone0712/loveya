@@ -1,16 +1,16 @@
 import axios from 'axios';
 import * as Define from "../define";
 
-export const checkSession = (data) => {
+export const checkSession = async (data) => {
     console.log("[axiosAPI][checkSession]");
     console.log("[axiosAPI][checkSession]data.headers", data.headers)
     const { userauth } = data.headers;
     console.log("[axiosAPI][checkSession]userauth", userauth);
     if(userauth == null || userauth == "false") {
         console.log("[axiosAPI][checkSession]replace");
+        await axios.get(Define.REST_API_URL + "/user/logout");
         window.sessionStorage.clear();
         window.location.replace('/rss');
-        //window.location.reload(true);
         return null;
     }
 

@@ -21,6 +21,7 @@ import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services";
+import axios from "axios";
 
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
 
@@ -98,7 +99,7 @@ class RSSNavbar extends Component{
 
   onLogout = async () => {
     await API.setLoginInit(this.props);
-    await services.axiosAPI.get(Define.REST_API_URL + "/user/logout");
+    await axios.get(Define.REST_API_URL + "/user/logout");
     this.props.onMovePage(Define.PAGE_LOGIN);
   };
 
