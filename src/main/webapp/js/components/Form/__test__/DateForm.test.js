@@ -15,6 +15,7 @@ import * as Define from "../../../define";
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import services from '../../../services';
+import PropTypes from "prop-types";
 
 
 const initialStore = {
@@ -26,6 +27,8 @@ let store;
 const initProps = {
     startDate: moment().startOf("day"),
     endDate: moment().endOf("day"),
+    sDateChanageFunc: jest.fn(),
+    eDateChanageFunc: jest.fn()
 };
 
 describe('DateForm', () => {
