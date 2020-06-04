@@ -360,6 +360,8 @@ class RSSautoplanwizard extends Component {
                           icon={faCheckCircle}
                           message={modalMessage}
                           style={"auto-plan"}
+                          leftBtn={"OK"}
+                          rightBtn={"Cancel"}
                           actionBg={this.modalClose}
                           actionLeft={() => this.handleRequestAutoPlanAdd()}
                           actionRight={this.modalClose}
@@ -369,6 +371,8 @@ class RSSautoplanwizard extends Component {
                           icon={faCheckCircle}
                           message={modalMessage}
                           style={"auto-plan"}
+                          leftBtn={"OK"}
+                          rightBtn={"Cancel"}
                           actionBg={this.modalClose}
                           actionLeft={() => this.handleRequestAutoPlanEdit(editId)}
                           actionRight={this.modalClose}

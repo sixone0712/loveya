@@ -244,6 +244,8 @@ class ManualVftpSss extends Component {
                 <ConfirmModal isOpen={(this.state.isModalOpen && this.state.isMode==='DeleteCommand')}
                               icon={faTrashAlt}
                               message={DELETE_MESSAGE}
+                              leftBtn={"OK"}
+                              rightBtn={"Cancel"}
                               style={"auto-plan"}
                               actionBg={this.closeModal}
                               actionLeft={this.deleteCommand}

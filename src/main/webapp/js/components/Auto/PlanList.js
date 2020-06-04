@@ -156,8 +156,8 @@ class RSSautoplanlist extends Component {
         }
     }
 
-    openDeleteModal = async (planId, status, index) => {
-        if (status === statusType.RUNNING) {
+    openDeleteModal = async (planId, status, detail, index) => {
+        if (status === statusType.RUNNING || detail === detailType.COLLECTING) {
         //if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
         } else {
@@ -317,6 +317,8 @@ class RSSautoplanlist extends Component {
                                   icon={faExclamationCircle}
                                   message={statusMessage}
                                   style={"auto-plan"}
+                                  leftBtn={"Yes"}
+                                  rightBtn={"No"}
                                   actionBg={this.closeStatusModal}
                                   actionLeft={() => this.handleStatusChange(selectedPlanStatus, selectedPlanId)}
                                   actionRight={this.closeStatusModal}
@@ -325,6 +327,8 @@ class RSSautoplanlist extends Component {
                                   icon={faTrashAlt}
                                   message={messageType.CONFIRM_DELETE_MESSAGE}
                                   style={"auto-plan"}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   actionBg={() => this.closeDeleteModal(false, selectedPlanId)}
                                   actionLeft={() => this.closeDeleteModal(true, selectedPlanId)}
                                   actionRight={() => this.closeDeleteModal(false, selectedPlanId)}
@@ -398,7 +402,7 @@ class RSSautoplanlist extends Component {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus, plan.keyIndex) }>
+                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus, plan.planDetail, plan.keyIndex) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>

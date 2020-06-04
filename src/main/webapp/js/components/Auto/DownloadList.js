@@ -322,6 +322,8 @@ class RSSAutoDownloadList extends Component {
                                   icon={faTrashAlt}
                                   message={modalMessage}
                                   style={"auto-plan"}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   actionBg={this.closeModal}
                                   actionLeft={this.deleteDownloadFile}
                                   actionRight={this.closeModal}
@@ -330,6 +332,8 @@ class RSSAutoDownloadList extends Component {
                                   icon={faDownload}
                                   message={modalMessage}
                                   style={"auto-plan"}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   actionBg={this.closeModal}
                                   actionLeft={this.saveDownloadFile}
                                   actionRight={this.closeModal}
@@ -337,6 +341,8 @@ class RSSAutoDownloadList extends Component {
                     <ConfirmModal isOpen={isNewDownloadOpen}
                                   icon={faDownload}
                                   message={modalMessage}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   style={"auto-plan"}
                                   actionBg={this.closeModal}
                                   actionLeft={this.saveDownloadFile}
