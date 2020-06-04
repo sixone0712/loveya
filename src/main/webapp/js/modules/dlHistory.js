@@ -51,9 +51,14 @@ export default handleActions({
 
                 if (result !== 0) {
                     console.warn("[GET_DL_HISTORY] error ", result);
-                    return state.setIn(["dlHistoryInfo", "result"], result);
+                    return state.setIn(["dlHistoryInfo", "result"], result)
+                                .setIn(["dlHistoryInfo", "dl_list"], List([]));
                 }
                 console.log("[GET_DL_HISTORY]  ", result);
+                console.log("[GET_DL_HISTORY]  ", data.length);
+                if(data.length === 0) {
+                    return state.setIn(["dlHistoryInfo", "dl_list"], List([]));
+                }
 
                 const cDwList = data.map(list => {
                     return {

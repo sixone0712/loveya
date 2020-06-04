@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as autoPlanActions from "../../modules/autoPlan";
-import {PAGE_AUTO_PLAN_ADD} from "../../define";
+import {PAGE_ADMIN_ACCOUNT, PAGE_ADMIN_DL_HISTORY, PAGE_AUTO_PLAN_ADD} from "../../define";
 
 class MoveRefreshPage extends Component {
     async componentDidMount() {
@@ -36,6 +36,12 @@ class MoveRefreshPage extends Component {
         } else if (target.includes(Define.PAGE_AUTO_STATUS)) {
             console.log("PAGE_AUTO_STATUS");
             history.replace(Define.PAGE_AUTO_STATUS);
+        } else if (target.includes(Define.PAGE_ADMIN_ACCOUNT)) {
+            console.log("PAGE_ADMIN_ACCOUNT");
+            history.replace(Define.PAGE_ADMIN_ACCOUNT);
+        } else if (target.includes(Define.PAGE_ADMIN_DL_HISTORY)) {
+            console.log("PAGE_ADMIN_ACCOUNT");
+            history.replace(Define.PAGE_ADMIN_DL_HISTORY);
         }
     }
 

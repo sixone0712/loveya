@@ -164,11 +164,11 @@ class RSSNavbar extends Component{
                       Administrator
                     </DropdownToggle>
                     <DropdownMenu>
-                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_ACCOUNT} onClick={() => this.handlePageChange("admin")}>
+                      <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_ADMIN_ACCOUNT} onClick={() => this.handlePageChange("admin")}>
                         User Account
                       </DropdownItem>
                       <DropdownItem divider />
-                      <DropdownItem tag={RRNavLink} to={Define.PAGE_ADMIN_DL_HISTORY} onClick={() => this.handlePageChange("admin")}>
+                      <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_ADMIN_DL_HISTORY} onClick={() => this.handlePageChange("admin")}>
                         Download History
                       </DropdownItem>
                     </DropdownMenu>
