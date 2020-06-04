@@ -156,8 +156,8 @@ class RSSautoplanlist extends Component {
         }
     }
 
-    openDeleteModal = async (planId, status, index) => {
-        if (status === statusType.RUNNING) {
+    openDeleteModal = async (planId, status, detail, index) => {
+        if (status === statusType.RUNNING || detail === detailType.COLLECTING) {
         //if(!status) {
             this.openAlert(messageType.DELETE_ALERT_MESSAGE);
         } else {
@@ -398,7 +398,7 @@ class RSSautoplanlist extends Component {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus, plan.keyIndex) }>
+                                                    <div className="icon-area" onClick={ () => this.openDeleteModal(plan.id, plan.planStatus, plan.planDetail, plan.keyIndex) }>
                                                         <FontAwesomeIcon icon={faTrashAlt} />
                                                     </div>
                                                 </td>
