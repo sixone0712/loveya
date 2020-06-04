@@ -43,7 +43,7 @@ class SignOut extends Component {
         this.setState(() => ({isModalOpen: false}));
     }
 
-    SignOutProcess = async () => {
+    SignOutProcess = async (e) => {
         const {uInfo, errors} = this.state;
         const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,28})([a-zA-Z0-9]$)/g;
         const pwRegex = /[0-9a-zA-Z]{6,30}/g;
@@ -51,19 +51,22 @@ class SignOut extends Component {
         if(!nameRegex.test(uInfo.name)) {
             this.setState({
                 errors: {
-                    name: "Name is invalid."
+                    name: "Name is invalid.",
+                    ...this.initState,
                 }
             });
         } else if (!pwRegex.test(uInfo.pwd)) {
             this.setState({
                 errors: {
-                    pwd: "Password is invalid."
+                    pwd: "Password is invalid.",
+                    ...this.initState,
                 }
             });
         } else if (uInfo.cfpwd.length === 0) {
             this.setState({
                 errors: {
-                    cfpwd: "Please enter the confirm password."
+                    cfpwd: "Please enter the confirm password.",
+                    ...this.initState,
                 }
             });
         } else if (uInfo.pwd !== uInfo.cfpwd) {
@@ -71,8 +74,8 @@ class SignOut extends Component {
                 {
                     ...this.state,
                     errors: {
-                        ...this.state.errors,
-                        pwd: API.getErrorMsg(Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD)
+                        pwd: API.getErrorMsg(Define.CHANGE_PW_FAIL_NOT_MATCH_NEW_PASSWORD),
+                        ...this.initState,
                     }
                 })
             );
@@ -86,9 +89,9 @@ class SignOut extends Component {
                     {
                         ...this.state,
                         errors: {
-                            ...this.state.errors,
                             pwd: (result !== Define.USER_SET_FAIL_SAME_NAME) ? API.getErrorMsg(result) : "",
-                            name: (result === Define.USER_SET_FAIL_SAME_NAME) ? API.getErrorMsg(result) : ""
+                            name: (result === Define.USER_SET_FAIL_SAME_NAME) ? API.getErrorMsg(result) : "",
+                            ...this.initState,
                         }
                     })
                 );
@@ -132,22 +135,29 @@ class SignOut extends Component {
     data = {
         titleMsg:'Create Account'
     };
+
+    initState = {
+        uInfo : {
+            name:'',
+            pwd:'',
+            cfpwd:'',
+            authValue:'100'
+        },
+        errors: {
+            name: '',
+            pwd: '',
+            cfpwd: '',
+            ModalMsg: '',
+        },
+    };
     close = () => {
-        this.setState(() => (
-            {...this.state,
-                uInfo : {
-                    ...this.state.uInfo,
-                    authValue: "100",
-                },
-                errors: {
-                    name: '',
-                    pwd: '',
-                    cfpwd: '',
-                    ModalMsg: '',
-                },
-            })
-        );
-        this.props.right();
+        this.setState({
+                ...this.state,
+                uInfo:this.initState.uInfo,
+                errors:this.initState.errors,
+            });
+        this.props.right()
+
     }
     render() {
         const {errors, uInfo} = this.state;
@@ -161,7 +171,7 @@ class SignOut extends Component {
                             transitionName={'Custom-modal-anim'}
                             transitionEnterTimeout={200}
                             transitionLeaveTimeout={200}>
-                            <div className="Custom-modal-overlay" onClick={right} />
+                            <div className="Custom-modal-overlay" onClick={this.close} />
                             <div className="Custom-modal">
                                 <p className="title font-lg">{this.data.titleMsg}</p>
                                 <div className="content-with-title user-modal">

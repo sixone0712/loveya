@@ -25,17 +25,17 @@ class ChangePwModal extends Component {
     }
 
     handleSubmit = () => {
-        const { newPw, confirmPw } = this.state;
+        const { oldPw,newPw, confirmPw } = this.state;
         const passwordRegex = /[0-9a-zA-Z]{6,30}/g;
-
-        if (newPw.length === 0) {
+        if (oldPw.length === 0) {
             this.setState({
                 errors: {
-                    newPw: API.getErrorMsg(Define.CHANGE_PW_FAIL_EMPTY_PASSWORD)
+                    oldPw: "Please enter the current password.",
                 }
             });
             return true;
-        } else if (!passwordRegex.test(newPw)) {
+        }
+        else if (newPw.length === 0 || !passwordRegex.test(newPw)) {
             this.setState({
                 errors: {
                     newPw: "New password is invalid."
