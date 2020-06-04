@@ -18,6 +18,9 @@ rssportal:
     objectlistfile: testroot/CanonFileService03/definitions/ObjectList.xml
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
+  collect:
+    logBase: planroot
+    cacheBase: download
 
 logging:
   level:

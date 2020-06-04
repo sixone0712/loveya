@@ -18,4 +18,6 @@ rssportal:
     objectlistfile: testroot/CanonFileService01/definitions/ObjectList.xml
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
-    
+  collect:
+    logBase: planroot
+    cacheBase: download
