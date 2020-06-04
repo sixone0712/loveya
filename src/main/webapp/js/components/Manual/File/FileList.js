@@ -356,6 +356,8 @@ class FileList extends Component {
                         icon={faDownload}
                         message={modalMessage}
                         style={"secondary"}
+                        leftBtn={"Yes"}
+                        rightBtn={"No"}
                         actionBg={this.closeDownloadModal}
                         actionLeft={this.openProcessModal}
                         actionRight={this.closeDownloadModal}
@@ -408,6 +410,8 @@ class FileList extends Component {
                         icon={faBan}
                         message={modalMessage}
                         style={"secondary"}
+                        leftBtn={"Yes"}
+                        rightBtn={"No"}
                         actionBg={null}
                         actionLeft={() => this.closeCancelModal(true)}
                         actionRight={() => this.closeCancelModal(false)}
@@ -415,6 +419,8 @@ class FileList extends Component {
           <ConfirmModal isOpen={isCompleteOpen}
                         icon={faChevronCircleDown}
                         message={modalMessage}
+                        leftBtn={"Save"}
+                        rightBtn={"Cancel"}
                         style={"secondary"}
                         actionBg={null}
                         actionLeft={() => this.closeCompleteModal(true)}

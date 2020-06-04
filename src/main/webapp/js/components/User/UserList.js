@@ -246,6 +246,8 @@ class UserList extends Component {
                     <ConfirmModal isOpen={(isModalOpen && this.state.isMode==='deleteUser')}
                                   icon={faTrashAlt}
                                   message={DELETE_CONFIRM_MESSAGE}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   style={"administrator"}
                                   actionBg={this.closeModal}
                                   actionLeft={this.DeleteAccount}

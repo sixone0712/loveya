@@ -317,6 +317,8 @@ class RSSautoplanlist extends Component {
                                   icon={faExclamationCircle}
                                   message={statusMessage}
                                   style={"auto-plan"}
+                                  leftBtn={"Yes"}
+                                  rightBtn={"No"}
                                   actionBg={this.closeStatusModal}
                                   actionLeft={() => this.handleStatusChange(selectedPlanStatus, selectedPlanId)}
                                   actionRight={this.closeStatusModal}
@@ -325,6 +327,8 @@ class RSSautoplanlist extends Component {
                                   icon={faTrashAlt}
                                   message={messageType.CONFIRM_DELETE_MESSAGE}
                                   style={"auto-plan"}
+                                  leftBtn={"OK"}
+                                  rightBtn={"Cancel"}
                                   actionBg={() => this.closeDeleteModal(false, selectedPlanId)}
                                   actionLeft={() => this.closeDeleteModal(true, selectedPlanId)}
                                   actionRight={() => this.closeDeleteModal(false, selectedPlanId)}

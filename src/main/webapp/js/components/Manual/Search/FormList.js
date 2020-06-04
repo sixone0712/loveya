@@ -256,6 +256,8 @@ class FormList extends Component{
                                       icon={faExclamationCircle}
                                       message={"Are you sure want to cancel the search?"}
                                       style={"green"}
+                                      leftBtn={"Yes"}
+                                      rightBtn={"No"}
                                       actionBg={null}
                                       actionLeft={() => this.openModal(modalType.CANCEL_COMPLETE)}
                                       actionRight={() => this.closeModal(modalType.CANCEL)}

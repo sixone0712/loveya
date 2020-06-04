@@ -11,6 +11,8 @@ const initProps = {
     icon: faTrashAlt,
     message: "alert modal unit test",
     style: "primary",
+    leftBtn: "OK",
+    rightBtn: "Cancel",
     actionBg: jest.fn(),
     actionLeft: jest.fn(),
     actionRight: jest.fn()
@@ -37,6 +39,8 @@ describe("Common Confirm test", () => {
                 isOpen={initProps.isOpen}
                 icon={initProps.icon}
                 message={initProps.message}
+                leftBtn={initProps.leftBtn}
+                rightBtn={initProps.rightBtn}
                 style={initProps.style}
                 actionBg={handleClick}
                 actionLeft={initProps.actionLeft}
@@ -54,6 +58,8 @@ describe("Common Confirm test", () => {
                 isOpen={initProps.isOpen}
                 icon={initProps.icon}
                 message={initProps.message}
+                leftBtn={initProps.leftBtn}
+                rightBtn={initProps.rightBtn}
                 style={initProps.style}
                 actionBg={initProps.actionBg}
                 actionLeft={handleClick}
@@ -71,6 +77,8 @@ describe("Common Confirm test", () => {
                 isOpen={initProps.isOpen}
                 icon={initProps.icon}
                 message={initProps.message}
+                leftBtn={initProps.leftBtn}
+                rightBtn={initProps.rightBtn}
                 style={initProps.style}
                 actionBg={initProps.actionBg}
                 actionLeft={initProps.actionLeft}

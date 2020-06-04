@@ -246,6 +246,8 @@ class ManualVftpCompat extends Component {
                           icon={faTrashAlt}
                           message={DELETE_MESSAGE}
                           style={"auto-plan"}
+                          leftBtn={"OK"}
+                          rightBtn={"Cancel"}
                           actionBg={this.closeModal}
                           actionLeft={this.deleteCommand}
                           actionRight={this.closeModal}

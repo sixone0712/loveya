@@ -2,7 +2,7 @@ import React from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const ConfirmModal = ({isOpen, icon, message, style, actionBg, actionLeft, actionRight}) => {
+const ConfirmModal = ({isOpen, icon, message, leftBtn, rightBtn, style, actionBg, actionLeft, actionRight}) => {
     return (
         <>
             {isOpen ? (
@@ -21,13 +21,13 @@ const ConfirmModal = ({isOpen, icon, message, style, actionBg, actionLeft, actio
                         </div>
                         <div className="button-wrap">
                             <button className={"form-type left-btn " + style} onClick={actionLeft}>
-                                OK
+                                {leftBtn}
                             </button>
                             <button
                                 className={"form-type right-btn " + style}
                                 onClick={actionRight}
                             >
-                                Cancel
+                                {rightBtn}
                             </button>
                         </div>
                     </div>
