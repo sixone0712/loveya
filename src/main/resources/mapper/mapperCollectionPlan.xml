@@ -30,7 +30,7 @@
     <select id="selectAll" resultType="CollectPlanVo">
         select
             <include refid="selectFields" />
-
+        order by id desc
         from rsss."collection_plan"
     </select>
 
@@ -39,9 +39,11 @@
             <include refid="selectFields" />
 
         from rsss."collection_plan" as t_collect
+        order by
         <if test="order!=null and order==true">
-        order by t_collect.tsnext
+            t_collect.tsnext,
         </if>
+            t_collect.id desc
         <if test="limit!=null">
         limit #{limit}
         </if>
