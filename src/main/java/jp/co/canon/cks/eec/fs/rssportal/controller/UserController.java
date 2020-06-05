@@ -1,9 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
-import jp.co.canon.cks.eec.fs.rssportal.service.UserPermissionService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
-import jp.co.canon.cks.eec.fs.rssportal.vo.UserPermissionVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,14 +24,12 @@ public class UserController {
     private final String USER_DATA = "data";
     private final HttpSession httpSession;
     private final UserService serviceUser;
-    private final UserPermissionService serviceUserPerm;
 
     @Autowired
-    public UserController(HttpSession httpSession, UserService serviceUser, UserPermissionService serviceUserPerm) {
+    public UserController(HttpSession httpSession, UserService serviceUser) {
         log.info("/user/ Controller");
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
-        this.serviceUserPerm = serviceUserPerm;
     }
 
     @GetMapping("/isLogin")

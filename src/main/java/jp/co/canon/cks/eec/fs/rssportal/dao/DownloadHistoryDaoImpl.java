@@ -29,6 +29,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
         return list;
     }
 
+/*
     @Override
     public DownloadHistoryVo find(@NonNull Map<String, Object> param) {
         if(!param.containsKey("id")) {
@@ -39,6 +40,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
         session.close();
         return history;
     }
+*/
 
     @Override
     public boolean add(@NonNull DownloadHistoryVo history) {
@@ -48,7 +50,7 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
         return true;
     }
 
-    @Override
+/*    @Override
     public boolean modify(@NonNull DownloadHistoryVo history) {
         SqlSession session = sessionFactory.openSession(true);
         session.update("dlHistory.update", history);
@@ -62,6 +64,6 @@ public class DownloadHistoryDaoImpl implements DownloadHistoryDao {
         session.delete("dlHistory.delete", history);
         session.close();
         return true;
-    }
+    }*/
 
 }

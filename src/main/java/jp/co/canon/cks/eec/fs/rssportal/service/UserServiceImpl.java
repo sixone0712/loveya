@@ -39,12 +39,12 @@ public class UserServiceImpl implements UserService {
         param.put("username", username);
         return dao.find(param);
     }
-    @Override
+   /* @Override
     public UserVo getUserById(@NonNull String id) {
         Map<String, Object> param = new HashMap<>();
         param.put("id",  Integer.parseInt(id));
         return dao.find(param);
-    }
+    }*/
 
     @Override
     public boolean addUser(@NonNull UserVo user) {
@@ -63,15 +63,14 @@ public class UserServiceImpl implements UserService {
         return dao.modify(user);
     }
 
-    @Override
+/*    @Override
     public boolean modifyPerm(int id, int[] perms) {
         UserVo temp = getUser(id);
         if(temp==null) {
             return false;
         }
-        // TODO implement this!
         return false;
-    }
+    }*/
 
     @Override
     public int verify(@NonNull String username, @NonNull String password) {

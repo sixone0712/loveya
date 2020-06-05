@@ -1,18 +1,11 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.service.DownloadHistoryService;
-import jp.co.canon.cks.eec.fs.rssportal.service.UserPermissionService;
-import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
-import jp.co.canon.cks.eec.fs.rssportal.service.UserServiceImpl;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.DownloadHistoryVo;
-import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +13,6 @@ import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Controller
 @RequestMapping("/rss/rest/dlHistory")

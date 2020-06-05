@@ -44,7 +44,7 @@
     <update id="update" parameterType="CommandVo">
         update rsss."cmd" set
             cmd_name = #{cmd_name},
-            modified = now(),
+            modified = now()
             where id = #{id}
     </update>
 

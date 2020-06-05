@@ -96,7 +96,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     }
 
     @SuppressWarnings("unused")
-    private void testAllowRegex() {
+    /*private void testAllowRegex() {
         final String[] testString = {
                 "/",
                 "/error",
@@ -128,7 +128,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         for(String str: report)
             log.info(str);
         log.info("===========================");
-    }
+    }*/
 
     private Log log = LogFactory.getLog(getClass());
 }

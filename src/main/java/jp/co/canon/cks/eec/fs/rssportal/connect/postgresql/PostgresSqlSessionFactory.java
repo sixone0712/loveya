@@ -24,7 +24,6 @@ public class PostgresSqlSessionFactory {
             factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(
                     "classpath*:mapper/**/*.xml"));
             factoryBean.setTypeAliases(
-                    UserPermissionVo.class,
                     UserVo.class,
                     GenreVo.class,
                     CommandVo.class,

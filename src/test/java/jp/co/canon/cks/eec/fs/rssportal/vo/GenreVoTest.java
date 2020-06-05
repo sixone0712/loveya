@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.vo;
 import java.util.Calendar;
 import java.util.Date;
 
+import jp.co.canon.cks.eec.fs.rssportal.Defines.Genre;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -33,5 +34,7 @@ public class GenreVoTest {
 
         String str = vo.toString();
         Assertions.assertNotNull(str);
+
+        Genre genre = new Genre();
     }
 }
