@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface CollectionPlanDao {
 
+    boolean exists();
     List<CollectPlanVo> findAll();
     List<CollectPlanVo> findAll(boolean ordering, int limit);
     CollectPlanVo find(int id);

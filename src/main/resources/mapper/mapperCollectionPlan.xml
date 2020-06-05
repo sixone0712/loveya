@@ -27,6 +27,10 @@
         case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
     </sql>
 
+    <select id="exists" resultType="boolean">
+        select exists (select * from information_schema.tables where table_schema='rsss' and table_name='collection_plan')
+    </select>
+
     <select id="selectAll" resultType="CollectPlanVo">
         select
             <include refid="selectFields" />

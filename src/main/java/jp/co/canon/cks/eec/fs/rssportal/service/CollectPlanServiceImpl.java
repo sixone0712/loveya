@@ -38,6 +38,11 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
+    public boolean isReady() {
+        return dao.exists();
+    }
+
+    @Override
     public int addPlan(@NonNull String planName,
                        @NonNull List<String> fabs,
                        @NonNull List<String> tools,

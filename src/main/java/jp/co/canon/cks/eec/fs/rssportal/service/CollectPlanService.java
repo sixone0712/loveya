@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface CollectPlanService {
 
+    boolean isReady();
     int addPlan(String planName,
                 List<String> fabs,
                 List<String> tools,
