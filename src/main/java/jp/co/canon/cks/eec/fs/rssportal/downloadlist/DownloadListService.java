@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface DownloadListService {
 
+    boolean isReady();
     DownloadListVo get(int id);
     List<DownloadListVo> getFinishedList();
     List<DownloadListVo> getList(int planId);

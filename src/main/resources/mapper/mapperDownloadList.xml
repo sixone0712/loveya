@@ -3,6 +3,10 @@
 
 <mapper namespace="downloadList">
 
+    <select id="exists" resultType="boolean">
+        select exists (select * from information_schema.tables where table_schema='rsss' and table_name='download_list')
+    </select>
+
     <select id="findItem" parameterType="integer" resultType="DownloadListVo">
         select
             id,

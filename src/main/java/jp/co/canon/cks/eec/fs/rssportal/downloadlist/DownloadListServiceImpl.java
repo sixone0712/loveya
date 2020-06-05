@@ -27,6 +27,11 @@ public class DownloadListServiceImpl implements DownloadListService{
     }
 
     @Override
+    public boolean isReady() {
+        return dao.exists();
+    }
+
+    @Override
     public DownloadListVo get(int id) {
         return dao.findItem(id);
     }

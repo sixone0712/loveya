@@ -32,6 +32,12 @@ class DownloadListControllerTest {
     }
 
     @Test
+    void isReady() {
+        log.info("test isReady()");
+        assertTrue(downloadService.isReady());
+    }
+
+    @Test
     void getList() {
         log.info("test getList()");
         MockHttpServletRequest request = new MockHttpServletRequest();
