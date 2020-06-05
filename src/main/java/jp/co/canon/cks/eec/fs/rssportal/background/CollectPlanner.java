@@ -63,6 +63,9 @@ public class CollectPlanner extends Thread {
         log.info("CollectPlanner start");
 
         try {
+            while(!service.isReady())
+                sleep(10000);
+
             while(true) {
                 // halted flag means there are no space anymore to collect files.
                 if(!halted) {

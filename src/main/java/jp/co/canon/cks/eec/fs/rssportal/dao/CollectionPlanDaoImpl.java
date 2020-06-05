@@ -23,6 +23,14 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
     }
 
     @Override
+    public boolean exists() {
+        SqlSession session = sessionFactory.openSession();
+        boolean ret = session.selectOne("colplan.exists");
+        session.close();
+        return ret;
+    }
+
+    @Override
     public List<CollectPlanVo> findAll() {
         SqlSession session = sessionFactory.openSession();
         List list = session.selectList("colplan.selectAll");

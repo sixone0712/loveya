@@ -44,9 +44,13 @@ public abstract class FileSystemMonitor extends Thread {
         halted = false;
         File target = new File(monitorPath);
         try {
+            while(!isReady()) {
+                sleep(10000);
+            }
             while(!target.exists()) {
                 sleep(interval);
             }
+
             if(target.isFile()) {
                 errorHandler("monitoring target is not directory");
                 return;
@@ -99,6 +103,7 @@ public abstract class FileSystemMonitor extends Thread {
         return total!=0?(int)(usable*100/total):0;
     }
 
+    protected boolean isReady() {return true;}
     abstract protected boolean checkSpecial();
     abstract protected void cleanup();
     abstract protected void restart();
