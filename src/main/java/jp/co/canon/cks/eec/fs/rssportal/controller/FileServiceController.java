@@ -59,7 +59,7 @@ public class FileServiceController {
     }
 
     @GetMapping("/createToolList")
-    public ResponseEntity<?> createToolList() throws Exception {
+    public ResponseEntity<RSSToolInfo[]> createToolList() throws Exception {
         log.info("/rss/rest/soap/createToolList");
         ToolInfoModel[] result = null;
         int retry = 0;
@@ -93,7 +93,7 @@ public class FileServiceController {
     }
 
     @GetMapping("/createFileTypeList")
-    public ResponseEntity<?> createFileTypeList(@RequestParam(name="tool") String tool) throws Exception {
+    public ResponseEntity<RSSLogInfoBean[]> createFileTypeList(@RequestParam(name="tool") String tool) throws Exception {
         log.info("/rss/rest/soap/createFileTypeList");
         String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
         String FILE_SELECT_PAGE = "FileListSelect";
@@ -149,7 +149,7 @@ public class FileServiceController {
     }
 
     @PostMapping("/createFileList")
-    public ResponseEntity<?> createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
+    public ResponseEntity<RSSFileInfoBeanResponse[] > createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
         log.info("/rss/rest/soap/createFileList");
 
         // Create ThreadPool with 10 threads

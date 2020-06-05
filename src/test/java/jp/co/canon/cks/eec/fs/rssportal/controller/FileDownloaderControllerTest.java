@@ -27,10 +27,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -139,9 +136,9 @@ class FileDownloaderControllerTest {
     }
 
     private String requestDownload() throws Exception {
-        RSSToolInfo toolInfo = fileServiceController.createToolList()[0];
+        RSSToolInfo toolInfo = Objects.requireNonNull(fileServiceController.createToolList().getBody())[0];
         assertNotNull(toolInfo);
-        RSSLogInfoBean[] logInfos = fileServiceController.createFileTypeList(toolInfo.getTargetname());
+        RSSLogInfoBean[] logInfos = fileServiceController.createFileTypeList(toolInfo.getTargetname()).getBody();
         assertNotNull(logInfos);
         assertNotEquals(logInfos.length, 0);
 
@@ -164,7 +161,7 @@ class FileDownloaderControllerTest {
             requestList[i].setDir("");
 
         }
-        RSSFileInfoBeanResponse[] fileList = fileServiceController.createFileList(requestList);
+        RSSFileInfoBeanResponse[] fileList = fileServiceController.createFileList(requestList).getBody();
         assertNotNull(fileList);
         assertNotEquals(fileList.length, 0);
 
