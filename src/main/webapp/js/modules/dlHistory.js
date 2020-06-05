@@ -60,8 +60,9 @@ export default handleActions({
                     return state.setIn(["dlHistoryInfo", "dl_list"], List([]));
                 }
 
-                const cDwList = data.map(list => {
+                const cDwList = data.map((list,idx) => {
                     return {
+                        dl_Idx: idx+1,
                         dl_id: list.id,
                         dl_user: list.dl_user,
                         dl_date: list.dl_date,
