@@ -148,7 +148,7 @@ public class PlanController {
     @ResponseBody
     public ResponseEntity<Integer> modify(HttpServletRequest request,
                                           @RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
-        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
+        log.info(String.format("request \"%s?id=%d\"", request.getServletPath(), id));
         CollectPlanVo plan = service.getPlan(id);
         if(plan==null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
