@@ -17,9 +17,11 @@ spring:
   profiles:
     active: dev
   datasource:
+    initialization-mode: always
+    driver-class-name: org.postgresql.Driver
     password: 1234
     platform: postgresql
-    # CKBS [set ip address]
+      # CKBS [set ip address]
     url: jdbc:postgresql://localhost:5432/rssdb
     username: rssadmin
   http:
