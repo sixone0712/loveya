@@ -42,8 +42,11 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
     }
 
     @PostConstruct
-    public void postConstruct() {
-        log.info("===================path="+_path);
+    public void postConstruct() throws InterruptedException {
+        while (!downloadService.isReady()) {
+            log.error("download_list table is not ready");
+            Thread.sleep(5000);
+        }
         configure(_path, _minFreeSpace, _minFreeSpacePercent, _interval);
         log.info(name+" thread starts");
     }

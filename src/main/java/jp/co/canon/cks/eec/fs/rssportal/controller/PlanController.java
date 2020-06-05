@@ -84,9 +84,8 @@ public class PlanController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String withExpired = (String) (param.containsKey("withExpired")?param.get("withExpired"):"");
         List<CollectPlanVo> list;
-        if(withExpired.equals(""))
+        if(param.containsKey("withExpired"))
             list = service.getAllPlansBySchedulePriority();
         else
             list = service.getAllPlans();

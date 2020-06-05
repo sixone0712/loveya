@@ -323,8 +323,8 @@ class PlanControllerTest {
 
     private Map<String, Object> createAddPlanRequestBody() throws Exception {
         // get the first tool info
-        RSSToolInfo toolInfo = fileServiceController.createToolList()[0];
-        RSSLogInfoBean[] logInfos = fileServiceController.createFileTypeList(toolInfo.getTargetname());
+        RSSToolInfo toolInfo = fileServiceController.createToolList().getBody()[0];
+        RSSLogInfoBean[] logInfos = fileServiceController.createFileTypeList(toolInfo.getTargetname()).getBody();
 
         Map<String, Object> param = new HashMap<>();
         param.put("planId", "if you can see this, it means someone has to debug it");

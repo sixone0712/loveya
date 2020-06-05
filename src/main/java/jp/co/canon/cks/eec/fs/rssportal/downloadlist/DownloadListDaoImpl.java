@@ -25,6 +25,14 @@ public class DownloadListDaoImpl implements DownloadListDao {
     }
 
     @Override
+    public boolean exists() {
+        SqlSession session = sessionFactory.openSession();
+        boolean ret = session.selectOne("downloadList.exists");
+        session.close();
+        return ret;
+    }
+
+    @Override
     public DownloadListVo findItem(int id) {
         SqlSession session = sessionFactory.openSession();
         DownloadListVo item = session.selectOne("downloadList.findItem", id);

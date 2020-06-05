@@ -5,6 +5,7 @@ import java.util.Map;
 
 public interface DownloadListDao {
 
+    boolean exists();
     DownloadListVo findItem(int id);
     List<DownloadListVo> find(int planId);
     List<DownloadListVo> find(int planId, int limit, int page);
