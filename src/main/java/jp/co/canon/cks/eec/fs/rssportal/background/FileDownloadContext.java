@@ -48,7 +48,7 @@ public class FileDownloadContext implements DownloadConfig {
 
     private int downloadFiles;
 
-    public FileDownloadContext(@NonNull String jobType, @NonNull String id, @NonNull DownloadForm form) {
+    public FileDownloadContext(@NonNull String jobType, @NonNull String id, @NonNull DownloadForm form, @NonNull String baseDir) {
 
         this.jobType = jobType;
         this.downloadForm = form;
@@ -72,7 +72,7 @@ public class FileDownloadContext implements DownloadConfig {
             fileDates[i] = convertStringToCalendar(fileInfo.getDate());
         }
 
-        Path path = Paths.get(DownloadConfig.ROOT_PATH, id, tool, logTypeStr==null?logType:logTypeStr);
+        Path path = Paths.get(baseDir, tool, logTypeStr==null?logType:logTypeStr);
         this.outPath = path.toString();
 
         downloadFiles = 0;

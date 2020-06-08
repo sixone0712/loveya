@@ -60,7 +60,8 @@ rssportal:
     objectlistfile: devTemp/ObjectList.xml
   collect:
     logBase: planroot
-    cacheBase: download
+    cacheBase: downloadcache
+    resultBase: zipa
 
 ---
 spring:
@@ -76,3 +77,4 @@ rssportal:
   collect:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
+    resultBase: /LOG/zip
