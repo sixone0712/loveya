@@ -21,8 +21,6 @@ spring:
     driver-class-name: org.postgresql.Driver
     password: 1234
     platform: postgresql
-      # CKBS [set ip address]
-    url: jdbc:postgresql://localhost:5432/rssdb
     username: rssadmin
   http:
     encoding:
@@ -45,6 +43,9 @@ rssportal:
 ---
 spring:
   profiles: dev
+  datasource:
+    # CKBS [set ip address]
+    url: jdbc:postgresql://10.1.31.237:5432/rssdb
   # Hot reload
   devtools:
     livereload:
@@ -64,6 +65,9 @@ rssportal:
 ---
 spring:
   profiles: release
+  datasource:
+    # CKBS [set ip address]
+    url: jdbc:postgresql://localhost/rssdb
 rssportal:
   property:
     constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml

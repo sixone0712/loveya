@@ -69,9 +69,11 @@ class InputModal extends Component {
         handleSelectBoxChange(0);
         await genreListActions.genreInitServerError();
         await this.setState({
-            ...this.state,
             inputOpen: false,
-            alertOpen: false
+            alertOpen: false,
+            errMsg: "",
+            alertMsg: "",
+            genreName: ""
         });
     };
 
