@@ -7,8 +7,12 @@ import penderMiddleware from 'redux-pender';
 const logger = createLogger();
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const store = createStore(modules, /* preloadedState, */ composeEnhancers(
-	applyMiddleware(logger, ReduxThunk, penderMiddleware())
-));
+// const store = createStore(modules, /* preloadedState, */ composeEnhancers(
+// 	applyMiddleware(logger, ReduxThunk, penderMiddleware())
+// ));
+
+// remove redux logger and snapshot
+const store = createStore(modules, /* preloadedState, */
+	applyMiddleware(ReduxThunk, penderMiddleware()));
 
 export default store;
