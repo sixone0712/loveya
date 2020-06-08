@@ -186,9 +186,16 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         long endTime = plan.getEnd().getTime();
 
         // when a plan stop, nextAction has to be null.
-        // nextAction null means there is no plan to work.
-        if(plan.isStop())
+        if(plan.isStop()) {
+            // check nextAction is null or not,
+            plan = getPlan(plan.getId());
+            if(plan!=null && plan.getNextAction()!=null) {
+                plan.setNextAction(null);
+                dao.updatePlan(plan);
+                notifyChanges();
+            }
             return;
+        }
 
         if(endTime<=cur) {
             plan.setNextAction(null);
