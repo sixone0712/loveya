@@ -23,7 +23,7 @@ spring:
     platform: postgresql
       # CKBS [set ip address]
     url: jdbc:postgresql://localhost:5432/rssdb
-    username: rssadmin
+    username: ckbs
   http:
     encoding:
       charset:    UTF-8
@@ -59,7 +59,8 @@ rssportal:
     objectlistfile: devTemp/ObjectList.xml
   collect:
     logBase: planroot
-    cacheBase: download
+    cacheBase: downloadcache
+    resultBase: zipa
 
 ---
 spring:
@@ -72,3 +73,4 @@ rssportal:
   collect:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
+    resultBase: /LOG/zip

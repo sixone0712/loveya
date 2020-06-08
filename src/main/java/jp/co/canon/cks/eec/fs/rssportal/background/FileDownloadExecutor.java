@@ -5,7 +5,6 @@ import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
-import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -35,8 +34,9 @@ public class FileDownloadExecutor implements DownloadConfig {
     private List<FileDownloadContext> downloadContexts;
     private String baseDir;
 
-    private FileServiceManage mServiceManager;
-    private FileServiceModel mService;
+    private FileDownloader downloader;
+    private FileServiceManage serviceManage;
+    private FileServiceModel service;
     private DownloadMonitor monitor;
     private int totalFiles = -1;
     private String mPath = null;
@@ -50,8 +50,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     public FileDownloadExecutor(
             @NonNull final String jobType,
             @Nullable final String desc,
-            @NonNull final FileServiceManage serviceManager,
-            @NonNull final FileServiceModel serviceModel,
+            @NonNull final FileDownloader downloader,
             @NonNull final List<DownloadForm> request,
             boolean compress) {
 
@@ -63,15 +62,16 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
 
         this.jobType = jobType;
-        status = Status.idle;
-        mServiceManager = serviceManager;
-        mService = serviceModel;
+        this.status = Status.idle;
+        this.downloader = downloader;
+        this.serviceManage = downloader.getServiceManage();
+        this.service = downloader.getService();
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
         downloadId = "DL"+(mUniqueKey++)+stamp.getTime();
         downloadForms = request;
         downloadContexts = new ArrayList<>();
-        baseDir = Paths.get(DownloadConfig.ROOT_PATH, downloadId).toString();
+        baseDir = Paths.get(downloader.getDownloadCacheDir(), downloadId).toString();
 
         this.desc = desc==null?"noname":desc;
         this.attrCompression = compress;
@@ -84,9 +84,9 @@ public class FileDownloadExecutor implements DownloadConfig {
         status = Status.init;
         log.info(downloadId+": initialize()");
         for(DownloadForm form: downloadForms) {
-            FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form);
-            context.setFileManager(mServiceManager);
-            context.setFileService(mService);
+            FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
+            context.setFileManager(serviceManage);
+            context.setFileService(service);
             downloadContexts.add(context);
         }
         totalFiles = 0;
@@ -101,7 +101,8 @@ public class FileDownloadExecutor implements DownloadConfig {
         status = Status.compress;
 
         Compressor comp = new Compressor();
-        String zipDir = Paths.get(DownloadConfig.ZIP_PATH, downloadId, "test.zip").toString();
+        String fileName = String.format("%d.zip", System.currentTimeMillis());
+        String zipDir = Paths.get(downloader.getDownloadResultDir(), downloadId, fileName).toString();
         if(comp.compress(baseDir, zipDir)) {
             mPath = zipDir;
         }

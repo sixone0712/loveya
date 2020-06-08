@@ -1,37 +1,26 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManageSoapBindingStub;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.xml.rpc.ServiceException;
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class FileDownloadExecutorTest {
 
+    @Autowired
+    private FileDownloader downloader;
     private FileDownloadExecutor executor;
 
+
     public FileDownloadExecutorTest() {
-        FileServiceModel service = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
-        FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-        FileServiceManage manager = null;
-        try {
-            manager = serviceLocator.getFileServiceManage();
-        } catch (ServiceException e) {
-            e.printStackTrace();
-        }
         Object obj = new Object();
         executor = new FileDownloadExecutor("manual", null,
-                manager, service, new ArrayList<>(), true);
+                downloader, new ArrayList<>(), true);
     }
 
     @Test

@@ -9,6 +9,7 @@ import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +23,6 @@ import java.util.List;
 @Component
 public class FileDownloader extends Thread {
 
-    private static final int MAX_THREADS_AT_ONCE = 5;
-
     /* Downloader status */
     private static final String STS_INVALID_ID = "invalid-id";
     private static final String STS_IN_PROGRESS = "in-progress";
@@ -31,41 +30,40 @@ public class FileDownloader extends Thread {
     private static final String STS_DONE = "done";
 
     private final DownloadMonitor monitor;
-    private HashMap<String, FileDownloadExecutor> mHolders;
-    private FileServiceModel mService;
-    private FileServiceManage mServiceManager;
+    private HashMap<String, FileDownloadExecutor> executorList;
+    private FileServiceModel service;
+    private FileServiceManage serviceManage;
+
+    @Value("${rssportal.collect.cacheBase}")
+    private String downloadCacheDir;
+
+    @Value("${rssportal.collect.resultBase}")
+    private String downloadResultDir;
 
     @Autowired
     private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
         this.monitor = monitor;
-        mService = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
+        service = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
         FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
         try {
-            mServiceManager = serviceLocator.getFileServiceManage();
+            serviceManage = serviceLocator.getFileServiceManage();
         } catch (ServiceException e) {
             e.printStackTrace();
         }
-        mHolders = new HashMap<>();
+        executorList = new HashMap<>();
     }
 
     public String addRequest(@NonNull final List<DownloadForm> dlList) {
         log.info("addRequest( request-size="+dlList.size()+")");
 
-        if(false) {
-            if (mHolders.size() >= MAX_THREADS_AT_ONCE) {
-                log.warn("addRequest(): thread full");
-                return null;
-            }
-        }
+        FileDownloadExecutor executor = new FileDownloadExecutor("manual","", this, dlList, true);
+        executor.setMonitor(monitor);
+        executorList.put(executor.getId(), executor);
 
-        FileDownloadExecutor holder = new FileDownloadExecutor("manual","", mServiceManager, mService, dlList, true);
-        holder.setMonitor(monitor);
-        mHolders.put(holder.getId(), holder);
-
-        holder.start();
-        log.warn("jobid="+holder.getId()+" has been started");
-        return holder.getId();
+        executor.start();
+        log.warn("jobid="+executor.getId()+" has been started");
+        return executor.getId();
     }
 
     public boolean cancelRequest(@NonNull final String downloadId) {
@@ -73,18 +71,18 @@ public class FileDownloader extends Thread {
             log.error("cancelRequest/ invalid downloadId "+downloadId);
             return false;
         }
-        FileDownloadExecutor holder = mHolders.get(downloadId);
-        holder.stop();
+        FileDownloadExecutor executor = executorList.get(downloadId);
+        executor.stop();
         return true;
     }
 
     public String getStatus(@NonNull final String dlId) {
 
-        if(mHolders.containsKey(dlId)==false) {
+        if(executorList.containsKey(dlId)==false) {
             return STS_INVALID_ID;
         }
-        FileDownloadExecutor holder = mHolders.get(dlId);
-        String status = holder.getStatus();
+        FileDownloadExecutor executor = executorList.get(dlId);
+        String status = executor.getStatus();
         if(status.equalsIgnoreCase("error")) {
             return STS_ERROR;
         } else if(status.equalsIgnoreCase("complete")) {
@@ -95,24 +93,24 @@ public class FileDownloader extends Thread {
     }
 
     public boolean isValidId(@NonNull final String dlId) {
-        return mHolders.containsKey(dlId)?true:false;
+        return executorList.containsKey(dlId)?true:false;
     }
 
     public String getDownloadInfo(@NonNull final String dlId) {
-        if(mHolders.containsKey(dlId)==false) {
+        if(executorList.containsKey(dlId)==false) {
             return null;
         }
-        FileDownloadExecutor holder = mHolders.get(dlId);
-        if(holder.isRunning()==true) {
+        FileDownloadExecutor executor = executorList.get(dlId);
+        if(executor.isRunning()==true) {
             return null;
         }
-        return holder.getDownloadPath();
+        return executor.getDownloadPath();
     }
 
     public String getBaseDir(@NonNull final String dlId) {
-        if(mHolders.containsKey(dlId)==false)
+        if(executorList.containsKey(dlId)==false)
             return null;
-        FileDownloadExecutor executor = mHolders.get(dlId);
+        FileDownloadExecutor executor = executorList.get(dlId);
         if(executor.isRunning())
             return null;
         return executor.getBaseDir();
@@ -122,20 +120,20 @@ public class FileDownloader extends Thread {
         if(isValidId(dlId)==false) {
             return 0;
         }
-        return mHolders.get(dlId).getTotalFiles();
+        return executorList.get(dlId).getTotalFiles();
     }
 
     public int getDownloadFiles(@NonNull final String dlId) {
         if(isValidId(dlId)==false) {
             return 0;
         }
-        return mHolders.get(dlId).getDownloadFiles();
+        return executorList.get(dlId).getDownloadFiles();
     }
     
     public List<String> getFabs(@NonNull final String dlId) {
         if(!isValidId(dlId))
             return null;
-        return mHolders.get(dlId).getFabs();
+        return executorList.get(dlId).getFabs();
     }
 
     public DownloadForm createDownloadFileList(@NonNull String fab, @NonNull String tool,
@@ -144,7 +142,7 @@ public class FileDownloader extends Thread {
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         try {
-            FileInfoModel[] fileInfos = mServiceManager.createFileList(tool, type, from, to, "", "");
+            FileInfoModel[] fileInfos = serviceManage.createFileList(tool, type, from, to, "", "");
             for(FileInfoModel file: fileInfos) {
                 dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
                 String time = dateFormat.format(file.getTimestamp().getTime());
@@ -156,6 +154,23 @@ public class FileDownloader extends Thread {
         }
         return form;
     }
+
+    public FileServiceModel getService() {
+        return this.service;
+    }
+
+    public FileServiceManage getServiceManage() {
+        return this.serviceManage;
+    }
+
+    public String getDownloadCacheDir() {
+        return downloadCacheDir;
+    }
+
+    public String getDownloadResultDir() {
+        return downloadResultDir;
+    }
+
 
     private final Log log = LogFactory.getLog(getClass());
 }
