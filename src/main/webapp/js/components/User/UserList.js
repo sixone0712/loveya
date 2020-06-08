@@ -61,7 +61,9 @@ class UserList extends Component {
     loadUserList = async () => {
         const res = await API.getDBUserList(this.props);
         const { data } = res;
-        const newData = data.data.map((item, idx) => {
+        // filter Administrator
+        const filterdData = data.data.filter(item => item.username !== "Administrator");
+        const newData = filterdData.map((item, idx) => {
             return (
                 {
                     keyIndex: idx + 1,
