@@ -191,10 +191,17 @@ public class CollectPlanner extends Thread {
             nextPlan = service.getNextPlan();
             if(nextPlan==null)
                 return null;
-            if(nextPlan!=null && nextPlan.getNextAction()!=null)
-                log.info("nextPlan=" + nextPlan.getPlanName() + " nextaction=" + nextPlan.getNextAction().toString());
-            if(nextPlan!=null)
-                planUpdated = false;
+            if(nextPlan!=null) {
+                if(nextPlan.isStop()) {
+                    log.info("all plans stopped");
+                    nextPlan = null;
+                    return null;
+                } else {
+                    if (nextPlan.getNextAction() != null)
+                        log.info("nextPlan=" + nextPlan.getPlanName() + " nextaction=" + nextPlan.getNextAction().toString());
+                    planUpdated = false;
+                }
+            }
         }
         return nextPlan.getNextAction()!=null?nextPlan:null;
     }
