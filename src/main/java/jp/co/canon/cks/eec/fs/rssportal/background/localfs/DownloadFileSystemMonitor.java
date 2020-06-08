@@ -3,9 +3,12 @@ package jp.co.canon.cks.eec.fs.rssportal.background.localfs;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,19 +18,26 @@ public class DownloadFileSystemMonitor extends FileSystemMonitor {
 
     private final Log log = LogFactory.getLog(getClass());
     private static final String name = "download-fs-monitor";
-    private static final String path = "zip";
-    private static final int _minFreeSpace = 15;    // gigabytes
-    private static final int _minFreeSpacePercent = 25;
-    private static final long _interval = 3600*1000;
+    @Value("${rssportal.collect.resultBase}")
+    private String path;
+    private int _minFreeSpace = 15;    // gigabytes
+    private int _minFreeSpacePercent = 25;
+    private long _interval = 3600*1000;
 
     private final FileDownloader fileDownloader;
     
     private List<File> invalidFileList;
 
+    @Autowired
     public DownloadFileSystemMonitor(FileDownloader fileDownloader) {
-        super(name, path, _minFreeSpace, _minFreeSpacePercent, _interval);
+        super(name);
         this.fileDownloader = fileDownloader;
         invalidFileList = new ArrayList<>();
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        configure(path, _minFreeSpace, _minFreeSpacePercent, _interval);
         log.info(name+" thread starts");
     }
 

@@ -53,6 +53,7 @@ spring:
   freemarker:
     cache: false
 
+
 rssportal:
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
@@ -60,7 +61,14 @@ rssportal:
     objectlistfile: devTemp/ObjectList.xml
   collect:
     logBase: planroot
-    cacheBase: download
+    cacheBase: downloadcache
+    resultBase: zipa
+
+logging:
+  file:
+    name: rssportal.log
+    max-size: 100MB
+    max-history: 7
 
 ---
 spring:
@@ -76,3 +84,11 @@ rssportal:
   collect:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
+    resultBase: /LOG/zip
+
+logging:
+  file:
+    name: rssportal.log
+    max-size: 100MB
+    max-history: 7
+    path: /LOG

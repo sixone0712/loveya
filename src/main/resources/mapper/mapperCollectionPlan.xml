@@ -34,8 +34,8 @@
     <select id="selectAll" resultType="CollectPlanVo">
         select
             <include refid="selectFields" />
-        order by id desc
         from rsss."collection_plan"
+        order by id desc
     </select>
 
     <select id="selectAllOptions" parameterType="hashmap" resultType="CollectPlanVo">
