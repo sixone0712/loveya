@@ -40,7 +40,7 @@ public class FileDownloadExecutor implements DownloadConfig {
     private DownloadMonitor monitor;
     private int totalFiles = -1;
     private String mPath = null;
-    private boolean stop = false;
+    private long lastUpdate;
 
     private boolean attrCompression;
     private boolean attrEmptyAllPathBeforeDownload;
@@ -62,7 +62,6 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
 
         this.jobType = jobType;
-        this.status = Status.idle;
         this.downloader = downloader;
         this.serviceManage = downloader.getServiceManage();
         this.service = downloader.getService();
@@ -78,10 +77,11 @@ public class FileDownloadExecutor implements DownloadConfig {
         this.attrEmptyAllPathBeforeDownload = true;
         this.attrReplaceFileForSameFileName = false;
         this.attrDownloadFilesViaMultiSessions = false;
+        setStatus(Status.idle);
     }
 
     private void initialize() {
-        status = Status.init;
+        setStatus(Status.init);
         log.info(downloadId+": initialize()");
         for(DownloadForm form: downloadForms) {
             FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
@@ -95,10 +95,9 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     private void compress() {
         log.info(downloadId+": compress()");
-
         if(status==Status.error || status==Status.stop)
             return;
-        status = Status.compress;
+        setStatus(Status.compress);
 
         Compressor comp = new Compressor();
         String fileName = String.format("%d.zip", System.currentTimeMillis());
@@ -110,12 +109,11 @@ public class FileDownloadExecutor implements DownloadConfig {
 
     private void wrapup() {
         log.info(downloadId+": wrapup()");
-        status = Status.complete;
+        setStatus(Status.complete);
     }
 
     private void cleanup() {
         log.info(downloadId+": cleanup()");
-
     }
 
     private Runnable runner = () -> {
@@ -124,7 +122,7 @@ public class FileDownloadExecutor implements DownloadConfig {
             if(status==Status.stop)
                 return;
 
-            status = Status.download;
+            setStatus(Status.download);
             List<FileServiceProc> procs = new ArrayList<>();
             for(FileDownloadContext context: downloadContexts) {
                 if(status==Status.stop || status==Status.error)
@@ -144,11 +142,12 @@ public class FileDownloadExecutor implements DownloadConfig {
                     procs.add(proc);
 
                     if(attrDownloadFilesViaMultiSessions==false) {
-                        while (proc.getCompleted()>0)
+                        while (proc.getCompleted()>0) {
                             Thread.sleep(100);
+                        }
                         // check error
                         if(proc.getCompleted()<0) {
-                            status = Status.error;
+                            setStatus(Status.error);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -157,8 +156,9 @@ public class FileDownloadExecutor implements DownloadConfig {
             }
 
             for(FileServiceProc proc:procs)
-                while(proc.getCompleted()>0)
+                while(proc.getCompleted()>0) {
                     Thread.sleep(100);
+                }
 
             if(status==Status.stop || status==Status.error)
                 return;
@@ -172,31 +172,12 @@ public class FileDownloadExecutor implements DownloadConfig {
         }
     };
 
-    public String getId() {
-        return downloadId;
-    }
-
-    public void start() {
-        log.info("file download start ("+ downloadForms.size()+")");
-        printExecutorInfo();
-        (new Thread(runner)).start();
-    }
-
-    public void stop() {
-        log.info("stop downloading");
-        status = Status.stop;
-    }
-
-    public boolean isRunning() {
-        return (status==Status.complete || status==Status.error || status==Status.stop)?false:true;
-    }
-
-    public String getStatus() {
-        return status.toString();
+    private void setStatus(Status status) {
+        this.status = status;
+        lastUpdate = System.currentTimeMillis();
     }
 
     private void printExecutorInfo() {
-
         log.info("FileDownloadExecutor(desc="+desc+", id="+downloadId+")");
         log.info("attr."+attrCompression);
         log.info("    .DownloadFilesViaMultiSessions="+attrDownloadFilesViaMultiSessions);
@@ -210,18 +191,31 @@ public class FileDownloadExecutor implements DownloadConfig {
                 log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
             }*/
         }
-
     }
 
-    /*public List<String> getFileList() {
-        List<String> list = new ArrayList<>();
-        for(DownloadForm form: downloadForms) {
-            form.getFiles().forEach(fileInfo -> {
-                list.add(String.format(file_format, form.getTool(), form.getLogType(), fileInfo.getName()));
-            });
-        }
-        return list;
-    }*/
+    public String getId() {
+        return downloadId;
+    }
+
+    public void start() {
+        log.info("file download start ("+ downloadForms.size()+")");
+        printExecutorInfo();
+        (new Thread(runner)).start();
+    }
+
+    public void stop() {
+        log.info("stop downloading");
+        setStatus(Status.stop);
+    }
+
+    public boolean isRunning() {
+        return (status==Status.complete || status==Status.error || status==Status.stop)?false:true;
+    }
+
+    public String getStatus() {
+        return status.toString();
+    }
+
 
     public String getBaseDir() {
         return baseDir;
@@ -253,6 +247,10 @@ public class FileDownloadExecutor implements DownloadConfig {
                 fabs.add(fab);
         }
         return fabs;
+    }
+
+    public long getLastUpdate() {
+        return lastUpdate;
     }
 
     /* Attributes */

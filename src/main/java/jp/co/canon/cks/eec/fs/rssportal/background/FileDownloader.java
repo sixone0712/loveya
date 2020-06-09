@@ -92,6 +92,12 @@ public class FileDownloader extends Thread {
         }
     }
 
+    public long getLastUpdateTime(@NonNull String downloadId) {
+        if(!executorList.containsKey(downloadId))
+            return -1;
+        return executorList.get(downloadId).getLastUpdate();
+    }
+
     public boolean isValidId(@NonNull final String dlId) {
         return executorList.containsKey(dlId)?true:false;
     }

@@ -40,6 +40,13 @@ rssportal:
       request: /LOG/VFTP/Requests
     #objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
 
+  purger:
+    download-cache:
+      min-size: 10 # gigabytes
+      min-percent: 30
+      interval: 1800 # seconds
+      keeping-period: 24 # hours
+
 ---
 spring:
   profiles: dev
