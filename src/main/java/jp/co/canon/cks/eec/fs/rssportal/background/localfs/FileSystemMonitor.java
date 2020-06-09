@@ -94,6 +94,16 @@ public abstract class FileSystemMonitor extends Thread {
         return 0;
     }
 
+    protected void deleteDir(@NonNull File file) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
+    }
+
     protected long gigabytes(long bytes) {
         final long div = 1024*1024*1024;
         return bytes/div;

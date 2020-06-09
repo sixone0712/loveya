@@ -65,24 +65,12 @@ public class DownloadFileSystemMonitor extends FileSystemMonitor {
         }
     }
 
-    private void deleteDir(@NonNull File file) {
-        File[] contents = file.listFiles();
-        if(contents!=null) {
-            for(File f: contents) {
-                deleteDir(f);
-            }
-        }
-        file.delete();
-    }
-
     @Override
     protected void restart() {
-
     }
 
     @Override
     protected void halt() {
-
     }
 
     @Override
