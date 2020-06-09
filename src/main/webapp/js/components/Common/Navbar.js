@@ -126,6 +126,8 @@ class RSSNavbar extends Component{
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL} onClick={() => this.handlePageChange("Manual")}>
                         FTP Download
                     </DropdownItem>
+                    {/* Phase 2 excludes VFTP */}
+                    {/*
                     <DropdownItem divider />
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual")}>
                         VFTP Download(COMPAT/Optional)
@@ -134,6 +136,7 @@ class RSSNavbar extends Component{
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual")}>
                         VFTP Download(SSSS/Optional)
                     </DropdownItem>
+                  */}
                 </DropdownMenu>
               </UncontrolledDropdown>
               <UncontrolledDropdown nav inNavbar>
