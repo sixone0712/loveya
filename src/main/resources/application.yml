@@ -66,7 +66,7 @@ rssportal:
 
 logging:
   file:
-    name: rssportal.log
+    name: ./logs/rssportal.log
     max-size: 100MB
     max-history: 7
 
@@ -88,7 +88,6 @@ rssportal:
 
 logging:
   file:
-    name: rssportal.log
+    name: /LOG/rssportal/rssportal.log
     max-size: 100MB
     max-history: 7
-    path: /LOG
