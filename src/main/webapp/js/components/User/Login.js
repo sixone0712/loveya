@@ -29,9 +29,11 @@ class Login extends Component {
     openModal = () => {
         this.setState(() => ({isModalOpen: true}));
     }
-    closeModal = () => {
+    closeModal = (e) => {
+        e.preventDefault();
         this.setState(() => ({isModalOpen: false}));
     }
+
     handleSubmit = () => {
         return ((this.state.username.length > 0 && this.state.password.length > 0)
                 ? 0 : Define.LOGIN_FAIL_EMPTY_USER_PASSWORD);
@@ -50,7 +52,7 @@ class Login extends Component {
         }
     }
 
-    loginProcess =async () => {
+    loginProcess = async () => {
         let errCode = this.handleSubmit();
         if (!errCode)
         {
@@ -75,7 +77,6 @@ class Login extends Component {
                         }
                     })
                 }
-
             }
         } else {
             const msg = API.getErrorMsg(errCode);
@@ -116,6 +117,7 @@ class Login extends Component {
         }
         this.setState({ ...nState});
     };
+
     render() {
         const {errors} = this.state;
         return (
