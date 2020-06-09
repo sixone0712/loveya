@@ -123,7 +123,7 @@ class RSSNavbar extends Component{
                 Manual Download
               </DropdownToggle>
                 <DropdownMenu>
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL} onClick={() => this.handlePageChange("Manual")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL} onClick={() => this.handlePageChange("Manual")}>
                         FTP Download
                     </DropdownItem>
                     <DropdownItem divider />
