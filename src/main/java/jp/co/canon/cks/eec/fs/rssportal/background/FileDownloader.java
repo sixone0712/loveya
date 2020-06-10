@@ -40,17 +40,13 @@ public class FileDownloader extends Thread {
     @Value("${rssportal.collect.resultBase}")
     private String downloadResultDir;
 
+    @Value("${rssportal.file-collect-service.addr}")
+    private String fileCollectServiceAddr;
+
     @Autowired
     private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
         this.monitor = monitor;
-        service = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
-        FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-        try {
-            serviceManage = serviceLocator.getFileServiceManage();
-        } catch (ServiceException e) {
-            e.printStackTrace();
-        }
         executorList = new HashMap<>();
     }
 
@@ -148,7 +144,7 @@ public class FileDownloader extends Thread {
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         try {
-            FileInfoModel[] fileInfos = serviceManage.createFileList(tool, type, from, to, "", "");
+            FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
             for(FileInfoModel file: fileInfos) {
                 dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
                 String time = dateFormat.format(file.getTimestamp().getTime());
@@ -162,11 +158,23 @@ public class FileDownloader extends Thread {
     }
 
     public FileServiceModel getService() {
-        return this.service;
+        if(service==null) {
+            log.info("file-collect-service.addr="+fileCollectServiceAddr);
+            service = new FileServiceUsedSOAP(fileCollectServiceAddr);
+        }
+        return service;
     }
 
     public FileServiceManage getServiceManage() {
-        return this.serviceManage;
+        if(serviceManage==null) {
+            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+            try {
+                serviceManage = serviceLocator.getFileServiceManage();
+            } catch (ServiceException e) {
+                e.printStackTrace();
+            }
+        }
+        return serviceManage;
     }
 
     public String getDownloadCacheDir() {
@@ -176,7 +184,6 @@ public class FileDownloader extends Thread {
     public String getDownloadResultDir() {
         return downloadResultDir;
     }
-
 
     private final Log log = LogFactory.getLog(getClass());
 }

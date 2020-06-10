@@ -40,12 +40,26 @@ rssportal:
       request: /LOG/VFTP/Requests
     #objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
 
+  # 'purger' is for cleaning up files that the app has already used in local file system.
   purger:
+    # on every downloading files processing, the app uses local cache to keep files temporary.
+    # 'download-cache' configuration is to clean this cache up.
     download-cache:
       min-size: 10 # gigabytes
       min-percent: 30
       interval: 1800 # seconds
       keeping-period: 24 # hours
+    # 'collect-plan' cleans up files that has completed downloading of auto-collection.
+    collect-plan:
+      min-size: 10 # gigabytes
+      min-percent: 30
+      interval: 3600 # seconds
+      keeping-period: 24 # hours
+    # `file-downloader` cleans up an output directory of downloading processing.
+    file-downloader:
+      min-size: 10 # gigabytes
+      min-percent: 30
+      interval: 3600 # seconds
 
 ---
 spring:
@@ -70,6 +84,8 @@ rssportal:
     logBase: planroot
     cacheBase: downloadcache
     resultBase: zipa
+  file-collect-service:
+    addr: 10.1.31.237
 
 logging:
   file:
@@ -92,6 +108,8 @@ rssportal:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
     resultBase: /LOG/zip
+  file-collect-service:
+    addr: 10.1.31.237
 
 logging:
   file:
