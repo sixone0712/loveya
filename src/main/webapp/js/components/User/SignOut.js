@@ -179,7 +179,7 @@ class SignOut extends Component {
                                                iName={"name"}
                                                iId="name"
                                                iErrMsg={errors.name}
-                                               iLabel={"YOUR NAME"}
+                                               iLabel={"USER NAME"}
                                                iPlaceholder ={"Enter the name"}
                                                changeFunc={(e) => this.handleInput(e)}
                                                maxLength={30}
