@@ -40,17 +40,13 @@ public class FileDownloader extends Thread {
     @Value("${rssportal.collect.resultBase}")
     private String downloadResultDir;
 
+    @Value("${rssportal.file-collect-service.addr}")
+    private String fileCollectServiceAddr;
+
     @Autowired
     private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
         this.monitor = monitor;
-        service = new FileServiceUsedSOAP(DownloadConfig.FCS_SERVER_ADDR);
-        FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-        try {
-            serviceManage = serviceLocator.getFileServiceManage();
-        } catch (ServiceException e) {
-            e.printStackTrace();
-        }
         executorList = new HashMap<>();
     }
 
@@ -162,10 +158,22 @@ public class FileDownloader extends Thread {
     }
 
     public FileServiceModel getService() {
-        return this.service;
+        if(service==null) {
+            log.info("file-collect-service.addr="+fileCollectServiceAddr);
+            service = new FileServiceUsedSOAP(fileCollectServiceAddr);
+        }
+        return service;
     }
 
     public FileServiceManage getServiceManage() {
+        if(serviceManage==null) {
+            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
+            try {
+                serviceManage = serviceLocator.getFileServiceManage();
+            } catch (ServiceException e) {
+                e.printStackTrace();
+            }
+        }
         return this.serviceManage;
     }
 
@@ -176,7 +184,6 @@ public class FileDownloader extends Thread {
     public String getDownloadResultDir() {
         return downloadResultDir;
     }
-
 
     private final Log log = LogFactory.getLog(getClass());
 }

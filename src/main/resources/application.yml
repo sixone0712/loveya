@@ -70,6 +70,8 @@ rssportal:
     logBase: planroot
     cacheBase: downloadcache
     resultBase: zipa
+  file-collect-service:
+    addr: 10.1.31.237
 
 logging:
   file:
@@ -92,6 +94,8 @@ rssportal:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
     resultBase: /LOG/zip
+  file-collect-service:
+    addr: 10.1.31.237
 
 logging:
   file:
