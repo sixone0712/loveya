@@ -9,7 +9,8 @@ module.exports = (env, options) => {
     //context: path.resolve(__dirname, 'src/main/webapp/js'),
     const config = {
         entry: ['@babel/polyfill', './src/main/webapp/js/index.js'],
-        devtool: 'source-map',
+        devtool: options.mode === 'production' ? 'hidden-source-map' : 'inline-source-map',
+        // devtool: 'source-map',
         cache: true,
         output: {
             path: path.resolve('./src/main/resources/static/rss'),
