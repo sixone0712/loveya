@@ -144,7 +144,7 @@ public class FileDownloader extends Thread {
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         try {
-            FileInfoModel[] fileInfos = serviceManage.createFileList(tool, type, from, to, "", "");
+            FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
             for(FileInfoModel file: fileInfos) {
                 dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
                 String time = dateFormat.format(file.getTimestamp().getTime());
@@ -174,7 +174,7 @@ public class FileDownloader extends Thread {
                 e.printStackTrace();
             }
         }
-        return this.serviceManage;
+        return serviceManage;
     }
 
     public String getDownloadCacheDir() {

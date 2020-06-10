@@ -20,9 +20,12 @@ public class DownloadFileSystemMonitor extends FileSystemMonitor {
     private static final String name = "download-fs-monitor";
     @Value("${rssportal.collect.resultBase}")
     private String path;
-    private int _minFreeSpace = 15;    // gigabytes
-    private int _minFreeSpacePercent = 25;
-    private long _interval = 3600*1000;
+    @Value("${rssportal.purger.file-downloader.min-size}")
+    private int _minFreeSpace;    // gigabytes
+    @Value("${rssportal.purger.file-downloader.min-percent}")
+    private int _minFreeSpacePercent;
+    @Value("${rssportal.purger.file-downloader.interval}")
+    private long _interval;
 
     private final FileDownloader fileDownloader;
     
@@ -37,7 +40,7 @@ public class DownloadFileSystemMonitor extends FileSystemMonitor {
 
     @PostConstruct
     public void postConstruct() {
-        configure(path, _minFreeSpace, _minFreeSpacePercent, _interval);
+        configure(path, _minFreeSpace, _minFreeSpacePercent, _interval*1000);
         log.info(name+" thread starts");
     }
 

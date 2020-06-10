@@ -23,10 +23,15 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
 
     @Value("${rssportal.collect.logBase}")
     private String _path;
-    private int _minFreeSpace = 10;    // gigabytes
-    private int _minFreeSpacePercent = 20;
-    private long _interval = 1800*1000;
-    private long _keepPeriod = 24*3600*1000;
+    @Value("${rssportal.purger.collect-plan.min-size}")
+    private int _minFreeSpace;    // gigabytes
+    @Value("${rssportal.purger.collect-plan.min-percent}")
+    private int _minFreeSpacePercent;
+    @Value("${rssportal.purger.collect-plan.interval}")
+    private long _interval;
+    @Value("${rssportal.purger.collect-plan.keeping-period}")
+    private long _keepPeriod;
+    private long keepPeriodMillis;
 
     private final DownloadListService downloadService;
     private final CollectPlanner collectPlanner;
@@ -43,7 +48,8 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
 
     @PostConstruct
     public void postConstruct() {
-        configure(_path, _minFreeSpace, _minFreeSpacePercent, _interval);
+        configure(_path, _minFreeSpace, _minFreeSpacePercent, _interval*1000);
+        keepPeriodMillis = _keepPeriod*3600000;
         log.info(name+" thread starts");
     }
 
@@ -61,7 +67,7 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
         List<DownloadListVo> list = downloadService.getFinishedList();
         cleanupList.clear();
         for(DownloadListVo item: list) {
-            Timestamp keepPoint = new Timestamp(System.currentTimeMillis()-_keepPeriod);
+            Timestamp keepPoint = new Timestamp(System.currentTimeMillis()-keepPeriodMillis);
             if(item.getCreated().before(keepPoint)) {
                 cleanupList.add(item);
             }
