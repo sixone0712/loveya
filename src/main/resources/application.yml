@@ -109,7 +109,7 @@ rssportal:
     cacheBase: /LOG/cache
     resultBase: /LOG/zip
   file-collect-service:
-    addr: 10.1.31.237
+    addr: localhost
 
 logging:
   file:
