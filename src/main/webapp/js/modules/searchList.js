@@ -136,7 +136,7 @@ export default handleActions({
         //const moment = require("moment");
         //const convDate = moment(startTime).format("YYMMDDHHMMSS");
         console.log("SEARCH_SET_REQEUST_START_DATE");
-        console.log("action.payload", action.payload);
+        //console.log("action.payload", action.payload);
 
         return state.set("startDate", startTime);
     },
@@ -148,7 +148,7 @@ export default handleActions({
         //const convDate = moment(endDate).format("YYMMDDHHMMSS");
 
         console.log("SEARCH_SET_REQUEST_END_DATE");
-        console.log("action.payload", action.payload);
+        //console.log("action.payload", action.payload);
 
         return state.set("endDate", endDate);
     },
@@ -160,19 +160,19 @@ export default handleActions({
         const { requestList } = state;
         const { toolList, logInfoList, startDate, endDate } = action.payload;
 
-        console.log("startDate", startDate);
-        console.log("toolList", toolList.toJS());
-        console.log("logInfoList", logInfoList.toJS());
+        //console.log("startDate", startDate);
+        //console.log("toolList", toolList.toJS());
+        //console.log("logInfoList", logInfoList.toJS());
 
         const newToolList = toolList.filter(list => list.get("checked") === true).toJS();
         const newLogInfoList = logInfoList.filter(list => list.get("checked") === true).toJS();
         const formDate = moment(startDate).format("YYYYMMDDHHmmss");
         const toDate = moment(endDate).format("YYYYMMDDHHmmss");
 
-        console.log("newToolList", newToolList);
-        console.log("newLogInfoList", newLogInfoList);
-        console.log("formDate", formDate);
-        console.log("toDate", toDate);
+        //console.log("newToolList", newToolList);
+        //console.log("newLogInfoList", newLogInfoList);
+        //console.log("formDate", formDate);
+        //console.log("toDate", toDate);
 
         const newSearchList = new Array();
         for (let tList of newToolList) {
@@ -193,7 +193,7 @@ export default handleActions({
                 );
             }
         }
-        console.log("newSearchList", newSearchList);
+        //console.log("newSearchList", newSearchList);
 
         return state.set("requestList", fromJS(newSearchList));
     },
@@ -204,8 +204,8 @@ export default handleActions({
         let downloadCnt = state.get("downloadCnt");
         const index = action.payload;
 
-        console.log("responseList", responseList);
-        console.log("index", index);
+        //console.log("responseList", responseList);
+        //console.log("index", index);
 
         const check =  responseList.getIn([index, 'checked']);
         if(check){
@@ -246,16 +246,16 @@ export default handleActions({
         const { func, dlId, status, totalFiles, downloadFiles } = action.payload;
         const downloadStatus = state.get("downloadStatus").toJS();
 
-        console.log("func", func);
+        //console.log("func", func);
         if(func !== undefined ) {
             downloadStatus.func = func;
         }
 
-        console.log("dlId", dlId);
+        //console.log("dlId", dlId);
         if(dlId !== undefined) {
             downloadStatus.dlId = dlId;
         }
-        console.log("status", status);
+        //console.log("status", status);
         if(status !== undefined) {
             if(status ==="done" || status === "error") {
                 clearInterval(downloadStatus.func);
@@ -263,16 +263,16 @@ export default handleActions({
             }
             downloadStatus.status = status;
         }
-        console.log("totalFiles", totalFiles);
+        //console.log("totalFiles", totalFiles);
         if(totalFiles !== undefined) {
             downloadStatus.totalFiles = totalFiles;
         }
-        console.log("downloadFiles", downloadFiles);
+        //console.log("downloadFiles", downloadFiles);
         if(downloadFiles !== undefined) {
             downloadStatus.downloadFiles = downloadFiles;
         }
 
-        console.log("downloadStatus", downloadStatus);
+        //console.log("downloadStatus", downloadStatus);
         return state.set("downloadStatus", fromJS(downloadStatus));
     }
 

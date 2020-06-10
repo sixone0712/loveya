@@ -159,7 +159,7 @@ export default applyPenders(reducer, [
                 }
             });
 
-            console.log("newGenreList", newGenreList);
+            //console.log("newGenreList", newGenreList);
 
             return state
                 .setIn(["genreList", "list"], fromJS(newGenreList))

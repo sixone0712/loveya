@@ -91,8 +91,8 @@ class RSSautoplanlist extends Component {
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list?withExpired=yes");
-        console.log("[AUTO][loadPlanList]res", res);
+        const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list");
+        //console.log("[AUTO][loadPlanList]res", res);
         const { data } = res;
         const newData = data.map((item, idx) => {
             const targetArray = item.logType.split(",")
@@ -118,7 +118,7 @@ class RSSautoplanlist extends Component {
             );
         })
 
-        console.log("[AUTO][loadPlanList]newData", newData);
+        //console.log("[AUTO][loadPlanList]newData", newData);
 
         await this.setState({
             ...this.state,

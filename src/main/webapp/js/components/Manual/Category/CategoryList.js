@@ -239,7 +239,7 @@ class CategoryList extends Component {
     const filteredData = categorylist.filter(element => {
       return element.logName.toLowerCase().includes(query.toLowerCase());
     });
-    console.log("genreList", genreList);
+    //console.log("genreList", genreList);
 
     return (
         <Card className="ribbon-wrapper catlist-card">

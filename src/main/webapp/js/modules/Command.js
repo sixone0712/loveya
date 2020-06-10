@@ -62,7 +62,7 @@ export default handleActions({
 
         const startTime = action.payload;
         console.log("COMMAND_SET_START_DATE");
-        console.log("action.payload", action.payload);
+        //console.log("action.payload", action.payload);
 
         return state.set("startDate", startTime);
     },
@@ -72,7 +72,7 @@ export default handleActions({
         const endDate = action.payload;
 
         console.log("COMMAND_SET_END_DATE");
-        console.log("action.payload", action.payload);
+        //console.log("action.payload", action.payload);
 
         return state.set("endDate", endDate);
     },

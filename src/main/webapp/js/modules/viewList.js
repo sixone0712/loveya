@@ -91,15 +91,15 @@ export default handleActions({
 			const lists = action.payload.data;
 			const tree = lists.ConstructDisplay.Tree;
 			const equipments = tree.find(item => item.name === "Equipments");
-			console.log("lists", lists);
-			console.log("tree", tree);
-			console.log("equipments", equipments);
-			console.log("equipments.Child", equipments.Child);
+			//console.log("lists", lists);
+			//console.log("tree", tree);
+			//console.log("equipments", equipments);
+			//console.log("equipments.Child", equipments.Child);
 			const newEquipments = equipments.Child.map(item => ({
 				name: String(item.name),
 				id: String(item.id)
 			}))
-			console.log("newEquipments.Child", newEquipments);
+			//console.log("newEquipments.Child", newEquipments);
 			return state.set("constructDisplay",fromJS(newEquipments));
 		}
 	}),
@@ -115,8 +115,8 @@ export default handleActions({
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
 				const lists = action.payload.data;
 				const constructDisplay = state.get("constructDisplay").toJS();
-				console.log("lists", lists);
-				console.log("constructDisplay", constructDisplay);
+				//console.log("lists", lists);
+				//console.log("constructDisplay", constructDisplay);
 
 				const newList = lists.reduce((acc, cur) => {
 					const find = constructDisplay.find(item => {
@@ -132,7 +132,7 @@ export default handleActions({
 					return acc;
 				}, []);
 
-				console.log("newList", newList);
+				//console.log("newList", newList);
 
 				const newEquipLists = constructDisplay.map((item, idx) => {
 					return {
@@ -141,7 +141,7 @@ export default handleActions({
 					}
 				});
 
-				console.log("newEquipLists", newEquipLists);
+				//console.log("newEquipLists", newEquipLists);
 
 				const newToolInfoList = newList.map((list, idx) => {
 					return {
@@ -155,7 +155,7 @@ export default handleActions({
 					}
 				});
 
-				console.log("newToolInfoList", newToolInfoList);
+				//console.log("newToolInfoList", newToolInfoList);
 
 				return state.set('toolInfoList', fromJS(newToolInfoList)).set('equipmentList', fromJS(newEquipLists));
 			},
@@ -166,8 +166,8 @@ export default handleActions({
 		onSuccess: (state, action) => {
 			console.log("handleActions[VIEW_LOAD_LOGTYPE_LIST]");
 			const lists = action.payload.data;
-			console.log("lists", lists);
-			console.log(lists[0].logType);
+			//console.log("lists", lists);
+			//console.log(lists[0].logType);
 			const newLists = lists.map((lists, idx) => {
 				return {
 					keyIndex: idx,
@@ -179,7 +179,7 @@ export default handleActions({
 				}
 			});
 
-			console.log("newLists", newLists);
+			//console.log("newLists", newLists);
 			return state.set('logInfoList', fromJS(newLists));
 		}
 	}),
@@ -194,11 +194,11 @@ export default handleActions({
 		let toolInfoListCheckCnt = state.get("toolInfoListCheckCnt");
 		const index = action.payload;
 
-		console.log("toolInfoList", toolInfoList);
-		console.log("index", index);
+		//console.log("toolInfoList", toolInfoList);
+		//console.log("index", index);
 
 		const check =  toolInfoList.getIn([index, "checked"]);
-		console.log("check", check);
+		//console.log("check", check);
 		if(check){
 			toolInfoListCheckCnt--;
 		} else {
@@ -230,10 +230,10 @@ export default handleActions({
 		let logInfoListCheckCnt = state.get("logInfoListCheckCnt");
 		const index = action.payload;
 
-		console.log("logInfoList", logInfoList.toJS());
-		console.log("index", index);
+		//console.log("logInfoList", logInfoList.toJS());
+		//console.log("index", index);
 		const check =  logInfoList.getIn([index, "checked"]);
-		console.log("check", check);
+		//console.log("check", check);
 		if(check){
 			logInfoListCheckCnt--;
 		} else {
@@ -292,13 +292,13 @@ export default handleActions({
 		console.log("handleActions[VIEW_SET_EDIT_PLAN_LIST]");
 		console.log("action.payload", action.payload);
 		const { tool, logCode } = action.payload;
-		console.log("tool", tool);
-		console.log("logCode", logCode);
+		//console.log("tool", tool);
+		//console.log("logCode", logCode);
 		const toolArray = tool.split(",");
 		const logArray = logCode.split(",");
 
-		console.log("toolArray", toolArray);
-		console.log("logArray", logArray);
+		//console.log("toolArray", toolArray);
+		//console.log("logArray", logArray);
 
 		const toolInfoList = state.get("toolInfoList");
 		const logInfoList = state.get("logInfoList");

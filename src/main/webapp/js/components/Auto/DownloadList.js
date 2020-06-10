@@ -143,7 +143,7 @@ class RSSAutoDownloadList extends Component {
         const { requestList } = this.state;
         let isExist = false;
 
-        console.log("requestList", requestList);
+        //console.log("requestList", requestList);
 
         const newList = requestList.filter(item => item.requestStatus === "new");
 
@@ -160,7 +160,7 @@ class RSSAutoDownloadList extends Component {
             });
         }
 
-        console.log("download", this.state.download);
+        //console.log("download", this.state.download);
 
         if (isExist === true) {
             this.openModal(modalType.MODAL_DOWNLOAD_2);

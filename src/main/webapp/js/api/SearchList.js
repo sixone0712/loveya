@@ -76,7 +76,7 @@ export const checkAllResponseList = (props, isAllChecked) => {
 export const requestDownload = async (props) => {
     const { responseList } = props;
     const responseListJS = responseList.toJS();
-    console.log("responseListJS", responseListJS);
+    //console.log("responseListJS", responseListJS);
 
     const downloadList = responseListJS.reduce((acc, cur, idx) => {
         if (cur.checked) acc.push({
@@ -94,11 +94,11 @@ export const requestDownload = async (props) => {
     const jsonList = new Object();
     jsonList.list = downloadList;
 
-    console.log("downloadList", downloadList);
-    console.log("jsonList", jsonList);
+    //console.log("downloadList", downloadList);
+    //console.log("jsonList", jsonList);
 
     const result = await services.axiosAPI.post(Define.REST_API_URL + "/dl/request", jsonList)
-        .then((data) => {console.log("data", data); return  data.data})
+        .then((data) => {/*console.log("data", data);*/ return  data.data})
         .catch((error) => {
             console.log("[startDownload]error", error);
             return Define.GENRE_SET_FAIL_SEVER_ERROR;
@@ -140,7 +140,7 @@ export const bytesToSize = (bytes) => {
 export const setDownload = (props) => {
     const { responseList } = props;
     const responseListJS = responseList.toJS();
-    console.log("responseListJS", responseListJS);
+    //console.log("responseListJS", responseListJS);
 
     const downloadList = responseListJS.reduce((acc, cur, idx) => {
         if (cur.checked) acc.push({
@@ -207,7 +207,7 @@ export const setWatchSearchStatus = (props) => {
 
         // when setTimeout is null
         if(intervalFunc == null) return;
-        console.log("intervalFunc", intervalFunc);
+        //console.log("intervalFunc", intervalFunc);
 
         console.log("resStatus", resStatus);
         if(resStatus === "success" || resStatus === "error") {

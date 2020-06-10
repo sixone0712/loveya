@@ -119,15 +119,15 @@ class RSSautoplanwizard extends Component {
       interval: convInterval,
       description: description,
     };
-    console.log("[PlanWizard][makeRequestAutoPlanData] reqData", reqData);
+    //console.log("[PlanWizard][makeRequestAutoPlanData] reqData", reqData);
     return reqData;
   }
 
   handleRequestAutoPlanAdd = async () => {
     const reqData = this.makeRequestAutoPlanData();
-    console.log("reqData", reqData);
+    //console.log("reqData", reqData);
     const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/add", reqData);
-    console.log(res);
+    //console.log(res);
 
     console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
@@ -136,7 +136,7 @@ class RSSautoplanwizard extends Component {
 
   handleRequestAutoPlanEdit = async (editId) => {
     const reqData = this.makeRequestAutoPlanData();
-    console.log("reqData", reqData);
+    //console.log("reqData", reqData);
     console.log("editID", editId);
     const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/modify?id=" + editId, reqData);
     console.log(res);
