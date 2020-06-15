@@ -141,13 +141,14 @@ public class RemoteFileServiceProc extends FileServiceProc {
 
             try {
                 byte[] buf = new byte[1024];
+                int size;
                 ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
                 ZipEntry entry = zis.getNextEntry();
                 while(entry!=null) {
                     File tmpFile = new File(dir, entry.getName());
                     FileOutputStream fos = new FileOutputStream(tmpFile);
-                    while(zis.read(buf)>0) {
-                        fos.write(buf);
+                    while((size=zis.read(buf))>0) {
+                        fos.write(buf, 0, size);
                     }
                     fos.close();
                     entry = zis.getNextEntry();
