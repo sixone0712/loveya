@@ -1541,6 +1541,12 @@ a:hover {
     text-align: center;
 }
 
+.filelist-card-body table tbody tr td .custom-control {
+    padding-left: 0;
+    margin-left: 2.5rem;
+    width: 0;
+}
+
 .filelist-card-body table tbody tr td:first-child {
     padding-left: 0.9em;
 }
