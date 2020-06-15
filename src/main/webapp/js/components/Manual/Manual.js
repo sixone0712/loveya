@@ -59,7 +59,7 @@ class Manual extends Component {
         const isFailure = logTypeFailure || toolInfoFailure || genreFailure;
         console.log("isSuccess", isSuccess);
         console.log("isFailure", isFailure);
-        console.log(this.props.history);
+        //console.log(this.props.history);
 
         return (
             <>

@@ -65,7 +65,7 @@ class App extends Component {
         const isLoggedIn = API.getLoginIsLoggedIn(this.props);
         console.log("[App][render]");
         console.log("[App][render]isLoggedIn", isLoggedIn);
-        console.log("[App][render]this.props.history", this.props.history);
+        //console.log("[App][render]this.props.history", this.props.history);
         return (
                 <>
                     {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}

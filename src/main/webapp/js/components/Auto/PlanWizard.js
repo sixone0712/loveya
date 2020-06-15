@@ -129,7 +129,7 @@ class RSSautoplanwizard extends Component {
     const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/add", reqData);
     //console.log(res);
 
-    console.log("this.props.history", this.props.history);
+    //console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
     // error process
   }
@@ -140,7 +140,7 @@ class RSSautoplanwizard extends Component {
     console.log("editID", editId);
     const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/modify?id=" + editId, reqData);
     console.log(res);
-    console.log("this.props.history", this.props.history);
+    //console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
     // error process
   }
