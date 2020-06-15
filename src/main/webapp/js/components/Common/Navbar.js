@@ -114,7 +114,7 @@ class RSSNavbar extends Component{
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
               <NavbarBrand className="custom-brand">
-              RSS
+              ESP
             </NavbarBrand>
             <Nav className="mr-auto" navbar>
 
