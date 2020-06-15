@@ -209,18 +209,22 @@ class UserList extends Component {
         const { length: count } = registeredList;
         console.log(registeredList);
         if (count === 0) {
+            const { isModalOpen} = this.state;
+
             return (
                 <>
+                    <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
                     <Container className="rss-container" fluid={true}>
                         <Breadcrumb className="topic-path">
                             <BreadcrumbItem>Administrator</BreadcrumbItem>
                             <BreadcrumbItem active>User Account</BreadcrumbItem>
                         </Breadcrumb>
                         <Card className="auto-plan-box">
-                            <CardHeader className="auto-plan-card-header">
+                            <CardHeader className="auto-plan-card-header administrator">
                                 User Account
+                                <p>Manage <span>user accounts.</span></p>
                             </CardHeader>
-                            <CardBody className="auto-plan-card-body">
+                            <CardBody className="auto-plan-card-body no-flex">
                                 <Col className="auto-plan-collection-list">
                                     <p className="no-registered-plan">
                                         <FontAwesomeIcon icon={faExclamationCircle} size="7x" />
@@ -229,6 +233,12 @@ class UserList extends Component {
                                         No registered User List
                                     </p>
                                 </Col>
+                                <div className="user-create-btn">
+                                    <Button outline size="sm" color="info"
+                                            onClick={() => this.setState({...this.state,isModalOpen: true, isMode : "SignOut"})}>
+                                        <FontAwesomeIcon icon={faUser} /> New Account
+                                    </Button>
+                                </div>
                             </CardBody>
                         </Card>
                     </Container>
