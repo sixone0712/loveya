@@ -199,13 +199,13 @@ a:hover {
 @-webkit-keyframes antSlideUpIn {
     0% {
         -webkit-transform: scaleY(0.8);
-        -webkit-transform-origin: 0% 0%;
+        -webkit-transform-origin: 0 0;
         opacity: 0;
     }
 
     100% {
         -webkit-transform: scaleY(1);
-        -webkit-transform-origin: 0% 0%;
+        -webkit-transform-origin: 0 0;
         opacity: 1;
     }
 }
@@ -213,13 +213,13 @@ a:hover {
 @keyframes antSlideUpIn {
     0% {
         transform: scaleY(0.8);
-        transform-origin: 0% 0%;
+        transform-origin: 0 0;
         opacity: 0;
     }
 
     100% {
         transform: scaleY(1);
-        transform-origin: 0% 0%;
+        transform-origin: 0 0;
         opacity: 1;
     }
 }
@@ -227,13 +227,13 @@ a:hover {
 @-webkit-keyframes antSlideUpOut {
     0% {
         -webkit-transform: scaleY(1);
-        -webkit-transform-origin: 0% 0%;
+        -webkit-transform-origin: 0 0;
         opacity: 1;
     }
 
     100% {
         -webkit-transform: scaleY(0.8);
-        -webkit-transform-origin: 0% 0%;
+        -webkit-transform-origin: 0 0;
         opacity: 0;
     }
 }
@@ -241,13 +241,13 @@ a:hover {
 @keyframes antSlideUpOut {
     0% {
         transform: scaleY(1);
-        transform-origin: 0% 0%;
+        transform-origin: 0 0;
         opacity: 1;
     }
 
     100% {
         transform: scaleY(0.8);
-        transform-origin: 0% 0%;
+        transform-origin: 0 0;
         opacity: 0;
     }
 }
@@ -735,8 +735,7 @@ a:hover {
     background-color: #b5e2fc;
 }
 
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled)
-.ant-select-item-option-state {
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-state {
     color: #1890ff;
 }
 
@@ -1975,8 +1974,12 @@ a:hover {
     text-align: center;
 }
 
+.auto-plan-form-group.targetlist .checkbox-section {
+    min-width: 250px;
+}
+
 .auto-plan-form-group.targetlist .checkbox-section:not(:last-child) {
-    margin-right: 25px;
+    margin-right: 1em;
 }
 
 .auto-plan-optionlist-form-group {
