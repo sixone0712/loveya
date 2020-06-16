@@ -2,7 +2,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
-import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;
+//import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;   //compile Error
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
