@@ -1168,7 +1168,6 @@ a:hover {
 
 .datepicker-item-area .datetime-picker .time .show-time .text {
     word-break: normal !important;
-    -ms-word-break: normal !important;
 }
 
 .datepicker-item-area .datetime-picker .time .sliders .slider .thumb:focus,
@@ -1242,6 +1241,10 @@ a:hover {
 /* machinelist style end */
 
 /* categorylist set */
+.catlist-card .catlist-btn {
+    word-break: normal !important;
+}
+
 .catlist-card .cmdlist-btn-toggle,
 .catlist-card .catlist-btn,
 .catlist-card .catlist-btn-toggle:hover {
