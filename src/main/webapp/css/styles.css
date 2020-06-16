@@ -1166,6 +1166,11 @@ a:hover {
     margin: 0 10px;
 }
 
+.datepicker-item-area .datetime-picker .time .show-time .text {
+    word-break: normal !important;
+    -ms-word-break: normal !important;
+}
+
 .datepicker-item-area .datetime-picker .time .sliders .slider .thumb:focus,
 .datepicker-item-area .datetime-picker .time .sliders .slider .thumb:active {
     background-color: rgb(55, 178, 77);
@@ -1986,7 +1991,7 @@ a:hover {
 }
 
 .auto-plan-form-group.targetlist .checkbox-section:not(:last-child) {
-    margin-right: 1em;
+    margin-right: 25px;
 }
 
 .auto-plan-optionlist-form-group {
