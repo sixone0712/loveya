@@ -209,10 +209,11 @@ class UserList extends Component {
         const { length: count } = registeredList;
         console.log(registeredList);
         if (count === 0) {
-            const { isModalOpen} = this.state;
+            const { isModalOpen, isAlertOpen, alertMessage } = this.state;
 
             return (
                 <>
+                    <AlertModal isOpen={isAlertOpen} icon={faCheckCircle} message={alertMessage} style={"administrator"} closer={this.closeAlert} />
                     <SignOut isOpen={isModalOpen && this.state.isMode==='SignOut'} right={this.closeModal} alertOpen={this.openAlert}/>
                     <Container className="rss-container" fluid={true}>
                         <Breadcrumb className="topic-path">
