@@ -9,6 +9,7 @@
     padding: 0;
     box-sizing: border-box;
     cursor: default;
+    word-break: break-all;
 }
 
 ::-webkit-scrollbar-track {
@@ -1982,7 +1983,6 @@ a:hover {
 
 .auto-plan-form-group.targetlist .checkbox-section {
     min-width: 250px;
-    word-break: break-all;
 }
 
 .auto-plan-form-group.targetlist .checkbox-section:not(:last-child) {
