@@ -77,7 +77,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
                     lastDownloadFiles = downloadFiles;
                 }
                 log.info("retry="+retry);
-                if(retry>=20) {
+                if(retry>=100000) {
                     monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
                     return false;
                 }
