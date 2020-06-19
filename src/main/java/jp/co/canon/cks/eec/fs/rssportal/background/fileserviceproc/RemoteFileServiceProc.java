@@ -96,6 +96,12 @@ public class RemoteFileServiceProc extends FileServiceProc {
                 String achieveUrl = manager.download(context.getUser(), context.getSystem(), context.getTool(),
                         context.getRequestNo(), reqInfo.getArchiveFileName());
                 log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
+                if(achieveUrl==null) {
+                    // When there is no file to download, 'achieveUrl' is null.
+                    // We consider that who asks this download requested invalid download.
+                    log.error("null downloaded file");
+                    return false;
+                }
                 setUrl(achieveUrl);
                 break;
             }
