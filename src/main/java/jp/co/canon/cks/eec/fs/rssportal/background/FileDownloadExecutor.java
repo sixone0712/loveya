@@ -84,6 +84,8 @@ public class FileDownloadExecutor implements DownloadConfig {
         setStatus(Status.init);
         log.info(downloadId+": initialize()");
         for(DownloadForm form: downloadForms) {
+            if(form.getFiles().size()==0)
+                continue;
             FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
             context.setFileManager(serviceManage);
             context.setFileService(service);
