@@ -150,6 +150,7 @@ public class FileDownloader extends Thread {
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
+        loopTop:
         while(retry<fileServiceRetryCount) {
             try {
                 FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
@@ -157,6 +158,7 @@ public class FileDownloader extends Thread {
                     dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
                     String time = dateFormat.format(file.getTimestamp().getTime());
                     form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                    break loopTop;
                 }
             } catch (RemoteException e) {
                 log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
