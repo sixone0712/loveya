@@ -113,7 +113,7 @@ rssportal:
   file-collect-service:
     addr: localhost
     retry: 10 # retry count
-    retry-interval: 100 # interval between each retry
+    retry-interval: 100 # interval between each retry(msec)
 
 logging:
   file:

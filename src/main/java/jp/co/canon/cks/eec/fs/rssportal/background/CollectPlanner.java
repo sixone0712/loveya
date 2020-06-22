@@ -88,25 +88,25 @@ public class CollectPlanner extends Thread {
 
         // change the status of this plan to 'collecting'
         service.setLastStatus(plan, PlanStatus.collecting);
+        PlanStatus lastStatus = PlanStatus.collected;
 
         // figure out a list the plan has to collect.
         List<DownloadForm> downloadList = createDownloadList(plan);
-
-        PlanStatus lastStatus = PlanStatus.collected;
         int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
-        if(totalFiles!=0) {
+
+        if (totalFiles != 0) {
             String downloadId = downloader.addRequest(downloadList);
-            while(downloader.getStatus(downloadId).equalsIgnoreCase("in-progress"))
+            while (downloader.getStatus(downloadId).equalsIgnoreCase("in-progress"))
                 sleep(500);
 
-            if(!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
-                log.error("file download failed [planId="+plan.getId()+"]");
+            if (!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
+                log.error("file download failed [planId=" + plan.getId() + "]");
                 lastStatus = PlanStatus.suspended;
             } else {
                 // copy downloaded files to the plan's directory.
                 int copied = copyFiles(plan, downloader.getBaseDir(downloadId));
-                log.info("updated files="+copied);
-                if(copied==0) {
+                log.info("updated files=" + copied);
+                if (copied == 0) {
                     log.info("collection complete.. but no updated files");
                 } else {
                     // compress files.
@@ -117,14 +117,14 @@ public class CollectPlanner extends Thread {
                     } else {
                         downloadListService.insert(plan, outputPath);
                         plan.setLastPoint(new Timestamp(expectedLastPoint));
-                        log.info("plan " + plan.getPlanName()+" "+copied+" files collecting success");
+                        log.info("plan " + plan.getPlanName() + " " + copied + " files collecting success");
                     }
                 }
                 // stop flag might be changed while the plan was on work.
                 // if someone stopped the plan, we have to update status and don't have to reschedule.
-                if(planUpdated) {
+                if (planUpdated) {
                     CollectPlanVo dbPlan = service.getPlan(plan.getId());
-                    if (dbPlan==null || dbPlan.isStop()) {
+                    if (dbPlan == null || dbPlan.isStop()) {
                         log.info("stopped plan on work");
                         plan.setStop(true);
                         service.setLastStatus(plan, lastStatus);
@@ -143,7 +143,7 @@ public class CollectPlanner extends Thread {
         return true;
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws RemoteException {
+    private List<DownloadForm> createDownloadList(CollectPlanVo plan) {
         List<DownloadForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
@@ -161,16 +161,29 @@ public class CollectPlanner extends Thread {
             to.setTimeInMillis(System.currentTimeMillis());
         }
 
+        boolean updateLastPoint = true;
         for(String tool: tools) {
             tool = tool.trim();
             for(int i=0; i<types.length; ++i) {
                 DownloadForm form = downloader.createDownloadFileList("undefined", tool, types[i].trim(),
                         typeStrs[i].trim(), from, to);
-                for(FileInfo file: form.getFiles()) {
-                    if(lastTime<file.getMilliTime())
-                        lastTime = file.getMilliTime();
+                if(form==null) {
+                    // That form is null means that a timeout has occurred on createFileList.
+                    log.error("cannot create download filelist for "+tool+"/"+types[i]);
+                    updateLastPoint = false;
+                    // There is only 1 last-point for a plan.
+                    // it means if createFileList error occurred,
+                    // updating last-point is possible to causes some omission logs for a tool which has an error.
+                    // That's why it doesn't update a last-point at this point.
+                } else {
+                    if(updateLastPoint) {
+                        for (FileInfo file : form.getFiles()) {
+                            if (lastTime < file.getMilliTime())
+                                lastTime = file.getMilliTime();
+                        }
+                    }
+                    downloadList.add(form);
                 }
-                downloadList.add(form);
             }
         }
         int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
@@ -180,7 +193,8 @@ public class CollectPlanner extends Thread {
                 new Timestamp(to.getTimeInMillis()).toString(),
                 dateFormat.format(lastTime)));
 
-        expectedLastPoint = lastTime;
+        if(updateLastPoint)
+            expectedLastPoint = lastTime;
         return downloadList;
     }
 
