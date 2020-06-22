@@ -43,6 +43,12 @@ public class FileDownloader extends Thread {
     @Value("${rssportal.file-collect-service.addr}")
     private String fileCollectServiceAddr;
 
+    @Value("${rssportal.file-collect-service.retry}")
+    private int fileServiceRetryCount;
+
+    @Value("${rssportal.file-collect-service.retry-interval}")
+    private int fileServiceRetryInterval;
+
     @Autowired
     private FileDownloader(@NonNull DownloadMonitor monitor) {
         log.info("initialize FileDownloader");
@@ -143,16 +149,26 @@ public class FileDownloader extends Thread {
                                                @NonNull Calendar from, @NonNull Calendar to) {
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        try {
-            FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
-            for(FileInfoModel file: fileInfos) {
-                dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
-                String time = dateFormat.format(file.getTimestamp().getTime());
-                form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+        int retry = 0;
+        while(retry<fileServiceRetryCount) {
+            try {
+                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
+                for (FileInfoModel file : fileInfos) {
+                    dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
+                    String time = dateFormat.format(file.getTimestamp().getTime());
+                    form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                }
+            } catch (RemoteException e) {
+                log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
+                retry++;
+                try {
+                    Thread.sleep(fileServiceRetryInterval);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                    log.error("interrupt exception occurs on thread sleep");
+                    return null;
+                }
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return null;
         }
         return form;
     }

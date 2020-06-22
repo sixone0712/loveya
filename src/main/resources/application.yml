@@ -86,6 +86,8 @@ rssportal:
     resultBase: zipa
   file-collect-service:
     addr: 10.1.31.237
+    retry: 10 # retry count
+    retry-interval: 100 # interval between each retry
 
 logging:
   file:
@@ -110,6 +112,8 @@ rssportal:
     resultBase: /LOG/zip
   file-collect-service:
     addr: localhost
+    retry: 10 # retry count
+    retry-interval: 100 # interval between each retry
 
 logging:
   file:
