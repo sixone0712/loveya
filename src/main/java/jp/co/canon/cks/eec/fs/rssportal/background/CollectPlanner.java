@@ -37,7 +37,6 @@ public class CollectPlanner extends Thread {
     private String planRootDir;
     private final CollectPlanService service;
     private final DownloadListService downloadListService;
-    private final DownloadMonitor monitor;
     private CollectPlanVo nextPlan;
     private boolean planUpdated = true;
     private boolean halted = false;
@@ -51,7 +50,6 @@ public class CollectPlanner extends Thread {
         if(service==null || monitor==null || downloadListService==null)
             throw new BeanInitializationException("service injection failed");
 
-        this.monitor = monitor;
         this.service = service;
         this.downloadListService = downloadListService;
         service.addNotifier(notifyUpdate);
