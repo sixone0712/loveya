@@ -171,6 +171,7 @@ public class CollectPlanner extends Thread {
                     // That form is null means that a timeout has occurred on createFileList.
                     log.error("cannot create download filelist for "+tool+"/"+types[i]);
                     updateLastPoint = false;
+                    expectedLastPoint = plan.getLastPoint().getTime();
                     // There is only 1 last-point for a plan.
                     // it means if createFileList error occurred,
                     // updating last-point is possible to causes some omission logs for a tool which has an error.
