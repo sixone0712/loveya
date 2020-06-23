@@ -161,7 +161,8 @@ public class FileDownloader extends Thread {
                 break;
             } catch (RemoteException e) {
                 log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
-                retry++;
+                if((++retry)>=fileServiceRetryCount)
+                    return null;
                 try {
                     Thread.sleep(fileServiceRetryInterval);
                 } catch (InterruptedException interruptedException) {
