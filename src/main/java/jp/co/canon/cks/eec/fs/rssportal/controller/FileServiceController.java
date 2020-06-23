@@ -34,9 +34,12 @@ public class FileServiceController {
 
     @Value("${rssportal.property.constructdisplay}")
     private String contructDisplay;
+    @Value("${rssportal.file-collect-service.retry}")
+    private int fileServiceRetryCount;
+    @Value("${rssportal.file-collect-service.retry-interval}")
+    private int fileServiceRetryInterval;
 
     private final Log log = LogFactory.getLog(getClass());
-    private final int maxRetry = 5;
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
 
     @GetMapping("/getFabName")
@@ -63,13 +66,14 @@ public class FileServiceController {
         log.info("/rss/rest/soap/createToolList");
         ToolInfoModel[] result = null;
         int retry = 0;
-        while(retry < maxRetry){
+        while(retry < fileServiceRetryCount){
             try {
                 result = serviceLocator.getFileServiceManage().createToolList();
                 break;
             } catch(Exception e){
                 retry++;
                 log.error("[createToolList]request failed(retry: " + retry);
+                Thread.sleep(fileServiceRetryInterval);
             }
         }
 
@@ -105,13 +109,14 @@ public class FileServiceController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-        while(retry < maxRetry){
+        while(retry < fileServiceRetryCount){
             try {
                 ftList = serviceLocator.getFileServiceManage().createFileTypeList(tool);
                 break;
             } catch(Exception e){
                 retry++;
                 log.error("[createFileTypeList] request failed(retry: " + retry);
+                Thread.sleep(fileServiceRetryInterval);
             }
         }
 
@@ -187,7 +192,7 @@ public class FileServiceController {
                         ed.setTime(f.parse(endDate));
                     }
 
-                    while(retry < maxRetry){
+                    while(retry < fileServiceRetryCount){
                         try {
                             src = serviceLocator.getFileServiceManage().createFileList(toolId, logId, st, ed, keyword, dir);
                             break;
@@ -195,6 +200,7 @@ public class FileServiceController {
                             e.printStackTrace();
                             retry++;
                             log.error("[createFileList]request failed(retry: " + retry + ")");
+                            Thread.sleep(fileServiceRetryInterval);
                         }
                     }
 
@@ -238,11 +244,20 @@ public class FileServiceController {
         threadPool.shutdown();
 
         ArrayList<RSSFileInfoBeanResponse> resultList = new ArrayList<>();
+        int totalCnt = 0;
+        int errCnt = 0;
         for (Future<ArrayList<RSSFileInfoBeanResponse>> future : futures) {
+            totalCnt++;
             if(future.get() == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                errCnt++;
+            } else {
+                resultList.addAll(future.get());
             }
-            resultList.addAll(future.get());
+        }
+
+        if(totalCnt == errCnt) {
+            log.error("[createFileList]There is no response to all requests.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
         RSSFileInfoBeanResponse[] array = resultList.toArray(new RSSFileInfoBeanResponse[resultList.size()]);
