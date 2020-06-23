@@ -26,7 +26,7 @@ class FileList extends Component {
     super(props);
     this.state = {
       itemsChecked: true,
-      pageSize: this.props.responsePerPage,
+      pageSize: 10,
       currentPage: 1,
       sortDirection: "",
       sortKey: "",
@@ -43,8 +43,22 @@ class FileList extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if(nextProps.requestCompletedDate != prevState.searchComplatedDate) {
-      console.log("[getDerivedStateFromProps] init filePaginate");
-      return { ...prevState, currentPage: 1, searchComplatedDate: nextProps.requestCompletedDate }
+      console.log("[getDerivedStateFromProps] init filelist state");
+      return {
+        itemsChecked: true,
+        pageSize: 10,
+        currentPage: 1,
+        sortDirection: "",
+        sortKey: "",
+        isError: Define.RSS_SUCCESS,
+        isDownloadOpen: false,
+        isProcessOpen: false,
+        isCancelOpen: false,
+        isCompleteOpen: false,
+        isAlertOpen: false,
+        modalMessage: "",
+        searchComplatedDate: nextProps.requestCompletedDate
+      }
     }
   }
 
@@ -537,7 +551,7 @@ class FileList extends Component {
               <div className="filelist-item-area">
                 <label>Rows per page:</label>
                 <Select
-                    defaultValue= {10}
+                    defaultValue={pageSize}
                     onChange={this.onChangeRowsPerPage}
                     className="filelist"
                 >
@@ -570,7 +584,6 @@ export default connect(
       responseListCnt: state.searchList.get('responseListCnt'),
       downloadCnt: state.searchList.get('downloadCnt'),
       downloadStatus: state.searchList.get('downloadStatus'),
-      responsePerPage: state.searchList.get('responsePerPage'),
       requestCompletedDate: state.searchList.get('requestCompletedDate'),
       resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
       resPending: state.pender.pending['searchList/SEARCH_LOAD_RESPONSE_LIST'],
