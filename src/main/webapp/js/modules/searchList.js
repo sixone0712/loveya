@@ -35,6 +35,7 @@ export const searchSetDlId = createAction(SEARCH_SET_DL_DOWNLOAD_FILES);
 
 
 const initialState = Map({
+    requestCompletedDate: "",
     requestListCnt: 0,
     requestList: List([
         Map({
@@ -122,7 +123,8 @@ export default handleActions({
                 const newListSize = newLists.length;
                 return state.set('responseList', fromJS(newLists)).set('requestListCnt', newListSize)
                             .set('responseListCnt', newListSize)
-                            .set('downloadCnt', newListSize);
+                            .set('downloadCnt', newListSize)
+                            .set('requestCompletedDate', new Date());
             },
         }),
 

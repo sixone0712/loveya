@@ -36,8 +36,16 @@ class FileList extends Component {
       isCancelOpen: false,
       isCompleteOpen: false,
       isAlertOpen: false,
-      modalMessage: ""
+      modalMessage: "",
+      searchComplatedDate: props.requestCompletedDate
     };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if(nextProps.requestCompletedDate != prevState.searchComplatedDate) {
+      console.log("[getDerivedStateFromProps] init filePaginate");
+      return { ...prevState, currentPage: 1, searchComplatedDate: nextProps.requestCompletedDate }
+    }
   }
 
   setErrorMsg = (errCode) => {
@@ -563,6 +571,7 @@ export default connect(
       downloadCnt: state.searchList.get('downloadCnt'),
       downloadStatus: state.searchList.get('downloadStatus'),
       responsePerPage: state.searchList.get('responsePerPage'),
+      requestCompletedDate: state.searchList.get('requestCompletedDate'),
       resSuccess: state.pender.success['searchList/SEARCH_LOAD_RESPONSE_LIST'],
       resPending: state.pender.pending['searchList/SEARCH_LOAD_RESPONSE_LIST'],
       resError: state.pender.failure['searchList/SEARCH_LOAD_RESPONSE_LIST'],
