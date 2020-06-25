@@ -10,9 +10,12 @@ plugins {
 // Build War
 /*
 bootWar {
-    archiveBaseName = 'rssportal'
+     archiveBaseName = 'rssportal'
     archiveFileName = 'rssportal.war'
-    archiveVersion = "0.0.1"
+    archiveVersion = "1.0.0"
+    manifest {
+        attributes("RSS-Portal-Version": "1.0.0")
+    }
 }
  */
 
