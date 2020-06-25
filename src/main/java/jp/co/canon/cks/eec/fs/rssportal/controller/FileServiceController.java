@@ -6,13 +6,14 @@ import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.manage.FileTypeModel;
 import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSFileInfoBeanResponse;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSLogInfoBean;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSRequestSearch;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
+import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoFileSearchReq;
+import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoFileSearchRes;
+import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoLog;
+import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoMpa;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @RestController
-@RequestMapping("/rss/rest/soap")
+@RequestMapping("/rss/api/info")
 public class FileServiceController {
 
     @Value("${rssportal.property.constructdisplay}")
@@ -38,22 +39,64 @@ public class FileServiceController {
     private int fileServiceRetryCount;
     @Value("${rssportal.file-collect-service.retry-interval}")
     private int fileServiceRetryInterval;
+    @Value("${rssportal.constructDisplayTree}")
+    public String[] constructDisplayTree;
 
     private final Log log = LogFactory.getLog(getClass());
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
 
-    @GetMapping("/getFabName")
-    public ResponseEntity<?> getGenre() throws FileNotFoundException {
-        log.info("/rss/rest/soap/getFabName");
-        log.info("[getFabName]contructDisplay: " + contructDisplay);
+    @GetMapping("/fabs")
+    public ResponseEntity<?> getFabs() throws FileNotFoundException {
+        log.info("/rss/rest/info/fabs");
+
+        JSONArray res = new JSONArray();
+        String output = null;
+
         try (InputStream inputStream = new FileInputStream(new File(contructDisplay))) {
             String xml = IOUtils.toString(inputStream);
             JSONObject jObject = XML.toJSONObject(xml);
+            JSONObject ConstructDisplay = jObject.getJSONObject("ConstructDisplay");
+            log.debug("ConstructDisplay: " + ConstructDisplay.toString());
+            JSONArray Tree = ConstructDisplay.getJSONArray("Tree");
+
+            for (int i = 0; i < Tree.length(); i++) {
+                JSONObject obj = Tree.getJSONObject(i);
+                String title = obj.getString("name");
+                for (String treeName : constructDisplayTree) {
+                    if (title.equals(treeName)) {
+                        JSONArray Child = null;
+                        try {
+                            Child = obj.getJSONArray("Child");
+                            for (int j = 0; j < Child.length(); j++) {
+                                JSONObject fabs = Child.getJSONObject(j);
+                                String name = fabs.getString("name");
+                                String id = Integer.toString(fabs.getInt("id"));
+                                JSONObject newFab = new JSONObject();
+                                res.put(newFab);
+                            }
+                        } catch (Exception e) {
+                            log.info("[fabs] Chlid does not exist.[ " + e + "]");
+                        }
+                    }
+                }
+            }
+
+            // Pring Log
+            /*
+            for (int i = 0; i < res.length(); i++) {
+                JSONObject obj = res.getJSONObject(i);
+                String fabName = obj.getString("fabName");
+                int fabId = obj.getInt("fabId");
+                log.info("fabName: " + fabName);
+                log.info("fabId: " + fabId);
+            }
+            */
+
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            Object json = mapper.readValue(jObject.toString(), Object.class);
-            String output = mapper.writeValueAsString(json);
-            return ResponseEntity.status(HttpStatus.OK).body(json);
+            Object json = mapper.readValue(res.toString(), Object.class);
+            output = mapper.writeValueAsString(json);
+            return ResponseEntity.status(HttpStatus.OK).body(output);
         } catch (IOException e) {
             e.printStackTrace();
             log.error("[createFileList]HttpStatus: INTERNAL_SERVER_ERROR");
@@ -61,9 +104,9 @@ public class FileServiceController {
         }
     }
 
-    @GetMapping("/createToolList")
-    public ResponseEntity<RSSToolInfo[]> createToolList() throws Exception {
-        log.info("/rss/rest/soap/createToolList");
+    @GetMapping("/mpas")
+    public ResponseEntity<ArrayList<RSSInfoMpa>> getMpas() throws Exception {
+        log.info("/rss/rest/info/maps");
         ToolInfoModel[] result = null;
         int retry = 0;
         while(retry < fileServiceRetryCount){
@@ -72,63 +115,63 @@ public class FileServiceController {
                 break;
             } catch(Exception e){
                 retry++;
-                log.error("[createToolList]request failed(retry: " + retry);
+                log.error("[mpas]request failed(retry: " + retry);
                 Thread.sleep(fileServiceRetryInterval);
             }
         }
 
         if(result == null) {
-            log.error("[createToolList]request totally failed");
+            log.error("[mpas]request totally failed");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
         ToolInfoModel[] toolModels = result;
-        ArrayList<RSSToolInfo> toolList = new ArrayList<>();
+        ArrayList<RSSInfoMpa> mpaList = new ArrayList<>();
         for (int i = 0; i < toolModels.length; i++) {
-            RSSToolInfo tool = new RSSToolInfo();
-            tool.setStructId(toolModels[i].getStructId());
-            tool.setTargetname(toolModels[i].getName());
-            tool.setTargettype(toolModels[i].getType());
-            toolList.add(tool);
+            RSSInfoMpa mpa = new RSSInfoMpa();
+            mpa.setFabId(toolModels[i].getStructId());
+            mpa.setMpaName(toolModels[i].getName());
+            mpa.setMpaType(toolModels[i].getType());
+            mpaList.add(mpa);
         }
 
-        RSSToolInfo[] arrToolList = toolList.toArray(new RSSToolInfo[toolList.size()]);
-        return ResponseEntity.status(HttpStatus.OK).body(arrToolList);
+        return ResponseEntity.status(HttpStatus.OK).body(mpaList);
     }
 
-    @GetMapping("/createFileTypeList")
-    public ResponseEntity<RSSLogInfoBean[]> createFileTypeList(@RequestParam(name="tool") String tool) throws Exception {
-        log.info("/rss/rest/soap/createFileTypeList");
-        String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
-        String FILE_SELECT_PAGE = "FileListSelect";
+    @GetMapping("/logs/{logName}")
+    public ResponseEntity<RSSInfoLog[]> getLogs(@PathVariable("logName") String logName) throws Exception {
+        log.info("/rss/rest/info/logs");
+        // Not currently used
+        //String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
+        //String FILE_SELECT_PAGE = "FileListSelect";
         FileTypeModel[] ftList = null;
         int retry = 0;
 
-        if (tool == null) {
-            log.error("[createFileTypeList]param(tool) is null");
+        if (logName == null) {
+            log.error("[logs]param(tool) is null");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         while(retry < fileServiceRetryCount){
             try {
-                ftList = serviceLocator.getFileServiceManage().createFileTypeList(tool);
+                ftList = serviceLocator.getFileServiceManage().createFileTypeList(logName);
                 break;
             } catch(Exception e){
                 retry++;
-                log.error("[createFileTypeList] request failed(retry: " + retry);
+                log.error("[logs]request failed(retry: " + retry);
                 Thread.sleep(fileServiceRetryInterval);
             }
         }
 
         if(ftList == null) {
-            log.error("[createFileTypeList]request totally failed");
+            log.error("[logs]request totally failed");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
-        RSSLogInfoBean[] r = new RSSLogInfoBean[ftList.length];
+        RSSInfoLog[] r = new RSSInfoLog[ftList.length];
         for (int i = 0; i < ftList.length; i++) {
-            r[i] = new RSSLogInfoBean();
-            r[i].setCode(ftList[i].getLogType());
+            r[i] = new RSSInfoLog();
+            r[i].setLogCode(ftList[i].getLogType());
             r[i].setLogName(ftList[i].getDataName());
             int v = Integer.parseInt(ftList[i].getSearchType());
             switch((v & 0x03)) {
@@ -144,42 +187,46 @@ public class FileServiceController {
                 default:
                     r[i].setLogType(3);
             }
+
+            // Not currently used
+            /*
             if ((v & 0x10) == 0x10) {
                 r[i].setFileListForwarding(FILE_SELECT_IN_DIR_PAGE);
             } else {
                 r[i].setFileListForwarding(FILE_SELECT_PAGE);
             }
+            */
         }
         return ResponseEntity.status(HttpStatus.OK).body(r);
     }
 
-    @PostMapping("/createFileList")
-    public ResponseEntity<RSSFileInfoBeanResponse[] > createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
-        log.info("/rss/rest/soap/createFileList");
+    @PostMapping("/files")
+    public ResponseEntity<ArrayList<RSSInfoFileSearchRes>> createFileList(@RequestBody RSSInfoFileSearchReq[] requestList) throws Exception {
+        log.info("/rss/rest/info/files");
 
         // Create ThreadPool with 10 threads
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         // Futrure object to hold the result when threads are executed asynchronously
-        ArrayList<Future<ArrayList<RSSFileInfoBeanResponse>>> futures = new ArrayList<Future<ArrayList<RSSFileInfoBeanResponse>>>();
+        ArrayList<Future<ArrayList<RSSInfoFileSearchRes>>> futures = new ArrayList<Future<ArrayList<RSSInfoFileSearchRes>>>();
 
-        for (final RSSRequestSearch list : requestList) {
+        for (final RSSInfoFileSearchReq list : requestList) {
             // Futrure object to hold the result when threads are executed asynchronously
-            Callable<ArrayList<RSSFileInfoBeanResponse>> callable = new Callable<ArrayList<RSSFileInfoBeanResponse>>() {
+            Callable<ArrayList<RSSInfoFileSearchRes>> callable = new Callable<ArrayList<RSSInfoFileSearchRes>>() {
                 @Override
-                public ArrayList<RSSFileInfoBeanResponse> call() throws Exception {
-                    ArrayList<RSSFileInfoBeanResponse> result = new ArrayList<>();
+                public ArrayList<RSSInfoFileSearchRes> call() throws Exception {
+                    ArrayList<RSSInfoFileSearchRes> result = new ArrayList<>();
                     Calendar st = null;
                     Calendar ed = null;
                     SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
-                    String structId = list.getStructId();
-                    String targetName = list.getTargetName();
+
+                    String fabName = list.getFabName();
+                    String mpaName = list.getMpaName();
                     String logName = list.getLogName();
+                    String logCode = list.getLogCode();
                     String startDate = list.getStartDate();
                     String endDate = list.getEndDate();
-                    String toolId = list.getTargetName();
-                    String logId = list.getLogCode();
-                    String keyword = list.getKeyword();
-                    String dir = list.getDir();
+                    String keyword = "";    //list.getKeyword();    //Not currently in use
+                    String dir = "";    //list.getDir();            //Not currently in use
                     FileInfoModel[] src = null;
                     int retry = 0;
 
@@ -194,7 +241,7 @@ public class FileServiceController {
 
                     while(retry < fileServiceRetryCount){
                         try {
-                            src = serviceLocator.getFileServiceManage().createFileList(toolId, logId, st, ed, keyword, dir);
+                            src = serviceLocator.getFileServiceManage().createFileList(mpaName, logCode, st, ed, keyword, dir);
                             break;
                         } catch(Exception e){
                             e.printStackTrace();
@@ -210,27 +257,26 @@ public class FileServiceController {
                     }
 
                     for (int i = 0; i < src.length; i++) {
-                        RSSFileInfoBeanResponse dest = new RSSFileInfoBeanResponse();
-                        if (dest.isFile()) {
+                        RSSInfoFileSearchRes dest = new RSSInfoFileSearchRes();
+                        //if (dest.isFile()) {  //Not currently in use
                             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(src[i].getTimestamp().getTimeInMillis());
-                            dest.setFile(src[i].getType().equals("F"));
-                            dest.setFileId(0);
-                            dest.setLogId(logId);
+                            //dest.setFile(src[i].getType().equals("F"));   //Not currently in use
+                            //dest.setFileId(0);    //Not currently in use
+                            dest.setLogCode(logCode);
                             dest.setFileName(src[i].getName());
                             dest.setFilePath(src[i].getName());
                             dest.setFileSize(src[i].getSize());
-                            //dest.setFileDate(Long.toString(src[i].getTimestamp().getTimeInMillis()));
                             dest.setFileDate(timeStamp);
-                            dest.setFileStatus("");
+                            //dest.setFileStatus("");   //Not currently in use
 
                             // additional info
-                            dest.setStructId(structId);
-                            dest.setTargetName(targetName);
+                            dest.setFabName(fabName);
+                            dest.setMpaName(mpaName);
                             dest.setLogName(logName);
 
                             result.add(dest);
                         }
-                    }
+                    //}
 
                     return result;
                 }
@@ -243,10 +289,10 @@ public class FileServiceController {
         // showdownNow () interrupts even if there is a callable being executed, and forcibly terminates it.
         threadPool.shutdown();
 
-        ArrayList<RSSFileInfoBeanResponse> resultList = new ArrayList<>();
+        ArrayList<RSSInfoFileSearchRes> resultList = new ArrayList<>();
         int totalCnt = 0;
         int errCnt = 0;
-        for (Future<ArrayList<RSSFileInfoBeanResponse>> future : futures) {
+        for (Future<ArrayList<RSSInfoFileSearchRes>> future : futures) {
             totalCnt++;
             if(future.get() == null) {
                 errCnt++;
@@ -260,9 +306,7 @@ public class FileServiceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
-        RSSFileInfoBeanResponse[] array = resultList.toArray(new RSSFileInfoBeanResponse[resultList.size()]);
-
-        return ResponseEntity.status(HttpStatus.OK).body(array);
+        return ResponseEntity.status(HttpStatus.OK).body(resultList);
     }
 
     /*

@@ -41,14 +41,14 @@ const initialState = Map({
         Map({
             structId: "",
             targetName: "",
-            targetType: "",
+            //targetType: "",   //Not currently in use
             logType: "",
             logCode: "",
             logName: "",
             startDate: "",
             endDate: "",
-            keyword: "",
-            dir: ""
+            //keyword: "",      //Not currently in use
+            //dir: ""            //Not currently in use
         })
     ]),
 
@@ -58,18 +58,18 @@ const initialState = Map({
     responseList: List([
 		Map({
             keyIndex: 0,
-            fileId: 0,
-            fileStatus: "",
+            //fileId: 0,        //Not currently in use
+            //fileStatus: "",   //Not currently in use
             logId: "",
             fileName: "",
             fileSize: 0,
             fileDate: "",
             filePath: "",
-            file: false,
+            //file: false,      //Not currently in use
             structId: "",
             targetName: "",
             logName: "",
-            sizeKB: 0,
+            //sizeKB: 0,        //Not currently in use
             checked: false
 		})
     ]),
@@ -104,18 +104,18 @@ export default handleActions({
                 const newLists = lists.map((list, idx) => {
                     return {
                         keyIndex: idx,
-                        fileId: list.fileId,
-                        fileStatus: list.fileStatus,
+                        //fileId: list.fileId,  //Not currently in use
+                        //fileStatus: list.fileStatus,  //Not currently in use
                         logId: list.logId,
                         fileName: list.fileName,
                         fileSize: list.fileSize,
                         fileDate: list.fileDate,
                         filePath: list.filePath,
-                        file: list.file,
-                        structId: list.structId,
-                        targetName: list.targetName,
+                        //file: list.file,  //Not currently in use
+                        structId: list.fabName,
+                        targetName: list.mpaName,
                         logName: list.logName,
-                        sizeKB: API.bytesToSize(list.fileSize),
+                        //sizeKB: API.bytesToSize(list.fileSize),   //Not currently in use
                         checked: true
                     }
                 });
@@ -183,14 +183,14 @@ export default handleActions({
                     {
                         structId: tList.structId,
                         targetName: tList.targetname,
-                        targetType: tList.targettype,
+                        //targetType: tList.targettype,     //Not currently in use
                         logType: fList.logType,
                         logCode: fList.logCode,
                         logName: fList.logName,
                         startDate: formDate,
                         endDate: toDate,
-                        keyword: "",
-                        dir: "",
+                        //keyword: "",                      //Not currently in use
+                        //dir: "",                          //Not currently in use
                     }
                 );
             }

@@ -31,8 +31,8 @@ const initialState = Map({
 
 	constructDisplay:  List([
 		Map({
-			name: "",
-			id: ""
+			fabName: "",
+			fabId: ""
 		})
 	]),
 
@@ -48,8 +48,8 @@ const initialState = Map({
 		Map({
 			keyIndex: 0,
 			structId: "",
-			collectServerId: 0,
-			collectHostName: null,
+			//collectServerId: 0,     //Not currently in use
+			//collectHostName: null,  //Not currently in use
 			targetname: "",
 			targettype: "",
 			checked: false
@@ -89,6 +89,8 @@ export default handleActions({
 		onSuccess: (state, action) => {
 			console.log("handleActions[VIEW_LOAD_CONSTRUCT_DISPLAY]");
 			const lists = action.payload.data;
+
+			/*
 			const tree = lists.ConstructDisplay.Tree;
 			const equipments = tree.find(item => item.name === "Equipments");
 			//console.log("lists", lists);
@@ -100,7 +102,10 @@ export default handleActions({
 				id: String(item.id)
 			}))
 			//console.log("newEquipments.Child", newEquipments);
-			return state.set("constructDisplay",fromJS(newEquipments));
+			 */
+
+			//console.log("lists", lists);
+			return state.set("constructDisplay",fromJS(lists));
 		}
 	}),
 	...pender(
@@ -120,12 +125,12 @@ export default handleActions({
 
 				const newList = lists.reduce((acc, cur) => {
 					const find = constructDisplay.find(item => {
-						return item.id === cur.structId
+						return item.fabId === cur.fabId
 					});
 					if(find !== undefined){
 						const newCur = {
 							...cur,
-							structId: find.name
+							structId: find.fabName
 						}
 						acc.push(newCur);
 					}
@@ -137,7 +142,7 @@ export default handleActions({
 				const newEquipLists = constructDisplay.map((item, idx) => {
 					return {
 						keyIndex: idx,
-						equipmentId: item.name
+						equipmentId: item.fabName
 					}
 				});
 
@@ -147,10 +152,10 @@ export default handleActions({
 					return {
 						keyIndex: idx,
 						structId: list.structId,
-						collectServerId: list.collectServerId,
-						collectHostName: list.collectHostName,
-						targetname: list.targetname,
-						targettype: list.targettype,
+						//collectServerId: list.collectServerId,    //Not currently in use
+						//collectHostName: list.collectHostName,    //Not currently in use
+						targetname: list.mpaName,
+						targettype: list.mpaType,
 						checked: false
 					}
 				});
@@ -172,9 +177,9 @@ export default handleActions({
 				return {
 					keyIndex: idx,
 					logType: lists.logType,
-					logCode: lists.code,
+					logCode: lists.logCode,
 					logName: lists.logName,
-					fileListForwarding: lists.fileListForwarding,
+					//fileListForwarding: lists.fileListForwarding,   //Not currently in use
 					checked: false
 				}
 			});

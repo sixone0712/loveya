@@ -45,8 +45,17 @@ export const setSearchList = async (props) => {
 export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
+    const requestListJS = requestList.toJS();
+    const newRequestList = requestListJS.map(list => ({
+	    fabName: list.structId,
+	    mpaName: list.targetName,
+	    logCode: list.logCode,
+	    logName: list.logName,
+	    startDate: list.startDate,
+	    endDate: list.endDate,
+    }))
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList(Define.REST_API_URL + "/soap/createFileList", requestList.toJS());
+    searchListActions.searchLoadResponseList(Define.REST_POST_INFO_FILES, newRequestList);
 };
 
 export const getResponseList = (props) => {

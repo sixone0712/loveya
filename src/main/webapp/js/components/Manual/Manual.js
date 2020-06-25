@@ -35,13 +35,13 @@ class Manual extends Component {
         await searchListActions.searchSetInitAllList();
         await genreListActions.genreInitAllList();
 
-        await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
-        await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
+        await viewListActions.viewLoadConstructDisplay(Define.REST_GET_INFO_FABS);
+        await viewListActions.viewLoadToolInfoList(Define.REST_GET_INFO_MPAS);
         const { toolInfoList } = this.props;
         const targetname = toolInfoList.getIn([0, "targetname"]);
         console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
         console.log("[Manual][componentDidMount]targetname", targetname);
-        await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
+        await viewListActions.viewLoadLogTypeList(`${Define.REST_GET_INFO_LOGS}/${targetname}`);
 
         await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
     }
