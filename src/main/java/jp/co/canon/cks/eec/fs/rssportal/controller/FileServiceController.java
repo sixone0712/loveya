@@ -211,7 +211,8 @@ public class FileServiceController {
 
                     for (int i = 0; i < src.length; i++) {
                         RSSFileInfoBeanResponse dest = new RSSFileInfoBeanResponse();
-                        if (dest.isFile()) {
+                        // Excludes ".." and "."
+                        if (!src[i].getName().equals(".") && !src[i].getName().equals("..")) {
                             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(src[i].getTimestamp().getTimeInMillis());
                             dest.setFile(src[i].getType().equals("F"));
                             dest.setFileId(0);

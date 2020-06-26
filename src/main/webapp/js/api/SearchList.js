@@ -87,6 +87,7 @@ export const requestDownload = async (props) => {
             file: cur.fileName,
             filesize: String(cur.fileSize),
             date: cur.fileDate,
+            isFile: cur.file,
         });
         return acc;
     }, []);
