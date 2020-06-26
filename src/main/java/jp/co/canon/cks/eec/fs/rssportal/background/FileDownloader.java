@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.xml.rpc.ServiceException;
@@ -148,8 +149,16 @@ public class FileDownloader extends Thread {
             final List<DownloadForm> formList,
             @NonNull String fab, @NonNull String tool,
             @NonNull String type, @NonNull String typeStr,
-            @NonNull Calendar from, @NonNull Calendar to, String dir) {
+            @Nullable Calendar from, @Nullable Calendar to, String dir) {
 
+        if(from==null) {
+            from = Calendar.getInstance();
+            from.set(1970, 1, 1);
+        }
+        if(to==null) {
+            to = Calendar.getInstance();
+            to.set(3000, 12,31);
+        }
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
