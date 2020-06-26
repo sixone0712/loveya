@@ -144,35 +144,49 @@ public class FileDownloader extends Thread {
         return executorList.get(dlId).getFabs();
     }
 
-    public DownloadForm createDownloadFileList(@NonNull String fab, @NonNull String tool,
-                                               @NonNull String type, @NonNull String typeStr,
-                                               @NonNull Calendar from, @NonNull Calendar to) {
+    public boolean createDownloadFileList(
+            final List<DownloadForm> formList,
+            @NonNull String fab, @NonNull String tool,
+            @NonNull String type, @NonNull String typeStr,
+            @NonNull Calendar from, @NonNull Calendar to, String dir) {
+
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
         while(retry<fileServiceRetryCount) {
             try {
-                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
+                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
                 for (FileInfoModel file : fileInfos) {
-                    dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
-                    String time = dateFormat.format(file.getTimestamp().getTime());
-                    form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                    if(file.getSize()==0 || file.getName().endsWith(".") || file.getName().endsWith(".."))
+                        continue;
+                    // Add recursive searching
+                    if(file.getType().equals("D")) {
+                        if(!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, file.getName())) {
+                            log.warn("failed to createFileList(dir="+file.getName()+")");
+                            return false;
+                        }
+                    } else {
+                        dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
+                        String time = dateFormat.format(file.getTimestamp().getTime());
+                        form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                    }
                 }
                 break;
             } catch (RemoteException e) {
                 log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
                 if((++retry)>=fileServiceRetryCount)
-                    return null;
+                    return false;
                 try {
                     Thread.sleep(fileServiceRetryInterval);
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
                     log.error("interrupt exception occurs on thread sleep");
-                    return null;
+                    return false;
                 }
             }
         }
-        return form;
+        formList.add(form);
+        return true;
     }
 
     public FileServiceModel getService() {

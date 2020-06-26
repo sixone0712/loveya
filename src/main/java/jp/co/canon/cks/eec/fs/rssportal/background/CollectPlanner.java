@@ -165,37 +165,36 @@ public class CollectPlanner extends Thread {
         for(String tool: tools) {
             tool = tool.trim();
             for(int i=0; i<types.length; ++i) {
-                DownloadForm form = downloader.createDownloadFileList("undefined", tool, types[i].trim(),
-                        typeStrs[i].trim(), from, to);
-                if(form==null) {
+                boolean ret = downloader.createDownloadFileList(downloadList, "undefined", tool, types[i].trim(),
+                        typeStrs[i].trim(), from, to, "");
+                if(ret==false) {
                     // That form is null means that a timeout has occurred on createFileList.
                     log.error("cannot create download filelist for "+tool+"/"+types[i]);
                     updateLastPoint = false;
-                    expectedLastPoint = plan.getLastPoint().getTime();
                     // There is only 1 last-point for a plan.
                     // it means if createFileList error occurred,
                     // updating last-point is possible to causes some omission logs for a tool which has an error.
                     // That's why it doesn't update a last-point at this point.
-                } else {
-                    if(updateLastPoint) {
-                        for (FileInfo file : form.getFiles()) {
-                            if (lastTime < file.getMilliTime())
-                                lastTime = file.getMilliTime();
-                        }
-                    }
-                    downloadList.add(form);
                 }
             }
         }
         int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        if(updateLastPoint) {
+            for(DownloadForm form: downloadList) {
+                for(FileInfo file: form.getFiles()) {
+                    if (expectedLastPoint < file.getMilliTime())
+                        expectedLastPoint = file.getMilliTime();
+                }
+            }
+        } else {
+            expectedLastPoint = plan.getLastPoint().getTime();
+        }
+
         log.info(String.format("totalFiles=%d (%s~%s) lastPoint=%s",
                 totalFiles,
                 new Timestamp(from.getTimeInMillis()).toString(),
                 new Timestamp(to.getTimeInMillis()).toString(),
-                dateFormat.format(lastTime)));
-
-        if(updateLastPoint)
-            expectedLastPoint = lastTime;
+                dateFormat.format(expectedLastPoint)));
         return downloadList;
     }
 
