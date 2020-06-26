@@ -45,6 +45,7 @@ public class FileDownloadContext implements DownloadConfig {
     private File rootDir;
     private File outFile;
     private String outPath;
+    private String subDir;
 
     private int downloadFiles;
 
@@ -70,6 +71,15 @@ public class FileDownloadContext implements DownloadConfig {
             fileNames[i] = fileInfo.getName();
             fileSizes[i] = fileInfo.getSize();
             fileDates[i] = convertStringToCalendar(fileInfo.getDate());
+        }
+
+        // check the first file name in the array and, if a file name includes '/'
+        // we consider it placed in a sub directory.
+        String[] firsts = fileNames[0].split("/");
+        if(firsts.length!=1) {
+            subDir = firsts[0];
+        } else {
+            subDir = null;
         }
 
         Path path = Paths.get(baseDir, tool, logTypeStr==null?logType:logTypeStr);
@@ -200,6 +210,10 @@ public class FileDownloadContext implements DownloadConfig {
 
     public String getJobType() {
         return jobType;
+    }
+
+    public String getSubDir() {
+        return subDir;
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {
