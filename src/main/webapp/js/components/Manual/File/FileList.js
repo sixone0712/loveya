@@ -3,7 +3,7 @@ import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faChevronCircleDown, faDownload, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { faFileAlt, faFolder } from "@fortawesome/free-regular-svg-icons";
+import { faFileAlt, faFolderOpen } from "@fortawesome/free-regular-svg-icons";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { Select } from "antd";
 import CheckBox from "../../Common/CheckBox";
@@ -527,7 +527,7 @@ class FileList extends Component {
                           <td>{file.targetName}</td>
                           <td>{file.logName}</td>
                           <td>
-                            <FontAwesomeIcon icon={file.file ? faFileAlt : faFolder} />{" "}
+                            <FontAwesomeIcon icon={file.file ? faFileAlt : faFolderOpen} />{" "}
                             {file.fileName}
                           </td>
                           <td>{convFileDate}</td>
