@@ -214,13 +214,17 @@ public class FileServiceController {
                         // Excludes ".." and "." and file size 0
                         if (!src[i].getName().endsWith(".") && !src[i].getName().endsWith("..") && src[i].getSize() != 0) {
 
-                            // Excludes directory older than startDate
+                            // Exclude directory dates before start date and directory dates after end date
                             if(!src[i].getType().equals("F")) {
                                 String timeDir = new SimpleDateFormat("yyyyMMddHHmm").format(src[i].getTimestamp().getTimeInMillis());
                                 String timeStart = startDate.substring(0, 12);
-                                long timeDirInt = Long.parseLong(timeDir);
-                                long timeStartInt = Long.parseLong(timeStart);
-                                if(timeDirInt < timeStartInt) {
+                                String timEnd = endDate.substring(0, 12);
+
+                                long timeDirLong = Long.parseLong(timeDir);
+                                long timeStartLong = Long.parseLong(timeStart);
+                                long timeEndLong = Long.parseLong(timEnd);
+
+                                if(timeDirLong < timeStartLong || timeDirLong > timeEndLong) {
                                     continue;
                                 }
                             }
