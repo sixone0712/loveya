@@ -531,7 +531,7 @@ class FileList extends Component {
                             {file.fileName}
                           </td>
                           <td>{convFileDate}</td>
-                          <td>{file.sizeKB}</td>
+                          <td>{file.file ? file.sizeKB : '-'}</td>
                         </tr>
                     );
                   })}
