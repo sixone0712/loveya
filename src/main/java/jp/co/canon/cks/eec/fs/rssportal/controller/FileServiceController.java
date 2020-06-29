@@ -213,6 +213,18 @@ public class FileServiceController {
                         RSSFileInfoBeanResponse dest = new RSSFileInfoBeanResponse();
                         // Excludes ".." and "." and file size 0
                         if (!src[i].getName().endsWith(".") && !src[i].getName().endsWith("..") && src[i].getSize() != 0) {
+
+                            // Excludes directory older than startDate
+                            if(!src[i].getType().equals("F")) {
+                                String timeDir = new SimpleDateFormat("yyyyMMddHHmm").format(src[i].getTimestamp().getTimeInMillis());
+                                String timeStart = startDate.substring(0, 12);
+                                long timeDirInt = Long.parseLong(timeDir);
+                                long timeStartInt = Long.parseLong(timeStart);
+                                if(timeDirInt < timeStartInt) {
+                                    continue;
+                                }
+                            }
+
                             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(src[i].getTimestamp().getTimeInMillis());
                             dest.setFile(src[i].getType().equals("F"));
                             dest.setFileId(0);
