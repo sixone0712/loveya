@@ -20,4 +20,19 @@ public class RSSRequestSearch {
     String endDate = "";
     String keyword = "";
     String dir = "";
+
+    public RSSRequestSearch getClone() {
+        RSSRequestSearch clone = new RSSRequestSearch();
+        clone.structId = this.structId;
+        clone.targetName = this.targetName;
+        clone.targetType = this.targetType;
+        clone.logType = this.logType;
+        clone.logCode = this.logCode;
+        clone.logName = this.logName;
+        clone.startDate = this.startDate;
+        clone.endDate = this.endDate;
+        clone.keyword = this.keyword;
+        clone.dir = this.dir;
+        return clone;
+    }
 }
