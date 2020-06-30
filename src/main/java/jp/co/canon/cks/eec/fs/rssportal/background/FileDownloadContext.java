@@ -56,7 +56,14 @@ public class FileDownloadContext implements DownloadConfig {
         this.id = id;
         this.system = form.getSystem();
         this.tool = form.getTool();
-        this.logType = form.getLogType();
+        // When logs place in a sub-directory not the log root,
+        // logType is possible to include sub-directory information.
+        String[] split = form.getLogType().split("/");
+        if(split.length==1) {
+            this.logType = form.getLogType();
+        } else {
+            this.logType = split[0];
+        }
         this.logTypeStr = form.getLogTypeStr();
         this.user = "eecAdmin";
         this.comment = "";

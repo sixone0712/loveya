@@ -197,6 +197,14 @@ public class FileDownloaderController {
 
         DownloadForm form;
 
+        // We have to consider sub-directories now.
+        String[] paths = file.split("/");
+        if(paths.length!=1) {
+            // This file places at the sub-directory.
+            // In this case, a key composes with 'logType/sub-directory-name' pattern.
+            logType = logType+"/"+paths[0];
+        }
+
         if(map.containsKey(tool)) {
             Map<String, DownloadForm> submap = (Map<String, DownloadForm>) map.get(tool);
             if(submap.containsKey(logType)) {
