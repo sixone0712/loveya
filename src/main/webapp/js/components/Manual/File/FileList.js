@@ -60,6 +60,7 @@ class FileList extends Component {
         searchComplatedDate: nextProps.requestCompletedDate
       }
     }
+    return prevState;
   }
 
   setErrorMsg = (errCode) => {
