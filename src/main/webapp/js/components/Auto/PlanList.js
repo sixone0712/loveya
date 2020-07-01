@@ -128,8 +128,8 @@ class RSSautoplanlist extends Component {
         return true;
     }
 
-    setEditPlanList = (id, status) => {
-        if (status === statusType.RUNNING) {
+    setEditPlanList = (id, status, detail) => {
+        if (status === statusType.RUNNING || detail === detailType.COLLECTING) {
         //if (!status) {
             this.openAlert(messageType.EDIT_ALERT_MESSAGE);
         } else {
@@ -395,7 +395,7 @@ class RSSautoplanlist extends Component {
                                                     <div
                                                         className="icon-area move-left"
                                                         /*onClick={ () =>  this.props.history.push(Define.PAGE_AUTO_PLAN_EDIT) }*/
-                                                        onClick={ () =>  this.setEditPlanList(plan.id, plan.planStatus) }
+                                                        onClick={ () =>  this.setEditPlanList(plan.id, plan.planStatus, plan.planDetail) }
 
                                                     >
                                                         <FontAwesomeIcon icon={faEdit} />
