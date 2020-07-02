@@ -513,7 +513,7 @@ class FileList extends Component {
                       const fileNameSplit = file.fileName.split("/");
                       for (let i = 0; i < fileNameSplit.length; i++) {
                         if (i === fileNameSplit.length - 1) {
-                          convFileName.push(<><FontAwesomeIcon icon={faFileAlt}/>{" " + file.fileName}</>);
+                          convFileName.push(<><FontAwesomeIcon icon={faFileAlt}/>{" " + fileNameSplit[i]}</>);
                         } else {
                           convFileName.push(<>{fileNameSplit[i] + " / "}</>);
                         }
