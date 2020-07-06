@@ -3,12 +3,13 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
     // Build War
-    id 'war'
+    //id 'war'
     // UnitTest
-    //id 'jacoco'
+    id 'jacoco'
 }
 
 // Build War
+/*
 bootWar {
      archiveBaseName = 'rssportal'
     archiveFileName = 'rssportal.war'
@@ -17,6 +18,7 @@ bootWar {
         attributes("RSS-Portal-Version": "1.0.2")
     }
 }
+ */
 
 group = 'jp.co.canon.cks.eec.fs'
 version = '0.0.1-SNAPSHOT'
@@ -45,14 +47,14 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     // Build War
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    //providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 
     // Build Jar
-    //compile 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    compile 'org.apache.tomcat.embed:tomcat-embed-jasper'
     compile 'javax.servlet:jstl'
 
     // Dummy
@@ -76,7 +78,6 @@ dependencies {
 }
 
 // UnitTest
-/*
 test {
     useJUnitPlatform()
 }
@@ -112,4 +113,3 @@ jacocoTestReport {
         })
     }
 }
-*/

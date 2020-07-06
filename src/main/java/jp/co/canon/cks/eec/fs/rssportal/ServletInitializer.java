@@ -1,5 +1,4 @@
 // Build War
-/*
 package jp.co.canon.cks.eec.fs.rssportal;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -13,4 +12,3 @@ public class ServletInitializer extends SpringBootServletInitializer {
     }
 
 }
- */
