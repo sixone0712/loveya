@@ -19,6 +19,11 @@ import java.util.zip.ZipInputStream;
 
 public class RemoteFileServiceProc extends FileServiceProc {
 
+    private int downloadFiles = 0;
+    private final long checkPointExpire = 60000*3; // 3 minutes
+    private long checkPointTime;
+    private int checkPointFiles;
+
     public RemoteFileServiceProc(@NonNull FileDownloadContext context) {
         super(context, RemoteFileServiceProc.class);
     }
@@ -51,40 +56,24 @@ public class RemoteFileServiceProc extends FileServiceProc {
         FileServiceManage manager = context.getFileManager();
         FileServiceModel service = context.getFileService();
 
-        monitor.add(context.getSystem(), context.getTool(), context.getRequestNo(), service);
+        monitor.add(context.getSystem(), context.getTool(), context.getRequestNo(), service, files->{
+            downloadFiles = files;
+            context.setDownloadFiles(files);
+            setCheckPoint();
+        });
 
         try {
-            int retry = 0;
-            int lastDownloadFiles = 0;
-            while(true) {
-                int downloadFiles = 0;
-                RequestInfoBean downloadInfo = monitor.getDownloadInfo(context.getSystem(),
-                        context.getTool(), context.getRequestNo());
-                if(downloadInfo!=null) {
-                    downloadFiles = downloadInfo.getFileListCount();
-                    context.setDownloadFiles(downloadFiles);
-                    log.info("downloading... "+downloadFiles+"/"+context.getFileCount());
-                    if(downloadFiles==context.getFileCount()) {
-                        log.info("download complete");
-                        monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
-                        break;
-                    }
-                }
-                if(downloadFiles==lastDownloadFiles) {
-                    retry++;
-                } else {
-                    retry = 0;
-                    lastDownloadFiles = downloadFiles;
-                }
-                log.info("retry="+retry);
-                if(retry>=100000) {
-                    monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
-                    return false;
-                }
+            setCheckPoint();
+            while(downloadFiles!=context.getFileCount()) {
                 sleep(500);
+                if(isCheckPointExpired()) {
+                    log.warn("no progress for a long time "+
+                            String.format("%s/%s/%s", context.getTool(), context.getLogType(), context.getSubDir()));
+                }
             }
-
+            monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
             log.info("ready to download (tool="+context.getTool()+" type="+context.getLogType()+")");
+
             while(true) {
                 RequestListBean requestList = service.createDownloadList(context.getSystem(), context.getTool(), context.getRequestNo());
                 RequestInfoBean reqInfo = requestList.get(context.getRequestNo());
@@ -193,4 +182,17 @@ public class RemoteFileServiceProc extends FileServiceProc {
         }
         return file.substring(0, idx);
     }
+
+    private void setCheckPoint() {
+        checkPointTime = System.currentTimeMillis();
+        checkPointFiles = downloadFiles;
+    }
+
+    private boolean isCheckPointExpired() {
+        if(checkPointFiles==downloadFiles && (System.currentTimeMillis()-checkPointTime)>checkPointExpire) {
+            return true;
+        }
+        return false;
+    }
+
 }

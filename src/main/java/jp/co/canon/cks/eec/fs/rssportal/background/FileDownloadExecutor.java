@@ -15,11 +15,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
-public class FileDownloadExecutor implements DownloadConfig {
+public class FileDownloadExecutor {
 
     private final Log log;
-    private static final String file_format = "%s/%s/%s";
 
     private enum Status {
         idle, init, download, compress, complete, stop, error
@@ -118,18 +118,47 @@ public class FileDownloadExecutor implements DownloadConfig {
         log.info(downloadId+": cleanup()");
     }
 
-    private Runnable runner = () -> {
-        try {
-            initialize();
-            if(status==Status.stop)
-                return;
+    private class DownloadRunner implements Runnable {
 
-            setStatus(Status.download);
-            List<FileServiceProc> procs = new ArrayList<>();
-            for(FileDownloadContext context: downloadContexts) {
-                if(status==Status.stop || status==Status.error)
-                    break;
-                try {
+        private Log log;
+        private AtomicInteger runnings;
+        private final int maxThreads = 16;
+
+        public DownloadRunner(Log log) {
+            this.log = log;
+            runnings = new AtomicInteger(0);
+        }
+
+        private Consumer<FileServiceProc> finishCallback = proc->{
+            log.info(proc.getName()+" finished");
+            runnings.getAndDecrement();
+        };
+
+        private Consumer<FileServiceProc> errorCallback = proc->{
+            log.info(proc.getName()+" error");
+            setStatus(Status.error);
+        };
+
+        @Override
+        public void run() {
+            try {
+                initialize();
+                if(status==Status.stop)
+                    return;
+
+                setStatus(Status.download);
+                List<FileServiceProc> procs = new ArrayList<>();
+
+                for(int i=0; i<downloadContexts.size();) {
+                    FileDownloadContext context = downloadContexts.get(i);
+
+                    if(status==Status.stop || status==Status.error)
+                        break;
+
+                    while(runnings.get()>=maxThreads) {
+                        Thread.sleep(500);
+                    }
+
                     FileServiceProc proc = null;
                     switch (context.getJobType()) {
                         case "manual":
@@ -140,39 +169,30 @@ public class FileDownloadExecutor implements DownloadConfig {
                             throw new IllegalArgumentException("invalid jobType");
                     }
                     proc.setMonitor(monitor);
+                    proc.setNotifyError(errorCallback);
+                    proc.setNotifyFinish(finishCallback);
                     proc.start();
                     procs.add(proc);
-
-                    if(attrDownloadFilesViaMultiSessions==false) {
-                        while (proc.getCompleted()>0) {
-                            Thread.sleep(100);
-                        }
-                        // check error
-                        if(proc.getCompleted()<0) {
-                            setStatus(Status.error);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    runnings.getAndIncrement();
+                    log.info(proc.getName()+" starts");
+                    ++i;
                 }
+
+                while(runnings.get()>0) {
+                    Thread.sleep(500);
+                    if(status==Status.stop || status==Status.error)
+                        return;
+                }
+
+                if(attrCompression)
+                    compress();
+
+                wrapup();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            for(FileServiceProc proc:procs)
-                while(proc.getCompleted()>0) {
-                    Thread.sleep(100);
-                }
-
-            if(status==Status.stop || status==Status.error)
-                return;
-
-            if(attrCompression)
-                compress();
-
-            wrapup();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-    };
+    }
 
     private void setStatus(Status status) {
         this.status = status;
@@ -202,7 +222,8 @@ public class FileDownloadExecutor implements DownloadConfig {
     public void start() {
         log.info("file download start ("+ downloadForms.size()+")");
         printExecutorInfo();
-        (new Thread(runner)).start();
+//        (new Thread(runner)).start();
+        (new Thread(new DownloadRunner(log))).start();
     }
 
     public void stop() {

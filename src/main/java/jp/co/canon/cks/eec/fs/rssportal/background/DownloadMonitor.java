@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Component
 public class DownloadMonitor extends Thread {
+
 
     private class Target {
         FileServiceModel service;
@@ -22,11 +24,13 @@ public class DownloadMonitor extends Thread {
         String requestNo;
         RequestInfoBean reqInfo;
         RequestInfoBean downloadInfo;
+
         long ts;
         boolean activated;
+        Consumer<Integer> updateDownloadFiles;
 
         private Target(FileServiceModel service, String system, String tool, String requestNo,
-                       RequestInfoBean reqInfo, RequestInfoBean downloadInfo, long ts) {
+                       RequestInfoBean reqInfo, RequestInfoBean downloadInfo, long ts, Consumer<Integer> updateDownloadFiles) {
             this.service = service;
             this.system = system;
             this.tool = tool;
@@ -35,6 +39,7 @@ public class DownloadMonitor extends Thread {
             this.downloadInfo = downloadInfo;
             this.ts = ts;
             this.activated = true;
+            this.updateDownloadFiles = updateDownloadFiles;
         }
     }
 
@@ -58,31 +63,27 @@ public class DownloadMonitor extends Thread {
                         if (target.activated) {
                             synchronized (target) {
                                 try {
-                                    log.info("request downloadInfo");
                                     RequestListBean downloadList = target.service.createDownloadList(target.system,
                                             target.tool, target.requestNo);
                                     if (downloadList != null) {
                                         for (Object item : downloadList.getRequestList()) {
                                             RequestInfoBean bean = (RequestInfoBean) item;
                                             if (bean.getRequestNo().equalsIgnoreCase(target.requestNo)) {
-                                                log.info(String.format("downloadList: %s fileListCount=%d",
-                                                        bean.getRequestNo(),
-                                                        bean.getFileListCount()));
                                                 target.downloadInfo = bean;
+                                                target.updateDownloadFiles.accept(bean.getFileListCount());
                                             }
                                         }
                                     }
+                                    /* deprecated
                                     RequestListBean requestList = target.service.createRequestList(
                                             target.system, target.tool, target.requestNo);
                                     if (requestList != null) {
                                         target.reqInfo = requestList.get(target.requestNo);
                                         if (target.reqInfo != null) {
-                                            log.info("monitor: " + target.reqInfo.getRequestNo() + ": " +
-                                                    target.reqInfo.getNumerator() + "/" +
-                                                    target.reqInfo.getDenominator());
                                             target.ts = System.currentTimeMillis();
                                         }
                                     }
+                                     */
                                 } catch (ServiceException e) {
                                     e.printStackTrace();
                                 }
@@ -113,7 +114,8 @@ public class DownloadMonitor extends Thread {
             @NonNull final String system,
             @NonNull final String tool,
             @NonNull final String requestNo,
-            @NonNull final FileServiceModel service) {
+            @NonNull final FileServiceModel service,
+            @NonNull final Consumer<Integer> updateDownloadFiles) {
 
         log.info("monitor.add(system="+system+" tool="+tool+" reqNo="+requestNo+")");
         if(getTarget(system, tool, requestNo)==null) {
@@ -121,8 +123,10 @@ public class DownloadMonitor extends Thread {
                 RequestListBean requestList = service.createDownloadList(system, tool, requestNo);
                 RequestInfoBean inf = requestList.get(requestNo);
                 synchronized (targets) {
-                    targets.add(new Target(service, system, tool, requestNo, inf, null,
-                            System.currentTimeMillis()));
+                    targets.add(
+                            new Target(service, system, tool, requestNo, inf, null,
+                            System.currentTimeMillis(), updateDownloadFiles)
+                    );
                 }
             } catch (ServiceException e) {
                 e.printStackTrace();
@@ -140,10 +144,13 @@ public class DownloadMonitor extends Thread {
         }
     }
 
+    /*
     public RequestInfoBean get(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
         Target target = getTarget(system, tool, requestNo);
         return target!=null?target.reqInfo:null;
     }
+
+     */
 
     public RequestInfoBean getDownloadInfo(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
         Target target = getTarget(system, tool, requestNo);

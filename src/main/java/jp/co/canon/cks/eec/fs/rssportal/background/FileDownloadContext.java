@@ -15,7 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class FileDownloadContext implements DownloadConfig {
+public class FileDownloadContext {
 
     private final String jobType;
     private final String id;
