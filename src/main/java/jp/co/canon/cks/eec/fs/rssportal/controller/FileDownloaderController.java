@@ -50,35 +50,34 @@ public class FileDownloaderController {
         }
         param.forEach((key, value)->log.info("key="+key+"\nvalue="+value));
 
+        List<DownloadForm> targetList = new ArrayList<>();
         Map<String, Map<String, DownloadForm>> map = new HashMap<>();
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("list");
 
         for(Map item: downloadList) {
             boolean checkItem = true;
-            checkItem &= item.containsKey("structId");
-            checkItem &= item.containsKey("machine");
-            checkItem &= item.containsKey("category");
-            checkItem &= item.containsKey("categoryName");
-            checkItem &= item.containsKey("file");
-            checkItem &= item.containsKey("filesize");
-            checkItem &= item.containsKey("date");
+            String fab = (String) item.get("structId");
+            String tool = (String) item.get("machine");
+            String logType = (String) item.get("category");
+            String logTypeStr = (String) item.get("categoryName");
+            String file = (String) item.get("file");
+            String fileSize = (String) item.get("filesize");
+            String date = (String) item.get("date");
+            boolean isFile = (boolean)item.get("isFile"); // if an item doesn't contains 'isFile', it occurs NullPointException.
 
-            if(checkItem) {
-                addDownloadItem(map,
-                        (String)item.get("structId"),
-                        (String)item.get("machine"),
-                        (String)item.get("category"),
-                        (String)item.get("categoryName"),
-                        (String)item.get("file"),
-                        (String)item.get("filesize"),
-                        (String)item.get("date"));
+            if(fab!=null && tool!=null && logType!=null && logTypeStr!=null && file!=null && fileSize!=null
+                    && date!=null) {
+                if(isFile) {
+                    addDownloadItem(map, fab, tool, logType, logTypeStr, file, fileSize, date);
+                } else {
+                    fileDownloader.createDownloadFileList(targetList, fab, tool, logType, logTypeStr, null, null, file);
+                }
             } else {
                 log.error("parameter failed");
                 return null;
             }
         }
 
-        List<DownloadForm> targetList = new ArrayList<>();
         map.forEach((m, submap)->submap.forEach((c, dlForm)->targetList.add(dlForm)));
 
         log.warn("targetList size="+targetList.size());
@@ -197,6 +196,14 @@ public class FileDownloaderController {
                                  String file, String size, String date) {
 
         DownloadForm form;
+
+        // We have to consider sub-directories now.
+        String[] paths = file.split("/");
+        if(paths.length!=1) {
+            // This file places at the sub-directory.
+            // In this case, a key composes with 'logType/sub-directory-name' pattern.
+            logType = logType+"/"+paths[0];
+        }
 
         if(map.containsKey(tool)) {
             Map<String, DownloadForm> submap = (Map<String, DownloadForm>) map.get(tool);

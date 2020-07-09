@@ -1511,8 +1511,11 @@ a:hover {
 }
 
 .filelist-card-body table thead tr th:first-child {
-    width: 5%;
     text-align: center;
+}
+
+.filelist-card-body table thead tr th:first-child > div {
+    width: 52px;
 }
 
 .filelist-card-body table thead tr th:nth-child(2) {

@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import javax.xml.rpc.ServiceException;
@@ -144,35 +145,57 @@ public class FileDownloader extends Thread {
         return executorList.get(dlId).getFabs();
     }
 
-    public DownloadForm createDownloadFileList(@NonNull String fab, @NonNull String tool,
-                                               @NonNull String type, @NonNull String typeStr,
-                                               @NonNull Calendar from, @NonNull Calendar to) {
+    public boolean createDownloadFileList(
+            final List<DownloadForm> formList,
+            @NonNull String fab, @NonNull String tool,
+            @NonNull String type, @NonNull String typeStr,
+            @Nullable Calendar from, @Nullable Calendar to, String dir) {
+
+        if(from==null) {
+            from = Calendar.getInstance();
+            from.set(1970, 1, 1);
+        }
+        if(to==null) {
+            to = Calendar.getInstance();
+            to.set(3000, 12,31);
+        }
         DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
         while(retry<fileServiceRetryCount) {
             try {
-                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", "");
+                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
                 for (FileInfoModel file : fileInfos) {
-                    dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
-                    String time = dateFormat.format(file.getTimestamp().getTime());
-                    form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                    if(file.getSize()==0 || file.getName().endsWith(".") || file.getName().endsWith(".."))
+                        continue;
+                    // Add recursive searching
+                    if(file.getType().equals("D")) {
+                        if(!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, file.getName())) {
+                            log.warn("failed to createFileList(dir="+file.getName()+")");
+                            return false;
+                        }
+                    } else {
+                        dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
+                        String time = dateFormat.format(file.getTimestamp().getTime());
+                        form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                    }
                 }
                 break;
             } catch (RemoteException e) {
                 log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
                 if((++retry)>=fileServiceRetryCount)
-                    return null;
+                    return false;
                 try {
                     Thread.sleep(fileServiceRetryInterval);
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
                     log.error("interrupt exception occurs on thread sleep");
-                    return null;
+                    return false;
                 }
             }
         }
-        return form;
+        formList.add(form);
+        return true;
     }
 
     public FileServiceModel getService() {

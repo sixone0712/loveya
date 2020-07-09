@@ -3,7 +3,7 @@ import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faChevronCircleDown, faDownload, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
+import { faFileAlt, faFolderOpen } from "@fortawesome/free-regular-svg-icons";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { Select } from "antd";
 import CheckBox from "../../Common/CheckBox";
@@ -508,6 +508,19 @@ class FileList extends Component {
                    <tbody>
                   {files.map((file, key) => {
                     const convFileDate = API.convertDateFormat(file.fileDate);
+                    const convFileName = [];
+                    if (file.fileName.indexOf("/") !== -1) {
+                      const fileNameSplit = file.fileName.split("/");
+                      for (let i = 0; i < fileNameSplit.length; i++) {
+                        if (i === fileNameSplit.length - 1) {
+                          convFileName.push(<><FontAwesomeIcon icon={faFileAlt}/>{" " + fileNameSplit[i]}</>);
+                        } else {
+                          convFileName.push(<>{fileNameSplit[i] + " / "}</>);
+                        }
+                      }
+                    } else {
+                      convFileName.push(<><FontAwesomeIcon icon={faFileAlt}/>{" " + file.fileName}</>);
+                    }
                     return (
                         <tr
                             key={key}
@@ -527,12 +540,9 @@ class FileList extends Component {
                           </td>
                           <td>{file.targetName}</td>
                           <td>{file.logName}</td>
-                          <td>
-                            <FontAwesomeIcon icon={faFileAlt} />{" "}
-                            {file.fileName}
-                          </td>
+                          <td>{convFileName}</td>
                           <td>{convFileDate}</td>
-                          <td>{file.sizeKB}</td>
+                          <td>{file.file ? file.sizeKB : '-'}</td>
                         </tr>
                     );
                   })}

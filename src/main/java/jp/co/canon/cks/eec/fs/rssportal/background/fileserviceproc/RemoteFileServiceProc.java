@@ -139,10 +139,18 @@ public class RemoteFileServiceProc extends FileServiceProc {
         File zipFile = achieve.toFile();
 
         if(zipFile.toString().endsWith(".zip")) {
-            String dir = parseDir(achieve.toString());
             if(zipFile.exists()==false || zipFile.isDirectory()) {
                 log.error("wrong achieve file");
                 return;
+            }
+            String dir = parseDir(achieve.toString());
+            String subDir = context.getSubDir();
+            if(subDir!=null && !subDir.equals("")) {
+                dir += File.separator+subDir;
+            }
+            File dirHandle = new File(dir);
+            if(!dirHandle.exists()) {
+                dirHandle.mkdirs();
             }
 
             try {
