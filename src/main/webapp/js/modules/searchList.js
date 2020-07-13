@@ -37,21 +37,17 @@ export const searchSetDlId = createAction(SEARCH_SET_DL_DOWNLOAD_FILES);
 const initialState = Map({
     requestCompletedDate: "",
     requestListCnt: 0,
-    requestList: List([
-        Map({
-            structId: "",
-            targetName: "",
-            //targetType: "",   //Not currently in use
-            logType: "",
-            logCode: "",
-            logName: "",
-            startDate: "",
-            endDate: "",
-            //keyword: "",      //Not currently in use
-            //dir: ""            //Not currently in use
-        })
-    ]),
-
+    requestList: Map({
+        fabNames: List[{}],
+        machineNames: List[{}],
+        //categoryTypes: List[{}],     //Not currently in use
+        categoryCodes: List[{}],
+        categoryNames: List[{}],
+        startDate: "",
+        endDate: "",
+        //keyword: "",      //Not currently in use
+        //dir: "",      //Not currently in use
+    }),
     downloadCnt: 0,
     responsePerPage: 10,
     responseListCnt: 0,
@@ -65,7 +61,7 @@ const initialState = Map({
             fileSize: 0,
             fileDate: "",
             filePath: "",
-            //file: false,      //Not currently in use
+            file: false,
             structId: "",
             targetName: "",
             logName: "",
@@ -80,6 +76,7 @@ const initialState = Map({
         status: "init",
         totalFiles: 0,
         downloadFiles: 0,
+        downloadUrl: ""
     }),
 
     //startDate: moment().set({'hour' : 0, 'minute': 0, 'second': 1}),
@@ -100,25 +97,28 @@ export default handleActions({
             // onFailure: (state, action) => state,
             onSuccess: (state, action) => {
                 console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]");
-                const lists = action.payload.data;
+                const {lists} = action.payload.data;
+                //console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]lists", lists);
                 const newLists = lists.map((list, idx) => {
                     return {
                         keyIndex: idx,
+                        structId: list.fabName,
+                        targetName: list.machineName,
+                        logName: list.categoryName,
+                        logId: list.categoryCode,
                         //fileId: list.fileId,  //Not currently in use
-                        //fileStatus: list.fileStatus,  //Not currently in use
-                        logId: list.logId,
                         fileName: list.fileName,
                         fileSize: list.fileSize,
                         fileDate: list.fileDate,
                         filePath: list.filePath,
-                        //file: list.file,  //Not currently in use
-                        structId: list.fabName,
-                        targetName: list.mpaName,
-                        logName: list.logName,
+                        //fileStatus: list.fileStatus,  //Not currently in use
+                        file: list.file,
                         //sizeKB: API.bytesToSize(list.fileSize),   //Not currently in use
                         checked: true
                     }
                 });
+
+                //console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]newLists", newLists);
 
                 const newListSize = newLists.length;
                 return state.set('responseList', fromJS(newLists)).set('requestListCnt', newListSize)
@@ -176,28 +176,22 @@ export default handleActions({
         //console.log("formDate", formDate);
         //console.log("toDate", toDate);
 
-        const newSearchList = new Array();
-        for (let tList of newToolList) {
-            for(let fList of newLogInfoList) {
-                newSearchList.push(
-                    {
-                        structId: tList.structId,
-                        targetName: tList.targetname,
-                        //targetType: tList.targettype,     //Not currently in use
-                        logType: fList.logType,
-                        logCode: fList.logCode,
-                        logName: fList.logName,
-                        startDate: formDate,
-                        endDate: toDate,
-                        //keyword: "",                      //Not currently in use
-                        //dir: "",                          //Not currently in use
-                    }
-                );
-            }
-        }
-        //console.log("newSearchList", newSearchList);
+        const fabNames = newToolList.map(list => list.structId);
+        const machineNames = newToolList.map(list => list.targetname);
+        const categoryCodes = newLogInfoList.map(list => list.logCode);
+        const categoryNames = newLogInfoList.map(list => list.logName);
 
-        return state.set("requestList", fromJS(newSearchList));
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]fabNames", fabNames);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]machineNames", machineNames);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]categoryCodes", categoryCodes);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]categoryNames", categoryNames);
+
+        return state.setIn(['requestList', 'fabNames'], fromJS(fabNames))
+                    .setIn(['requestList', 'machineNames'], fromJS(machineNames))
+                    .setIn(['requestList', 'categoryCodes'], fromJS(categoryCodes))
+                    .setIn(['requestList', 'categoryNames'], fromJS(categoryNames))
+                    .setIn(['requestList', 'startDate'], formDate)
+                    .setIn(['requestList', 'endDate'], toDate);
     },
 
     [SEARCH_CHECK_RESPONSE_LIST]: (state, action) => {
@@ -245,7 +239,7 @@ export default handleActions({
 
     [SEARCH_SET_DL_STATUS] : (state, action) => {
 
-        const { func, dlId, status, totalFiles, downloadFiles } = action.payload;
+        const { func, dlId, status, totalFiles, downloadFiles, downloadUrl } = action.payload;
         const downloadStatus = state.get("downloadStatus").toJS();
 
         //console.log("func", func);
@@ -272,6 +266,9 @@ export default handleActions({
         //console.log("downloadFiles", downloadFiles);
         if(downloadFiles !== undefined) {
             downloadStatus.downloadFiles = downloadFiles;
+        }
+        if(downloadUrl !== undefined) {
+            downloadStatus.downloadUrl = downloadUrl;
         }
 
         //console.log("downloadStatus", downloadStatus);

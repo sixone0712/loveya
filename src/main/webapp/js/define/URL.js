@@ -19,11 +19,15 @@ export const PAGE_REFRESH_AUTO_STATUS = PAGE_REFRESH + "?target=" + PAGE_AUTO_ST
 export const PAGE_REFRESH_ADMIN_ACCOUNT = PAGE_REFRESH + "?target=" + PAGE_ADMIN_ACCOUNT;
 export const PAGE_REFRESH_ADMIN_DL_HISTORY = PAGE_REFRESH + "?target=" + PAGE_ADMIN_DL_HISTORY;
 
-export const REST_GET_INFO = "/rss/api/info";
-export const REST_GET_INFO_FABS =  REST_GET_INFO + "/fabs";
-export const REST_GET_INFO_MPAS =  REST_GET_INFO + "/mpas";
-export const REST_GET_INFO_LOGS =  REST_GET_INFO + "/logs";
-export const REST_POST_INFO_FILES =  REST_GET_INFO + "/files";
+export const REST_INFOS = "/rss/api/infos";
+export const REST_INFOS_GET_FABS =  REST_INFOS + "/fabs";
+export const REST_INFOS_GET_MACHINES =  REST_INFOS + "/machines";
+export const REST_INFOS_GET_CATEGORIES =  REST_INFOS + "/categories";
+
+export const REST_FTP = "/rss/api/ftp"
+export const REST_FTP_POST_FILELIST = REST_FTP;
+export const REST_FTP_POST_DOWNLOAD = REST_FTP + '/download';
+export const REST_FTP_DELETE_DOWNLOAD = REST_FTP + '/download';
 
 
 

@@ -5,7 +5,6 @@ import services from '../services';
 import moment from "moment";
 
 const VIEW_INIT_ALL_LIST= 'viewList/VIEW_INIT_ALL_LIST';
-const VIEW_LOAD_CONSTRUCT_DISPLAY= 'viewList/VIEW_LOAD_CONSTRUCT_DISPLAY';
 const VIEW_LOAD_TOOLINFO_LIST= 'viewList/VIEW_LOAD_TOOLINFO_LIST';
 const VIEW_LOAD_LOGTYPE_LIST= 'viewList/VIEW_LOAD_LOGTYPE_LIST';
 const VIEW_CHECK_TOOL_LIST = 'viewList/VIEW_CHECK_TOOL_LIST';
@@ -16,7 +15,6 @@ const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
 const VIEW_SET_EDIT_PLAN_LIST= 'viewList/VIEW_SET_EDIT_PLAN_LIST';
 
 export const viewInitAllList = createAction(VIEW_INIT_ALL_LIST);
-export const viewLoadConstructDisplay = createAction(VIEW_LOAD_CONSTRUCT_DISPLAY, services.axiosAPI.get);	// getURL
 export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.get);	// getURL
 export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.get);		// getURL
 export const viewCheckToolList = createAction(VIEW_CHECK_TOOL_LIST); 	// index
@@ -28,18 +26,10 @@ export const viewSetEditPlanList = createAction(VIEW_SET_EDIT_PLAN_LIST);
 
 const initialState = Map({
 	gotReady: false,	// flag for loaded data
-
-	constructDisplay:  List([
-		Map({
-			fabName: "",
-			fabId: ""
-		})
-	]),
-
 	equipmentList: List([
 		Map({
 			keyIndex: 0,
-			structId: ""
+			fabName: ""
 		})
 	]),
 
@@ -84,30 +74,6 @@ const initialState = Map({
 });
 
 export default handleActions({
-	...pender({
-		type: VIEW_LOAD_CONSTRUCT_DISPLAY,
-		onSuccess: (state, action) => {
-			console.log("handleActions[VIEW_LOAD_CONSTRUCT_DISPLAY]");
-			const lists = action.payload.data;
-
-			/*
-			const tree = lists.ConstructDisplay.Tree;
-			const equipments = tree.find(item => item.name === "Equipments");
-			//console.log("lists", lists);
-			//console.log("tree", tree);
-			//console.log("equipments", equipments);
-			//console.log("equipments.Child", equipments.Child);
-			const newEquipments = equipments.Child.map(item => ({
-				name: String(item.name),
-				id: String(item.id)
-			}))
-			//console.log("newEquipments.Child", newEquipments);
-			 */
-
-			//console.log("lists", lists);
-			return state.set("constructDisplay",fromJS(lists));
-		}
-	}),
 	...pender(
 		{
 			type: VIEW_LOAD_TOOLINFO_LIST, // If type is given, create an object containing action handlers suffixed to this type.
@@ -118,51 +84,26 @@ export default handleActions({
 
 			onSuccess: (state, action) => { // If there is nothing else to do when successful, this function can also be omitted.
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
-				const lists = action.payload.data;
-				const constructDisplay = state.get("constructDisplay").toJS();
-				//console.log("lists", lists);
-				//console.log("constructDisplay", constructDisplay);
-
-				const newList = lists.reduce((acc, cur) => {
-					const find = constructDisplay.find(item => {
-						return item.fabId === cur.fabId
-					});
-					if(find !== undefined){
-						const newCur = {
-							...cur,
-							structId: find.fabName
-						}
-						acc.push(newCur);
-					}
-					return acc;
-				}, []);
-
-				//console.log("newList", newList);
-
-				const newEquipLists = constructDisplay.map((item, idx) => {
+				const {lists} = action.payload.data;
+				//console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]lists", lists);
+				const equipArray = Array.from(new Set(lists.map(item => item.fabName)));
+				//console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]equipArray", equipArray);
+				const equipList = equipArray.map((item, idx) => ({ keyIndex : idx, fabName: item }));
+				//console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]equipList", equipList);
+				const toolInfoList = lists.map((list, idx) => {
 					return {
 						keyIndex: idx,
-						equipmentId: item.fabName
-					}
-				});
-
-				//console.log("newEquipLists", newEquipLists);
-
-				const newToolInfoList = newList.map((list, idx) => {
-					return {
-						keyIndex: idx,
-						structId: list.structId,
+						structId: list.fabName,
 						//collectServerId: list.collectServerId,    //Not currently in use
 						//collectHostName: list.collectHostName,    //Not currently in use
-						targetname: list.mpaName,
-						targettype: list.mpaType,
+						targetname: list.machineName,
+						//targettype: list.machineType,             //Not currently in use
 						checked: false
 					}
 				});
 
 				//console.log("newToolInfoList", newToolInfoList);
-
-				return state.set('toolInfoList', fromJS(newToolInfoList)).set('equipmentList', fromJS(newEquipLists));
+				return state.set('toolInfoList', fromJS(toolInfoList)).set('equipmentList', fromJS(equipList));
 			},
 			// When a function is omitted, the default value (state, action) => state is set (that is, it returns the state as it is)
 		}),
@@ -170,15 +111,15 @@ export default handleActions({
 		type: VIEW_LOAD_LOGTYPE_LIST,
 		onSuccess: (state, action) => {
 			console.log("handleActions[VIEW_LOAD_LOGTYPE_LIST]");
-			const lists = action.payload.data;
+			const { lists } = action.payload.data;
 			//console.log("lists", lists);
 			//console.log(lists[0].logType);
 			const newLists = lists.map((lists, idx) => {
 				return {
 					keyIndex: idx,
-					logType: lists.logType,
-					logCode: lists.logCode,
-					logName: lists.logName,
+					//logType: lists.categoryType,
+					logCode: lists.categoryCode,
+					logName: lists.categoryName,
 					//fileListForwarding: lists.fileListForwarding,   //Not currently in use
 					checked: false
 				}

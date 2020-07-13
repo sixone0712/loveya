@@ -46,16 +46,21 @@ export const startSearchList = (props) => {
     const { searchListActions } = props;
     const { requestList } = props;
     const requestListJS = requestList.toJS();
-    const newRequestList = requestListJS.map(list => ({
-	    fabName: list.structId,
-	    mpaName: list.targetName,
-	    logCode: list.logCode,
-	    logName: list.logName,
-	    startDate: list.startDate,
-	    endDate: list.endDate,
-    }))
+
+    //console.log("[startSearchList]requestListJS", requestListJS);
+
+    const newRequestList = {
+      fabNames: requestListJS.fabNames,
+      machineNames: requestListJS.machineNames,
+      categoryCodes: requestListJS.categoryCodes,
+      categoryNames: requestListJS.categoryNames,
+	    startDate: requestListJS.startDate,
+	    endDate: requestListJS.endDate,
+    };
+
+    //console.log("[startSearchList]newRequestList", newRequestList);
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList(Define.REST_POST_INFO_FILES, newRequestList);
+    searchListActions.searchLoadResponseList(Define.REST_FTP_POST_FILELIST, newRequestList);
 };
 
 export const getResponseList = (props) => {
@@ -89,34 +94,35 @@ export const requestDownload = async (props) => {
 
     const downloadList = responseListJS.reduce((acc, cur, idx) => {
         if (cur.checked) acc.push({
-            structId: cur.structId,
-            machine: cur.targetName,
-            category: cur.logId,
+            fabName: cur.structId,
+            machineName: cur.targetName,
+            categoryCode: cur.logId,
             categoryName: cur.logName,
-            file: cur.fileName,
-            filesize: String(cur.fileSize),
-            date: cur.fileDate,
-            isFile: cur.file,
+            fileName: cur.fileName,
+            fileSize: cur.fileSize,
+            fileDate: cur.fileDate,
+            file: cur.file,
         });
         return acc;
     }, []);
 
     const jsonList = new Object();
-    jsonList.list = downloadList;
+    jsonList.lists = downloadList;
 
     //console.log("downloadList", downloadList);
     //console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.post(Define.REST_API_URL + "/dl/request", jsonList)
-        .then((data) => {/*console.log("data", data);*/ return  data.data})
+    const result = await services.axiosAPI.post(Define.REST_FTP_POST_DOWNLOAD, jsonList)
+        .then((res) => {/*console.log("data", data);*/ return  res})
         .catch((error) => {
             console.log("[startDownload]error", error);
             return Define.GENRE_SET_FAIL_SEVER_ERROR;
         });
 
-    console.log("result", result);
-
-    return result;
+    //console.log("result", result);
+    const { downloadId } = result.data;
+    console.log("[requestDownload]donwloadId", downloadId);
+    return downloadId;
 };
 
 
@@ -176,7 +182,7 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
         let { func } = downloadStatus;
         if(func === null) return;
 
-        const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/status?dlId=" + requestId)
+        const res = await services.axiosAPI.get(`${Define.REST_FTP_POST_DOWNLOAD}/${requestId}`)
             .then(res => res)
             .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
 
@@ -197,10 +203,11 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
 
         modalFunc.setSearchListActions({
             func: func,
-            dlId: res.data.dlId,
+            dlId: res.data.donwloadId,
             status: res.data.status,
             totalFiles: res.data.totalFiles,
-            downloadFiles: res.data.downloadFiles
+            downloadFiles: res.data.downloadedFiles,
+            downloadUrl: res.data.downloadUrl
         });
 
         setWatchDlStatus(requestId, modalFunc);

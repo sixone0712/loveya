@@ -35,13 +35,12 @@ class Manual extends Component {
         await searchListActions.searchSetInitAllList();
         await genreListActions.genreInitAllList();
 
-        await viewListActions.viewLoadConstructDisplay(Define.REST_GET_INFO_FABS);
-        await viewListActions.viewLoadToolInfoList(Define.REST_GET_INFO_MPAS);
+        await viewListActions.viewLoadToolInfoList(Define.REST_INFOS_GET_MACHINES);
         const { toolInfoList } = this.props;
         const targetname = toolInfoList.getIn([0, "targetname"]);
         console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
         console.log("[Manual][componentDidMount]targetname", targetname);
-        await viewListActions.viewLoadLogTypeList(`${Define.REST_GET_INFO_LOGS}/${targetname}`);
+        await viewListActions.viewLoadLogTypeList(`${Define.REST_INFOS_GET_CATEGORIES}/${targetname}`);
 
         await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
     }
@@ -109,8 +108,6 @@ export default connect(
         logTypeFailure: state.pender.failure['viewList/VIEW_LOAD_TOOLINFO_LIST'],
         toolInfoFailure: state.pender.failure['viewList/VIEW_LOAD_LOGTYPE_LIST'],
         genreFailure: state.pender.failure['genreList/GENRE_LOAD_DB_LIST'],
-
-
     }),
     (dispatch) => ({
         viewListActions: bindActionCreators(viewListActions, dispatch),

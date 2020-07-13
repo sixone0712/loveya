@@ -106,7 +106,7 @@ class FileList extends Component {
 
     // Init
     const { searchListActions } = this.props;
-    searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0})
+    searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0, downloadUrl: ""})
     this.setErrorStatus(Define.RSS_SUCCESS);
 
     // Request Download
@@ -154,7 +154,7 @@ class FileList extends Component {
       if(func !== null){
         clearInterval(func);
         // Reauest Cancel
-        const res = await services.axiosAPI.get(Define.REST_API_URL + "/dl/cancel?dlId=" + dlId);
+        const res = await services.axiosAPI.deleteReq(Define.REST_FTP_DELETE_DOWNLOAD + "/" + dlId);
         console.log("res", res)
         // error process
       }
@@ -205,7 +205,8 @@ class FileList extends Component {
     if(isSave) {
       const { downloadStatus } = this.props;
       let res = 0;
-      res = await services.axiosAPI.downloadFile(Define.REST_API_URL + "/dl/download?dlId=" + downloadStatus.toJS().dlId);
+      console.log("downloadStatus.toJS().downloadUrl", downloadStatus.toJS().downloadUrl);
+      res = await services.axiosAPI.downloadFile(downloadStatus.toJS().downloadUrl);
       console.log("res: ",res);
       (res.result == Define.RSS_SUCCESS)
           ? API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Completed")
@@ -315,7 +316,7 @@ class FileList extends Component {
     const { sortKey, sortDirection } = this.state;
     const style = "sort-icon";
 
-    console.log(name);
+    //console.log(name);
 
     return sortKey === name ? style + " sort-active " + sortDirection : style;
   };

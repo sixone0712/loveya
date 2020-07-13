@@ -225,6 +225,9 @@ public class FileDownloader extends Thread {
     public String getDownloadResultDir() {
         return downloadResultDir;
     }
+    
+    public int getFileServiceRetryCount() { return fileServiceRetryCount; }
+    public int getFileServiceRetryInterval() { return fileServiceRetryInterval; }
 
     private final Log log = LogFactory.getLog(getClass());
 }
