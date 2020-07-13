@@ -62,8 +62,8 @@ public class FileDownloader extends Thread {
 
         FileDownloadExecutor executor = new FileDownloadExecutor("manual","", this, dlList, true);
         executor.setMonitor(monitor);
+        executor.setAttrDownloadFilesViaMultiSessions(true);
         executorList.put(executor.getId(), executor);
-
         executor.start();
         log.warn("jobid="+executor.getId()+" has been started");
         return executor.getId();
