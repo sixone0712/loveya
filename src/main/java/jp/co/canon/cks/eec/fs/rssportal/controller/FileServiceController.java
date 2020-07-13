@@ -109,8 +109,8 @@ public class FileServiceController {
                 JSONObject fab = fabs.getJSONObject(i);
                 String fabName = fab.getString("fabName");
                 String fabId = fab.getString("fabId");
-                //log.debug("fabName: " + fabName);
-                //log.debug("fabId: " + fabId);
+                //log.info("fabName: " + fabName);
+                //log.info("fabId: " + fabId);
                 if (fabId.equals(findId)) {
                     return fabName;
                 }
@@ -168,6 +168,7 @@ public class FileServiceController {
         }
 
         Map<String, Object> res = new HashMap<>();
+        res.put("lists", mpaList);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
@@ -236,6 +237,7 @@ public class FileServiceController {
         }
 
         Map<String, Object> res = new HashMap<>();
+        res.put("lists", r);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }
