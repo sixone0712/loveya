@@ -8,6 +8,12 @@ sourceCompatibility = '1.8'
 
 jar {
 	archiveFileName = "ELogCollector.jar"
+
+	from {
+		configurations.runtimeClasspath.collect{
+			it.isDirectory() ? it : zipTree(it)
+		}
+	}
 }
 
 compileJava.options.encoding = 'UTF-8'
@@ -27,8 +33,10 @@ repositories {
 
 dependencies {
 	implementation 'commons-net:commons-net:3.6'
+	implementation 'commons-cli:commons-cli:1.4'
 }
 
 test {
 	useJUnitPlatform()
 }
+
