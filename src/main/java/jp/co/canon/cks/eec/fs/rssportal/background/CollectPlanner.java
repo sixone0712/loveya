@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
@@ -25,10 +26,7 @@ import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class CollectPlanner extends Thread {
@@ -45,7 +43,10 @@ public class CollectPlanner extends Thread {
     private final FileDownloader downloader;
 
     @Autowired
-    private CollectPlanner(DownloadMonitor monitor, CollectPlanService service, DownloadListService downloadListService, FileDownloader downloader) throws ServiceException, MalformedURLException {
+    private CollectPlanner(DownloadMonitor monitor,
+                           CollectPlanService service,
+                           DownloadListService downloadListService,
+                           FileDownloader downloader) throws ServiceException, MalformedURLException {
         this.downloader = downloader;
         if(service==null || monitor==null || downloadListService==null)
             throw new BeanInitializationException("service injection failed");
@@ -61,7 +62,7 @@ public class CollectPlanner extends Thread {
         log.info("CollectPlanner start");
 
         try {
-            while(!service.isReady())
+            while(!service.isReady() || true)
                 sleep(10000);
 
             while(true) {

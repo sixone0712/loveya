@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
