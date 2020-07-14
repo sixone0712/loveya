@@ -6,8 +6,6 @@ import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdef
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdefinition.LogCollectDefinition;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdefinition.LogCollectDefinitionList;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.objectlist.FileService;
-import jp.co.canon.cks.eec.fs.manage.service.configuration.legacy.constructioninfo.*;
-import jp.co.canon.cks.eec.fs.manage.service.configuration.legacy.logcollectdefinition.*;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logconfiguration.LogConfiguration;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logconfiguration.LogConfigurationLoader;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.objectlist.ObjectList;
