@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class CollectThreadPool {
@@ -15,64 +18,46 @@ public class CollectThreadPool {
     @Value("${rssportal.collect.max-threads}")
     private int maxCollectThreads;
 
-    private CollectThread[] pool;
-    private int runningThreads;
+    private List<CollectThread> threads;
+    private AtomicInteger threadId;
 
     @PostConstruct
     private void postContrcutor() {
         log.info("initialize collect thread pool ("+maxCollectThreads+" threads)");
-        pool = new CollectThread[maxCollectThreads];
-        for(int i=0; i<pool.length; ++i) {
-            pool[i] = new CollectThread(i);
-        }
-        runningThreads = 0;
-    }
-
-    public int execute(CollectProcess runner) {
-        if(runner==null) {
-            log.error("null runner");
-            return -1;
-        }
-        CollectThread thread = getEmptyThread();
-        if(thread==null) {
-            log.warn("there isn't a thread available");
-            return -1;
-        }
-        thread.setRunner(runner);
-        thread.start();
-        return thread.getNo();
+        threads = new ArrayList<>();
+        threadId = new AtomicInteger(0);
     }
 
     public CollectThread getThread() {
-        CollectThread thread = getEmptyThread();
-        if(thread==null) {
-            return null;
+        CollectThread thread = null;
+        if(threads.size()<maxCollectThreads) {
+            thread = new CollectThread(threadId.getAndIncrement());
+            threads.add(thread);
         }
-        thread.lock();
+        printCurrent();
         return thread;
     }
 
     public void putThread(CollectThread thread) {
         if(thread==null) {
+            log.error("putThread error");
             return;
         }
         try {
             thread.join();
-            thread.setRunner(null);
-            thread.unlock();
+            threads.remove(thread);
         } catch (InterruptedException e) {
             log.error("thread join failed");
             e.printStackTrace();
         }
+        printCurrent();
     }
 
-    private CollectThread getEmptyThread() {
-        for(CollectThread thread: pool) {
-            if(thread.isAvailable()) {
-                return thread;
-            }
+    private void printCurrent() {
+        log.info("CollectThreadPool running threads");
+        for(CollectThread thread: threads) {
+            log.info(" - thread "+thread.getNo());
         }
-        return null;
     }
 
 }

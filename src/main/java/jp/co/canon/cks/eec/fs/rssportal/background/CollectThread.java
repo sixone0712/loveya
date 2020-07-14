@@ -12,12 +12,10 @@ public class CollectThread extends Thread {
     private CollectProcess runner;
     private Timestamp runningStartTime;
     private Timestamp runningFinishTime;
-    private Boolean lock;
 
     public CollectThread(int threadNo) {
         super();
         this.no = threadNo;
-        lock = false;
     }
 
     @Override
@@ -35,31 +33,7 @@ public class CollectThread extends Thread {
         return no;
     }
 
-    public boolean isLocked() {
-        return lock.booleanValue();
-    }
-
-    public void lock() {
-        synchronized (lock) {
-            lock = true;
-        }
-    }
-
-    public void unlock() {
-        synchronized (lock) {
-            lock = false;
-        }
-    }
-
     public void setRunner(CollectProcess runner) {
         this.runner = runner;
     }
-
-    public boolean isAvailable() {
-        if(isLocked()) {
-            return false;
-        }
-        return true;
-    }
-
 }

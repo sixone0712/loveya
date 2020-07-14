@@ -33,6 +33,7 @@ public class PlanManager extends Thread {
 
     @Autowired
     private CollectThreadPool thread;
+    private List<CollectThread> killList;
 
     private List<CollectProcess> collects;
 
@@ -54,21 +55,22 @@ public class PlanManager extends Thread {
         try {
             while (true) {
                 sleep(5000);
+                killThread();
 
                 int nextIdx = findNextScheduledPlan();
                 if(nextIdx!=-1) {
-                    CollectProcess p = collects.get(nextIdx);
-                    if (p.getSchedule().before(new Timestamp(System.currentTimeMillis()))) {
+                    CollectProcess process = collects.get(nextIdx);
+                    if (process.getSchedule().before(new Timestamp(System.currentTimeMillis()))) {
                         CollectThread t = thread.getThread();
                         if (t == null) {
                             log.info("no thread available now");
                             continue;
                         }
-                        p.setNotifyJobDone(()->{
-                            p.freeThread();
-                            thread.putThread(t);
+                        process.setNotifyJobDone(()->{
+                            process.freeThreadContainer();
+                            killList.add(t);
                         });
-                        p.allocateThread(t);
+                        process.allocateThreadContainer(t);
                     }
                 }
             }
@@ -76,6 +78,13 @@ public class PlanManager extends Thread {
             log.error("error");
             e.printStackTrace();
         }
+    }
+
+    private void killThread() {
+        for(CollectThread t: killList) {
+            thread.putThread(t);
+        }
+        killList.clear();
     }
 
     private int findNextScheduledPlan() {
@@ -98,6 +107,7 @@ public class PlanManager extends Thread {
     private void initPlanModels() {
         log.info("initialize all plans");
         collects = new ArrayList<>();
+        killList = new ArrayList<>();
         List<CollectPlanVo> plans = planDao.findAll();
         for(CollectPlanVo plan: plans) {
             collects.add(new CollectProcess(this, plan, planDao, downloader, log));

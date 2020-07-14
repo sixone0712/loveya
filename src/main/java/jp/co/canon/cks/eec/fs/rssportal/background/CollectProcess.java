@@ -53,12 +53,13 @@ public class CollectProcess implements Runnable {
         this.dao = dao;
         this.downloader = downloader;
         this.log = log;
-        this.planName = plan.getPlanName();
+        this.planName = String.format("#%d", plan.getId());
         this.threading = false;
         this.stop = plan.isStop();
         this.kill = false;
         syncTime = getTimestamp();
         schedule();
+        push();
     }
 
     private void startProc() {
@@ -126,6 +127,9 @@ public class CollectProcess implements Runnable {
         } else {
             printInfo("no files to collect");
         }
+        plan.setLastStatus(result.name());
+        plan.setLastCollect(getTimestamp());
+        schedule();
         push();
         doneProc();
     }
@@ -164,8 +168,8 @@ public class CollectProcess implements Runnable {
         return threading;
     }
 
-    public void allocateThread(CollectThread thread) {
-        printInfo("allocateThread(thread="+thread.getNo()+")");
+    public void allocateThreadContainer(CollectThread thread) {
+        printInfo("allocateThreadContainer(thread="+thread.getNo()+")");
         if(thread==null) {
             printError("thread is not available");
             return;
@@ -174,10 +178,10 @@ public class CollectProcess implements Runnable {
         startCollect();
     }
 
-    public void freeThread() {
-        printInfo("freeThread");
+    public void freeThreadContainer() {
+        printInfo("freeThreadContainer");
         if(threading) {
-            printError("freeThread failed");
+            printError("freeThreadContainer failed");
             return;
         }
         thread = null;
@@ -221,13 +225,12 @@ public class CollectProcess implements Runnable {
             }
         }
         if(planning!=null) {
-            if(planning.after(new Timestamp(System.currentTimeMillis()))) {
+            if(planning.after(plan.getEnd())) {
                 planning = plan.getEnd();
             }
         }
         plan.setNextAction(planning);
         printInfo(toString());
-        //push();
     }
 
     private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
@@ -342,7 +345,8 @@ public class CollectProcess implements Runnable {
     }
 
     private boolean isChangeable() {
-        if(plan.getDetail().equalsIgnoreCase(PlanStatus.collecting.name())) {
+        String status = plan.getLastStatus();
+        if(status!=null && status.equalsIgnoreCase(PlanStatus.collecting.name())) {
             return false;
         }
         return true;
@@ -386,9 +390,9 @@ public class CollectProcess implements Runnable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("plan::");
-        sb.append(plan.getPlanName()).append(":");
-        sb.append(plan.getDetail()).append(":");
+        StringBuilder sb = new StringBuilder("");
+        sb.append(plan.getPlanName()).append(" : ");
+        sb.append(plan.getLastStatus()).append(" : ");
         sb.append(plan.getNextAction());
         return sb.toString();
     }
