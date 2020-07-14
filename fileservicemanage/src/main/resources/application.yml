@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: dev
+server:
+  servlet:
+    contextPath:
+fileservice:
+  configDirectory: /usr/local/canon/esp/CanonFileService
+  fileServiceDirectory: /usr/local/canon/esp/CanonFileService
+  constructionServiceDirectory: /usr/local/canon/esp/ConstructionService

@@ -1,0 +1,22 @@
+
+spring:
+  profiles:
+    active: dev
+server:
+  servlet:
+    contextPath:
+fileservice:
+  constructionServiceDirectory: /usr/local/canon/esp/ConstructionService
+  configDirectory: /usr/local/canon/esp/CanonFileService
+  collect:
+    ftp:
+      downloadDirectory: /LOG/downloads
+      requestDirectory: /LOG/ftpRequests
+    vftp:
+      downloadDirectory: /LOG/vdownloads
+      requestDirectory: /LOG/vftpRequests
+    threadWaitTime: 2000
+    ftpPath: /
+    assignThread: 6
+    niceVal: 10
+

@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group = 'jp.co.canon.cks.eec.fs'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework:spring-web:5.2.7.RELEASE'
+    implementation 'org.springframework:spring-core:5.2.7.RELEASE'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
+    implementation project(':fileservicecommon')
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+}
+
+test {
+    useJUnitPlatform()
+}
