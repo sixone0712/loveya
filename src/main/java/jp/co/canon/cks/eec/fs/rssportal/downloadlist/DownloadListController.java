@@ -1,21 +1,24 @@
 package jp.co.canon.cks.eec.fs.rssportal.downloadlist;
 
+import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlansFileList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/rss/rest/downloadlist")
+@RestController
+@RequestMapping("/rss/api/plans")
 public class DownloadListController {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -31,25 +34,55 @@ public class DownloadListController {
         this.service = service;
     }
 
-    @RequestMapping("/list")
-    public ResponseEntity<List<DownloadListVo>> getList(HttpServletRequest request,
-                                                        @RequestParam(name="planId") int planId) {
-        String path = request.getServletPath();
-        log.info("request "+path);
-        List<DownloadListVo> list;
-        list = service.getList(planId);
-        return new ResponseEntity<>(list, HttpStatus.OK);
+    @GetMapping("/{planId}/filelists")
+    @ResponseBody
+    public ResponseEntity<?> getList(HttpServletRequest request,
+                                                        @PathVariable("planId") String planId) {
+        log.info(String.format("[Get] %s", request.getServletPath()));
+
+        if(planId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        int id = Integer.parseInt(planId);
+        List<DownloadListVo> files;
+        files = service.getList(id);
+
+        List<RSSPlansFileList> convList = new ArrayList<RSSPlansFileList>();
+        for(DownloadListVo file : files) {
+            RSSPlansFileList newFile = new RSSPlansFileList();
+            SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
+            newFile.setPlanId(file.getPlanId());
+            newFile.setFileId(file.getId());
+            newFile.setCreated(file.getCreated() != null ? conTimeFormat.format(file.getCreated()) : null);
+            newFile.setStatus(file.getStatus());
+            newFile.setDownloadUrl("/rss/api/plans/storage/" + String.valueOf(file.getId()));
+            convList.add(newFile);
+        }
+
+        Map<String, Object> resBody = new HashMap<>();
+        resBody.put("lists", convList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
-    @RequestMapping("/delete")
-    public ResponseEntity delete(HttpServletRequest request,
-                                         @RequestParam(name="id") int id) {
-        String path = request.getServletPath();
-        log.info("request "+path);
+    @DeleteMapping("/{planId}/filelists/{fileId}")
+    @ResponseBody
+    public ResponseEntity<?> delete(HttpServletRequest request,
+                                 @PathVariable("planId") String planId,
+                                 @PathVariable("fileId") String fileId) {
+        log.info(String.format("[Delete] %s", request.getServletPath()));
+
+        if(planId == null || fileId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        int id = Integer.parseInt(fileId);
         DownloadListVo item = service.get(id);
-        if(item==null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        if(item==null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
         service.delete(id);
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }

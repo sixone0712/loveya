@@ -29,5 +29,16 @@ export const REST_FTP_POST_FILELIST = REST_FTP;
 export const REST_FTP_POST_DOWNLOAD = REST_FTP + '/download';
 export const REST_FTP_DELETE_DOWNLOAD = REST_FTP + '/download';
 
+export const REST_PLANS = '/rss/api/plans'
+export const REST_PLANS_POST_PLANS = REST_PLANS;
+export const REST_PLANS_GET_PLANS = REST_PLANS;
+export const REST_PLANS_DELETE_PLANS = REST_PLANS;
+export const REST_PLANS_MODIFY_PLAN = REST_PLANS;
+export const REST_PLANS_CHANGE_PLAN_STATUS = REST_PLANS;
+
+export const REST_PLANS_GET_FILELIST = REST_PLANS;
+export const REST_PLANS_GET_DOWNLOAD_FILE = REST_PLANS;
+export const REST_PLANS_DELETE_FILE = REST_PLANS;
+
 
 

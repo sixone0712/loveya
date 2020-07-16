@@ -145,7 +145,7 @@ class RSSAutoDownloadList extends Component {
 
         //console.log("requestList", requestList);
 
-        const newList = requestList.filter(item => item.requestStatus === "new");
+        const newList = requestList.filter(item => item.status === "new");
 
         if(newList.length > 0) {
             isExist = true;
@@ -170,9 +170,10 @@ class RSSAutoDownloadList extends Component {
     };
 
     saveDownloadFile = async () => {
-        console.log("[DownladList][saveDownloadFile]id", this.state.download.id);
-        if(this.state.download.id !== "") {
-            const res = await services.axiosAPI.downloadFile(Define.REST_API_URL + '/plan/download?id=' + this.state.download.id);
+        const { downloadUrl } = this.state.download;
+        console.log("[DownladList][saveDownloadFile]downloadUrl", downloadUrl);
+        if(downloadUrl !== "") {
+            const res = await services.axiosAPI.downloadFile(downloadUrl);
             if(res.result == Define.RSS_SUCCESS) {
                 this.closeModal();
                 API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Completed")
@@ -186,14 +187,15 @@ class RSSAutoDownloadList extends Component {
                 API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Fail")
             }
         } else {
-            console.error("[DownladList][saveDownloadFile]id is null");
+            console.error("[DownladList][saveDownloadFile]downloadUrl is null");
             this.closeModal();
         }
         this.loadDownloadList(this.state.requestId, this.state.requestName);
     }
 
     requestDelete = async () => {
-        const res = await services.axiosAPI.get(Define.REST_API_URL + '/downloadlist/delete?id=' + this.state.delete.id)
+        const { planId, fileId} = this.state.delete;
+        const res = await services.axiosAPI.deleteRequest(`${Define.REST_PLANS_DELETE_FILE}/${planId}/fileLists/${fileId}`)
             .then( res  => {
                 return Define.RSS_SUCCESS;
             })
@@ -215,8 +217,8 @@ class RSSAutoDownloadList extends Component {
     }
 
     deleteDownloadFile = async () => {
-        console.log("[DownladList][deleteDownloadFile]id", this.state.delete.id);
-        if(this.state.delete.id !== "") {
+        console.log("[DownladList][deleteDownloadFile]fileId", this.state.delete.fileId);
+        if(this.state.delete.fileId !== "") {
             const res = await this.requestDelete();
             console.log("[DownladList][deleteDownloadFile]res", res);
             if(res === Define.RSS_SUCCESS) {
@@ -241,20 +243,20 @@ class RSSAutoDownloadList extends Component {
     }
 
 
-    loadDownloadList = async (id, name) => {
+    loadDownloadList = async (planId, planName) => {
         let result = false;
-        const res = await services.axiosAPI.get(Define.REST_API_URL + "/downloadlist/list?planId=" + id);
-        const { data } = res;
+        const res = await services.axiosAPI.get(`${Define.REST_PLANS_GET_FILELIST}/${planId}/filelists`);
+        const { lists } = res.data;
         console.log("[DownloadList][componentDidMount]res", res);
         let newRequestList = [];
-        if(data !== "") {
-            newRequestList = data.map((item, idx) => {
+        if(lists !== undefined) {
+            newRequestList = lists.map((item, idx) => {
                 return {
-                    requestId: item.title,
-                    requestStatus: item.status,
-                    id: item.id,
+                    created: item.created,
+                    status: item.status,
+                    fileId: item.fileId,
                     planId: item.planId,
-                    path: item.path,
+                    downloadUrl: item.downloadUrl,
                     keyIndex: idx + 1
                 }
             })
@@ -263,8 +265,8 @@ class RSSAutoDownloadList extends Component {
 
         await this.setState({
             ...this.state,
-            requestName: name,
-            requestId: id,
+            requestName: planName,
+            requestId: planId,
             requestList: newRequestList
         })
 
@@ -273,11 +275,11 @@ class RSSAutoDownloadList extends Component {
 
     async componentDidMount() {
         const query = queryString.parse(this.props.location.search);
-        const { id, name } = query;
-        console.log("[DownloadList][componentDidMount]id", id);
-        console.log("[DownloadList][componentDidMount]name", name);
+        const { planId, planName } = query;
+        console.log("[DownloadList][componentDidMount]planId", planId);
+        console.log("[DownloadList][componentDidMount]planName", planName);
 
-        const res = await this.loadDownloadList(id, name);
+        const res = await this.loadDownloadList(planId, planName);
     }
 
     render() {
@@ -402,10 +404,10 @@ class RSSAutoDownloadList extends Component {
                                                                  this.openModal(modalType.MODAL_DOWNLOAD_1)
                                                              });
                                                          }}>
-                                                        {request.requestId}
+                                                        {request.created}
                                                     </span>
                                                 </td>
-                                                <td>{CreateStatus(request.requestStatus)}</td>
+                                                <td>{CreateStatus(request.status)}</td>
                                                 <td>
                                                     <div className="icon-area"
                                                          onClick={ () => {

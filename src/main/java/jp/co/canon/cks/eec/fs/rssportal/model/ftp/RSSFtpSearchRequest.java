@@ -1,6 +1,5 @@
 package jp.co.canon.cks.eec.fs.rssportal.model.ftp;
 
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSRequestSearch;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RSSFTPSearchRequest {
+public class RSSFtpSearchRequest {
     private String fabName = "";
     private String machineName = "";
     private String categoryCode = "";
@@ -18,8 +17,8 @@ public class RSSFTPSearchRequest {
     private String keyword = "";      //Not currently in use
     private String dir = "";          //Not currently in use
 
-    public RSSFTPSearchRequest getClone() {
-        RSSFTPSearchRequest clone = new RSSFTPSearchRequest();
+    public RSSFtpSearchRequest getClone() {
+        RSSFtpSearchRequest clone = new RSSFtpSearchRequest();
         clone.fabName = this.fabName;
         clone.machineName = this.machineName;
         clone.categoryCode = this.categoryCode;

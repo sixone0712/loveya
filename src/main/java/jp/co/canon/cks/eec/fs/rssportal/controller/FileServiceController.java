@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.manage.FileTypeModel;
 import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
-import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoCategory;
-import jp.co.canon.cks.eec.fs.rssportal.model.Info.RSSInfoMachine;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfosCategory;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfosMachine;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -156,9 +156,9 @@ public class FileServiceController {
         }
 
         ToolInfoModel[] toolModels = result;
-        ArrayList<RSSInfoMachine> mpaList = new ArrayList<>();
+        ArrayList<RSSInfosMachine> mpaList = new ArrayList<>();
         for (int i = 0; i < toolModels.length; i++) {
-            RSSInfoMachine machine = new RSSInfoMachine();
+            RSSInfosMachine machine = new RSSInfosMachine();
             String fabName = findFabName(fabList, toolModels[i].getStructId());
             if (fabName != null && !fabName.equals("")) {
                 machine.setFabName(fabName);
@@ -203,9 +203,9 @@ public class FileServiceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
-        RSSInfoCategory[] r = new RSSInfoCategory[ftList.length];
+        RSSInfosCategory[] r = new RSSInfosCategory[ftList.length];
         for (int i = 0; i < ftList.length; i++) {
-            r[i] = new RSSInfoCategory();
+            r[i] = new RSSInfosCategory();
             r[i].setCategoryCode(ftList[i].getLogType());
             r[i].setCategoryName(ftList[i].getDataName());
             // Not currently used

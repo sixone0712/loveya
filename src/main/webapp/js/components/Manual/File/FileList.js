@@ -154,7 +154,7 @@ class FileList extends Component {
       if(func !== null){
         clearInterval(func);
         // Reauest Cancel
-        const res = await services.axiosAPI.deleteReq(Define.REST_FTP_DELETE_DOWNLOAD + "/" + dlId);
+        const res = await services.axiosAPI.deleteRequest(Define.REST_FTP_DELETE_DOWNLOAD + "/" + dlId);
         console.log("res", res)
         // error process
       }

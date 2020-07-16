@@ -107,15 +107,16 @@ class RSSautoplanwizard extends Component {
     const logNames = newLogInfoList.map(item => item.logName);
 
     const reqData = {
-      planId: planId,
-      structId: structId,
-      tools: tools,
-      logTypes: logTypes,
-      logNames: logNames,
-      collectStart: moment(collectStart).format("YYYY-MM-DD HH:mm:ss"),
-      from: moment(from).format("YYYY-MM-DD HH:mm:ss"),
-      to: moment(to).format("YYYY-MM-DD HH:mm:ss"),
-      collectType: collectType,
+      planName: planId,
+      planType: "ftp",    // need to add
+      fabNames: structId,
+      machineNames: tools,
+      categoryCodes: logTypes,
+      categoryNames: logNames,
+      start: moment(collectStart).format("YYYYMMDDHHmmss"),
+      from: moment(from).format("YYYYMMDDHHmmss"),
+      to: moment(to).format("YYYYMMDDHHmmss"),
+      type: collectType,
       interval: convInterval,
       description: description,
     };
@@ -126,7 +127,7 @@ class RSSautoplanwizard extends Component {
   handleRequestAutoPlanAdd = async () => {
     const reqData = this.makeRequestAutoPlanData();
     //console.log("reqData", reqData);
-    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/add", reqData);
+    const res = await services.axiosAPI.post(Define.REST_PLANS_POST_PLANS, reqData);
     //console.log(res);
 
     //console.log("this.props.history", this.props.history);
@@ -138,7 +139,7 @@ class RSSautoplanwizard extends Component {
     const reqData = this.makeRequestAutoPlanData();
     //console.log("reqData", reqData);
     console.log("editID", editId);
-    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/modify?id=" + editId, reqData);
+    const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_MODIFY_PLAN}/${editId}`, reqData);
     console.log(res);
     //console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);

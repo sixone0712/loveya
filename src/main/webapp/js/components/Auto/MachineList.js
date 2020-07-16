@@ -62,7 +62,7 @@ class RSSautomachinelist extends Component {
                 return (
                     <div className="machine-section" key={index}>
                       <MachineCollapse
-                          structId={title.equipmentId}
+                          structId={title.fabName}
                           machineList={machineList}
                           checkItem={this.checkAutoMachineItem}
                       />

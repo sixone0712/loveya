@@ -4,8 +4,8 @@ import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
-import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFTPSearchRequest;
-import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFTPSearchResponse;
+import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchRequest;
+import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchResponse;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +44,7 @@ public class FileDownloaderController {
         this.session = session;
         this.fileDownloader = fileDownloader;
     }
-    private boolean createFileList(List<RSSFTPSearchResponse> list, RSSFTPSearchRequest request) {
+    private boolean createFileList(List<RSSFtpSearchResponse> list, RSSFtpSearchRequest request) {
         if(list==null || request==null) return false;
 
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -90,14 +90,14 @@ public class FileDownloaderController {
                         if(dirTimestamp > searchTo || dirTimestamp < searchFrom) continue;
                          */
 
-                        RSSFTPSearchRequest child = request.getClone();
+                        RSSFtpSearchRequest child = request.getClone();
                         child.setDir(file.getName());
                         if(!createFileList(list, child)) {
                             log.warn(String.format("[createFileList]connection error (%s %s %s)",
                                     request.getMachineName(), request.getCategoryCode(), request.getDir()));
                         }
                     } else {
-                        RSSFTPSearchResponse info = new RSSFTPSearchResponse();
+                        RSSFtpSearchResponse info = new RSSFtpSearchResponse();
                         info.setFile(true);
                         //info.setFileId(0);
                         info.setCategoryCode(request.getCategoryCode());
@@ -134,8 +134,8 @@ public class FileDownloaderController {
     //@PostMapping
     //@ResponseBody
     public ResponseEntity<?> searchFTPFileList(HttpServletRequest request, @RequestBody Map<String, Object> requestList) throws Exception {
-        log.info(String.format("[Post] \"%s", request.getServletPath()));
-        List<RSSFTPSearchResponse> responselists = new ArrayList<>();
+        log.info(String.format("[Post] %s", request.getServletPath()));
+        List<RSSFtpSearchResponse> responselists = new ArrayList<>();
         ArrayList<String> fabNames = requestList.containsKey("fabNames") ? (ArrayList<String>) requestList.get("fabNames") : null;
         ArrayList<String> machineNames = requestList.containsKey("machineNames") ? (ArrayList<String>) requestList.get("machineNames") : null;
         ArrayList<String> categoryCodes = requestList.containsKey("categoryCodes") ? (ArrayList<String>) requestList.get("categoryCodes") : null;
@@ -164,7 +164,7 @@ public class FileDownloaderController {
 
         for(int i = 0; i < machineNames.size(); i++) {
             for(int j = 0; j < categoryCodes.size(); j++) {
-                RSSFTPSearchRequest serachReqeust = new RSSFTPSearchRequest();
+                RSSFtpSearchRequest serachReqeust = new RSSFtpSearchRequest();
                 serachReqeust.setFabName(fabNames.get(i));
                 serachReqeust.setMachineName(machineNames.get(i));
                 serachReqeust.setCategoryCode(categoryCodes.get(j));
@@ -185,8 +185,8 @@ public class FileDownloaderController {
     @PostMapping
     @ResponseBody
     public ResponseEntity<?> searchFTPFileListWithThreadPool(HttpServletRequest request, @RequestBody Map<String, Object> requestList) throws Exception {
-        log.info(String.format("[Post] \"%s", request.getServletPath()));
-        List<RSSFTPSearchResponse> responselists = new ArrayList<>();
+        log.info(String.format("[Post] %s", request.getServletPath()));
+        List<RSSFtpSearchResponse> responselists = new ArrayList<>();
         ArrayList<String> fabNames = requestList.containsKey("fabNames") ? (ArrayList<String>) requestList.get("fabNames") : null;
         ArrayList<String> machineNames = requestList.containsKey("machineNames") ? (ArrayList<String>) requestList.get("machineNames") : null;
         ArrayList<String> categoryCodes = requestList.containsKey("categoryCodes") ? (ArrayList<String>) requestList.get("categoryCodes") : null;
@@ -213,11 +213,11 @@ public class FileDownloaderController {
         // Create ThreadPool with 10 threads
         ExecutorService threadPool = Executors.newFixedThreadPool(10);
         // Futrure object to hold the result when threads are executed asynchronously
-        ArrayList<Future<ArrayList<RSSFTPSearchResponse>>> futures = new ArrayList<Future<ArrayList<RSSFTPSearchResponse>>>();
+        ArrayList<Future<ArrayList<RSSFtpSearchResponse>>> futures = new ArrayList<Future<ArrayList<RSSFtpSearchResponse>>>();
 
         for(int i = 0; i < machineNames.size(); i++) {
             for(int j = 0; j < categoryCodes.size(); j++) {
-                RSSFTPSearchRequest serachReqeust = new RSSFTPSearchRequest();
+                RSSFtpSearchRequest serachReqeust = new RSSFtpSearchRequest();
                 serachReqeust.setFabName(fabNames.get(i));
                 serachReqeust.setMachineName(machineNames.get(i));
                 serachReqeust.setCategoryCode(categoryCodes.get(j));
@@ -226,10 +226,10 @@ public class FileDownloaderController {
                 serachReqeust.setEndDate(endDate);
 
                 // Futrure object to hold the result when threads are executed asynchronously
-                Callable<ArrayList<RSSFTPSearchResponse>> callable = new Callable<ArrayList<RSSFTPSearchResponse>>() {
+                Callable<ArrayList<RSSFtpSearchResponse>> callable = new Callable<ArrayList<RSSFtpSearchResponse>>() {
                     @Override
-                    public ArrayList<RSSFTPSearchResponse> call() throws Exception {
-                        ArrayList<RSSFTPSearchResponse> result = new ArrayList<>();
+                    public ArrayList<RSSFtpSearchResponse> call() throws Exception {
+                        ArrayList<RSSFtpSearchResponse> result = new ArrayList<>();
                         if(!createFileList(result, serachReqeust)) {
                             log.warn("[createFileList]failed to connect "+serachReqeust.getMachineName());
                         }
@@ -241,7 +241,7 @@ public class FileDownloaderController {
         }
         threadPool.shutdown();
 
-        for (Future<ArrayList<RSSFTPSearchResponse>> future : futures) {
+        for (Future<ArrayList<RSSFtpSearchResponse>> future : futures) {
             responselists.addAll(future.get());
         }
 
@@ -253,7 +253,7 @@ public class FileDownloaderController {
     @PostMapping(value="/download")
     @ResponseBody
     public ResponseEntity<?> ftpDownloadRequest(HttpServletRequest request, @RequestBody Map<String, Object> param) {
-        log.info(String.format("[Post] \"%s", request.getServletPath()));
+        log.info(String.format("[Post] %s", request.getServletPath()));
         Map<String, Object> res = new HashMap<>();
         if(param.size() == 0 || param.containsKey("lists") == false) {
             log.warn("no target to download");
@@ -298,8 +298,7 @@ public class FileDownloaderController {
     @DeleteMapping("/download/{downloadId}")
     @ResponseBody
     public ResponseEntity<?> ftpDownloadCancel(HttpServletRequest request, @PathVariable("downloadId") String downloadId) {
-        log.info(String.format("[Delete] \"%s\"%s", request.getServletPath(), downloadId));
-
+        log.info(String.format("[Delete] %s", request.getServletPath()));
         if (downloadId == null) {
             log.warn("downloadId is null");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -316,7 +315,7 @@ public class FileDownloaderController {
     @GetMapping("/download/{downloadId}")
     @ResponseBody
     public ResponseEntity<DownloadStatusResponseBody> ftpDownloadStatus(HttpServletRequest request, @PathVariable("downloadId") String downloadId) {
-        log.info(String.format("[Get] \"%s\"%s", request.getServletPath(), downloadId));
+        log.info(String.format("[Get] %s", request.getServletPath()));
         if(downloadId == null) {
             log.warn("downloadId is null");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -336,20 +335,20 @@ public class FileDownloaderController {
             @PathVariable("downloadId") String downloadId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        log.info(String.format("[Get] \"%s\"%s", request.getServletPath(), downloadId));
+        log.info(String.format("[Get] %s", request.getServletPath()));
 
         if(downloadId == null) {
             log.error("invalid param");
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         if(fileDownloader.isValidId(downloadId)==false) {
             log.error("invalid dlId");
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         if(fileDownloader.getStatus(downloadId).equals("done")==false) {
             log.error("in-progress");
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         String dlPath = fileDownloader.getDownloadInfo(downloadId);

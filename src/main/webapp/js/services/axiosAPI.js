@@ -64,6 +64,40 @@ export const post = async (url, postData) => {
     return checkSession(res);
 }
 
+export const putCancelToken = axios.CancelToken;
+export let putCancel;
+export const putReqeust = async (url, data) => {
+    const res =  await axios.put(url, data,  {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        // References
+        // https://yamoo9.github.io/axios/guide/cancellation.html
+        cancelToken: new putCancelToken(function executor(c) {
+            // The executor function takes the cancel function as a parameter.
+            putCancel = c;
+        })
+    });
+    return checkSession(res);
+}
+
+export const deleteCancelToken = axios.CancelToken;
+export let deleteCancel;
+export const deleteRequest = async (url) => {
+    const res =  await axios.delete(url, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        // References
+        // https://yamoo9.github.io/axios/guide/cancellation.html
+        cancelToken: new deleteCancelToken(function executor(c) {
+            // The executor function takes the cancel function as a parameter.
+            deleteCancel = c;
+        })
+    });
+    return checkSession(res);
+}
+
 export const downloadFile = async (url) => {
     const method = 'GET';
     let fileName = 'unknown';

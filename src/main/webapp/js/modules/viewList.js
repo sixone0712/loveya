@@ -84,7 +84,7 @@ export default handleActions({
 
 			onSuccess: (state, action) => { // If there is nothing else to do when successful, this function can also be omitted.
 				console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]");
-				const {lists} = action.payload.data;
+				const { lists } = action.payload.data;
 				//console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]lists", lists);
 				const equipArray = Array.from(new Set(lists.map(item => item.fabName)));
 				//console.log("handleActions[VIEW_LOAD_TOOLINFO_LIST]equipArray", equipArray);
@@ -240,11 +240,6 @@ export default handleActions({
 		const { tool, logCode } = action.payload;
 		//console.log("tool", tool);
 		//console.log("logCode", logCode);
-		const toolArray = tool.split(",");
-		const logArray = logCode.split(",");
-
-		//console.log("toolArray", toolArray);
-		//console.log("logArray", logArray);
 
 		const toolInfoList = state.get("toolInfoList");
 		const logInfoList = state.get("logInfoList");
@@ -254,7 +249,7 @@ export default handleActions({
 		// all toolinfo list init -> unchecked
 		const initToolInfoList = toolInfoList.map(list => list.set("checked", false));
 		// check Edit list
-		const newToolInfoList = toolArray.reduce((pre, cur) => {
+		const newToolInfoList = tool.reduce((pre, cur) => {
 			const findList = initToolInfoList.find(item => item.get("targetname") == cur);
 			return pre.update(findList.get("keyIndex"), list => {
 				toolInfoListCheckCnt++;
@@ -266,7 +261,7 @@ export default handleActions({
 		const initLogInfoList = logInfoList.map(list => list.set("checked", false));
 
 		// check Edit list
-		const newLogInfoList = logArray.reduce((pre, cur) => {
+		const newLogInfoList = logCode.reduce((pre, cur) => {
 			const findList = initLogInfoList.find(item => item.get("logCode") == cur);
 			return pre.update(findList.get("keyIndex"), list => {
 				logInfoListCheckCnt++;

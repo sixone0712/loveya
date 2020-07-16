@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
+import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlansCollectionPlan;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -15,27 +16,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.ModelAndViewDefiningException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Controller
-@RequestMapping("/rss/rest/plan")
+@RestController
+@RequestMapping("/rss/api/plans")
 public class PlanController {
 
     private final HttpSession session;
@@ -52,15 +48,14 @@ public class PlanController {
         this.downloadService = downloadListService;
     }
 
-    @RequestMapping("/add")
+    @PostMapping
     @ResponseBody
-    public ResponseEntity<Integer> addPlan(HttpServletRequest request,
-                                           @RequestBody Map<String, Object> param) {
-        log.info(String.format("request \"%s\"", request.getServletPath()));
-        //param.forEach((key,value)->log.info("key="+key+" value="+value));
+    public ResponseEntity<?> addPlan(HttpServletRequest request, @RequestBody Map<String, Object> param) {
+        log.info(String.format("[Post] %s", request.getServletPath()));
+
         if(param==null) {
             log.error("no param");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         try {
@@ -68,63 +63,98 @@ public class PlanController {
             if(id<0) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity(id, HttpStatus.OK);
+            Map<String, Object> resBody = new HashMap<>();
+            resBody.put("planID", id);
+            return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (ParseException e) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
-    @RequestMapping("/list")
+    @GetMapping
     @ResponseBody
-    public ResponseEntity<List<CollectPlanVo>> listPlan(HttpServletRequest request,
-                                                        @RequestParam Map<String, Object> param) {
-        log.info(String.format("request \"%s\"", request.getServletPath()));
+    public ResponseEntity<?> listPlan(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+        log.info(String.format("[Get] %s", request.getServletPath()));
         if(param==null) {
             log.error("no param");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         }
 
-        List<CollectPlanVo> list;
-        if(param.containsKey("withExpired"))
-            list = service.getAllPlansBySchedulePriority();
-        else
-            list = service.getAllPlans();
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        List<CollectPlanVo> plans;
+        if(param.containsKey("withPriority")) plans = service.getAllPlansBySchedulePriority();
+        else plans = service.getAllPlans();
+
+        List<RSSPlansCollectionPlan> convList = new ArrayList<RSSPlansCollectionPlan>();
+        for(CollectPlanVo plan : plans) {
+            RSSPlansCollectionPlan newPlan = new RSSPlansCollectionPlan();
+            SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
+            newPlan.setPlanId(plan.getId());
+            newPlan.setPlanType("");      // need to add
+            newPlan.setOwnerId(plan.getOwner());
+            newPlan.setPlanName(plan.getPlanName());
+            newPlan.setFabNames(plan.getFab());
+            newPlan.setMachineNames(plan.getTool());
+            newPlan.setCategoryCodes(plan.getLogType());
+            newPlan.setCategoryNames(plan.getLogTypeStr());
+            newPlan.setCommands(null);      // need to add
+            newPlan.setType(plan.getCollectTypeStr());
+            newPlan.setInterval(Long.toString(plan.getInterval()));
+            newPlan.setDescription(plan.getDescription());
+            newPlan.setStart(plan.getCollectStart() != null ? conTimeFormat.format(plan.getCollectStart()) : null);
+            newPlan.setFrom(plan.getStart() != null ? conTimeFormat.format(plan.getStart()): null);
+            newPlan.setTo(plan.getEnd() != null ? conTimeFormat.format(plan.getEnd()): null);
+            newPlan.setLastCollection(plan.getLastCollect() != null ? conTimeFormat.format(plan.getLastCollect()) : null);
+            newPlan.setStatus(plan.getStatus());
+            newPlan.setDetailedStatus(plan.getDetail());
+            convList.add(newPlan);
+        }
+
+        Map<String, Object> resBody = new HashMap<>();
+        resBody.put("lists", convList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
-    @RequestMapping("/delete")
+    @DeleteMapping("/{planId}")
     @ResponseBody
-    public ResponseEntity deletePlan(HttpServletRequest request, @RequestParam(name="id") int id) {
-        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
+    public ResponseEntity<?> deletePlan(HttpServletRequest request, @PathVariable("planId") String planId) {
+        log.info(String.format("[Delete] %s", request.getServletPath()));
+        if(planId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        boolean ret = service.deletePlan(Integer.parseInt(planId));
+        if(!ret) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
-        boolean ret = service.deletePlan(id);
-        if(ret)
-            return new ResponseEntity(HttpStatus.OK);
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @RequestMapping("/download")
+    @GetMapping("/storage/{fileId}")
     public ResponseEntity<InputStreamResource> download(HttpServletRequest request,
                                                         HttpServletResponse response,
-                                                        @RequestParam(name="id") int id) {
-        log.info(String.format("request \"%s?id=\"", request.getServletPath(), id));
+                                                        @PathVariable("fileId") String fileId) {
+        log.info(String.format("[Get] %s", request.getServletPath()));
+        if(fileId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        int id = Integer.parseInt(fileId);
 
         DownloadListVo item = downloadService.get(id);
         if(item==null) {
             log.error("invalid downloadId "+id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         CollectPlanVo plan = service.getPlan(item.getPlanId());
         if(plan==null || plan.getLastCollect()==null) {
             log.error("invalid download request for invisible plan "+item.getPlanId());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         File zip = new File(item.getPath());
         if(zip==null || !zip.isFile() || !zip.exists()) {
             log.error("no download file");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         downloadService.updateDownloadStatus(id);
 
@@ -136,53 +166,68 @@ public class PlanController {
             headers.setContentLength(Files.size(zip.toPath()));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             response.setHeader("Content-Disposition", "attachment; filename="+downloadFileName);
-            return new ResponseEntity(isr, headers, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).headers(headers).body(isr);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/{planId}")
     @ResponseBody
-    public ResponseEntity<Integer> modify(HttpServletRequest request,
-                                          @RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
-        log.info(String.format("request \"%s?id=%d\"", request.getServletPath(), id));
-        CollectPlanVo plan = service.getPlan(id);
-        if(plan==null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> modify(HttpServletRequest request,
+                                          @PathVariable("planId") String planId,
+                                          @RequestBody Map<String, Object> param) {
+        log.info(String.format("[Put] %s", request.getServletPath()));
+        if(planId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-        boolean ret = service.deletePlan(id);
-        if(!ret) {
+        int id = Integer.parseInt(planId);
+        CollectPlanVo plan = service.getPlan(id);
+        if(plan==null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if(!service.deletePlan(id)) {
             log.error("invalid planId="+id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         try {
             int newId = addPlanProc(param);
-            if(id<0) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if(newId<0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
-            return new ResponseEntity(newId, HttpStatus.OK);
+            Map<String, Object> resBody = new HashMap<>();
+            resBody.put("planId", newId);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (ParseException e) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-    @RequestMapping("/stop")
-    public ResponseEntity stopPlan(HttpServletRequest request,
-                                   @RequestParam(name="id") int id) {
-        log.info("request \""+request.getServletPath()+"\" [id="+id+"]");
-        HttpStatus status = service.stopPlan(id)?HttpStatus.OK:HttpStatus.NOT_FOUND;
-        return new ResponseEntity(status);
-    }
+    @PutMapping("/{planId}/{action}")
+    public ResponseEntity<?> changePlanStatus(HttpServletRequest request,
+                                           @PathVariable("planId") String planId,
+                                           @PathVariable("action") String action) {
+        log.info(String.format("[Put] %s", request.getServletPath()));
+        if(planId == null || action == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-    @RequestMapping("/restart")
-    public ResponseEntity restartPlan(HttpServletRequest request,
-                                   @RequestParam(name="id") int id) {
-        log.info("request \""+request.getServletPath()+"\" [id="+id+"]");
-        HttpStatus status = service.restartPlan(id)?HttpStatus.OK:HttpStatus.NOT_FOUND;
-        return new ResponseEntity(status);
+        int id = Integer.parseInt(planId);
+
+        HttpStatus status;
+        if(action.equals("stop")) {
+            status = service.stopPlan(id) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        } else if(action.equals("restart")) {
+            status = service.restartPlan(id)? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        } else {
+            status = HttpStatus.NOT_FOUND;
+        }
+
+        return ResponseEntity.status(status).body(null);
     }
 
     private String createDownloadFilename(CollectPlanVo plan, DownloadListVo item) {
@@ -235,39 +280,58 @@ public class PlanController {
 
     private int addPlanProc(@NonNull Map<String, Object> param) throws ParseException {
 
-        String planName = param.containsKey("planId")?(String)param.get("planId"):null;
-        List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
-        List<String> fabs = param.containsKey("structId")?(List<String>) param.get("structId"):null;
-        List<String> logTypes = param.containsKey("logTypes")?(List<String>) param.get("logTypes"):null;
-        List<String> logTypeStr = param.containsKey("logNames")?(List<String>) param.get("logNames"):null;
-        String collectStartStr = param.containsKey("collectStart")?(String)param.get("collectStart"):null;
-        String fromStr = param.containsKey("from")?(String)param.get("from"):null;
-        String toStr = param.containsKey("to")?(String)param.get("to"):null;
-        String collectType = param.containsKey("collectType")?(String)param.get("collectType"):null;
+        String planName = param.containsKey("planName")?(String)param.get("planName"):null;
+        String planType = param.containsKey("planType")?(String)param.get("planType"):null;
+        List<String> fabNames = param.containsKey("fabNames")?(List<String>) param.get("fabNames"):null;
+        List<String> machineNames = param.containsKey("machineNames")?(List<String>) param.get("machineNames"):null;
+        List<String> categoryNames = param.containsKey("categoryNames")?(List<String>) param.get("categoryNames"):null;
+        List<String> categoryCodes = param.containsKey("categoryCodes")?(List<String>) param.get("categoryCodes"):null;
+        List<String> commands = param.containsKey("commands")?(List<String>) param.get("commands"):null;
+        String start = param.containsKey("start")?(String)param.get("start"):null;
+        String from = param.containsKey("from")?(String)param.get("from"):null;
+        String to = param.containsKey("to")?(String)param.get("to"):null;
+        String type = param.containsKey("type")?(String)param.get("type"):null;
         String intervalStr = param.containsKey("interval")?(String)param.get("interval"):null;
         String description = param.containsKey("description")?(String)param.get("description"):null;
 
-        if(planName==null || fabs==null || tools==null || logTypes==null || logTypeStr==null || fromStr==null ||
-                toStr==null || collectStartStr==null || collectType==null || intervalStr==null)
+        if(planType != null) {
+            if (planType.equalsIgnoreCase("ftp")) {
+                if (categoryNames == null || categoryCodes == null) {
+                    return -1;
+                }
+            } else if (planType.equalsIgnoreCase("vftp_compat") || planType.equals("vftp_sss")) {
+                if (commands == null) {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
+        } else {
             return -1;
-        if(collectType.equalsIgnoreCase("cycle")==false &&
-                collectType.equalsIgnoreCase("continuous")==false)
-            return -1;
+        }
 
-        Date collectStartDate = toDate(collectStartStr);
-        Date fromDate = toDate(fromStr);
-        Date toDate = toDate(toStr);
+        if(planName==null || fabNames==null || machineNames==null || start==null || from==null
+            ||to==null || type==null || intervalStr==null || description==null) {
+            return -1;
+        }
+
+        if(type.equalsIgnoreCase("cycle")==false
+            && type.equalsIgnoreCase("continuous")==false) return -1;
+
+        Date collectStartDate = toDate(start);
+        Date fromDate = toDate(from);
+        Date toDate = toDate(to);
         long interval = Long.valueOf(intervalStr);
 
-        int id = service.addPlan(planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
-                collectType, interval, description);
+        int id = service.addPlan(planName, fabNames, machineNames, categoryCodes, categoryNames,
+                collectStartDate, fromDate, toDate, type, interval, description);
         if(id<0)
             return -2;
         return id;
     }
 
     private Date toDate(@NonNull String str) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(str);
+        return new SimpleDateFormat("yyyyMMddHHmmss").parse(str);
     }
 
     private final Log log = LogFactory.getLog(getClass());
