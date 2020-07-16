@@ -1,8 +1,12 @@
 package jp.co.canon.cks.eec.fs.rssportal.common;
 
-import java.util.List;
+import lombok.NonNull;
 
-public class Tools {
+import java.io.File;
+import java.util.List;
+import java.util.function.Predicate;
+
+public class Tool {
 
     static public int getCollectTypeNumber(String collectType) {
         if(collectType==null || collectType.isEmpty()) {
@@ -28,5 +32,27 @@ public class Tools {
             sb.append(item);
         }
         return sb.toString();
+    }
+
+    static public void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
+    }
+
+    static public void deleteDir(File file, Predicate<File> filter) {
+        File[] contents = file.listFiles();
+        if(contents!=null) {
+            for(File f: contents) {
+                deleteDir(f, filter);
+            }
+        }
+        if(!filter.test(file)) {
+            file.delete();
+        }
     }
 }

@@ -65,7 +65,7 @@ public class PlanController {
         }
 
         try {
-            int id = addPlanProc(param);
+            int id = addPlanProc(param, -1);
             if(id<0) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -149,24 +149,34 @@ public class PlanController {
     public ResponseEntity<Integer> modify(HttpServletRequest request,
                                           @RequestParam(name="id") int id, @RequestBody Map<String, Object> param) {
         log.info(String.format("request \"%s?id=%d\"", request.getServletPath(), id));
-        CollectPlanVo plan = service.getPlan(id);
-        if(plan==null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        boolean ret = service.deletePlan(id);
-        if(!ret) {
-            log.error("invalid planId="+id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        try {
-            int newId = addPlanProc(param);
-            if(id<0) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if(true) {
+            try {
+                int newId = addPlanProc(param, id);
+                return new ResponseEntity(newId, HttpStatus.OK);
+            } catch (ParseException e) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity(newId, HttpStatus.OK);
-        } catch (ParseException e) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        } else {
+            CollectPlanVo plan = service.getPlan(id);
+            if (plan == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+            boolean ret = service.deletePlan(id);
+            if (!ret) {
+                log.error("invalid planId=" + id);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            try {
+                int newId = addPlanProc(param, -1);
+                if (id < 0) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                return new ResponseEntity(newId, HttpStatus.OK);
+            } catch (ParseException e) {
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            }
         }
     }
 
@@ -234,7 +244,7 @@ public class PlanController {
         return fileName;
     }
 
-    private int addPlanProc(@NonNull Map<String, Object> param) throws ParseException {
+    private int addPlanProc(@NonNull Map<String, Object> param, int modifyPlanId) throws ParseException {
 
         String planName = param.containsKey("planId")?(String)param.get("planId"):null;
         List<String> tools = param.containsKey("tools")?(List<String>) param.get("tools"):null;
@@ -268,8 +278,14 @@ public class PlanController {
             }
         }
 
-        int id = service.addPlan(userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
-                collectType, interval, description);
+        int id;
+        if(modifyPlanId<0) {
+            id = service.addPlan(userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
+                    collectType, interval, description);
+        } else {
+            id = service.modifyPlan(modifyPlanId, userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
+                    collectType, interval, description);
+        }
         if(id<0)
             return -2;
         return id;

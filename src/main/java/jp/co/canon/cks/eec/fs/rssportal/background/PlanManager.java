@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
+import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,6 +200,33 @@ public class PlanManager extends Thread {
         return true;
     }
 
+    public boolean modifyPlan(CollectPlanVo plan) {
+        CollectProcess process = getPlanProcess(plan.getId());
+        if(process==null) {
+            log.error("modifyPlan: invalid plan "+plan.getId());
+            return false;
+        }
+        if(process.getPlan().getDetail().equalsIgnoreCase(PlanStatus.collecting.name())) {
+            log.error("modifyPlan: failed to modify operating plan");
+            return false;
+        }
+        return process.modifyPlan(plan);
+    }
+
+    public boolean deletePlan(int planId) {
+        CollectProcess process = getPlanProcess(planId);
+        if(process==null) {
+            log.error("deletePlan: invalid plan "+process.getPlan().getId());
+            return false;
+        }
+        boolean result = process.deletePlan();
+        if(result) {
+            collects.remove(process);
+            log.info("deletePlan: CollectProcess deleted "+planId);
+        }
+        return result;
+    }
+
     private CollectProcess getPlanProcess(int planId) {
         for(CollectProcess process: collects) {
             if(process.getPlan().getId()==planId) {
@@ -207,5 +235,7 @@ public class PlanManager extends Thread {
         }
         return null;
     }
+
+
 
 }

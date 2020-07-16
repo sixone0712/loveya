@@ -66,5 +66,5 @@ public interface CollectPlanService {
     /**
      *
      */
-    int modifyPlan(CollectPlanVo plan);
+    int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description);
 }

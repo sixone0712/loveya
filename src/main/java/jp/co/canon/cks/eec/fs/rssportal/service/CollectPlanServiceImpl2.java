@@ -1,7 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
 import jp.co.canon.cks.eec.fs.rssportal.background.PlanManager;
-import jp.co.canon.cks.eec.fs.rssportal.common.Tools;
+import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
 import org.apache.commons.logging.Log;
@@ -31,39 +31,15 @@ public class CollectPlanServiceImpl2 implements CollectPlanService {
 
     @Override
     public int addPlan(int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
-
-        int collectTypeInt = Tools.getCollectTypeNumber(collectType);
-
-        if(collectTypeInt<0 || start.after(end)) {
-            log.error("invalid input");
-            return -1;
-        }
-
-        CollectPlanVo plan = new CollectPlanVo();
-        plan.setPlanName(planName);
-        plan.setFab(Tools.toCSVString(fabs));
-        plan.setTool(Tools.toCSVString(tools));
-        plan.setLogType(Tools.toCSVString(logTypes));
-        plan.setLogTypeStr(Tools.toCSVString(logTypeStr));
-        plan.setCollectionType(collectTypeInt);
-        plan.setInterval(interval);
-        plan.setCollectStart(new Timestamp(collectStart.getTime()));
-        plan.setStart(new Timestamp(start.getTime()));
-        plan.setEnd(new Timestamp(end.getTime()));
-        plan.setNextAction(new Timestamp(collectStart.getTime()));
-        plan.setLastPoint(new Timestamp(start.getTime()));
-        plan.setLastStatus(PlanStatus.registered.name());
-        if(description!=null) {
-            plan.setDescription(description);
-        }
-        plan.setOwner(userId);
-
-        return manager.addPlan(plan);
+        CollectPlanVo plan = createPlanObject(userId, planName, fabs, tools, logTypes, logTypeStr, collectStart, start, end, collectType, interval, description);
+        return plan==null?-1:manager.addPlan(plan);
     }
+
+
 
     @Override
     public boolean deletePlan(int planId) {
-        return false;
+        return manager.deletePlan(planId);
     }
 
     @Override
@@ -133,8 +109,38 @@ public class CollectPlanServiceImpl2 implements CollectPlanService {
     }
 
     @Override
-    public int modifyPlan(CollectPlanVo plan) {
-        
-        return 0;
+    public int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+        CollectPlanVo plan = createPlanObject(userId, planName, fabs, tools, logTypes, logTypeStr, collectStart, start, end, collectType, interval, description);
+        plan.setId(planId);
+        return manager.modifyPlan(plan)?plan.getId():-1;
+    }
+
+    private CollectPlanVo createPlanObject(int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+        int collectTypeInt = Tool.getCollectTypeNumber(collectType);
+
+        if(collectTypeInt<0 || start.after(end)) {
+            log.error("invalid input");
+            return null;
+        }
+
+        CollectPlanVo plan = new CollectPlanVo();
+        plan.setPlanName(planName);
+        plan.setFab(Tool.toCSVString(fabs));
+        plan.setTool(Tool.toCSVString(tools));
+        plan.setLogType(Tool.toCSVString(logTypes));
+        plan.setLogTypeStr(Tool.toCSVString(logTypeStr));
+        plan.setCollectionType(collectTypeInt);
+        plan.setInterval(interval);
+        plan.setCollectStart(new Timestamp(collectStart.getTime()));
+        plan.setStart(new Timestamp(start.getTime()));
+        plan.setEnd(new Timestamp(end.getTime()));
+        plan.setNextAction(new Timestamp(collectStart.getTime()));
+        plan.setLastPoint(new Timestamp(start.getTime()));
+        plan.setLastStatus(PlanStatus.registered.name());
+        if(description!=null) {
+            plan.setDescription(description);
+        }
+        plan.setOwner(userId);
+        return plan;
     }
 }

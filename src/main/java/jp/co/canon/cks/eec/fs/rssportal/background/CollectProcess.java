@@ -1,7 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
-import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -408,12 +408,29 @@ public class CollectProcess implements Runnable {
         return new Timestamp(System.currentTimeMillis());
     }
 
-    private void updateSyncTimestamp() {
-        syncTime = new Timestamp(System.currentTimeMillis());
+    private void clearLogFiles() {
+        clearLogStorage(true);
     }
 
-    private void updateJobStartTimestamp() {
-        jobStartTime = new Timestamp(System.currentTimeMillis());
+    private void clearAllFiles() {
+        clearLogStorage(false);
+    }
+
+    private void clearLogStorage(boolean filter) {
+        if(threading) {
+            printError("failed to clear storage");
+            return;
+        }
+        Path path = Paths.get(manager.getCollectRoot(), String.valueOf(plan.getId()));
+        if(filter) {
+            Tool.deleteDir(path.toFile(), file -> {
+                if (file.getName().endsWith(".zip"))
+                    return true;
+                return false;
+            });
+        } else {
+            Tool.deleteDir(path.toFile());
+        }
     }
 
     private void printInfo(String str) {
@@ -437,5 +454,41 @@ public class CollectProcess implements Runnable {
         sb.append(plan.getLastStatus()).append(" : ");
         sb.append(plan.getNextAction());
         return sb.toString();
+    }
+
+    public boolean modifyPlan(CollectPlanVo plan) {
+        printInfo("modifyPlan");
+        this.plan.setNextAction(null);
+
+        clearLogFiles();
+
+        this.plan.setPlanName(plan.getPlanName());
+        this.plan.setFab(plan.getFab());
+        this.plan.setTool(plan.getTool());
+        this.plan.setLogType(plan.getLogType());
+        this.plan.setLogTypeStr(plan.getLogTypeStr());
+        this.plan.setCollectionType(plan.getCollectionType());
+        this.plan.setInterval(plan.getInterval());
+        this.plan.setCollectStart(plan.getCollectStart());
+        this.plan.setStart(plan.getStart());
+        this.plan.setEnd(plan.getEnd());
+        this.plan.setLastPoint(plan.getStart());
+        this.plan.setLastStatus(PlanStatus.registered.name());
+        this.plan.setDescription(plan.getDescription());
+        this.plan.setOwner(plan.getOwner());
+
+        schedule();
+        push();
+        return true;
+    }
+
+    public boolean deletePlan() {
+        printInfo("deletePlan");
+        boolean result = dao.deletePlan(plan.getId());
+        if(result) {
+            this.plan.setNextAction(null);
+            clearAllFiles();
+        }
+        return result;
     }
 }
