@@ -144,7 +144,7 @@ public class CollectPlanner extends Thread {
         return true;
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) {
+    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
         List<DownloadForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");

@@ -24,9 +24,9 @@ public class CollectThread extends Thread {
             log.error("no runner");
             return;
         }
-        runningStartTime = new Timestamp(System.currentTimeMillis());
+        runningStartTime = getTimestamp();
         runner.run();
-        runningFinishTime = new Timestamp(System.currentTimeMillis());
+        runningFinishTime = getTimestamp();
     }
 
     public int getNo() {
@@ -35,5 +35,9 @@ public class CollectThread extends Thread {
 
     public void setRunner(CollectProcess runner) {
         this.runner = runner;
+    }
+
+    private Timestamp getTimestamp() {
+        return new Timestamp(System.currentTimeMillis());
     }
 }

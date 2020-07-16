@@ -63,13 +63,13 @@ public class CollectProcess implements Runnable {
     }
 
     private void startProc() {
-        printInfo("startProc");
+        printInfo("start collecting");
         jobStartTime = getTimestamp();
         jobDoneTime = null;
     }
 
     private void doneProc() {
-        printInfo("doneProc");
+        printInfo("collecting done");
         jobDoneTime = getTimestamp();
         threading = false;
         notifyJobDone.run();
@@ -80,17 +80,29 @@ public class CollectProcess implements Runnable {
 
         startProc();
         PlanStatus result = PlanStatus.collected;
+        PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
 
         setStatus(PlanStatus.collecting);
-        List<DownloadForm> downloadList = createDownloadList(plan);
-        int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        List<DownloadForm> downloadList = null;
+        int totalFiles = 0;
+
+        try {
+            downloadList = createDownloadList(plan);
+            totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        } catch (InterruptedException e) {
+            printInfo("interrupt occurs on creating list");
+            setStatus(lastStatus);
+            doneProc();
+        }
 
         if(totalFiles>0) {
             try {
                 String downloadId = downloader.addRequest(downloadList);
+                printInfo("downloading start");
                 while(downloader.getStatus(downloadId).equalsIgnoreCase("in-progress")) {
                     Thread.sleep(500);
                 }
+                printInfo("download done");
 
                 if(!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
                     printError("file download failed");
@@ -111,15 +123,12 @@ public class CollectProcess implements Runnable {
                             printInfo(copied + " files collecting success");
                         }
                     }
-                    if(stop || kill) {
-                        // LET'S THINK OF THE BETTER WAY!
-
-                    }
                 }
-
             } catch (InterruptedException e) {
-                printError("error on collecting");
-                e.printStackTrace();
+                printInfo("interrupt occurs, restore status "+lastStatus.name());
+                setStatus(lastStatus);
+                doneProc();
+                return;
             } catch (IOException e) {
                 printError("copyFiles error");
                 e.printStackTrace();
@@ -127,14 +136,15 @@ public class CollectProcess implements Runnable {
         } else {
             printInfo("no files to collect");
         }
-        plan.setLastStatus(result.name());
+        setStatus(result);
         plan.setLastCollect(getTimestamp());
         schedule();
         push();
         doneProc();
     }
 
-    public void pull() {
+
+    private void pull() {
         if(!isChangeable()) {
             printError("pull failed in collecting");
             return;
@@ -143,13 +153,31 @@ public class CollectProcess implements Runnable {
         syncTime = getTimestamp();
     }
 
-    public void push() {
+    private void push() {
         if(!isChangeable()) {
             printError("push failed in collecting");
             return;
         }
-        dao.updatePlan(plan);
+        dao.update(plan);
         syncTime = getTimestamp();
+    }
+
+    private void updateStatus() {
+        String lastStatus = plan.getLastStatus();
+        if(plan.isStop() || lastStatus.equalsIgnoreCase(PlanStatus.completed.name())
+                || lastStatus.equalsIgnoreCase(PlanStatus.halted.name())) {
+            plan.setStatus("stop");
+        } else {
+            plan.setStatus("running");
+        }
+    }
+
+    public void setStop(boolean val) {
+        stop = val;
+        plan.setStop(stop);
+        updateStatus();
+        schedule();
+        dao.updateStop(plan.getId(), stop);
     }
 
     public Timestamp getSchedule() {
@@ -166,6 +194,14 @@ public class CollectProcess implements Runnable {
 
     public boolean isThreading() {
         return threading;
+    }
+
+    public Thread getThread() {
+        return thread;
+    }
+
+    public boolean isStop() {
+        return stop;
     }
 
     public void allocateThreadContainer(CollectThread thread) {
@@ -200,12 +236,12 @@ public class CollectProcess implements Runnable {
         thread.start();
     }
 
-    public void schedule() {
-        if(!isChangeable()) {
-            printError("failed to schedule the plan");
-            return;
-        }
+    private void setStatus(PlanStatus status) {
+        plan.setLastStatus(status.name());
+        plan.setDetail(status.name());
+    }
 
+    private void schedule() {
         Timestamp planning;
         if(stop || isExpired()) {
             planning = null;
@@ -214,6 +250,10 @@ public class CollectProcess implements Runnable {
             if(lastCollectedTime==null) {
                 // In this case, collect it asap.
                 planning = getTimestamp();
+            } else if(lastCollectedTime.after(plan.getEnd())) {
+                printInfo("collecting completed");
+                setStatus(PlanStatus.completed);
+                planning = null;
             } else {
                 long interval;
                 if (plan.getCollectionType() == 1 /*COLLECTTYPE_CYCLE*/) {
@@ -231,6 +271,10 @@ public class CollectProcess implements Runnable {
         }
         plan.setNextAction(planning);
         printInfo(toString());
+    }
+
+    public CollectPlanVo getPlan() {
+        return plan;
     }
 
     private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
@@ -289,7 +333,7 @@ public class CollectProcess implements Runnable {
         return zipPath.toString();
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) {
+    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
         List<DownloadForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
@@ -322,6 +366,7 @@ public class CollectProcess implements Runnable {
                     // updating last-point is possible to causes some omission logs for a tool which has an error.
                     // That's why it doesn't update a last-point at this point.
                 }
+                Thread.sleep(1);
             }
         }
         int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
@@ -353,7 +398,8 @@ public class CollectProcess implements Runnable {
     }
 
     private boolean isExpired() {
-        if(plan.getDetail().equalsIgnoreCase(PlanStatus.completed.name()))
+        String detail = plan.getDetail();
+        if(detail==null || detail.equalsIgnoreCase(PlanStatus.completed.name()))
             return true;
         return false;
     }
@@ -382,10 +428,6 @@ public class CollectProcess implements Runnable {
             String formed = String.format("[%s] %s", planName, str);
             log.error(formed);
         }
-    }
-
-    private void setStatus(PlanStatus status) {
-        plan.setLastStatus(status.name());
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.springframework.web.servlet.ModelAndViewDefiningException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 import java.io.*;
 import java.nio.file.Files;
 import java.text.ParseException;
@@ -259,7 +260,15 @@ public class PlanController {
         Date toDate = toDate(toStr);
         long interval = Long.valueOf(intervalStr);
 
-        int id = service.addPlan(planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
+        int userId = 0;
+        if(session!=null) {
+            SessionContext context = (SessionContext) session.getAttribute("context");
+            if(context!=null) {
+                userId = context.getUser().getId();
+            }
+        }
+
+        int id = service.addPlan(userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
                 collectType, interval, description);
         if(id<0)
             return -2;

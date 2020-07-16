@@ -36,9 +36,10 @@ public class PlanManager extends Thread {
     private List<CollectThread> killList;
 
     private List<CollectProcess> collects;
+    private boolean inited;
 
     public PlanManager() {
-
+        inited = false;
     }
 
     @PostConstruct
@@ -50,7 +51,7 @@ public class PlanManager extends Thread {
     public void run() {
         log.info("PlanManager start");
         waitDatabaseReady();
-        initPlanModels();
+        initPlanProcess();
 
         try {
             while (true) {
@@ -96,7 +97,7 @@ public class PlanManager extends Thread {
                 continue;
             }
             Timestamp iSchedule = collects.get(i).getSchedule();
-            if(iSchedule.before(nextTime)) {
+            if(iSchedule!=null && iSchedule.before(nextTime)) {
                 nextIdx = i;
                 nextTime = iSchedule;
             }
@@ -104,7 +105,7 @@ public class PlanManager extends Thread {
         return nextIdx;
     }
 
-    private void initPlanModels() {
+    private void initPlanProcess() {
         log.info("initialize all plans");
         collects = new ArrayList<>();
         killList = new ArrayList<>();
@@ -113,6 +114,7 @@ public class PlanManager extends Thread {
             collects.add(new CollectProcess(this, plan, planDao, downloader, log));
             log.info(plan.toString());
         }
+        inited = true;
     }
 
     private void waitDatabaseReady() {
@@ -139,4 +141,71 @@ public class PlanManager extends Thread {
     public String getCollectRoot() {
         return "test/"+planRootDir;
     }
+
+    public boolean isInitialized() {
+        return inited;
+    }
+
+    public int addPlan(CollectPlanVo plan) {
+        int planId = planDao.addPlan(plan);
+        CollectPlanVo added = planDao.find(planId);
+        collects.add(new CollectProcess(this, added, planDao, downloader, log));
+        return planId;
+    }
+
+    public List<CollectPlanVo> getPlans() {
+        List<CollectPlanVo> list = new ArrayList<>();
+        for(CollectProcess process: collects) {
+            list.add(process.getPlan());
+        }
+        return list;
+    }
+
+    public CollectPlanVo getPlan(int planId) {
+        CollectProcess process = getPlanProcess(planId);
+        return process==null?null:process.getPlan();
+    }
+
+    public boolean stopPlan(int planId) {
+        CollectProcess process = getPlanProcess(planId);
+        if(process==null) {
+            log.warn("stopPlan: invalid request. planid="+planId);
+            return false;
+        }
+        CollectPlanVo plan = process.getPlan();
+        process.setStop(true);
+        if(process.isThreading()) {
+            Thread thd = process.getThread();
+            if(thd.isAlive()) {
+
+                log.info("interrupt thread "+plan.getId());
+                thd.interrupt();
+            }
+        }
+        log.info("stopPlan "+plan.getId());
+        return true;
+    }
+
+    public boolean restartPlan(int planId) {
+        CollectProcess process = getPlanProcess(planId);
+        if(process==null) {
+            log.warn("restartPlan: invalid request. planid="+planId);
+            return false;
+        }
+        if(process.isStop()) {
+            process.setStop(false);
+        }
+        log.info("restartPlan "+process.getPlan().getId());
+        return true;
+    }
+
+    private CollectProcess getPlanProcess(int planId) {
+        for(CollectProcess process: collects) {
+            if(process.getPlan().getId()==planId) {
+                return process;
+            }
+        }
+        return null;
+    }
+
 }

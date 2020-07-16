@@ -37,7 +37,7 @@ public class CollectPlanVo {
         sb.append(" stop=").append(stop);
         sb.append(" interval=").append(interval);
         sb.append(" lastCollect=").append(lastCollect==null?"":lastCollect.toString());
-        sb.append(" nextAction=").append(nextAction.toString());
+        sb.append(" nextAction=").append(nextAction==null?"":nextAction.toString());
         sb.append("]");
         return sb.toString();
     }

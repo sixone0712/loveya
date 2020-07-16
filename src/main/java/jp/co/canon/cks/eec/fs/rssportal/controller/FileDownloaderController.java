@@ -70,7 +70,12 @@ public class FileDownloaderController {
                 if(isFile) {
                     addDownloadItem(map, fab, tool, logType, logTypeStr, file, fileSize, date);
                 } else {
-                    fileDownloader.createDownloadFileList(targetList, fab, tool, logType, logTypeStr, null, null, file);
+                    try {
+                        fileDownloader.createDownloadFileList(targetList, fab, tool, logType, logTypeStr, null, null, file);
+                    } catch (InterruptedException e) {
+                        log.error("stopped creating download list");
+                        return null;
+                    }
                 }
             } else {
                 log.error("parameter failed");

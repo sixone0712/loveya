@@ -14,5 +14,7 @@ public interface CollectionPlanDao {
     int addPlan(CollectPlanVo plan);
     boolean updatePlan(CollectPlanVo plan);
     boolean deletePlan(int id);
+    void update(CollectPlanVo plan);
     boolean updateStatus(CollectPlanVo plan);
+    void updateStop(int id, boolean value);
 }
