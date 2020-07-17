@@ -3,7 +3,6 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import * as API from '../../api'
-
 import { Col, FormGroup, Input, Label, CustomInput, UncontrolledPopover, PopoverHeader, PopoverBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamation } from "@fortawesome/free-solid-svg-icons";
@@ -23,6 +22,10 @@ class RSSautoformlist extends Component {
       modalOpen: false,
       cycleIntervalMax: 2
     };
+
+    this.periodFrom = React.createRef();
+    this.periodTo = React.createRef();
+    this.collectStartField = React.createRef();
   }
 
   handleDateChange = (idx, moment) => {
@@ -64,6 +67,23 @@ class RSSautoformlist extends Component {
   };
 
   openModal = idx => {
+    switch(idx) {
+      case Define.AUTO_DATE_PERIOD_FROM:
+        this.periodFrom.current.blur();
+        break;
+
+      case Define.AUTO_DATE_PERIOD_TO:
+        this.periodTo.current.blur();
+        break;
+
+      case Define.AUTO_DATE_COLLECT_START:
+        this.collectStartField.current.blur();
+        break;
+
+      default:
+        break;
+    }
+
     this.setState({
       currentModal: idx,
       modalOpen: true
@@ -122,7 +142,6 @@ class RSSautoformlist extends Component {
 
   render() {
     const { currentModal, modalOpen, cycleIntervalMax } = this.state;
-
     const { autoPlan } = this.props;
     const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
 
@@ -179,22 +198,22 @@ class RSSautoformlist extends Component {
                     Period
                   </Label>
                   <FormGroup className="period-section">
-                    <Input
+                    <input
                         type="text"
-                        bsSize="sm"
-                        value={from.format("YYYY-MM-DD HH:mm")}
-                        onClick={() =>
-                            this.openModal(Define.AUTO_DATE_PERIOD_FROM)
-                        }
                         readOnly
+                        className="form-control-sm form-control"
+                        value={from.format("YYYY-MM-DD HH:mm")}
+                        onClick={() => this.openModal(Define.AUTO_DATE_PERIOD_FROM)}
+                        ref={this.periodFrom}
                     />
                     <span className="split-character">~</span>
-                    <Input
+                    <input
                         type="text"
-                        bsSize="sm"
+                        readOnly
+                        className="form-control-sm form-control"
                         value={to.format("YYYY-MM-DD HH:mm")}
                         onClick={() => this.openModal(Define.AUTO_DATE_PERIOD_TO)}
-                        readOnly
+                        ref={this.periodTo}
                     />
                   </FormGroup>
                 </FormGroup>
@@ -202,13 +221,13 @@ class RSSautoformlist extends Component {
                   <Label for="plan_start" className="input-label">
                     Start
                   </Label>
-                  <Input
+                  <input
                       type="text"
-                      bsSize="sm"
+                      readOnly
+                      className="form-control-sm form-control half-width"
                       value={collectStart.format("YYYY-MM-DD HH:mm")}
                       onClick={() => this.openModal(Define.AUTO_DATE_COLLECT_START)}
-                      readOnly
-                      className="half-width"
+                      ref={this.collectStartField}
                   />
                 </FormGroup>
                 <FormGroup>

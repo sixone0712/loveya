@@ -229,7 +229,9 @@ class InputModal extends Component {
                                             </p>
                                         </PopoverBody>
                                     </UncontrolledPopover>
-                                    <span className="error">{errMsg}</span>
+                                    <span className={"error" + (typeof(errMsg) === "undefined" ? "" : errMsg.length > 0 ? " .active" : "")}>
+                                        {errMsg}
+                                    </span>
                                 </div>
                             </div>
                             <div className="button-wrap">

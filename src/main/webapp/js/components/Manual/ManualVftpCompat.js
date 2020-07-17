@@ -1,3 +1,4 @@
+/*
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -11,7 +12,6 @@ import {
     FormGroup,
     Button,
     Card,
-    Collapse,
     Input,
     ButtonToggle,
 } from "reactstrap";
@@ -26,15 +26,10 @@ import {
     faTrashAlt,
     faExclamationCircle
 } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "./Search/DatePicker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import Filelist from "./File/FileList";
 import * as API from "../../api";
-import cmd from "../../modules/Command";
 import AlertModal from "../Common/AlertModal";
 import ConfirmModal from "../Common/ConfirmModal";
-import RadioGroup from "antd/es/radio/group";
-import Radio from "antd/es/radio";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import DateForm from "../Form/DateForm";
 import moment from "moment";
@@ -363,4 +358,63 @@ export default connect(
     (dispatch) => ({
         CmdActions: bindActionCreators(CmdActions, dispatch),
     })
+)(ManualVftpCompat);
+ */
+
+import React from "react";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as API from "../../api";
+import * as CmdActions from "../../modules/Command";
+import CommandInfo from "../../modules/Command"
+import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import ScrollToTop from "react-scroll-up";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
+import Machinelist from "../Manual/Machine/MachineList";
+import Commandlist from "../Manual/VFTP/commandlist";
+import Datesetting from "../Manual/VFTP/datesetting";
+import Commandline from "../Manual/VFTP/commandline";
+import Footer from "../Common/Footer";
+
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
+
+const ManualVftpCompat = () => {
+    return (
+        <>
+            <Container className="rss-container vftp manual" fluid={true}>
+                <Breadcrumb className="topic-path">
+                    <BreadcrumbItem>Manual Download</BreadcrumbItem>
+                    <BreadcrumbItem active>VFTP (COMPAT)</BreadcrumbItem>
+                </Breadcrumb>
+                <Row>
+                    <Col className="machinelist"><Machinelist /></Col>
+                    <Col><Commandlist /></Col>
+                    <Col className="datesetting"><Datesetting /></Col>
+                </Row>
+                <Commandline />
+            </Container>
+            <Footer/>
+            <ScrollToTop showUnder={160} style={scrollStyle}>
+                <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+            </ScrollToTop>
+        </>
+    );
+};
+
+export default connect(
+    (state) => ({
+        CommandInfo: state.cmd.get('CommandInfo'),
+        CommandList: state.cmd.get('CommandList'),
+        startDate:state.cmd.get('startDate'),
+        endDate:state.cmd.get('endDate')
+    }),
+    (dispatch) => ({ CmdActions: bindActionCreators(CmdActions, dispatch) })
 )(ManualVftpCompat);

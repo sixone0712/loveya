@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import queryString from "query-string";
 import { Route, Switch } from 'react-router-dom';
 import { NavLink } from "react-router-dom";
 import ScrollToTop from "react-scroll-up";
@@ -21,41 +22,64 @@ const scrollStyle = {
     zIndex: "101"
 };
 
-class Auto extends Component {
+const planType = {
+    FTP: "FTP",
+    VFTP_COMPAT: "VFTP_COMPAT",
+    VFTP_SSS: "VFTP_SSS"
+};
 
+const planMessage = {
+    FTP: "(FTP)",
+    VFTP_COMPAT: "(VFTP COMPAT)",
+    VFTP_SSS: "(VFTP SSS)"
+}
+
+class Auto extends Component {
     constructor() {
         super();
         this.state = {
-            page: Define.AUTO_CUR_PAGE_INIT
+            page: Define.AUTO_CUR_PAGE_INIT,
+            planInfo: {
+                type: planType.FTP,
+                message: planMessage.FTP
+            }
         }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         let page = Define.AUTO_CUR_PAGE_ADD
-        if(nextProps.location.pathname.includes(Define.PAGE_AUTO_STATUS)) {
+        const { location } = nextProps;
+        const query = queryString.parse(location.search);
+        const { type } = query;
+        const newType = type !== null ? type : prevState.planInfo.type;
+
+        if(location.pathname.includes(Define.PAGE_AUTO_STATUS)) {
             page = Define.AUTO_CUR_PAGE_STATUS;
-        } else if(nextProps.location.pathname.includes(Define.PAGE_AUTO_DOWNLOAD)) {
+        } else if(location.pathname.includes(Define.PAGE_AUTO_DOWNLOAD)) {
             page = Define.AUTO_CUR_PAGE_DOWNLOAD;
-        } else if(nextProps.location.pathname.includes(Define.PAGE_AUTO_PLAN_EDIT)) {
+        } else if(location.pathname.includes(Define.PAGE_AUTO_PLAN_EDIT)) {
             page = Define.AUTO_CUR_PAGE_EDIT;
         }
 
         return {
-            ...prevState,
-            page: page
+            page: page,
+            planInfo: {
+                type: newType,
+                message: writePlanMessage(newType)
+            }
         };
     }
 
     render() {
-        const { page } = this.state;
+        const { page, planInfo } = this.state;
 
         return (
             <>
                 <Container className="rss-container" fluid={true}>
-                    <CreateBreadCrumb page={page}/>
+                    <CreateBreadCrumb page={page} message={planInfo.message}/>
                     <Switch>
-                        <Route path={Define.PAGE_AUTO_PLAN_ADD} component={AutoPlanAdd}/>
-                        <Route path={Define.PAGE_AUTO_PLAN_EDIT} component={AutoPlanEdit}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_ADD} render={() => <AutoPlanAdd type={planInfo.type} />}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_EDIT} render={() => <AutoPlanEdit type={planInfo.type} />}/>
                         <Route path={Define.PAGE_AUTO_STATUS} component={AutoStatus}/>
                         <Route path={Define.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
                     </Switch>
@@ -67,19 +91,35 @@ class Auto extends Component {
             </>
         );
     }
+}
+
+const writePlanMessage = (type) => {
+    switch(type) {
+        case planType.FTP:
+            return planMessage.FTP;
+
+        case planType.VFTP_COMPAT:
+            return planMessage.VFTP_COMPAT;
+
+        case planType.VFTP_SSS:
+            return planMessage.VFTP_SSS;
+
+        default:
+            return null;
+    }
 };
 
 export default Auto;
 
 export const CreateBreadCrumb = props => {
-    const { page } = props;
+    const { page, message } = props;
 
     switch (page) {
         case Define.AUTO_CUR_PAGE_ADD:
             return (
                 <Breadcrumb className="topic-path">
                     <BreadcrumbItem>Auto Download</BreadcrumbItem>
-                    <BreadcrumbItem active>Add New Plan</BreadcrumbItem>
+                    <BreadcrumbItem active>Add New Plan {message}</BreadcrumbItem>
                 </Breadcrumb>
             )
 
@@ -100,7 +140,7 @@ export const CreateBreadCrumb = props => {
                             Plan Status
                         </NavLink>
                     </BreadcrumbItem>
-                    <BreadcrumbItem active>Edit Plan</BreadcrumbItem>
+                    <BreadcrumbItem active>Edit Plan {message}</BreadcrumbItem>
                 </Breadcrumb>
             );
 

@@ -1,3 +1,4 @@
+/*
 import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -341,16 +342,63 @@ class ManualVftpSss extends Component {
         );
     }
 }
+ */
+
+import React from "react";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as CmdActions from "../../modules/Command";
+import CommandInfo from "../../modules/Command"
+import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import ScrollToTop from "react-scroll-up";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
+import Machinelist from "../Manual/Machine/MachineList";
+import Datesetting from "../Manual/VFTP/datesetting";
+import Commandlist from "../Manual/VFTP/commandlist";
+import Commandline from "../Manual/VFTP/commandline";
+import Filelist from "./VFTP/filelist";
+import Footer from "../Common/Footer";
+
+const scrollStyle = {
+    backgroundColor: "#343a40",
+    width: "40px",
+    height: "40px",
+    textAlign: "center",
+    borderRadius: "3px",
+    zIndex: "101"
+};
+
+const ManualVftpSss = () => {
+    return (
+        <>
+            <Container className="rss-container vftp manual" fluid={true}>
+                <Breadcrumb className="topic-path">
+                    <BreadcrumbItem>Manual Download</BreadcrumbItem>
+                    <BreadcrumbItem active>VFTP (SSS)</BreadcrumbItem>
+                </Breadcrumb>
+                <Row>
+                    <Col className="machinelist"><Machinelist /></Col>
+                    <Col><Commandlist /></Col>
+                    <Col className="datesetting"><Datesetting /></Col>
+                </Row>
+                <Commandline />
+                <Filelist />
+            </Container>
+            <Footer/>
+            <ScrollToTop showUnder={160} style={scrollStyle}>
+                <span className="scroll-up-icon"><FontAwesomeIcon icon={faAngleDoubleUp} size="lg"/></span>
+            </ScrollToTop>
+        </>
+    );
+};
 
 export default connect(
     (state) => ({
         CommandInfo: state.cmd.get('CommandInfo'),
         CommandList: state.cmd.get('CommandList'),
         startDate:state.cmd.get('startDate'),
-        endDate:state.cmd.get('endDate'),
-
+        endDate:state.cmd.get('endDate')
     }),
-    (dispatch) => ({
-        CmdActions: bindActionCreators(CmdActions, dispatch),
-    })
+    (dispatch) => ({ CmdActions: bindActionCreators(CmdActions, dispatch) })
 )(ManualVftpSss);

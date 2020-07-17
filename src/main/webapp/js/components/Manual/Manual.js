@@ -5,8 +5,7 @@ import * as viewListActions from "../../modules/viewList";
 import * as genreListActions from "../../modules/genreList";
 import * as searchListActions from "../../modules/searchList";
 import * as Define from '../../define';
-
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import Machinelist from "./Machine/MachineList";
 import Categorylist from "./Category/CategoryList";
 import Formlist from "./Search/FormList";
@@ -71,7 +70,11 @@ class Manual extends Component {
             <>
                 {isSuccess &&
                 <>
-                    <Container className="rss-container" fluid={true}>
+                    <Container className="rss-container manual" fluid={true}>
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Manual Download</BreadcrumbItem>
+                            <BreadcrumbItem active>FTP</BreadcrumbItem>
+                        </Breadcrumb>
                         <Row>
                             <Col>
                                 <Machinelist/>

@@ -45,7 +45,7 @@ class SignOut extends Component {
 
     SignOutProcess = async (e) => {
         const {uInfo, errors} = this.state;
-        const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9\s._-]{1,28})([a-zA-Z0-9]$)/g;
+        const nameRegex = /^([a-zA-Z0-9])([a-zA-Z0-9._-]{1,28})([a-zA-Z0-9]$)/g;
         const pwRegex = /[0-9a-zA-Z]{6,30}/g;
 
         if(!nameRegex.test(uInfo.name)) {
@@ -202,7 +202,7 @@ class SignOut extends Component {
                                         <PopoverBody>
                                             <p>
                                                 <FontAwesomeIcon icon={faExclamation} />{" "}
-                                                Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-), space( ).
+                                                Characters that can be entered: alphabet, number, dot(.), low line(_), hyphen(-).
                                             </p>
                                             <p>
                                                 <FontAwesomeIcon icon={faExclamation} />{" "}

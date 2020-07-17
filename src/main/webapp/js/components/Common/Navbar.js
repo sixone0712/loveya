@@ -8,8 +8,11 @@ import {
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
+  FormGroup,
+  Button
 } from "reactstrap";
+import ReactTransitionGroup from "react-addons-css-transition-group";
 import {NavLink as RRNavLink } from "react-router-dom";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -33,8 +36,8 @@ class RSSNavbar extends Component{
       isPasswordOpen : false,
       isLogoutOpen : false,
       isAlertOpen: false,
-      alertMessage: "",
-      isMode:""
+      isPlanOpen: false,
+      alertMessage: ""
     };
   }
 
@@ -43,20 +46,26 @@ class RSSNavbar extends Component{
     return currentPage === page ? "nav-item-custom-select" : null;
   };
 
-  handlePageChange = page => {
+  handlePageChange = async page => {
     this.setState({
       currentPage: page
     });
+
+    await this.closeModal();
   };
   
   openModal = async (sMode) => {
     switch(sMode) {
       case "password":
-        await this.setState({isPasswordOpen: true, isMode : sMode});
+        await this.setState({isPasswordOpen: true });
         break;
 
       case "logout":
-        await this.setState(() => ({isLogoutOpen: true, isMode:sMode}));
+        await this.setState({isLogoutOpen: true });
+        break;
+
+      case "plan":
+        await this.setState({ isPlanOpen: true });
         break;
 
       default:
@@ -69,7 +78,7 @@ class RSSNavbar extends Component{
   	await this.setState(() => ({
       isPasswordOpen: false,
       isLogoutOpen: false,
-      isMode:''
+      isPlanOpen: false
   	}));
   }
 
@@ -108,39 +117,32 @@ class RSSNavbar extends Component{
   };
 
   render() {
-    const { isPasswordOpen, isLogoutOpen, isAlertOpen, alertMessage } = this.state;
+    const { isPasswordOpen, isLogoutOpen, isAlertOpen, isPlanOpen, alertMessage } = this.state;
 
     return (
         <>
           <AlertModal isOpen={isAlertOpen} icon={faCheckCircle} message={alertMessage} style={"gray"} closer={this.closeAlert} />
           <ChangePwModal isOpen={isPasswordOpen} right={this.closeModal} alertOpen={this.openAlert}/>
           <LogOutModal isOpen={isLogoutOpen} left={this.onLogout} right={this.closeModal} />
+          <PlanModal isOpen={isPlanOpen} btnAction={this.handlePageChange} closer={this.closeModal} />
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
-              <NavbarBrand className="custom-brand">
-              Rapid Collector
-            </NavbarBrand>
+              <NavbarBrand className="custom-brand">Rapid Collector</NavbarBrand>
             <Nav className="mr-auto" navbar>
-
               <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
-                  <DropdownToggle nav>
-                Manual Download
-              </DropdownToggle>
+                <DropdownToggle nav>Manual Download</DropdownToggle>
                 <DropdownMenu>
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL} onClick={() => this.handlePageChange("Manual")}>
-                        FTP Download
+                        FTP
                     </DropdownItem>
-                    {/* Phase 2 excludes VFTP */}
-                    {/*
                     <DropdownItem divider />
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual")}>
-                        VFTP Download(COMPAT/Optional)
+                        VFTP(COMPAT)
                     </DropdownItem>
                     <DropdownItem divider />
                     <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual")}>
-                        VFTP Download(SSSS/Optional)
+                        VFTP(SSS)
                     </DropdownItem>
-                  */}
                 </DropdownMenu>
               </UncontrolledDropdown>
               <UncontrolledDropdown nav inNavbar>
@@ -148,10 +150,7 @@ class RSSNavbar extends Component{
                   Auto Download
                 </DropdownToggle>
                 <DropdownMenu>
-                  <DropdownItem
-                      tag={RRNavLink}
-                      to={Define.PAGE_REFRESH_AUTO_PLAN_ADD}
-                      onClick={ () => this.handlePageChange("Auto") }>
+                  <DropdownItem onClick={() => this.openModal("plan")}>
                     Add New Plan
                   </DropdownItem>
                   <DropdownItem divider />
@@ -201,6 +200,70 @@ class RSSNavbar extends Component{
     );
   }
 }
+
+const PlanModal = ({ isOpen, btnAction, closer }) => {
+  return (
+      <>
+        {isOpen ? (
+            <ReactTransitionGroup
+                transitionName={"Custom-modal-anim"}
+                transitionEnterTimeout={200}
+                transitionLeaveTimeout={200}
+            >
+              <div className="Custom-modal-overlay" />
+              <div className="Custom-modal">
+                <p className="title font-lg">New Plan</p>
+                <div className="content-with-title add-plan-modal">
+                  <FormGroup className="plan-btn-area">
+                    <Button
+                        color="info"
+                        outline
+                        block
+                        tag={RRNavLink}
+                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=FTP"}
+                        onClick={() => btnAction("Auto")}
+                    >
+                      FTP
+                    </Button>
+                    <Button
+                        color="info"
+                        outline
+                        block
+                        tag={RRNavLink}
+                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=VFTP_COMPAT"}
+                        onClick={() => btnAction("Auto")}
+                    >
+                      VFTP(COMPAT)
+                    </Button>
+                    <Button
+                        color="info"
+                        outline
+                        block
+                        tag={RRNavLink}
+                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=VFTP_SSS"}
+                        onClick={() => btnAction("Auto")}
+                    >
+                      VFTP(SSS)
+                    </Button>
+                  </FormGroup>
+                </div>
+                <div className="button-wrap">
+                  <button className="gray alert-type" onClick={closer}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </ReactTransitionGroup>
+        ) : (
+            <ReactTransitionGroup
+                transitionName={"Custom-modal-anim"}
+                transitionEnterTimeout={200}
+                transitionLeaveTimeout={200}
+            />
+        )}
+      </>
+  );
+};
 
 export default connect(
     (state) => ({

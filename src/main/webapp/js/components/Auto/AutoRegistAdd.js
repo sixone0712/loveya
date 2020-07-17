@@ -17,7 +17,7 @@ class RSSAutoRegistAdd extends Component {
         <>
             <Row className="pd-0">
                 <Col>
-                <Wizard isNew={isNew} editId={editId} history={this.props.history}/>
+                <Wizard isNew={isNew} editId={editId} history={this.props.history} type={this.props.type}/>
                 </Col>
             </Row>
         </>

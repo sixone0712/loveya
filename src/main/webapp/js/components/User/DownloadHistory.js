@@ -153,9 +153,9 @@ class DownloadHistory extends Component {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                         {lists.map((history) => {
+                                         {lists.map((history, index) => {
                                         return (
-                                            <tr key={history.dl_Idx}>
+                                            <tr key={index}>
                                             	<td>{history.dl_Idx}</td>
                                                 <td>{history.dl_user}</td>
                                                 <td>{(history.dl_date != null) ? moment(history.dl_date, "YYYYMMDDHHmmss").format(formatDate) : ""}</td>
