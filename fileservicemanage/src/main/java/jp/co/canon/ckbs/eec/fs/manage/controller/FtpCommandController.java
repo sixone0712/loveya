@@ -4,10 +4,11 @@ import jp.co.canon.ckbs.eec.fs.collect.controller.param.CreateFtpDownloadRequest
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
+import jp.co.canon.ckbs.eec.fs.configuration.Category;
 import jp.co.canon.ckbs.eec.fs.manage.service.CategoryList;
+import jp.co.canon.ckbs.eec.fs.manage.service.FileServiceManageException;
 import jp.co.canon.ckbs.eec.fs.manage.service.FtpFileService;
 import jp.co.canon.ckbs.eec.fs.manage.service.MachineList;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Category;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,12 @@ public class FtpCommandController {
                                   @RequestParam(name="to", required = false) String to,
                                   @RequestParam(name="keyword", required = false, defaultValue = "") String keyword,
                                   @RequestParam(name="path", required = false, defaultValue = "") String path){
-        LogFileList logFileList = fileService.getFtpFileList(machine, category, from, to, keyword, path);
+        LogFileList logFileList = null;
+        try {
+            logFileList = fileService.getFtpFileList(machine, category, from, to, keyword, path);
+        } catch (FileServiceManageException e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(logFileList);
     }
 
@@ -51,7 +57,12 @@ public class FtpCommandController {
     ResponseEntity<?> createFtpDownloadRequest(@PathVariable String machine,
                                                @RequestBody CreateFtpDownloadRequestParam param){
 
-        FtpDownloadRequestResponse res = fileService.createFtpDownloadRequest(machine, param.getCategory(), param.isArchive(), param.getFileList());
+        FtpDownloadRequestResponse res = null;
+        try {
+            res = fileService.createFtpDownloadRequest(machine, param.getCategory(), param.isArchive(), param.getFileList());
+        } catch (FileServiceManageException e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(res);
     }
 
@@ -59,7 +70,12 @@ public class FtpCommandController {
     ResponseEntity<FtpDownloadRequestListResponse> getFtpDownloadRequestList(@PathVariable String machine,
                                                 @PathVariable String requestNo){
         FtpDownloadRequestListResponse res =
-                fileService.getFtpDownloadRequestList(machine, requestNo);
+                null;
+        try {
+            res = fileService.getFtpDownloadRequestList(machine, requestNo);
+        } catch (FileServiceManageException e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(res);
     }
 
@@ -76,7 +92,11 @@ public class FtpCommandController {
     @DeleteMapping(value="/ftp/download/{machine}/{requestNo}")
     ResponseEntity<?> cancelAndDeleteFtpDownloadRequest(@PathVariable String machine, @PathVariable String requestNo){
         // TODO : implement this.
-        fileService.cancelAndDeleteRequest(machine, requestNo);
+        try {
+            fileService.cancelAndDeleteRequest(machine, requestNo);
+        } catch (FileServiceManageException e) {
+            e.printStackTrace();
+        }
 
         return ResponseEntity.ok("");
     }

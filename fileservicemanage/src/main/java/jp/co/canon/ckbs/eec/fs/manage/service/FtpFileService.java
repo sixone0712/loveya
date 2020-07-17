@@ -6,7 +6,7 @@ import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestRespon
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Category;
+import jp.co.canon.ckbs.eec.fs.configuration.Category;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.ConfigurationService;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +52,10 @@ public class FtpFileService {
                                       String from,
                                       String to,
                                       String keyword,
-                                      String path){
+                                      String path) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-
+            throw new FileServiceManageException("", "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         return connector.getFtpFileList(machine, category, from, to, keyword, path);
@@ -76,10 +76,10 @@ public class FtpFileService {
         }
     }
 
-    public FtpDownloadRequestResponse createFtpDownloadRequest(String machine, String category, boolean archive, String[] fileList){
+    public FtpDownloadRequestResponse createFtpDownloadRequest(String machine, String category, boolean archive, String[] fileList) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-
+            throw new FileServiceManageException("", "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         FtpDownloadRequestResponse res = connector.createFtpDownloadRequest(machine, category, archive, fileList);
@@ -89,17 +89,23 @@ public class FtpFileService {
         return res;
     }
 
-    String[] getHostsForMachine(String machine){
+    String[] getHostsForMachine(String machine) throws FileServiceManageException{
         if (machine == null){
             return configurationService.getAllFileServiceHost();
         }
         String[] hosts = new String[1];
         hosts[0] = configurationService.getFileServiceHost(machine);
+        if (hosts[0] == null){
+            throw new FileServiceManageException("", "unknown machine name");
+        }
         return hosts;
     }
 
-    public FtpDownloadRequestListResponse getFtpDownloadRequestList(String machine, String requestNo){
+    public FtpDownloadRequestListResponse getFtpDownloadRequestList(String machine, String requestNo) throws FileServiceManageException {
         String[] hosts = getHostsForMachine(machine);
+        if (hosts.length == 0){
+            throw new FileServiceManageException("", "unknown machine name");
+        }
 
         ArrayList<GetRequestThread> threadArrayList = new ArrayList<>();
         ArrayList<FtpDownloadRequestListResponse> responseList = new ArrayList<>();
@@ -157,10 +163,10 @@ public class FtpFileService {
 
     }
 
-    public void cancelAndDeleteRequest(String machine, String requestNo){
+    public void cancelAndDeleteRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-
+            throw new FileServiceManageException("", "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         connector.cancelAndDeleteRequest(machine, requestNo);

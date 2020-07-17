@@ -1,8 +1,6 @@
 package jp.co.canon.ckbs.eec.fs.collect;
 
-import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
-import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
-import jp.co.canon.ckbs.eec.fs.collect.controller.param.CreateFtpDownloadRequestParam;
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.*;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +17,9 @@ public class FileServiceCollectConnector {
         this.prefix = String.format("http://%s", this.host);
     }
 
+    /*
+    FTP INTERFACE
+    */
     public LogFileList getFtpFileList(String machine,
                                String category,
                                String from,
@@ -72,6 +73,93 @@ public class FileServiceCollectConnector {
 
     public void cancelAndDeleteRequest(String machine, String requestNo){
         String url = "/fsc/ftp/download/{machine}/{requestNo}";
+        restTemplate.delete(url, machine, requestNo);
+    }
+
+    /*
+        VFTP INTERFACE
+     */
+
+    /* SSS LIST */
+    public VFtpListRequestResponse createVFtpSssListRequest(String machine, String directory) {
+        String url = this.prefix + "/fsc/vftp/sss/list/{machine}";
+        CreateVFtpListRequestParam param = new CreateVFtpListRequestParam();
+        param.setDirectory(directory);
+
+        ResponseEntity<VFtpListRequestResponse> res =
+                restTemplate.postForEntity(url, param, VFtpListRequestResponse.class, machine);
+
+        return res.getBody();
+    }
+
+    public VFtpListRequestResponse getVFtpSssListRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/sss/list/{machine}/{requestNo}";
+
+        ResponseEntity<VFtpListRequestResponse> res =
+                restTemplate.getForEntity(url, VFtpListRequestResponse.class, machine, requestNo);
+
+        return res.getBody();
+    }
+
+    public void cancelAndDeleteVFtpSssListRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/sss/list/{machine}/{requestNo}";
+        restTemplate.delete(url, machine, requestNo);
+    }
+
+    /* SSS DOWNLOAD */
+    public VFtpSssDownloadRequestResponse createVFtpSssDownloadRequest(String machine, String directory, String[] fileList, boolean archive){
+        String url = this.prefix + "/fsc/vftp/sss/download/{machine}";
+
+        CreateVFtpSssDownloadRequestParam param = new CreateVFtpSssDownloadRequestParam();
+        param.setDirectory(directory);
+        param.setFileList(fileList);
+        param.setArchive(archive);
+
+        ResponseEntity<VFtpSssDownloadRequestResponse> res =
+                restTemplate.postForEntity(url, param, VFtpSssDownloadRequestResponse.class, machine);
+
+        return res.getBody();
+    }
+
+    public VFtpSssDownloadRequestResponse getVFtpSssDownloadRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/sss/download/{machine}/{requestNo}";
+
+        ResponseEntity<VFtpSssDownloadRequestResponse> res =
+                restTemplate.getForEntity(url, VFtpSssDownloadRequestResponse.class, machine, requestNo);
+
+        return res.getBody();
+    }
+
+    public void cancelAndDeleteVFtpSssDownloadRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/sss/download/{machine}/{requestNo}";
+        restTemplate.delete(url, machine, requestNo);
+    }
+
+    /* COMPAT DOWNLOAD */
+    public VFtpCompatDownloadRequestResponse createVFtpCompatDownloadRequest(String machine, String filename, boolean archive){
+        String url = this.prefix + "/fsc/vftp/compat/download/{machine}";
+
+        CreateVFtpCompatDownloadRequestParam param = new CreateVFtpCompatDownloadRequestParam();
+        param.setFilename(filename);
+        param.setArchive(archive);
+
+        ResponseEntity<VFtpCompatDownloadRequestResponse> res =
+                restTemplate.postForEntity(url, param, VFtpCompatDownloadRequestResponse.class, machine);
+
+        return res.getBody();
+    }
+
+    public VFtpCompatDownloadRequestResponse getVFtpCompatDownloadRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/compat/download/{machine}/{requestNo}";
+
+        ResponseEntity<VFtpCompatDownloadRequestResponse> res =
+                restTemplate.getForEntity(url, VFtpCompatDownloadRequestResponse.class, machine, requestNo);
+
+        return res.getBody();
+    }
+
+    public void cancelAndDeleteVFtpCompatDownloadRequest(String machine, String requestNo){
+        String url = this.prefix + "/fsc/vftp/compat/download/{machine}/{requestNo}";
         restTemplate.delete(url, machine, requestNo);
     }
 }

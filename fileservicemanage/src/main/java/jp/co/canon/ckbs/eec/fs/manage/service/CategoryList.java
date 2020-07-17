@@ -1,6 +1,6 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Category;
+import jp.co.canon.ckbs.eec.fs.configuration.Category;
 import lombok.Getter;
 import lombok.Setter;
 

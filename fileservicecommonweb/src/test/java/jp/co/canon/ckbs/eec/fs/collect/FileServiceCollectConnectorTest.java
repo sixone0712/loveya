@@ -3,6 +3,7 @@ package jp.co.canon.ckbs.eec.fs.collect;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.CreateFtpDownloadRequestParam;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
+import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -12,8 +13,9 @@ public class FileServiceCollectConnectorTest {
     void test_001(){
         FileServiceCollectConnector connector = new FileServiceCollectConnector("10.1.36.118:8080");
 
-        connector.getFtpFileList("MPA_2", "002", "20200601000000", "20200706235959", "", "");
-
+        LogFileList logFileList =
+                connector.getFtpFileList("MPA_2", "002", "20200601000000", "20200706235959", "", "");
+        System.out.println("AAA");
     }
 
     @Test

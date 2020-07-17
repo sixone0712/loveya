@@ -1,15 +1,16 @@
 package jp.co.canon.ckbs.eec.fs.manage.service.configuration;
 
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.constructioninfo.ConstructionInfo;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.constructioninfo.Equipment;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdefinition.Log;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdefinition.LogCollectDefinition;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logcollectdefinition.LogCollectDefinitionList;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.objectlist.FileService;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logconfiguration.LogConfiguration;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.logconfiguration.LogConfigurationLoader;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.objectlist.ObjectList;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.legacy.objectlist.Tool;
+import jp.co.canon.ckbs.eec.fs.configuration.Category;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.constructioninfo.ConstructionInfo;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.constructioninfo.Equipment;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.logcollectdefinition.Log;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.logcollectdefinition.LogCollectDefinition;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.logcollectdefinition.LogCollectDefinitionList;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.FileService;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.logconfiguration.LogConfiguration;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.logconfiguration.LogConfigurationLoader;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.ObjectList;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.Tool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
