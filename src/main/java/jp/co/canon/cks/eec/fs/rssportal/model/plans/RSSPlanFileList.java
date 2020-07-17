@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @ToString
-public class RSSPlansFileList {
+public class RSSPlanFileList {
     private int planId;
     private int fileId;
     private String created;

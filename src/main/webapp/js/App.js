@@ -30,7 +30,7 @@ class App extends Component {
         this.props.history.push(url);
     };
 
-    async componentDidMount() {
+    componentDidMount() {
         console.log("[App][componentDidMount]");
         /*
         const isLoggedInStorage = window.sessionStorage.getItem('isLoggedIn');
@@ -46,19 +46,25 @@ class App extends Component {
         }
         */
 
-        const res = await services.axiosAPI.isLogin(Define.REST_API_URL + "/user/isLogin");
-        console.log("[App][componentDidMount]res", res);
-        const { isLogin, username, permissions} = res.data;
-        await API.setLoginIsLoggedIn(this.props, isLogin);
-        const isLoggedIn = API.getLoginIsLoggedIn(this.props);
-        console.log("[App][componentDidMount]isLoggedIn", isLoggedIn);
-        if(isLoggedIn) {
-            await API.setLoginUserName(this.props, username);
-            await API.setLoginAuth(this.props, String(permissions));
-            this.onMovePage(Define.PAGE_MANUAL);
-        } else {
-            this.onMovePage(Define.PAGE_LOGIN);
+        const checkConnection = async () => {
+          try {
+            const res = await services.axiosAPI.isLogin(Define.REST_AUTHS_GET_ME);
+            const {status} = res;
+            console.log("[App][componentDidMount]status", status);
+            if (status === 200) {
+              const {userName, userId, permission} = res.data;
+              await API.setLoginIsLoggedIn(this.props, true);
+              await API.setLoginUserName(this.props, userName);
+              await API.setLoginAuth(this.props, permission);
+              this.onMovePage(Define.PAGE_MANUAL);
+            } else {
+              this.onMovePage(Define.PAGE_LOGIN);
+            }
+          } catch (e) {
+            console.log(e);
+          }
         }
+        checkConnection().then(r => r).catch(e => console.log(e));
     }
 
     render() {

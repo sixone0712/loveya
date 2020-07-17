@@ -113,6 +113,7 @@ class RSSautoplanwizard extends Component {
       machineNames: tools,
       categoryCodes: logTypes,
       categoryNames: logNames,
+      commands: null,   // need to add
       start: moment(collectStart).format("YYYYMMDDHHmmss"),
       from: moment(from).format("YYYYMMDDHHmmss"),
       to: moment(to).format("YYYYMMDDHHmmss"),

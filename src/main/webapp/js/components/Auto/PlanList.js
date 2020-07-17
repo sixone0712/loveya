@@ -86,46 +86,45 @@ class RSSautoplanlist extends Component {
         };
     }
 
-    async componentDidMount() {
-        await this.loadPlanList();
+    componentDidMount() {
+        this.loadPlanList().then(r => r).catch(e => console.log(e));
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get(Define.REST_PLANS_GET_PLANS);
-        //console.log("[AUTO][loadPlanList]res", res);
-        const { lists } = res.data;
-        const newData = lists.map((item, idx) => {
-            return (
-                {
-                    planId: item.planName,
-                    planDescription: item.description,
-                    planTarget: item.categoryCodes.length,
-                    planPeriodStart: moment(item.from, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
-                    planPeriodEnd: moment(item.to, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: item.status,
-                    planLastRun: item.lastCollection == null
-                                ? "-"
-                                : moment(item.lastCollection, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
-                    planDetail: item.detailedStatus,
-                    id: item.planId,
-                    tool: item.machineNames,
-                    logType: item.categoryCodes,
-                    interval: item.interval,
-                    collectStart: moment(item.start, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
-                    collectTypeStr: item.type,
-                    keyIndex: idx + 1
-                }
-            );
-        })
-
-        //console.log("[AUTO][loadPlanList]newData", newData);
-
-        await this.setState({
-            ...this.state,
-            registeredList: newData
-        })
-
-        return true;
+        try {
+            const res = await services.axiosAPI.get(Define.REST_PLANS_GET_PLANS);
+            const { lists } = res.data;
+            const newData = lists.map((item, idx) => {
+                return (
+                  {
+                      planId: item.planName,
+                      planDescription: item.description,
+                      planTarget: item.categoryCodes.length,
+                      planPeriodStart: moment(item.from, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planPeriodEnd: moment(item.to, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planStatus: item.status,
+                      planLastRun: item.lastCollection == null
+                        ? "-"
+                        : moment(item.lastCollection, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planDetail: item.detailedStatus,
+                      id: item.planId,
+                      tool: item.machineNames,
+                      logType: item.categoryCodes,
+                      interval: item.interval,
+                      collectStart: moment(item.start, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      collectTypeStr: item.type,
+                      keyIndex: idx + 1
+                  }
+                );
+            })
+            //console.log("[AUTO][loadPlanList]newData", newData);
+            await this.setState({
+                ...this.state,
+                registeredList: newData
+            })
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     setEditPlanList = (id, status, detail) => {

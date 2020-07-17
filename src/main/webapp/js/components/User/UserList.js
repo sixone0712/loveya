@@ -59,19 +59,23 @@ class UserList extends Component {
     };
 
     loadUserList = async () => {
-        const res = await API.getDBUserList(this.props);
-        const { data } = res;
+        try {
+            const res = await API.getDBUserList(this.props);
+        } catch (e) {
+            console.log(e);
+        }
+        const lists = API.getUserList(this.props)
         // filter Administrator
-        const filterdData = data.data.filter(item => item.username !== "Administrator");
+        const filterdData = lists.filter(item => item.name !== "Administrator");
         const newData = filterdData.map((item, idx) => {
             return (
                 {
                     keyIndex: idx + 1,
-                    userAuth: item.permissions,
+                    userAuth: item.auth,
                     userId: item.id,
-                    userName: item.username,
+                    userName: item.name,
                     userCreated: item.created,
-                    userLastAccess: item.lastAccess
+                    userLastAccess: item.last_access
                 }
             );
         });
@@ -171,9 +175,12 @@ class UserList extends Component {
     };
 
     DeleteAccount = async () => {
-        console.log("[VFT .....] DeleteAccount");
         console.log(this.state.selected);
-        await API.deleteUser(this.props, this.state.selected);
+        try {
+            const res = await API.deleteUser(this.props, this.state.selected);
+        } catch (e) {
+            console.log(e);
+        }
         let result = API.getUserInfoErrorCode(this.props);
         console.log("result:" + result);
         if(result !== 0)
@@ -317,8 +324,8 @@ class UserList extends Component {
                                                           {user.userAuth}
                                                         </span>
                                                     </td>
-                                                    <td>{(user.userCreated!=null) ? moment(user.userCreated).format(formatDate): ""}</td>
-                                                    <td>{(user.userLastAccess!=null) ? moment(user.userLastAccess).format(formatDate): ""}</td>
+                                                    <td>{(user.userCreated!=null) ? moment(user.userCreated, "YYYYMMDDHHmmss").format(formatDate): ""}</td>
+                                                    <td>{(user.userLastAccess!=null) ? moment(user.userLastAccess, "YYYYMMDDHHmmss").format(formatDate): ""}</td>
                                                     <td>
                                                         <div className="icon-area-administrator" onClick={ () => this.uDelete(user.userId, user.keyIndex) }>
                                                             <FontAwesomeIcon icon={faTrashAlt} />

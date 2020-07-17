@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RSSInfosMachine {
+public class RSSInfoMachine {
 	//private String fabId = "";
 	private String fabName = "";
 	private String machineName = "";

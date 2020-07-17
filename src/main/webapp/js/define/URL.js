@@ -40,5 +40,19 @@ export const REST_PLANS_GET_FILELIST = REST_PLANS;
 export const REST_PLANS_GET_DOWNLOAD_FILE = REST_PLANS;
 export const REST_PLANS_DELETE_FILE = REST_PLANS;
 
+export const REST_AUTHS = "/rss/api/auths";
+export const REST_AUTHS_GET_LOGIN = REST_AUTHS + "/login"
+export const REST_AUTHS_GET_LOGOUT = REST_AUTHS + "/logout"
+export const REST_AUTHS_GET_ME = REST_AUTHS + "/me"
 
+export const REST_USERS = "/rss/api/users"
+export const REST_USERS_GET_LIST = REST_USERS;
+export const REST_USERS_PATCH_CHANGE_PERMISSION = REST_USERS;
+export const REST_USERS_PATCH_CHANGE_PASSWORD = REST_USERS;
+export const REST_USERS_POST_CREATE_USER = REST_USERS;
+export const REST_USERS_POST_DELETE_USER = REST_USERS;
+
+export const REST_HISTORIES = "/rss/api/histories"
+export const REST_HISTORIES_GET_DOWNLOAD_LIST = REST_HISTORIES + "/downloads";
+export const REST_HISTORIES_POST_DOWNLOAD_ADD = REST_HISTORIES + "/downloads";
 

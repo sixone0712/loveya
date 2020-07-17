@@ -60,7 +60,11 @@ export const startSearchList = (props) => {
 
     //console.log("[startSearchList]newRequestList", newRequestList);
     searchListActions.searchInitResponseList();
-    searchListActions.searchLoadResponseList(Define.REST_FTP_POST_FILELIST, newRequestList);
+    try {
+        searchListActions.searchLoadResponseList(Define.REST_FTP_POST_FILELIST, newRequestList);
+    } catch (e) {
+        console.log(e);
+    }
 };
 
 export const getResponseList = (props) => {

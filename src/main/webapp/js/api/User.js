@@ -5,18 +5,24 @@ import md5 from 'md5-hash'
 export const createUser = (props, uinfo) => {
     const { userActions } = props;
 
-    return userActions.createUser(`${Define.REST_API_URL}/user/create?name=${uinfo.name}&pwd=${md5(uinfo.pwd)}&auth=${uinfo.authValue}`);
+    const requestData = {
+        userName: uinfo.name,
+        password: md5(uinfo.pwd),
+        permission: uinfo.authValue
+    };
+
+    return userActions.createUser(Define.REST_USERS_POST_CREATE_USER, requestData);
 };
 
 export const deleteUser = (props, id) => {
     const { userActions } = props;
 
-    return userActions.deleteUser(`${Define.REST_API_URL}/user/delete?id=${id}`);
+    return userActions.deleteUser(`${Define.REST_USERS_POST_DELETE_USER}/${id}`);
 };
 
 export const getDBUserList = (props) => {
     const { userActions } = props;
-    return userActions.loadUserList(`${Define.REST_API_URL}/user/loadUserList`);
+    return userActions.loadUserList(Define.REST_USERS_GET_LIST);
 };
 
 export const getUserList = (props) => {
@@ -39,7 +45,7 @@ export const getUserAuth = (props, id) => {
     }
     return '';
 };
-export const changePermission = (props, url) => {
+export const changePermission = (props, url, requestData) => {
     const { userActions } = props;
-    return userActions.changeUserPermission(url);
+    return userActions.changeUserPermission(url, requestData);
 };

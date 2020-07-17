@@ -1,9 +1,11 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
-import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlansCollectionPlan;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
+import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlanCollectionPlan;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -52,22 +54,29 @@ public class PlanController {
     @ResponseBody
     public ResponseEntity<?> addPlan(HttpServletRequest request, @RequestBody Map<String, Object> param) {
         log.info(String.format("[Post] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
 
         if(param==null) {
             log.error("no param");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         try {
             int id = addPlanProc(param);
             if(id<0) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                error.setReason(RSSErrorReason.INVALID_PARAMETER);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
             }
-            Map<String, Object> resBody = new HashMap<>();
             resBody.put("planID", id);
             return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (ParseException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
     }
 
@@ -75,18 +84,23 @@ public class PlanController {
     @ResponseBody
     public ResponseEntity<?> listPlan(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         log.info(String.format("[Get] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         if(param==null) {
             log.error("no param");
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         List<CollectPlanVo> plans;
         if(param.containsKey("withPriority")) plans = service.getAllPlansBySchedulePriority();
         else plans = service.getAllPlans();
 
-        List<RSSPlansCollectionPlan> convList = new ArrayList<RSSPlansCollectionPlan>();
+        List<RSSPlanCollectionPlan> convList = new ArrayList<RSSPlanCollectionPlan>();
         for(CollectPlanVo plan : plans) {
-            RSSPlansCollectionPlan newPlan = new RSSPlansCollectionPlan();
+            RSSPlanCollectionPlan newPlan = new RSSPlanCollectionPlan();
             SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
             newPlan.setPlanId(plan.getId());
             newPlan.setPlanType("");      // need to add
@@ -109,7 +123,6 @@ public class PlanController {
             convList.add(newPlan);
         }
 
-        Map<String, Object> resBody = new HashMap<>();
         resBody.put("lists", convList);
 
         return ResponseEntity.status(HttpStatus.OK).body(resBody);
@@ -119,22 +132,36 @@ public class PlanController {
     @ResponseBody
     public ResponseEntity<?> deletePlan(HttpServletRequest request, @PathVariable("planId") String planId) {
         log.info(String.format("[Delete] %s", request.getServletPath()));
-        if(planId == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if(planId == null || planId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
         boolean ret = service.deletePlan(Integer.parseInt(planId));
-        if(!ret) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if(!ret) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @GetMapping("/storage/{fileId}")
-    public ResponseEntity<InputStreamResource> download(HttpServletRequest request,
+    public ResponseEntity<?> download(HttpServletRequest request,
                                                         HttpServletResponse response,
                                                         @PathVariable("fileId") String fileId) {
         log.info(String.format("[Get] %s", request.getServletPath()));
-        if(fileId == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if(fileId == null || fileId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         int id = Integer.parseInt(fileId);
@@ -142,19 +169,25 @@ public class PlanController {
         DownloadListVo item = downloadService.get(id);
         if(item==null) {
             log.error("invalid downloadId "+id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         CollectPlanVo plan = service.getPlan(item.getPlanId());
         if(plan==null || plan.getLastCollect()==null) {
             log.error("invalid download request for invisible plan "+item.getPlanId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         File zip = new File(item.getPath());
         if(zip==null || !zip.isFile() || !zip.exists()) {
             log.error("no download file");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
         downloadService.updateDownloadStatus(id);
 
@@ -169,8 +202,10 @@ public class PlanController {
             return ResponseEntity.status(HttpStatus.OK).headers(headers).body(isr);
         } catch (IOException e) {
             e.printStackTrace();
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @PutMapping("/{planId}")
@@ -179,31 +214,43 @@ public class PlanController {
                                           @PathVariable("planId") String planId,
                                           @RequestBody Map<String, Object> param) {
         log.info(String.format("[Put] %s", request.getServletPath()));
-        if(planId == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if(planId == null || planId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         int id = Integer.parseInt(planId);
         CollectPlanVo plan = service.getPlan(id);
         if(plan==null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         if(!service.deletePlan(id)) {
             log.error("invalid planId="+id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         try {
             int newId = addPlanProc(param);
             if(newId<0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                error.setReason(RSSErrorReason.INVALID_PARAMETER);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
             }
-            Map<String, Object> resBody = new HashMap<>();
             resBody.put("planId", newId);
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+            return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (ParseException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
     }
 
@@ -212,22 +259,30 @@ public class PlanController {
                                            @PathVariable("planId") String planId,
                                            @PathVariable("action") String action) {
         log.info(String.format("[Put] %s", request.getServletPath()));
-        if(planId == null || action == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if(planId == null || planId.isEmpty() || action == null || action.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         int id = Integer.parseInt(planId);
 
-        HttpStatus status;
         if(action.equals("stop")) {
-            status = service.stopPlan(id) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+            if(service.stopPlan(id)) {
+                return ResponseEntity.status(HttpStatus.OK).body(null);
+            }
         } else if(action.equals("restart")) {
-            status = service.restartPlan(id)? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        } else {
-            status = HttpStatus.NOT_FOUND;
+            if(service.restartPlan(id)) {
+                return ResponseEntity.status(HttpStatus.OK).body(null);
+            }
         }
 
-        return ResponseEntity.status(status).body(null);
+        error.setReason(RSSErrorReason.NOT_FOUND);
+        resBody.put("error", error.getRSSError());
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     private String createDownloadFilename(CollectPlanVo plan, DownloadListVo item) {

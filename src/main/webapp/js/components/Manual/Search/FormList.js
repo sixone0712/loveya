@@ -97,7 +97,6 @@ class FormList extends Component{
 
         API.startSearchList(this.props);
 
-
         const intervalProps = {
             closeProcessModal: () => this.closeModal(modalType.PROCESS),
             getIntervalFunc : this.getIntervalFunc,

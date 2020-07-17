@@ -1,9 +1,11 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchRequest;
 import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchResponse;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
@@ -135,7 +137,10 @@ public class FileDownloaderController {
     //@ResponseBody
     public ResponseEntity<?> searchFTPFileList(HttpServletRequest request, @RequestBody Map<String, Object> requestList) throws Exception {
         log.info(String.format("[Post] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
         List<RSSFtpSearchResponse> responselists = new ArrayList<>();
+
         ArrayList<String> fabNames = requestList.containsKey("fabNames") ? (ArrayList<String>) requestList.get("fabNames") : null;
         ArrayList<String> machineNames = requestList.containsKey("machineNames") ? (ArrayList<String>) requestList.get("machineNames") : null;
         ArrayList<String> categoryCodes = requestList.containsKey("categoryCodes") ? (ArrayList<String>) requestList.get("categoryCodes") : null;
@@ -145,11 +150,15 @@ public class FileDownloaderController {
 
         if(fabNames == null || machineNames == null || categoryCodes == null || startDate == null || endDate == null) {
             log.error("[searchFTPFileList] parameter error");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         if((fabNames.size() != machineNames.size()) || (categoryCodes.size() != categoryNames.size())) {
             log.error("[searchFTPFileList] parameter is not matched");
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
@@ -178,15 +187,18 @@ public class FileDownloaderController {
             }
         }
 
-        Map<String, Object> res = new HashMap<>();
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        resBody.put("lists", responselists);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     @PostMapping
     @ResponseBody
     public ResponseEntity<?> searchFTPFileListWithThreadPool(HttpServletRequest request, @RequestBody Map<String, Object> requestList) throws Exception {
         log.info(String.format("[Post] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
         List<RSSFtpSearchResponse> responselists = new ArrayList<>();
+
         ArrayList<String> fabNames = requestList.containsKey("fabNames") ? (ArrayList<String>) requestList.get("fabNames") : null;
         ArrayList<String> machineNames = requestList.containsKey("machineNames") ? (ArrayList<String>) requestList.get("machineNames") : null;
         ArrayList<String> categoryCodes = requestList.containsKey("categoryCodes") ? (ArrayList<String>) requestList.get("categoryCodes") : null;
@@ -195,11 +207,15 @@ public class FileDownloaderController {
         String endDate = requestList.containsKey("endDate") ? (String) requestList.get("endDate") : null;
 
         if(fabNames == null || machineNames == null || categoryCodes == null || startDate == null || endDate == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         if((fabNames.size() != machineNames.size()) || (categoryCodes.size() != categoryNames.size())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         /*
@@ -245,18 +261,21 @@ public class FileDownloaderController {
             responselists.addAll(future.get());
         }
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("lists", responselists);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        resBody.put("lists", responselists);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     @PostMapping(value="/download")
     @ResponseBody
     public ResponseEntity<?> ftpDownloadRequest(HttpServletRequest request, @RequestBody Map<String, Object> param) {
         log.info(String.format("[Post] %s", request.getServletPath()));
-        Map<String, Object> res = new HashMap<>();
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         if(param.size() == 0 || param.containsKey("lists") == false) {
             log.warn("no target to download");
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         param.forEach((key, value)->log.info("key="+key+"\nvalue="+value));
@@ -283,30 +302,39 @@ public class FileDownloaderController {
                 }
             } else {
                 log.error("parameter failed");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                error.setReason(RSSErrorReason.INVALID_PARAMETER);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
             }
         }
 
         map.forEach((m, submap)->submap.forEach((c, dlForm)->requestList.add(dlForm)));
-        log.warn("requestList size="+requestList.size());
+        //log.info("requestList size="+requestList.size());
         String downloadId = fileDownloader.addRequest(requestList);
-        log.info("downloadId: " + downloadId);
-        res.put("downloadId", downloadId);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        //log.info("downloadId: " + downloadId);
+        resBody.put("downloadId", downloadId);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     @DeleteMapping("/download/{downloadId}")
     @ResponseBody
     public ResponseEntity<?> ftpDownloadCancel(HttpServletRequest request, @PathVariable("downloadId") String downloadId) {
         log.info(String.format("[Delete] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         if (downloadId == null) {
             log.warn("downloadId is null");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         if (!fileDownloader.cancelRequest(downloadId)) {
             log.warn("downloadId is invalid");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(null);
@@ -314,41 +342,56 @@ public class FileDownloaderController {
 
     @GetMapping("/download/{downloadId}")
     @ResponseBody
-    public ResponseEntity<DownloadStatusResponseBody> ftpDownloadStatus(HttpServletRequest request, @PathVariable("downloadId") String downloadId) {
+    public ResponseEntity<?> ftpDownloadStatus(HttpServletRequest request, @PathVariable("downloadId") String downloadId) {
         log.info(String.format("[Get] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         if(downloadId == null) {
             log.warn("downloadId is null");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         log.trace("ftpDownloadStatus(downloadId="+downloadId+")");
 
         if(fileDownloader.isValidId(downloadId)==false) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new DownloadStatusResponseBody(fileDownloader, downloadId));
     }
 
     @RequestMapping("/storage/{downloadId}")
-    public ResponseEntity<InputStreamResource> ftpDownloadFile(
+    public ResponseEntity<?> ftpDownloadFile(
             @PathVariable("downloadId") String downloadId,
             HttpServletRequest request,
             HttpServletResponse response) {
         log.info(String.format("[Get] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
 
         if(downloadId == null) {
             log.error("invalid param");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         if(fileDownloader.isValidId(downloadId)==false) {
             log.error("invalid dlId");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
         if(fileDownloader.getStatus(downloadId).equals("done")==false) {
             log.error("in-progress");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
         String dlPath = fileDownloader.getDownloadInfo(downloadId);
@@ -361,7 +404,6 @@ public class FileDownloaderController {
             headers.setContentLength(Files.size(Paths.get(dlPath)));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             response.setHeader("Content-Disposition", "attachment; filename="+createZipFilename(downloadId));
-            //return new ResponseEntity(isr, headers, HttpStatus.OK);
             return ResponseEntity.status(HttpStatus.OK).headers(headers).body(isr);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -369,7 +411,9 @@ public class FileDownloaderController {
             e.printStackTrace();
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        error.setReason(RSSErrorReason.NOT_FOUND);
+        resBody.put("error", error.getRSSError());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
     }
 
     private String createZipFilename(String downloadId) {

@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RSSInfosCategory {
+public class RSSInfoCategory {
     //private int categoryType = 0;
     private String categoryCode = "";
     private String categoryName = "";

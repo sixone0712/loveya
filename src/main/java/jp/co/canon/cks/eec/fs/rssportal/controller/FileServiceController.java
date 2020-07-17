@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
 import jp.co.canon.cks.eec.fs.manage.FileTypeModel;
 import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
-import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfosCategory;
-import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfosMachine;
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfoCategory;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfoMachine;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,6 +126,9 @@ public class FileServiceController {
     //public ResponseEntity<ArrayList<RSSInfoMachine>> getMachines() throws Exception {
     public ResponseEntity<?> getMachines() throws Exception {
         log.info("[Get] /rss/api/infos/machines");
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         String fabs = null;
         JSONObject jsonParse = null;
         JSONArray fabList = null;
@@ -134,7 +139,9 @@ public class FileServiceController {
         } catch (JSONException e) {
             log.error("[machines]request getFabs failed");
             log.error(e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
         ToolInfoModel[] result = null;
@@ -152,13 +159,15 @@ public class FileServiceController {
 
         if (result == null) {
             log.error("[machines]request totally failed");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
         ToolInfoModel[] toolModels = result;
-        ArrayList<RSSInfosMachine> mpaList = new ArrayList<>();
+        ArrayList<RSSInfoMachine> mpaList = new ArrayList<>();
         for (int i = 0; i < toolModels.length; i++) {
-            RSSInfosMachine machine = new RSSInfosMachine();
+            RSSInfoMachine machine = new RSSInfoMachine();
             String fabName = findFabName(fabList, toolModels[i].getStructId());
             if (fabName != null && !fabName.equals("")) {
                 machine.setFabName(fabName);
@@ -167,9 +176,8 @@ public class FileServiceController {
             }
         }
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("lists", mpaList);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        resBody.put("lists", mpaList);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     @GetMapping("/categories/{machineName}")
@@ -180,11 +188,16 @@ public class FileServiceController {
         //String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
         //String FILE_SELECT_PAGE = "FileListSelect";
         FileTypeModel[] ftList = null;
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         int retry = 0;
 
-        if (machineName == null) {
+        if (machineName == null || machineName.isEmpty()) {
             log.error("[categories]param(tool) is null");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
         while (retry < fileServiceRetryCount) {
@@ -200,12 +213,14 @@ public class FileServiceController {
 
         if (ftList == null) {
             log.error("[categories]request totally failed");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
-        RSSInfosCategory[] r = new RSSInfosCategory[ftList.length];
+        RSSInfoCategory[] r = new RSSInfoCategory[ftList.length];
         for (int i = 0; i < ftList.length; i++) {
-            r[i] = new RSSInfosCategory();
+            r[i] = new RSSInfoCategory();
             r[i].setCategoryCode(ftList[i].getLogType());
             r[i].setCategoryName(ftList[i].getDataName());
             // Not currently used
@@ -236,8 +251,7 @@ public class FileServiceController {
             */
         }
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("lists", r);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        resBody.put("lists", r);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 }

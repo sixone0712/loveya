@@ -27,22 +27,29 @@ const scrollStyle = {
 
 class Manual extends Component {
 
-    async componentDidMount() {
-        console.log("[Manual][componentDidMount]componentDidMount");
-        const {viewListActions, genreListActions, searchListActions} = this.props;
+    componentDidMount() {
+      const loadInfos = async () => {
+        try {
+          console.log("[Manual][componentDidMount]componentDidMount");
+          const {viewListActions, genreListActions, searchListActions} = this.props;
 
-        await viewListActions.viewInitAllList();
-        await searchListActions.searchSetInitAllList();
-        await genreListActions.genreInitAllList();
+          await viewListActions.viewInitAllList();
+          await searchListActions.searchSetInitAllList();
+          await genreListActions.genreInitAllList();
 
-        await viewListActions.viewLoadToolInfoList(Define.REST_INFOS_GET_MACHINES);
-        const { toolInfoList } = this.props;
-        const targetname = toolInfoList.getIn([0, "targetname"]);
-        console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
-        console.log("[Manual][componentDidMount]targetname", targetname);
-        await viewListActions.viewLoadLogTypeList(`${Define.REST_INFOS_GET_CATEGORIES}/${targetname}`);
+          await viewListActions.viewLoadToolInfoList(Define.REST_INFOS_GET_MACHINES);
+          const {toolInfoList} = this.props;
+          const targetname = toolInfoList.getIn([0, "targetname"]);
+          console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
+          console.log("[Manual][componentDidMount]targetname", targetname);
+          await viewListActions.viewLoadLogTypeList(`${Define.REST_INFOS_GET_CATEGORIES}/${targetname}`);
 
-        await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
+          await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      loadInfos().then(r => r).catch(e => console.log(e));
     }
 
     render() {

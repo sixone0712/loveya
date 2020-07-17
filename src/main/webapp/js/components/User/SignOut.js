@@ -81,7 +81,11 @@ class SignOut extends Component {
             );
         } else {
             let result = 0;
-            await API.createUser(this.props, uInfo);
+            try {
+                await API.createUser(this.props, uInfo);
+            } catch (e) {
+                console.log(e);
+            }
             result = API.getUserInfoErrorCode(this.props);
             console.log("result:" + result);
             if (result !== 0) {
@@ -96,7 +100,11 @@ class SignOut extends Component {
                     })
                 );
             } else {
-                await API.getDBUserList(this.props);
+                try {
+                    await API.getDBUserList(this.props);
+                } catch (e) {
+                    console.log(e);
+                }
                 this.close(); //create modal Close
                 this.props.alertOpen("create");
             }

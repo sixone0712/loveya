@@ -1,6 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.downloadlist;
 
-import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlansFileList;
+import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlanFileList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -48,9 +48,9 @@ public class DownloadListController {
         List<DownloadListVo> files;
         files = service.getList(id);
 
-        List<RSSPlansFileList> convList = new ArrayList<RSSPlansFileList>();
+        List<RSSPlanFileList> convList = new ArrayList<RSSPlanFileList>();
         for(DownloadListVo file : files) {
-            RSSPlansFileList newFile = new RSSPlansFileList();
+            RSSPlanFileList newFile = new RSSPlanFileList();
             SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
             newFile.setPlanId(file.getPlanId());
             newFile.setFileId(file.getId());

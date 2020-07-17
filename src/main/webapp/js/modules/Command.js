@@ -14,10 +14,10 @@ const COMMAND_INIT_SERVER_ERROR = "cmd/COMMAND_INIT_SERVER_ERROR";
 const COMMAND_SET_START_DATE= 'cmd/COMMAND_SET_START_DATE';
 const COMMAND_SET_END_DATE= 'cmd/COMMAND_SET_END_DATE';
 
-export const addCommand = createAction(COMMAND_ADD, services.axiosAPI.get);
-export const deleteCommand = createAction(COMMAND_DELETE, services.axiosAPI.get);
-export const updateCommand = createAction(COMMAND_UPDATE, services.axiosAPI.get);
-export const getCommandList = createAction(COMMAND_GET_LIST, services.axiosAPI.get);
+export const addCommand = createAction(COMMAND_ADD, services.axiosAPI.getPender);
+export const deleteCommand = createAction(COMMAND_DELETE, services.axiosAPI.getPender);
+export const updateCommand = createAction(COMMAND_UPDATE, services.axiosAPI.getPender);
+export const getCommandList = createAction(COMMAND_GET_LIST, services.axiosAPI.getPender);
 export const setCmdStartDate = createAction(COMMAND_SET_START_DATE);
 export const setCmdEndDate = createAction(COMMAND_SET_END_DATE);
 

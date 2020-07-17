@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class RSSPlansCollectionPlan {
+public class RSSPlanCollectionPlan {
     private int planId;
     private String planType;
     private int ownerId;
@@ -31,7 +31,7 @@ public class RSSPlansCollectionPlan {
     private String status;
     private String detailedStatus;
 
-    public RSSPlansCollectionPlan() {
+    public RSSPlanCollectionPlan() {
         this.fabNames = new ArrayList<String>();
         this.machineNames = new ArrayList<String>();
         this.categoryCodes = new ArrayList<String>();
