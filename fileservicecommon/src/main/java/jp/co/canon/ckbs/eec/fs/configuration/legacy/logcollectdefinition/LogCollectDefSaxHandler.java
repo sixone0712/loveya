@@ -64,6 +64,7 @@ public class LogCollectDefSaxHandler extends DefaultHandler {
             Log log = buildLog(attributes);
             this.addLog(log);
             builder = new StringBuilder();
+            currentLog = log;
             return;
         }
     }
@@ -85,6 +86,7 @@ public class LogCollectDefSaxHandler extends DefaultHandler {
         if (qName.equalsIgnoreCase("Log")){
             this.setLogUrls(builder.toString());
             builder = null;
+            currentLog = null;
         }
     }
 

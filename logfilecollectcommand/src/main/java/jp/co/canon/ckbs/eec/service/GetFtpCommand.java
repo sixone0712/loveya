@@ -3,7 +3,6 @@ package jp.co.canon.ckbs.eec.service;
 import org.apache.commons.cli.*;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -49,6 +48,7 @@ public class GetFtpCommand extends BaseFtpCommand {
         try {
             outputStream = new FileOutputStream(outputFile);
         } catch (FileNotFoundException e) {
+            System.out.println("ERR: FileNotFoundException...");
             e.printStackTrace();
         }
         if (outputStream == null){
@@ -96,7 +96,7 @@ public class GetFtpCommand extends BaseFtpCommand {
         try {
             inputStreamToFile(inputStream, fileName);
         } catch (Exception e){
-
+            System.out.println("ERR:Exception");
         } finally {
             try {
                 inputStream.close();

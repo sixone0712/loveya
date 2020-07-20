@@ -1,34 +1,34 @@
 package jp.co.canon.ckbs.eec.fs.collect.service;
 
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpListRequest;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
+import jp.co.canon.ckbs.eec.fs.collect.service.configuration.ConfigurationService;
+import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
 import org.apache.commons.exec.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @Component
 public class VFtpListService {
     @Value("${fileservice.configDirectory}")
     String configDirectory;
 
+    @Autowired
+    ConfigurationService configurationService;
+
     File workingDir = null;
 
     long lastRequestNumber = 0;
     DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
 
-    Map<String, VFtpListRequest> requestMap = new HashMap<>();
-
+    Map<String, VFtpSssListRequest> requestMap = new HashMap<>();
+    Map<String, ListRequestThread> listRequestThreadMap = new HashMap<>();
 
     @PostConstruct
     private void postConstruct(){
@@ -43,52 +43,10 @@ public class VFtpListService {
         return workingDir;
     }
 
-    void addRequest(VFtpListRequest request){
+    void addRequest(VFtpSssListRequest request){
+        request.setTimestamp(System.currentTimeMillis());
         requestMap.put(request.getRequestNo(), request);
     }
-/*
-    StringBuilder createListCommand(String machine, String directory){
-        StringBuilder command = new StringBuilder();
-
-        command.append(" list ");
-
-        command.append(" -host ").append("10.1.31.243").append(" ");
-        command.append(" -port ").append("22001").append(" ");
-        command.append(" -root ").append("/VROOT/SSS/Optional").append(" ");
-        command.append(" -dest ").append(directory).append(" ");
-        command.append(" -u ")
-                .append("ckbs").append("/")
-                .append("ckbs").append(" ");
-
-        command.append(" -md ")
-                .append("passive").append(" ");
-
-        return command;
-    }
-
- */
-
-/*
-    public void getServerFileList(String machine, String directory){
-        StringBuilder command = createListCommand(machine, directory);
-
-        CommandExecutor proc = new CommandExecutor(getWorkingDir());
-        String result = null;
-        try {
-            result = proc.execute(command.toString());
-        } catch (Exception ex){
-
-        }
-
-        if (result != null){
-            StringTokenizer st = new StringTokenizer(result, System.getProperty("line.separator"));
-            for(; st.hasMoreTokens();){
-                String line = st.nextToken();
-            }
-        }
-    }
-
- */
 
     Date generateRequestTime(){
         final Date currentTime = new Date();
@@ -107,43 +65,63 @@ public class VFtpListService {
         return id.toString();
     }
 
-    public VFtpListRequest addListRequest(VFtpListRequest request){
+    boolean isValidDirectory(String directory){
+        return true;
+    }
+
+    public VFtpSssListRequest addListRequest(VFtpSssListRequest request) throws FileServiceCollectException {
+        FtpServerInfo info = configurationService.getFtpServerInfo(request.getMachine());
+        if (info == null){
+            throw new FileServiceCollectException("400", "Parameter(machine) is not valid.");
+        }
+        if (isValidDirectory(request.getDirectory()) == false){
+            throw new FileServiceCollectException("400", "Parameter(directory) is not valid");
+        }
+
         Date requestTime = generateRequestTime();
 
         String requestNo = generateRequestNoFromTime(requestTime, request.getMachine(), request.getDirectory());
         request.setRequestNo(requestNo);
         addRequest(request);
 
-        /*
-        ListRequestThread thread = new ListRequestThread(request, getWorkingDir());
+        FtpServerInfo ftpServerInfo = configurationService.getFtpServerInfo(request.getMachine());
+
+        ListRequestThread thread = new ListRequestThread(request, ftpServerInfo, getWorkingDir());
+        listRequestThreadMap.put(request.getRequestNo(), thread);
         thread.start();
-         */
 
         return request;
     }
 
-    static class ListRequestThread extends Thread implements ExecuteStreamHandler{
-        VFtpListRequest request;
-        boolean stop = false;
-        File workDir;
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
-
-        public ListRequestThread(VFtpListRequest request, File workDir){
-            this.request = request;
-            this.workDir = workDir;
+    public VFtpSssListRequest getListRequest(String machine, String requestNo){
+        VFtpSssListRequest request = requestMap.get(requestNo);
+        if (request != null){
+            if (request.getMachine().equals(machine)){
+                return request;
+            }
         }
+        return null;
+    }
 
-        String createCommandString(){
-            StringBuilder builder = new StringBuilder();
-            builder.append("java -cp /usr/local/canon/esp/CanonFileService/Libs/ELogCollector.jar jp.co.canon.ckbs.eec.service.FtpCommand ")
-                    .append("list ")
-                    .append("-host ").append("10.1.31.242").append(" ")
-                    .append("-port ").append("21").append(" ")
-                    .append("-md ").append("passive").append(" ")
-                    .append("-u ").append("ckbs/ckbs").append(" ")
-                    .append("-root ").append("/VROOT/SSS/Optional").append(" ")
-                    .append("-dest ").append(request.getDirectory());
-            return builder.toString();
+    public void cancelAndDeleteSssListRequest(String machine, String requestNo){
+        ListRequestThread listRequestThread = listRequestThreadMap.get(requestNo);
+        if (listRequestThread != null){
+            listRequestThread.stopExecute();
+            listRequestThreadMap.remove(requestNo);
+        }
+    }
+
+    class ListRequestThread extends Thread implements CustomOutputStreamLineHandler{
+        VFtpSssListRequest request;
+        FtpServerInfo ftpServerInfo;
+        File workDir;
+        List<VFtpFileInfo> fileInfoList = new ArrayList<>();
+        CustomExecutor executor = new CustomExecutor();
+
+        public ListRequestThread(VFtpSssListRequest request, FtpServerInfo ftpServerInfo, File workDir){
+            this.request = request;
+            this.ftpServerInfo = ftpServerInfo;
+            this.workDir = workDir;
         }
 
         CommandLine createCommand(){
@@ -152,10 +130,10 @@ public class VFtpListService {
                     .addArgument("/usr/local/canon/esp/CanonFileService/Libs/ELogCollector.jar")
                     .addArgument("jp.co.canon.ckbs.eec.service.FtpCommand")
                     .addArgument("list")
-                    .addArgument("-host").addArgument("10.1.31.242")
+                    .addArgument("-host").addArgument(ftpServerInfo.getHost())
                     .addArgument("-port").addArgument("21")
-                    .addArgument("-md").addArgument("passive")
-                    .addArgument("-u").addArgument("ckbs/ckbs")
+                    .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
+                    .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
                     .addArgument("-root").addArgument("/VROOT/SSS/Optional")
                     .addArgument("-dest").addArgument(request.getDirectory());
             return cmdLine;
@@ -163,37 +141,52 @@ public class VFtpListService {
 
         @Override
         public void run() {
-            DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
-            DefaultExecutor executor = new DefaultExecutor();
-            executor.setWatchdog(watchdog);
-            executor.setStreamHandler(this);
             CommandLine cmdLine = createCommand();
-            try {
-                executor.execute(cmdLine, resultHandler);
-            } catch (IOException e) {
-                e.printStackTrace();
+            String cmdLineString = cmdLine.toString();
+            request.setStatus(VFtpSssListRequest.Status.EXECUTING);
+
+            executor.execute(cmdLine, this);
+            request.setFileList(fileInfoList.toArray(new VFtpFileInfo[0]));
+
+            request.setStatus(VFtpSssListRequest.Status.EXECUTED);
+            request.setCompletedTime(System.currentTimeMillis());
+        }
+
+        public void stopExecute(){
+            request.setStatus(VFtpSssListRequest.Status.CANCEL);
+            executor.stop();
+        }
+
+        @Override
+        public boolean processOutputLine(String line) {
+//            System.out.println("OUTPUT:" + line);
+            if (line.startsWith("FILE:")){
+                String[] strArr = line.substring(5).split(";");
+                VFtpFileInfo info = new VFtpFileInfo();
+                info.setFilename(strArr[0]);
+                info.setSize(Integer.parseInt(strArr[1]));
+                info.setType("F");
+                fileInfoList.add(info);
+                return true;
             }
-
-            try {
-                resultHandler.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (line.startsWith("DIRECTORY:")){
+                VFtpFileInfo info = new VFtpFileInfo();
+                info.setFilename(line.substring(10));
+                info.setType("D");
+                fileInfoList.add(info);
+                return true;
             }
+            if (line.startsWith("ERR:")){
+                request.setStatus(VFtpSssListRequest.Status.ERROR);
+                return false;
+            }
+            return true;
         }
 
         @Override
-        public void setProcessInputStream(OutputStream os) throws IOException {
-
-        }
-
-        @Override
-        public void setProcessErrorStream(InputStream is) throws IOException {
-
-        }
-
-        @Override
-        public void setProcessOutputStream(InputStream is) throws IOException {
-
+        public boolean processErrorLine(String line) {
+            System.out.println("ERROR:" + line);
+            return true;
         }
     }
 }

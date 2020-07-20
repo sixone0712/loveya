@@ -81,22 +81,22 @@ public class FileServiceCollectConnector {
      */
 
     /* SSS LIST */
-    public VFtpListRequestResponse createVFtpSssListRequest(String machine, String directory) {
+    public VFtpSssListRequestResponse createVFtpSssListRequest(String machine, String directory) {
         String url = this.prefix + "/fsc/vftp/sss/list/{machine}";
         CreateVFtpListRequestParam param = new CreateVFtpListRequestParam();
         param.setDirectory(directory);
 
-        ResponseEntity<VFtpListRequestResponse> res =
-                restTemplate.postForEntity(url, param, VFtpListRequestResponse.class, machine);
+        ResponseEntity<VFtpSssListRequestResponse> res =
+                restTemplate.postForEntity(url, param, VFtpSssListRequestResponse.class, machine);
 
         return res.getBody();
     }
 
-    public VFtpListRequestResponse getVFtpSssListRequest(String machine, String requestNo){
+    public VFtpSssListRequestResponse getVFtpSssListRequest(String machine, String requestNo){
         String url = this.prefix + "/fsc/vftp/sss/list/{machine}/{requestNo}";
 
-        ResponseEntity<VFtpListRequestResponse> res =
-                restTemplate.getForEntity(url, VFtpListRequestResponse.class, machine, requestNo);
+        ResponseEntity<VFtpSssListRequestResponse> res =
+                restTemplate.getForEntity(url, VFtpSssListRequestResponse.class, machine, requestNo);
 
         return res.getBody();
     }

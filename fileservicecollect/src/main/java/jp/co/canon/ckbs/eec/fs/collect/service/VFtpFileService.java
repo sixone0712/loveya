@@ -1,6 +1,6 @@
 package jp.co.canon.ckbs.eec.fs.collect.service;
 
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpListRequest;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +12,19 @@ public class VFtpFileService {
     @Autowired
     VFtpListService listService;
 
-    public String addSssListRequest(String machine, String directory){
-        VFtpListRequest request = new VFtpListRequest();
+    public VFtpSssListRequest addSssListRequest(String machine, String directory) throws FileServiceCollectException {
+        VFtpSssListRequest request = new VFtpSssListRequest();
         request.setMachine(machine);
         request.setDirectory(directory);
+        return listService.addListRequest(request);
+    }
 
-        return null;
+    public VFtpSssListRequest getSssListRequest(String machine, String requestNo){
+        return listService.getListRequest(machine, requestNo);
+    }
+
+    public void cancelAndDeleteSssListRequest(String machine, String requestNo){
+        listService.cancelAndDeleteSssListRequest(machine, requestNo);
     }
 
 }

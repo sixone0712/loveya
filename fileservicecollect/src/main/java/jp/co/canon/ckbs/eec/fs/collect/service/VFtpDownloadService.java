@@ -13,7 +13,6 @@ public class VFtpDownloadService {
 
     @Value("${fileservice.collect.vftp.requestDirectory}")
     String vftpRequestDirectory;
-
      */
 
     @PostConstruct

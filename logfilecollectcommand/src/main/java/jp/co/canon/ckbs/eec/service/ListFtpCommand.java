@@ -21,9 +21,7 @@ public class ListFtpCommand extends BaseFtpCommand {
                 System.out.println("ERR: LOGIN FAILED");
                 return;
             }
-            if (!ftpmode.equalsIgnoreCase("active")){
-                ftpClient.enterLocalPassiveMode();
-            }
+            System.out.println("STATUS:LOGIN_OK");
 
             boolean moved = true;
             moved = ftpClient.changeWorkingDirectory(rootDir);
@@ -35,6 +33,10 @@ public class ListFtpCommand extends BaseFtpCommand {
             if (!moved){
                 System.out.println("ERR: DIRECTORY MOVE FAILED(DEST DIR)");
                 return;
+            }
+            if (!ftpmode.equalsIgnoreCase("active")){
+                ftpClient.enterLocalPassiveMode();
+                System.out.println("STATUS:ENTER PASSIVE");
             }
             FTPFile[] ftpFiles = ftpClient.listFiles();
             for(FTPFile file : ftpFiles){
@@ -72,8 +74,9 @@ public class ListFtpCommand extends BaseFtpCommand {
 
         CommandLineParser parser = new DefaultParser();
 
+        CommandLine commandLine = null;
         try {
-            CommandLine commandLine = parser.parse(options, args, true);
+            commandLine = parser.parse(options, args, true);
             String userStr = commandLine.getOptionValue("u");
             this.host = commandLine.getOptionValue("host");
             String portStr = commandLine.getOptionValue("port");
@@ -90,8 +93,8 @@ public class ListFtpCommand extends BaseFtpCommand {
 
             doCommand();
         } catch (ParseException e) {
+            System.out.println("ERR: Command Parse Exception");
             e.printStackTrace();
-//            throw new Exception (e.getMessage());
         }
     }
 }

@@ -1,6 +1,8 @@
 package jp.co.canon.ckbs.eec.fs.collect.controller;
 
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.*;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
+import jp.co.canon.ckbs.eec.fs.collect.service.FileServiceCollectException;
 import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,19 +14,36 @@ public class VFtpCommandController {
     VFtpFileService fileService;
 
     @PostMapping(value="/vftp/sss/list/{machine}")
-    ResponseEntity<VFtpListRequestResponse> createSssListRequest(@PathVariable String machine, @RequestBody CreateVFtpListRequestParam param){
-        VFtpListRequestResponse res = new VFtpListRequestResponse();
-        return ResponseEntity.ok(res);
+    ResponseEntity<VFtpSssListRequestResponse> createSssListRequest(@PathVariable String machine, @RequestBody CreateVFtpListRequestParam param){
+        VFtpSssListRequestResponse res = new VFtpSssListRequestResponse();
+        try {
+            VFtpSssListRequest request = fileService.addSssListRequest(machine, param.getDirectory());
+            res.fromRequest(request);
+            return ResponseEntity.ok(res);
+        } catch(FileServiceCollectException e){
+            res.setErrorCode(e.getCode());
+            res.setErrorMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(res);
+        }
     }
 
     @GetMapping(value="/vftp/sss/list/{machine}/{requestNo}")
-    ResponseEntity<VFtpListRequestResponse> getSssListRequest(@PathVariable String machine, @PathVariable String requestNo){
-        VFtpListRequestResponse res = new VFtpListRequestResponse();
+    ResponseEntity<VFtpSssListRequestResponse> getSssListRequest(@PathVariable String machine, @PathVariable String requestNo){
+        VFtpSssListRequestResponse res = new VFtpSssListRequestResponse();
+        VFtpSssListRequest request = fileService.getSssListRequest(machine, requestNo);
+        if (request != null){
+            res.fromRequest(request);
+        } else {
+            res.setErrorCode("404");
+            res.setErrorMessage("Request Not Found");
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(res);
     }
 
     @DeleteMapping(value="/vftp/sss/list/{machine}/{requestNo}")
     ResponseEntity<?> cancelAndDeleteSssListRequest(@PathVariable String machine, @PathVariable String requestNo){
+        fileService.cancelAndDeleteSssListRequest(machine, requestNo);
         return ResponseEntity.ok("cancelAndDeleteListRequest");
     }
 

@@ -13,8 +13,8 @@ public class VFtpCommandController {
     VFtpFileService fileService;
 
     @PostMapping(value="/vftp/sss/list/{machine}")
-    ResponseEntity<VFtpListRequestResponse> createSssListRequest(@PathVariable String machine, @RequestBody CreateVFtpListRequestParam param){
-        VFtpListRequestResponse res = null;
+    ResponseEntity<VFtpSssListRequestResponse> createSssListRequest(@PathVariable String machine, @RequestBody CreateVFtpListRequestParam param){
+        VFtpSssListRequestResponse res = null;
         try {
             res = fileService.createVFtpSssListRequest(machine, param.getDirectory());
         } catch (FileServiceManageException e) {
@@ -24,8 +24,8 @@ public class VFtpCommandController {
     }
 
     @GetMapping(value="/vftp/sss/list/{machine}/{requestNo}")
-    ResponseEntity<VFtpListRequestResponse> getSssListRequest(@PathVariable String machine, @PathVariable String requestNo){
-        VFtpListRequestResponse res = null;
+    ResponseEntity<VFtpSssListRequestResponse> getSssListRequest(@PathVariable String machine, @PathVariable String requestNo){
+        VFtpSssListRequestResponse res = null;
         try {
             res = fileService.getVFtpSssListRequest(machine, requestNo);
         } catch (FileServiceManageException e) {
