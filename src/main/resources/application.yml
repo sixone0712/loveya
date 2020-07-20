@@ -86,6 +86,7 @@ rssportal:
     logBase: planroot
     cacheBase: downloadcache
     resultBase: zipa
+    max-threads: 4
   file-collect-service:
     addr: 10.1.31.237
     retry: 1 # retry count
@@ -112,6 +113,7 @@ rssportal:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
     resultBase: /LOG/zip
+    max-threads: 4
   file-collect-service:
     addr: localhost
     retry: 1 # retry count
