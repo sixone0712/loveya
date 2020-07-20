@@ -78,8 +78,8 @@ class Auto extends Component {
                 <Container className="rss-container" fluid={true}>
                     <CreateBreadCrumb page={page} message={planInfo.message}/>
                     <Switch>
-                        <Route path={Define.PAGE_AUTO_PLAN_ADD} render={() => <AutoPlanAdd type={planInfo.type} />}/>
-                        <Route path={Define.PAGE_AUTO_PLAN_EDIT} render={() => <AutoPlanEdit type={planInfo.type} />}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_ADD} render={() => <AutoPlanAdd history={this.props.history} location={this.props.location} type={planInfo.type} />}/>
+                        <Route path={Define.PAGE_AUTO_PLAN_EDIT} render={() => <AutoPlanEdit history={this.props.history} location={this.props.location} type={planInfo.type} />}/>
                         <Route path={Define.PAGE_AUTO_STATUS} component={AutoStatus}/>
                         <Route path={Define.PAGE_AUTO_DOWNLOAD} component={AutoDownload}/>
                     </Switch>

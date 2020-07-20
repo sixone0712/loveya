@@ -228,13 +228,16 @@ public class PlanController {
 
         try {
             int newId = addPlanProc(param, id);
-            if(newId<0) {
+            if(newId == -1) {
+                error.setReason(RSSErrorReason.INVALID_PARAMETER);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
+            } else if (newId == -2){
                 error.setReason(RSSErrorReason.NOT_FOUND);
                 resBody.put("error", error.getRSSError());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
             }
-            resBody.put("planId", newId);
-            return ResponseEntity.status(HttpStatus.OK).body(resBody);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (ParseException e) {
             error.setReason(RSSErrorReason.INTERNAL_ERROR);
             resBody.put("error", error.getRSSError());
