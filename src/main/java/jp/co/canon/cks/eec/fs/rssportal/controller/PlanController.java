@@ -211,13 +211,20 @@ public class PlanController {
 
     @PutMapping("/{planId}")
     @ResponseBody
-<<<<<<< src/main/java/jp/co/canon/cks/eec/fs/rssportal/controller/PlanController.java
     public ResponseEntity<?> modify(HttpServletRequest request,
                                           @PathVariable("planId") String planId,
                                           @RequestBody Map<String, Object> param) {
         log.info(String.format("[Put] %s", request.getServletPath()));
         Map<String, Object> resBody = new HashMap<>();
         RSSError error = new RSSError();
+
+        if(planId == null && planId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        int id = Integer.parseInt(planId);
 
         try {
             int newId = addPlanProc(param, id);
@@ -360,7 +367,6 @@ public class PlanController {
         Date toDate = toDate(to);
         long interval = Long.valueOf(intervalStr);
 
-<<<<<<< src/main/java/jp/co/canon/cks/eec/fs/rssportal/controller/PlanController.java
         int userId = 0;
         if(session!=null) {
             SessionContext context = (SessionContext) session.getAttribute("context");
@@ -371,16 +377,13 @@ public class PlanController {
 
         int id;
         if(modifyPlanId<0) {
-            id = service.addPlan(userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
-                    collectType, interval, description);
+            id = service.addPlan(userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
+                    type, interval, description);
         } else {
-            id = service.modifyPlan(modifyPlanId, userId, planName, fabs, tools, logTypes, logTypeStr, collectStartDate, fromDate, toDate,
-                    collectType, interval, description);
+            id = service.modifyPlan(modifyPlanId, userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
+                    type, interval, description);
         }
-=======
-        int id = service.addPlan(planName, fabNames, machineNames, categoryCodes, categoryNames,
-                collectStartDate, fromDate, toDate, type, interval, description);
->>>>>>> src/main/java/jp/co/canon/cks/eec/fs/rssportal/controller/PlanController.java
+
         if(id<0)
             return -2;
         return id;
