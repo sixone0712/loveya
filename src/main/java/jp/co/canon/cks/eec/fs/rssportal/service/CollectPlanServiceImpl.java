@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Service
+//@Service
 public class CollectPlanServiceImpl implements CollectPlanService {
 
     private static final int COLLECTTYPE_CYCLE = 1;
@@ -43,7 +44,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    public int addPlan(@NonNull String planName,
+    public int addPlan(int userId,
+                       @NonNull String planName,
                        @NonNull List<String> fabs,
                        @NonNull List<String> tools,
                        @NonNull List<String> logTypes,
@@ -277,6 +279,11 @@ public class CollectPlanServiceImpl implements CollectPlanService {
             log.info("update statue (plan="+plan.getPlanName()+" status="+status.name()+")");
         else
             log.info("update status failed (plan="+plan.getPlanName()+" status="+status.name()+")");
+    }
+
+    @Override
+    public int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+        return 0;
     }
 
     @Override

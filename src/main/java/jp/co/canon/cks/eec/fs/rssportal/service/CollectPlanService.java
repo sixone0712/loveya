@@ -11,17 +11,19 @@ import java.util.List;
 public interface CollectPlanService {
 
     boolean isReady();
-    int addPlan(String planName,
-                List<String> fabs,
-                List<String> tools,
-                List<String> logTypes,
-                List<String> logTypeStr,
-                Date collectStart,
-                Date start,
-                Date end,
-                String collectType,
-                long interval,
-                String description);
+    int addPlan(
+            int userId,
+            String planName,
+            List<String> fabs,
+            List<String> tools,
+            List<String> logTypes,
+            List<String> logTypeStr,
+            Date collectStart,
+            Date start,
+            Date end,
+            String collectType,
+            long interval,
+            String description);
 
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);
@@ -60,4 +62,9 @@ public interface CollectPlanService {
      */
     void setLastStatus(int planId, PlanStatus status);
     void setLastStatus(CollectPlanVo plan, PlanStatus status);
+
+    /**
+     *
+     */
+    int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description);
 }

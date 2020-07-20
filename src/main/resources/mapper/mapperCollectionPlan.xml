@@ -23,6 +23,7 @@
         tsnext as nextAction,
         tslastpoint as lastPoint,
         laststatus as detail,
+        laststatus as lastStatus,
         case when laststatus='halted' or laststatus='completed' or stop=true then 'stop' else 'running' end as status,
         case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
     </sql>
@@ -118,6 +119,17 @@
     <update id="updateStatus" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
             laststatus = #{lastStatus}
+        where id = #{id}
+    </update>
+
+    <update id="updateInfo" parameterType="CollectPlanVo">
+        update rsss."collection_plan" set
+             stop = #{stop},
+          <if test="lastStatus!=null">
+             laststatus = #{lastStatus},
+          </if>
+             tslastcollect = #{lastCollect},
+             tsnext = #{nextAction}
         where id = #{id}
     </update>
 

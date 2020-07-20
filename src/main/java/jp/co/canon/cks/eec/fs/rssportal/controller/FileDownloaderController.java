@@ -298,7 +298,12 @@ public class FileDownloaderController {
                 if(file) {
                     addDownloadItem(map, fabName, machineName, categoryCode, categoryName, fileName, fileSize, fileDate);
                 } else {
-                    fileDownloader.createDownloadFileList(requestList, fabName, machineName, categoryCode, categoryName, null, null, fileName);
+                    try {
+                        fileDownloader.createDownloadFileList(requestList, fabName, machineName, categoryCode, categoryName, null, null, fileName);
+                    } catch (InterruptedException e) {
+                        log.error("stopped creating download list");
+                        return null;
+                    }
                 }
             } else {
                 log.error("parameter failed");

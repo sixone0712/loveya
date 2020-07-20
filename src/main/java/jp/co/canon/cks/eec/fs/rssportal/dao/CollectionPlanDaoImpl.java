@@ -92,4 +92,24 @@ public class CollectionPlanDaoImpl implements CollectionPlanDao {
         session.close();
         return true;
     }
+
+    @Override
+    public void update(CollectPlanVo plan) {
+        SqlSession session = sessionFactory.openSession(true);
+        session.update("colplan.updateInfo", plan);
+        session.close();
+    }
+
+    @Override
+    public void updateStop(int id, boolean value) {
+        SqlSession session = sessionFactory.openSession(true);
+        CollectPlanVo plan = session.selectOne("selectId", id);
+        if(plan!=null) {
+            if(plan.isStop()!=value) {
+                plan.setStop(value);
+                session.update("colplan.updateInfo", plan);
+            }
+        }
+        session.close();
+    }
 }

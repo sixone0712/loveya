@@ -149,7 +149,7 @@ public class FileDownloader extends Thread {
             final List<DownloadForm> formList,
             @NonNull String fab, @NonNull String tool,
             @NonNull String type, @NonNull String typeStr,
-            @Nullable Calendar from, @Nullable Calendar to, String dir) {
+            @Nullable Calendar from, @Nullable Calendar to, String dir) throws InterruptedException {
 
         if(from==null) {
             from = Calendar.getInstance();
@@ -163,6 +163,7 @@ public class FileDownloader extends Thread {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
         while(retry<fileServiceRetryCount) {
+            Thread.sleep(1); // job interrupt point
             try {
                 FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
                 for (FileInfoModel file : fileInfos) {
