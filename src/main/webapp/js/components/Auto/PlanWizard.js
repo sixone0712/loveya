@@ -16,6 +16,7 @@ import {
 } from "reactstrap";
 import Machine from "./MachineList";
 import Target from "./TargetList";
+import Command from "./VFTP/commandlist";
 import Option from "./OptionList";
 import Check from "./CheckSetting";
 import moment from "moment";
@@ -27,7 +28,7 @@ import ConfirmModal from "../Common/ConfirmModal";
 
 export const wizardStep = {
   MACHINE: 1,
-  TARGET: 2,
+  TARGET_COMMAND: 2,
   OPTION: 3,
   CHECK: 4
 };
@@ -107,15 +108,17 @@ class RSSautoplanwizard extends Component {
     const logNames = newLogInfoList.map(item => item.logName);
 
     const reqData = {
-      planId: planId,
-      structId: structId,
-      tools: tools,
-      logTypes: logTypes,
-      logNames: logNames,
-      collectStart: moment(collectStart).format("YYYY-MM-DD HH:mm:ss"),
-      from: moment(from).format("YYYY-MM-DD HH:mm:ss"),
-      to: moment(to).format("YYYY-MM-DD HH:mm:ss"),
-      collectType: collectType,
+      planName: planId,
+      planType: "ftp",    // need to add
+      fabNames: structId,
+      machineNames: tools,
+      categoryCodes: logTypes,
+      categoryNames: logNames,
+      commands: null,   // need to add
+      start: moment(collectStart).format("YYYYMMDDHHmmss"),
+      from: moment(from).format("YYYYMMDDHHmmss"),
+      to: moment(to).format("YYYYMMDDHHmmss"),
+      type: collectType,
       interval: convInterval,
       description: description,
     };
@@ -126,7 +129,7 @@ class RSSautoplanwizard extends Component {
   handleRequestAutoPlanAdd = async () => {
     const reqData = this.makeRequestAutoPlanData();
     //console.log("reqData", reqData);
-    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/add", reqData);
+    const res = await services.axiosAPI.post(Define.REST_PLANS_POST_PLANS, reqData);
     //console.log(res);
 
     //console.log("this.props.history", this.props.history);
@@ -138,7 +141,7 @@ class RSSautoplanwizard extends Component {
     const reqData = this.makeRequestAutoPlanData();
     //console.log("reqData", reqData);
     console.log("editID", editId);
-    const res = await services.axiosAPI.post(Define.REST_API_URL + "/plan/modify?id=" + editId, reqData);
+    const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_MODIFY_PLAN}/${editId}`, reqData);
     console.log(res);
     //console.log("this.props.history", this.props.history);
     this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
@@ -148,8 +151,8 @@ class RSSautoplanwizard extends Component {
 
   handleNext = () => {
     const { currentStep, isNew } = this.state;
-    const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt } = this.props;
-    const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan);
+    const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt, type } = this.props;
+    const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan, type);
 
     if(message === null) {
       if(currentStep === wizardStep.CHECK) {
@@ -271,9 +274,9 @@ class RSSautoplanwizard extends Component {
 
   render() {
     console.log("render");
-    console.log("this.state.editID", this.state.editID);
+    console.log("this.state.editID", this.state.editId);
     const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
-    const { logTypeSuccess, toolInfoSuccess, logTypeFailure, toolInfoFailure } = this.props;
+    const { logTypeSuccess, toolInfoSuccess, logTypeFailure, toolInfoFailure, type } = this.props;
 
     return (
       <>
@@ -287,7 +290,7 @@ class RSSautoplanwizard extends Component {
             </CardHeader>
             <CardBody className="auto-plan-card-body">
               <Col sm={{ size: 3 }} className="step-indicator pdl-0 bd-right">
-                <ul>
+                <ul className="wizard-step">
                   <li>
                     <div className={this.getClassName(wizardStep.MACHINE)}>
                       <div className="step-number">
@@ -297,11 +300,11 @@ class RSSautoplanwizard extends Component {
                     </div>
                   </li>
                   <li>
-                    <div className={this.getClassName(wizardStep.TARGET)}>
+                    <div className={this.getClassName(wizardStep.TARGET_COMMAND)}>
                       <div className="step-number">
-                        {this.completeCheck(wizardStep.TARGET)}
+                        {this.completeCheck(wizardStep.TARGET_COMMAND)}
                       </div>
-                      <div className="step-label">Target</div>
+                      <div className="step-label">{type === "FTP" ? "Target" : "Command"}</div>
                     </div>
                   </li>
                   <li>
@@ -333,14 +336,18 @@ class RSSautoplanwizard extends Component {
                   <CarouselItem key={wizardStep.MACHINE}>
                     <Machine isNew={isNew} />
                   </CarouselItem>
-                  <CarouselItem key={wizardStep.TARGET}>
-                    <Target isNew={isNew} />
+                  <CarouselItem key={wizardStep.TARGET_COMMAND}>
+                    {type === "FTP" ? (
+                        <Target isNew={isNew} />
+                    ) : (
+                        <Command isNew={isNew} />
+                    )}
                   </CarouselItem>
                   <CarouselItem key={wizardStep.OPTION}>
                     <Option isNew={isNew} />
                   </CarouselItem>
                   <CarouselItem key={wizardStep.CHECK}>
-                    <Check isNew={isNew} />
+                    <Check isNew={isNew} type={type}/>
                   </CarouselItem>
                 </Carousel>
               </Col>
@@ -383,7 +390,7 @@ class RSSautoplanwizard extends Component {
   }
 }
 
-export function invalidCheck(step, toolCnt, targetCnt, optionList) {
+export function invalidCheck(step, toolCnt, targetCnt, optionList, type) {
   switch(step) {
     case wizardStep.MACHINE:
       if (toolCnt === 0) {
@@ -392,8 +399,8 @@ export function invalidCheck(step, toolCnt, targetCnt, optionList) {
         return null;
       }
 
-    case wizardStep.TARGET:
-      if (targetCnt === 0) {
+    case wizardStep.TARGET_COMMAND:
+      if (targetCnt === 0 && type === "FTP") {
         return modalMessage.TARGET_ALERT_MESSAGE;
       } else {
         return null;
@@ -403,6 +410,7 @@ export function invalidCheck(step, toolCnt, targetCnt, optionList) {
       const { planId, collectType, interval, from, to, description, intervalUnit } = optionList.toJS();
       const planIdRegex = /^([\p{L}0-9]).{1,30}([\p{L}0-9]$)/gu;
       const planDescRegex = /^([\p{L}0-9]).{1,38}([\p{L}0-9]$)/gu;
+      const planIntervalRegex = /[0-9]/g;
 
       if (!planIdRegex.test(planId)) {
         return modalMessage.PLAN_ID_ALERT_MESSAGE;
@@ -413,7 +421,7 @@ export function invalidCheck(step, toolCnt, targetCnt, optionList) {
       }
 
       if (collectType === Define.AUTO_MODE_CYCLE) {
-        if (interval < 1) {
+        if (interval < 1 || !planIntervalRegex.test(interval)) {
           return modalMessage.CYCLE_ALERT_MESSAGE;
         }
 

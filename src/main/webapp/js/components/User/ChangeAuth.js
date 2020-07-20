@@ -26,7 +26,15 @@ class ChangeAuthModal extends Component {
         console.log("changePermission");
         const { selectedValue } = this.state;
         const selected = (selectedValue ==='') ? API.getUserAuth(this.props, id) : selectedValue;
-        await API.changePermission(this.props, `${Define.REST_API_URL}/user/changeAuth?id=${id}&permission=${selected}`);
+        const requestData = {
+            permission: selected
+        }
+        try {
+            const res = await API.changePermission(this.props,
+              `${Define.REST_USERS_PATCH_CHANGE_PERMISSION}/${id}/permission`, requestData);
+        } catch (e) {
+            console.log(e);
+        }
         const err = API.getUserInfoErrorCode(this.props);
         console.log("changePermission err: ", err);
         if (!err) {

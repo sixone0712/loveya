@@ -1,304 +1,236 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
+import jp.co.canon.cks.eec.fs.rssportal.model.users.RSSUserResponse;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
-import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
-@RequestMapping("/rss/rest/user")
+@RestController
+@RequestMapping("/rss/api/users")
 public class UserController {
-    private final String USER_RESULT = "result";
-    private final String USER_DATA = "data";
     private final HttpSession httpSession;
     private final UserService serviceUser;
+    private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     public UserController(HttpSession httpSession, UserService serviceUser) {
-        log.info("/user/ Controller");
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
     }
 
-    @GetMapping("/isLogin")
+    @PatchMapping("/{userID}/password")
     @ResponseBody
-    public Map<String, Object> isLogin(@RequestParam Map<String, Object> param)  throws Exception {
-        log.info("/user/isLogin");
-        Map<String, Object> res = new HashMap<>();
+    public ResponseEntity<?> changePw(HttpServletRequest request, @PathVariable("userID") String userID,
+                                      @RequestBody Map<String, Object> param) throws Exception {
+        log.info(String.format("[Patch] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
 
-        if(httpSession.getAttribute("context") != null) {
-            SessionContext context = (SessionContext)httpSession.getAttribute("context");
-            res.put("isLogin", true);
-            res.put("username", context.getUser().getUsername());
-            res.put("permissions", context.getUser().getPermissions());
-            log.info("true");
-        } else {
-            res.put("isLogin", false);
-            res.put("username", "");
-            res.put("permissions", "");
-            log.info("false");
+        if (userID == null || userID.equals("")) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            log.info(String.format("[Patch] %s / userId is empty.", request.getServletPath()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
-        return res;
-    }
 
-    @GetMapping("/login")
-    @ResponseBody
-    public Map<String, Object>  login(@RequestParam Map<String, Object> param)  throws Exception {
-        log.info("/user/login");
-        String username = param.containsKey("user")?(String)param.get("user"):null;
-        String password = param.containsKey("password")?(String)param.get("password"):null;
-        Map<String, Object> res = new HashMap<>();
-        res.put("error", 0);
-        res.put("name", "");
-        res.put("auth", "");
+        int id = Integer.parseInt(userID);
+        String oldPassword = param.containsKey("oldPassword") ? (String) param.get("oldPassword") : null;
+        String newPassword = param.containsKey("newPassword") ? (String) param.get("newPassword") : null;
 
-        if(username==null || username.isEmpty() || password==null || password.isEmpty())
-        {
-            res.put("error", 32);       // LOGIN_FAIL_NO_USERNAME_PASSWORD
+        if (oldPassword == null || oldPassword.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            log.info(String.format("[Patch] %s / oldPassword or newPassword is empty.", request.getServletPath()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
-        else
-        {
-            int userId = serviceUser.verify(username, password);
-            if(userId >= 10000) {
-                SessionContext context = new SessionContext();
-                UserVo LoginUser = serviceUser.getUser(userId);
-                serviceUser.UpdateLastAccessTime(userId);
-                context.setUser(LoginUser);
-                context.setAuthorized(true);
-                httpSession.setAttribute("context", context);
-                res.put("name", LoginUser.getUsername());
-                res.put("auth", LoginUser.getPermissions());
+
+        UserVo userObj = serviceUser.getUser(id);
+        if (userObj != null && (userObj.getId() >= 10000)) {
+            if (!oldPassword.equals(userObj.getPassword())) {
+                error.setReason(RSSErrorReason.INVALID_PASSWORD);
+                resBody.put("error", error.getRSSError());
+                log.info(String.format("[Patch] %s / oldPassword does not match the password of the DB.", request.getServletPath()));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
             }
-            else {
-                res.put("error", userId);
-            }
-        }
-        return res;
-    }
-
-    @GetMapping("/logout")
-    @ResponseBody
-    public int logout()  throws Exception {
-        log.info("/user/logout");
-        this.httpSession.invalidate();
-        return 0;
-    }
-
-    @GetMapping("/changePw")
-    @ResponseBody
-    public int changePw(@RequestParam Map<String, Object> param)  throws Exception {
-        int res = 0;
-        log.info("/user/changePw");
-
-        String oldPw = param.containsKey("oldPw")?(String)param.get("oldPw"):null;
-        String newPw = param.containsKey("newPw")?(String)param.get("newPw"):null;
-
-        if(httpSession.getAttribute("context") != null) {
-            SessionContext context = (SessionContext)httpSession.getAttribute("context");
-            String username =  context.getUser().getUsername();
-            if(newPw==null || oldPw==null || newPw.isEmpty() || oldPw.isEmpty())
-            {
-                res = 40;   // CHANGE_PW_FAIL_EMPTY_PASSWORD
-            }
-            else
-            {
-                UserVo userObj = serviceUser.getUser(username);
-                if(userObj != null && (userObj.getId() >= 10000)) {
-                    boolean DbResult = false;
-                    if(!oldPw.equals(userObj.getPassword()))
-                    {
-                        res = 41;   //CHANGE_PW_FAIL_INCORRECT_CURRENT_PASSWORD;
-                        log.info("DB update fail");
-                    }
-                    else
-                    {
-                        userObj.setPassword(newPw);
-                        DbResult = serviceUser.modifyUser(userObj);
-                        if(!DbResult)
-                        {
-                            res = 32;
-                            log.info("DB update fail");
-                        }
-                        else
-                        {
-                            log.info("DB update Success");
-                        }
-                    }
-
-                }
-                else {
-                    res =  33; // LOGIN_FAIL_NO_REGISTER_USER
-                }
-            }
-        }
-
-        return res;
-    }
-    @GetMapping("/changeAuth")
-    @ResponseBody
-    public Map<String, Object> changeAuth(@RequestParam Map<String, Object> param)  throws Exception {
-
-        int res = 0;
-        log.info("/user/changeAuth");
-        String id = param.containsKey("id")?(String)param.get("id"):null;
-        String permission = param.containsKey("permission")?(String)param.get("permission"):null;
-
-        log.info("id: "+id);
-        Map<String, Object> returnData = new HashMap<>();
-
-        if(id==null || permission==null || id.isEmpty() || permission.isEmpty())
-        {
-            returnData.put("result", 32 );// LOGIN_FAIL_NO_USERNAME_PASSWORD
-        }
-        else
-        {
-            UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
-            if(userObj != null && (userObj.getId() >= 10000)) {
-                boolean DbResult = false;
-
-                userObj.setPermissions(permission);
-                DbResult = serviceUser.modifyUser(userObj);
-                if(!DbResult)
-                {
-                    returnData.put("result", 32 );
-                    log.info("DB update fail");
-                }
-                else
-                {
-                    log.info("DB update Success");
-                    returnData.put("result", 0 );
-                    returnData.put("Auth", userObj.getPermissions());
-                }
-            }
-            else {
-                returnData.put("result", 100 );// DB_UPDATE_ERROR_NO_SUCH_USER
-            }
-        }
-        return returnData;
-    }
-
-    @GetMapping("/create")
-    @ResponseBody
-    public int create(@RequestParam Map<String, Object> param)  throws Exception {
-
-        int res = 0;
-        log.info("/user/create");
-        String name = param.containsKey("name")?(String)param.get("name"):null;
-        String pwd = param.containsKey("pwd")?(String)param.get("pwd"):null;
-        String auth = param.containsKey("auth")?(String)param.get("auth"):null;
-
-        if(name==null || pwd==null || auth==null
-                || name.isEmpty() || pwd.isEmpty() || auth.isEmpty())
-        {
-            res = 32;   // LOGIN_FAIL_NO_USERNAME_PASSWORD
-        }
-        else
-        {
-            UserVo userObj = serviceUser.getUser(name);
-            if(userObj != null) {
-               res= 300;//USER_SET_FAIL_SAME_NAME
-            }
-            else {
-                boolean DbResult = false;
-                userObj = new UserVo();
-                userObj.setUsername(name);
-                userObj.setPassword(pwd);
-                userObj.setPermissions(auth);
-                DbResult = serviceUser.addUser(userObj);
-                if(!DbResult)
-                {
-                    res = 350;//USER_SET_FAIL_NO_REASON
-                    log.info("DB create fail");
-                }else{
-                    log.info("DB create Success");
-                }
-            }
-        }
-        return res;
-    }
-
-    @GetMapping("/loadUserList")
-    @ResponseBody
-    public Map<String, Object> loadUserList() throws Exception {
-        log.info("/user/loadUserList");
-        Map<String, Object> returnData = new HashMap<>();
-        List<UserVo> list = serviceUser.getUserList();
-        if(list == null || list.size()== 0) {
-            returnData.put(USER_RESULT,  -1);
-            returnData.put(USER_DATA, null);
-            log.info("List data is null");
-        }
-        else {
-            returnData.put(USER_RESULT,  0);
-            returnData.put(USER_DATA, list);
-        }
-        return returnData;
-    }
-
-    @GetMapping("/delete")
-    @ResponseBody
-    public int deleteUser(@RequestParam Map<String, Object> param)  throws Exception {
-
-        int res = 0;
-        log.info("/user/deleteUser");
-        String id = param.containsKey("id")?(String)param.get("id"):null;
-        log.info("id: "+id);
-
-        if(id==null || id.isEmpty())
-        {
-            res = 33;  //LOGIN_FAIL_NO_REGISTER_USER
-        } else {
-            UserVo userObj = serviceUser.getUser(Integer.parseInt(id));
-            if(userObj == null) {
-                res= 33;//LOGIN_FAIL_NO_REGISTER_USER
+            userObj.setPassword(newPassword);
+            if (serviceUser.modifyUser(userObj)) {
+                return ResponseEntity.status(HttpStatus.OK).body(null);
             } else {
-                boolean DbResult = false;
-                DbResult = serviceUser.deleteUser(userObj);
-                if(!DbResult) {
-                    res = 350;//USER_SET_FAIL_NO_REASON
-                    log.info("DB delete fail");
-                }
+                error.setReason(RSSErrorReason.INTERNAL_ERROR);
+                resBody.put("error", error.getRSSError());
+                log.info(String.format("[Patch] %s / DB communication error.", request.getServletPath()));
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
             }
-        }
-        return res;
-    }
-
-    public Map<String, Object>  getUser(@RequestParam Map<String, Object> param)  throws Exception {
-
-        Map<String, Object> res = new HashMap<>();
-
-        log.info("/user/getUser");
-        String name = param.containsKey("name")?(String)param.get("name"):null;
-        log.info("name: "+name);
-
-        if(name==null || name.isEmpty())
-        {
-            res.put(USER_RESULT,33); //LOGIN_FAIL_NO_REGISTER_USER
         } else {
-            UserVo userObj = serviceUser.getUser(name);
-            if(userObj == null) {
-                res.put(USER_RESULT,33); //LOGIN_FAIL_NO_REGISTER_USER
-            } else {
-                res.put(USER_RESULT,0); //LOGIN_FAIL_NO_REGISTER_USER
-                res.put(USER_DATA,userObj); //LOGIN_FAIL_NO_REGISTER_USER
-                log.info("getId: "+userObj.getId());
-            }
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            log.info(String.format("[Patch] %s / There are no users in the DB.", request.getServletPath()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
-        return res;
     }
 
-    private final Log log = LogFactory.getLog(getClass());
+    @PatchMapping("/{userID}/permission")
+    @ResponseBody
+    public ResponseEntity<?> changeAuth(HttpServletRequest request,
+                                        @PathVariable("userID") String userID,
+                                        @RequestBody Map<String, Object> param) throws Exception {
+        log.info(String.format("[Patch] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
 
+        if (userID == null || userID.equals("")) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        int id = Integer.parseInt(userID);
+        String permission = param.containsKey("permission") ? (String) param.get("permission") : null;
+
+        if (permission == null || permission.isEmpty()) {
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
+        }
+
+        if (!(permission.equals("10") || permission.equals("20") || permission.equals("50") || permission.equals("100"))) {
+            log.info("permission: " + permission);
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
+        }
+
+        UserVo userObj = serviceUser.getUser(id);
+        if (userObj != null && (userObj.getId() >= 10000)) {
+            userObj.setPermissions(permission);
+            if (serviceUser.modifyUser(userObj)) {
+                resBody.put("permission", permission);
+                return ResponseEntity.status(HttpStatus.OK).body(resBody);
+            } else {
+                error.setReason(RSSErrorReason.INTERNAL_ERROR);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
+            }
+        } else {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+    }
+
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<?> create(HttpServletRequest request,
+                                    @RequestBody Map<String, Object> param) throws Exception {
+        log.info(String.format("[Post] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        String userName = param.containsKey("userName") ? (String) param.get("userName") : null;
+        String password = param.containsKey("password") ? (String) param.get("password") : null;
+        String permission = param.containsKey("permission") ? (String) param.get("permission") : null;
+
+        if (userName == null || password == null || permission == null
+                || userName.isEmpty() || password.isEmpty() || permission.isEmpty()) {
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
+        }
+
+        UserVo userObj = serviceUser.getUser(userName);
+        if (userObj != null) {
+            error.setReason(RSSErrorReason.DUPLICATE_USER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(resBody);
+        }
+
+        UserVo newUserObj = new UserVo();
+        newUserObj.setUsername(userName);
+        newUserObj.setPassword(password);
+        newUserObj.setPermissions(permission);
+
+        if (!serviceUser.addUser(newUserObj)) {
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
+
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @DeleteMapping("/{userId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteUser(HttpServletRequest request,
+                                        @PathVariable("userId") String userId) throws Exception {
+
+        log.info(String.format("[Delete] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if (userId == null || userId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        int id = Integer.parseInt(userId);
+
+        UserVo userObj = serviceUser.getUser(id);
+        if (userObj == null) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        if (!serviceUser.deleteUser(userObj)) {
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
+
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @GetMapping
+    @ResponseBody
+    public ResponseEntity<?> loadUserList(HttpServletRequest request) throws Exception {
+        log.info(String.format("[Get] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        List<UserVo> lists = serviceUser.getUserList();
+        List<RSSUserResponse> userList = new ArrayList<RSSUserResponse>();
+        for (UserVo list : lists) {
+            RSSUserResponse user = new RSSUserResponse();
+            SimpleDateFormat conTimeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            user.setUserId(list.getId());
+            user.setUserName(list.getUsername());
+            user.setPermission(list.getPermissions());
+            user.setCreated(list.getCreated() != null ? conTimeFormat.format(list.getCreated()) : null);
+            user.setModified(list.getModified() != null ? conTimeFormat.format(list.getModified()) : null);
+            user.setLastAccess(list.getLastAccess() != null ? conTimeFormat.format(list.getLastAccess()) : null);
+            userList.add(user);
+        }
+
+        resBody.put("lists", userList);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
+    }
 }
+

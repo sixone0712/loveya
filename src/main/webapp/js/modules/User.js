@@ -2,6 +2,7 @@ import { createAction, handleActions } from 'redux-actions';
 import { Map, List, fromJS, Record } from 'immutable';
 import { pender , applyPenders } from 'redux-pender';
 import services from '../services';
+import * as Define from "../define";
 
 
 const USER_CREATE = "user/USER_CREATE";
@@ -11,10 +12,10 @@ const USER_GET_LIST = "user/USER_GET_LIST";
 const USER_INIT_ALL_LIST = "user/USER_INIT_ALL_LIST";
 const USER_INIT_SERVER_ERROR = "user/USER_INIT_SERVER_ERROR";
 
-export const createUser = createAction(USER_CREATE, services.axiosAPI.get);
-export const deleteUser = createAction(USER_DELETE, services.axiosAPI.get);
-export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.get);
-export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.get);
+export const createUser = createAction(USER_CREATE, services.axiosAPI.postPender);
+export const deleteUser = createAction(USER_DELETE, services.axiosAPI.deletePender);
+export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.getPender);
+export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.patchPander);
 
 const initialState = Map({
     UserInfo : Map({
@@ -36,7 +37,6 @@ const initialState = Map({
                 created: "",
                 last_access: "",
                 modified: "",
-                validity: false
             })
         ]),
     }),
@@ -54,7 +54,21 @@ export default handleActions({
         {
             type: USER_CREATE,
             onSuccess: (state, action) => {
-                return  state.setIn(["UserInfo","result"], action.payload.data);
+                return  state.setIn(["UserInfo","result"], Define.RSS_SUCCESS);
+            },
+            onFailure: (state, action) => {
+              const { status, data : { error : { reason } } } = action.payload;
+              let result = Define.USER_SET_FAIL_NO_REASON;
+              if(reason !== undefined || reason !== null) {
+                if (status === Define.BAD_REQUEST) {
+                    result = Define.LOGIN_FAIL_NO_USERNAME_PASSWORD;
+                } else if(status === Define.CONFLICT) {
+                  result = Define.USER_SET_FAIL_SAME_NAME
+                } else {
+                  result = Define.USER_SET_FAIL_NO_REASON
+                }
+              }
+              return  state.setIn(["UserInfo","result"], result);
             }
         },
     ),
@@ -62,7 +76,19 @@ export default handleActions({
         {
             type: USER_DELETE,
             onSuccess: (state, action) => {
-                return  state.setIn(["UserInfo","result"], action.payload.data);
+                return  state.setIn(["UserInfo","result"], Define.RSS_SUCCESS);
+            },
+            onFailure: (state, action) => {
+              const { status, data : { error : { reason } } } = action.payload;
+              let result = Define.USER_SET_FAIL_NO_REASON;
+              if(reason !== undefined || reason !== null) {
+                if(status === Define.NOT_FOUND) {
+                  result = Define.DB_UPDATE_ERROR_NO_SUCH_USER
+                } else {
+                  result = Define.USER_SET_FAIL_NO_REASON
+                }
+              }
+              return  state.setIn(["UserInfo","result"], result);
             }
         }
     ),
@@ -70,13 +96,23 @@ export default handleActions({
         {
             type: USER_MODIFY_AUTH,
             onSuccess: (state, action) => {
-                const {auth, result} = action.payload.data;
-                if(result !== 0)
-                {
-                    return state.setIn(["UserInfo", "result"], result);
+              const { status, data: { permission } } = action.payload;
+              return state.setIn(["UserInfo", "result"], Define.RSS_SUCCESS)
+                          .setIn(["UserInfo", "auth"], permission);
+            },
+            onFailure: (state, action) => {
+              const { status, data : { error : { reason } } } = action.payload;
+              let result = Define.USER_SET_FAIL_NO_REASON;
+              if(reason !== undefined || reason !== null) {
+                if(status === Define.BAD_REQUEST) {
+                  result = Define.LOGIN_FAIL_NO_USERNAME_PASSWORD;
+                } else if(status === Define.NOT_FOUND) {
+                  result = Define.DB_UPDATE_ERROR_NO_SUCH_USER
+                } else {
+                  result = Define.USER_SET_FAIL_NO_REASON
                 }
-                return state.setIn(["UserInfo", "result"], result)
-                            .setIn(["UserInfo", "auth"], auth);
+              }
+              return  state.setIn(["UserInfo","result"], result);
             }
         }
     ),
@@ -90,29 +126,21 @@ export default handleActions({
                 return state.setIn(["UserList","isServerErr"], true)
             },
             onSuccess: (state, action) => {
-                const {data, result} = action.payload.data;
-
-                if (result !== 0) {
-                    console.warn("[USER_GET_LIST] error ", result);
-                    return state.setIn(["UserList", "result"], result);
-                }
-
-                const cUserList = data.map(list => {
+                const { data: { lists } } = action.payload;
+                const cUserList = lists.map(list => {
                     return {
-                        id: list.id,
-                        name: list.username,
-                        auth: list.permissions,
+                        id: list.userId,
+                        name: list.userName,
+                        auth: list.permission,
                         created: list.created,
                         modified: list.modified,
-                        validity: list.validity,
                         last_access: list.lastAccess,
                     }
                 });
 
                 return state
                     .setIn(["UserList", "list"], fromJS(cUserList))
-                    .setIn(["UserList", "totalCnt"], cUserList.length)
-                    .setIn(["UserList", "result"], result);
+                    .setIn(["UserList", "totalCnt"], cUserList.length);
             }
         }
     )

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export default function InputForm({iType, iLabel, iName, iId, iPlaceholder, changeFunc, iErrMsg, maxLength}){
+    const errorActive = typeof(iErrMsg) === "undefined" ? "" : iErrMsg.length > 0 ? " active" : "";
     return (
         <div className="password-input-area">
             <label>{iLabel}</label>
@@ -14,7 +15,7 @@ export default function InputForm({iType, iLabel, iName, iId, iPlaceholder, chan
                 maxLength={maxLength}
                 onChange={changeFunc}
             />
-            <span className="error">{iErrMsg}</span>
+            <span className={"error" + errorActive}>{iErrMsg}</span>
         </div>
     );
 }

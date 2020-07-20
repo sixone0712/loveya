@@ -26,7 +26,7 @@ const { Option } = Select;
 
 export function getDownloadType(type) {
     let typeString = 0;
-    console.log("type: ",type);
+    //console.log("type: ",type);
     typeString = (type == Define.RSS_TYPE_FTP_MANUAL)  ? "Manual download(ftp)"
         : (type == Define.RSS_TYPE_FTP_AUTO)  ? "Auto download(ftp)"
         : (type == Define.RSS_TYPE_VFTP_SSS)  ? "Manual download(VFTP/SSS)"
@@ -52,10 +52,11 @@ class DownloadHistory extends Component {
 
     }
 
-    async componentDidMount()
-    {
-        console.log("componentDidMount");
-        await API.loadDlHistoryList(this.props);
+    componentDidMount() {
+        const loadHistory = async () => {
+            return await API.loadDlHistoryList(this.props);
+        }
+        loadHistory().then(r => r).catch(e => console.log(e));
     };
 
     handlePaginationChange = page => {
@@ -79,8 +80,8 @@ class DownloadHistory extends Component {
         const formatDate = 'YYYY/MM/DD HH:mm:ss';
         const historyList = API.getDlHistoryList(this.props);
         const {length:count} = historyList;
-        console.log("historyList: ",historyList);
-        console.log("count: ",count);
+        //console.log("historyList: ",historyList);
+        //console.log("count: ",count);
 
         const {currentPage, pageSize} = this.state;
         const lists = filePaginate(historyList, currentPage, pageSize);
@@ -152,12 +153,12 @@ class DownloadHistory extends Component {
                                         </tr>
                                         </thead>
                                         <tbody>
-                                         {lists.map((history) => {
+                                         {lists.map((history, index) => {
                                         return (
-                                            <tr key={history.dl_Idx}>
+                                            <tr key={index}>
                                             	<td>{history.dl_Idx}</td>
                                                 <td>{history.dl_user}</td>
-                                                <td>{(history.dl_date != null) ? moment(history.dl_date).format(formatDate) : ""}</td>
+                                                <td>{(history.dl_date != null) ? moment(history.dl_date, "YYYYMMDDHHmmss").format(formatDate) : ""}</td>
                                                 <td>{history.dl_filename}</td>
                                                 <td>{getDownloadType(history.dl_type)}</td>
                                                 <td>{history.dl_status}</td>

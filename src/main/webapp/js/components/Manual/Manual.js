@@ -5,8 +5,7 @@ import * as viewListActions from "../../modules/viewList";
 import * as genreListActions from "../../modules/genreList";
 import * as searchListActions from "../../modules/searchList";
 import * as Define from '../../define';
-
-import { Container, Row, Col } from "reactstrap";
+import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import Machinelist from "./Machine/MachineList";
 import Categorylist from "./Category/CategoryList";
 import Formlist from "./Search/FormList";
@@ -27,23 +26,29 @@ const scrollStyle = {
 
 class Manual extends Component {
 
-    async componentDidMount() {
-        console.log("[Manual][componentDidMount]componentDidMount");
-        const {viewListActions, genreListActions, searchListActions} = this.props;
+    componentDidMount() {
+      const loadInfos = async () => {
+        try {
+          console.log("[Manual][componentDidMount]componentDidMount");
+          const {viewListActions, genreListActions, searchListActions} = this.props;
 
-        await viewListActions.viewInitAllList();
-        await searchListActions.searchSetInitAllList();
-        await genreListActions.genreInitAllList();
+          await viewListActions.viewInitAllList();
+          await searchListActions.searchSetInitAllList();
+          await genreListActions.genreInitAllList();
 
-        await viewListActions.viewLoadConstructDisplay(Define.REST_API_URL + "/soap/getFabName");
-        await viewListActions.viewLoadToolInfoList(Define.REST_API_URL + "/soap/createToolList");
-        const { toolInfoList } = this.props;
-        const targetname = toolInfoList.getIn([0, "targetname"]);
-        console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
-        console.log("[Manual][componentDidMount]targetname", targetname);
-        await viewListActions.viewLoadLogTypeList(Define.REST_API_URL + "/soap/createFileTypeList?tool=" + targetname);
+          await viewListActions.viewLoadToolInfoList(Define.REST_INFOS_GET_MACHINES);
+          const {toolInfoList} = this.props;
+          const targetname = toolInfoList.getIn([0, "targetname"]);
+          console.log("[Manual][componentDidMount]toolInfoList", toolInfoList.toJS());
+          console.log("[Manual][componentDidMount]targetname", targetname);
+          await viewListActions.viewLoadLogTypeList(`${Define.REST_INFOS_GET_CATEGORIES}/${targetname}`);
 
-        await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
+          await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      loadInfos().then(r => r).catch(e => console.log(e));
     }
 
     render() {
@@ -65,7 +70,11 @@ class Manual extends Component {
             <>
                 {isSuccess &&
                 <>
-                    <Container className="rss-container" fluid={true}>
+                    <Container className="rss-container manual" fluid={true}>
+                        <Breadcrumb className="topic-path">
+                            <BreadcrumbItem>Manual Download</BreadcrumbItem>
+                            <BreadcrumbItem active>FTP</BreadcrumbItem>
+                        </Breadcrumb>
                         <Row>
                             <Col>
                                 <Machinelist/>
@@ -109,8 +118,6 @@ export default connect(
         logTypeFailure: state.pender.failure['viewList/VIEW_LOAD_TOOLINFO_LIST'],
         toolInfoFailure: state.pender.failure['viewList/VIEW_LOAD_LOGTYPE_LIST'],
         genreFailure: state.pender.failure['genreList/GENRE_LOAD_DB_LIST'],
-
-
     }),
     (dispatch) => ({
         viewListActions: bindActionCreators(viewListActions, dispatch),

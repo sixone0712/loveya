@@ -191,7 +191,6 @@ class RSSautoTargetlist extends Component {
                     color="info"
                     className={"form-btn toggle-all" + (ItemsChecked ? " active" : "")}
                     onClick={this.selectAllItem}
-                    style={{ zIndex: "2" }}
                 >
                   All
                 </ButtonToggle>

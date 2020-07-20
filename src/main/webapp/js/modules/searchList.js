@@ -21,7 +21,7 @@ export const searchSetRequestList = createAction(SEARCH_SET_REQUEST_LIST); 	// t
 export const searchSetRequestStartDate = createAction(SEARCH_SET_REQEUST_START_DATE); 	// toolList
 export const searchSetRequestEndDate = createAction(SEARCH_SET_REQUEST_END_DATE); 	// toolList
 export const searchInitResponseList = createAction(SEARCH_INIT_RESPONSE_LIST); 	// toolList
-export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, services.axiosAPI.post);
+export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, services.axiosAPI.postPender);
 export const searchCheckResponseList = createAction(SEARCH_CHECK_RESPONSE_LIST); 	// toolList
 export const searchCheckALLResponseList = createAction(SEARCH_CHECK_ALL_RESPONSE_LIST); 	// toolList
 export const searchSetResponsePerPage = createAction(SEARCH_SET_RESPONSE_PERPAGE); 	// toolList
@@ -37,29 +37,25 @@ export const searchSetDlId = createAction(SEARCH_SET_DL_DOWNLOAD_FILES);
 const initialState = Map({
     requestCompletedDate: "",
     requestListCnt: 0,
-    requestList: List([
-        Map({
-            structId: "",
-            targetName: "",
-            targetType: "",
-            logType: "",
-            logCode: "",
-            logName: "",
-            startDate: "",
-            endDate: "",
-            keyword: "",
-            dir: ""
-        })
-    ]),
-
+    requestList: Map({
+        fabNames: List[{}],
+        machineNames: List[{}],
+        //categoryTypes: List[{}],     //Not currently in use
+        categoryCodes: List[{}],
+        categoryNames: List[{}],
+        startDate: "",
+        endDate: "",
+        //keyword: "",      //Not currently in use
+        //dir: "",      //Not currently in use
+    }),
     downloadCnt: 0,
     responsePerPage: 10,
     responseListCnt: 0,
     responseList: List([
 		Map({
             keyIndex: 0,
-            fileId: 0,
-            fileStatus: "",
+            //fileId: 0,        //Not currently in use
+            //fileStatus: "",   //Not currently in use
             logId: "",
             fileName: "",
             fileSize: 0,
@@ -69,7 +65,7 @@ const initialState = Map({
             structId: "",
             targetName: "",
             logName: "",
-            sizeKB: 0,
+            //sizeKB: 0,        //Not currently in use
             checked: false
 		})
     ]),
@@ -80,6 +76,7 @@ const initialState = Map({
         status: "init",
         totalFiles: 0,
         downloadFiles: 0,
+        downloadUrl: ""
     }),
 
     //startDate: moment().set({'hour' : 0, 'minute': 0, 'second': 1}),
@@ -100,25 +97,28 @@ export default handleActions({
             // onFailure: (state, action) => state,
             onSuccess: (state, action) => {
                 console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]");
-                const lists = action.payload.data;
+                const {lists} = action.payload.data;
+                //console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]lists", lists);
                 const newLists = lists.map((list, idx) => {
                     return {
                         keyIndex: idx,
-                        fileId: list.fileId,
-                        fileStatus: list.fileStatus,
-                        logId: list.logId,
+                        structId: list.fabName,
+                        targetName: list.machineName,
+                        logName: list.categoryName,
+                        logId: list.categoryCode,
+                        //fileId: list.fileId,  //Not currently in use
                         fileName: list.fileName,
                         fileSize: list.fileSize,
                         fileDate: list.fileDate,
                         filePath: list.filePath,
+                        //fileStatus: list.fileStatus,  //Not currently in use
                         file: list.file,
-                        structId: list.structId,
-                        targetName: list.targetName,
-                        logName: list.logName,
-                        sizeKB: API.bytesToSize(list.fileSize),
+                        //sizeKB: API.bytesToSize(list.fileSize),   //Not currently in use
                         checked: true
                     }
                 });
+
+                //console.log("handleActions[SEARCH_LOAD_RESPONSE_LIST]newLists", newLists);
 
                 const newListSize = newLists.length;
                 return state.set('responseList', fromJS(newLists)).set('requestListCnt', newListSize)
@@ -176,28 +176,22 @@ export default handleActions({
         //console.log("formDate", formDate);
         //console.log("toDate", toDate);
 
-        const newSearchList = new Array();
-        for (let tList of newToolList) {
-            for(let fList of newLogInfoList) {
-                newSearchList.push(
-                    {
-                        structId: tList.structId,
-                        targetName: tList.targetname,
-                        targetType: tList.targettype,
-                        logType: fList.logType,
-                        logCode: fList.logCode,
-                        logName: fList.logName,
-                        startDate: formDate,
-                        endDate: toDate,
-                        keyword: "",
-                        dir: "",
-                    }
-                );
-            }
-        }
-        //console.log("newSearchList", newSearchList);
+        const fabNames = newToolList.map(list => list.structId);
+        const machineNames = newToolList.map(list => list.targetname);
+        const categoryCodes = newLogInfoList.map(list => list.logCode);
+        const categoryNames = newLogInfoList.map(list => list.logName);
 
-        return state.set("requestList", fromJS(newSearchList));
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]fabNames", fabNames);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]machineNames", machineNames);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]categoryCodes", categoryCodes);
+        //console.log("handleActions[SEARCH_SET_REQUEST_LIST]categoryNames", categoryNames);
+
+        return state.setIn(['requestList', 'fabNames'], fromJS(fabNames))
+                    .setIn(['requestList', 'machineNames'], fromJS(machineNames))
+                    .setIn(['requestList', 'categoryCodes'], fromJS(categoryCodes))
+                    .setIn(['requestList', 'categoryNames'], fromJS(categoryNames))
+                    .setIn(['requestList', 'startDate'], formDate)
+                    .setIn(['requestList', 'endDate'], toDate);
     },
 
     [SEARCH_CHECK_RESPONSE_LIST]: (state, action) => {
@@ -245,7 +239,7 @@ export default handleActions({
 
     [SEARCH_SET_DL_STATUS] : (state, action) => {
 
-        const { func, dlId, status, totalFiles, downloadFiles } = action.payload;
+        const { func, dlId, status, totalFiles, downloadFiles, downloadUrl } = action.payload;
         const downloadStatus = state.get("downloadStatus").toJS();
 
         //console.log("func", func);
@@ -272,6 +266,9 @@ export default handleActions({
         //console.log("downloadFiles", downloadFiles);
         if(downloadFiles !== undefined) {
             downloadStatus.downloadFiles = downloadFiles;
+        }
+        if(downloadUrl !== undefined) {
+            downloadStatus.downloadUrl = downloadUrl;
         }
 
         //console.log("downloadStatus", downloadStatus);

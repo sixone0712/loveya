@@ -42,7 +42,7 @@ class MachineList extends Component {
                 return (
                   <EquipmentCollapse
                     key={index}
-                    structId={title.equipmentId}
+                    structId={title.fabName}
                     machineList={machineList}
                     checkMachineItem={this.checkMachineItem}
                   />

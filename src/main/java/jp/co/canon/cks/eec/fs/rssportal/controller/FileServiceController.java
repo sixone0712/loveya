@@ -2,14 +2,18 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import jp.co.canon.cks.eec.fs.manage.*;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSFileInfoBeanResponse;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSLogInfoBean;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSRequestSearch;
-import jp.co.canon.cks.eec.fs.rssportal.model.RSSToolInfo;
+import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
+import jp.co.canon.cks.eec.fs.manage.FileTypeModel;
+import jp.co.canon.cks.eec.fs.manage.ToolInfoModel;
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfoCategory;
+import jp.co.canon.cks.eec.fs.rssportal.model.Infos.RSSInfoMachine;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,15 +22,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
-import java.rmi.RemoteException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/rss/rest/soap")
+@RequestMapping("/rss/api/infos")
 public class FileServiceController {
 
     @Value("${rssportal.property.constructdisplay}")
@@ -35,22 +36,68 @@ public class FileServiceController {
     private int fileServiceRetryCount;
     @Value("${rssportal.file-collect-service.retry-interval}")
     private int fileServiceRetryInterval;
-
+    @Value("${rssportal.constructDisplayTree}")
+    public String[] constructDisplayTree;
     private final Log log = LogFactory.getLog(getClass());
+
     FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
 
-    @GetMapping("/getFabName")
-    public ResponseEntity<?> getGenre() throws FileNotFoundException {
-        log.info("/rss/rest/soap/getFabName");
-        log.info("[getFabName]contructDisplay: " + contructDisplay);
+    @GetMapping("/fabs")
+    @ResponseBody
+    public ResponseEntity<?> getFabs() throws FileNotFoundException {
+        log.info("[Get] /rss/api/infos/fabs");
+        JSONObject lists = new JSONObject();
+        JSONArray res = new JSONArray();
+        String output = null;
+
         try (InputStream inputStream = new FileInputStream(new File(contructDisplay))) {
             String xml = IOUtils.toString(inputStream);
             JSONObject jObject = XML.toJSONObject(xml);
+            JSONObject ConstructDisplay = jObject.getJSONObject("ConstructDisplay");
+            log.debug("ConstructDisplay: " + ConstructDisplay.toString());
+            JSONArray Tree = ConstructDisplay.getJSONArray("Tree");
+
+            for (int i = 0; i < Tree.length(); i++) {
+                JSONObject obj = Tree.getJSONObject(i);
+                String title = obj.getString("name");
+                for (String treeName : constructDisplayTree) {
+                    if (title.equals(treeName)) {
+                        JSONArray Child = null;
+                        try {
+                            Child = obj.getJSONArray("Child");
+                            for (int j = 0; j < Child.length(); j++) {
+                                JSONObject fabs = Child.getJSONObject(j);
+                                String name = fabs.getString("name");
+                                String id = Integer.toString(fabs.getInt("id"));
+                                JSONObject newFab = new JSONObject();
+                                newFab.put("fabName", name);
+                                newFab.put("fabId", id);
+                                res.put(newFab);
+                            }
+                        } catch (Exception e) {
+                            log.info("[fabs] Chlid does not exist.[ " + e + "]");
+                        }
+                    }
+                }
+            }
+            lists.put("lists", res);
+
+            // Pring Log
+            /*
+            for (int i = 0; i < res.length(); i++) {
+                JSONObject obj = res.getJSONObject(i);
+                String fabName = obj.getString("fabName");
+                int fabId = obj.getInt("fabId");
+                log.info("fabName: " + fabName);
+                log.info("fabId: " + fabId);
+            }
+             */
+
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            Object json = mapper.readValue(jObject.toString(), Object.class);
-            String output = mapper.writeValueAsString(json);
-            return ResponseEntity.status(HttpStatus.OK).body(json);
+            Object json = mapper.readValue(lists.toString(), Object.class);
+            output = mapper.writeValueAsString(json);
+            return ResponseEntity.status(HttpStatus.OK).body(output);
         } catch (IOException e) {
             e.printStackTrace();
             log.error("[createFileList]HttpStatus: INTERNAL_SERVER_ERROR");
@@ -58,247 +105,153 @@ public class FileServiceController {
         }
     }
 
-    @GetMapping("/createToolList")
-    public ResponseEntity<RSSToolInfo[]> createToolList() throws Exception {
-        log.info("/rss/rest/soap/createToolList");
+    public String findFabName(JSONArray fabs, String findId) {
+        if (fabs.length() != 0 && fabs != null) {
+            for (int i = 0; i < fabs.length(); i++) {
+                JSONObject fab = fabs.getJSONObject(i);
+                String fabName = fab.getString("fabName");
+                String fabId = fab.getString("fabId");
+                //log.info("fabName: " + fabName);
+                //log.info("fabId: " + fabId);
+                if (fabId.equals(findId)) {
+                    return fabName;
+                }
+            }
+        }
+        return null;
+    }
+
+    @GetMapping("/machines")
+    @ResponseBody
+    //public ResponseEntity<ArrayList<RSSInfoMachine>> getMachines() throws Exception {
+    public ResponseEntity<?> getMachines() throws Exception {
+        log.info("[Get] /rss/api/infos/machines");
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        String fabs = null;
+        JSONObject jsonParse = null;
+        JSONArray fabList = null;
+        try {
+            fabs = (String) getFabs().getBody();
+            jsonParse = new JSONObject(fabs);
+            fabList = jsonParse.getJSONArray("lists");
+        } catch (JSONException e) {
+            log.error("[machines]request getFabs failed");
+            log.error(e);
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
+        }
+
         ToolInfoModel[] result = null;
         int retry = 0;
-        while(retry < fileServiceRetryCount){
+        while (retry < fileServiceRetryCount) {
             try {
                 result = serviceLocator.getFileServiceManage().createToolList();
                 break;
-            } catch(Exception e){
+            } catch (Exception e) {
                 retry++;
-                log.error("[createToolList]request failed(retry: " + retry);
+                log.error("[machines]request failed(retry: " + retry);
                 Thread.sleep(fileServiceRetryInterval);
             }
         }
 
-        if(result == null) {
-            log.error("[createToolList]request totally failed");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        if (result == null) {
+            log.error("[machines]request totally failed");
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
         ToolInfoModel[] toolModels = result;
-        ArrayList<RSSToolInfo> toolList = new ArrayList<>();
+        ArrayList<RSSInfoMachine> mpaList = new ArrayList<>();
         for (int i = 0; i < toolModels.length; i++) {
-            RSSToolInfo tool = new RSSToolInfo();
-            tool.setStructId(toolModels[i].getStructId());
-            tool.setTargetname(toolModels[i].getName());
-            tool.setTargettype(toolModels[i].getType());
-            toolList.add(tool);
+            RSSInfoMachine machine = new RSSInfoMachine();
+            String fabName = findFabName(fabList, toolModels[i].getStructId());
+            if (fabName != null && !fabName.equals("")) {
+                machine.setFabName(fabName);
+                machine.setMachineName(toolModels[i].getName());
+                mpaList.add(machine);
+            }
         }
 
-        RSSToolInfo[] arrToolList = toolList.toArray(new RSSToolInfo[toolList.size()]);
-        return ResponseEntity.status(HttpStatus.OK).body(arrToolList);
+        resBody.put("lists", mpaList);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
-    @GetMapping("/createFileTypeList")
-    public ResponseEntity<RSSLogInfoBean[]> createFileTypeList(@RequestParam(name="tool") String tool) throws Exception {
-        log.info("/rss/rest/soap/createFileTypeList");
-        String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
-        String FILE_SELECT_PAGE = "FileListSelect";
+    @GetMapping("/categories/{machineName}")
+    @ResponseBody
+    public ResponseEntity<?> getCategories(@PathVariable("machineName") String machineName) throws Exception {
+        log.info("[Get] /rss/api/infos/machines/" + machineName);
+        // Not currently used
+        //String FILE_SELECT_IN_DIR_PAGE = "FileListSelectInDirectory";
+        //String FILE_SELECT_PAGE = "FileListSelect";
         FileTypeModel[] ftList = null;
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
         int retry = 0;
 
-        if (tool == null) {
-            log.error("[createFileTypeList]param(tool) is null");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if (machineName == null || machineName.isEmpty()) {
+            log.error("[categories]param(tool) is null");
+            error.setReason(RSSErrorReason.INVALID_PARAMETER);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
-        while(retry < fileServiceRetryCount){
+        while (retry < fileServiceRetryCount) {
             try {
-                ftList = serviceLocator.getFileServiceManage().createFileTypeList(tool);
+                ftList = serviceLocator.getFileServiceManage().createFileTypeList(machineName);
                 break;
-            } catch(Exception e){
+            } catch (Exception e) {
                 retry++;
-                log.error("[createFileTypeList] request failed(retry: " + retry);
+                log.error("[categories]request failed(retry: " + retry);
                 Thread.sleep(fileServiceRetryInterval);
             }
         }
 
-        if(ftList == null) {
-            log.error("[createFileTypeList]request totally failed");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        if (ftList == null) {
+            log.error("[categories]request totally failed");
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
-        RSSLogInfoBean[] r = new RSSLogInfoBean[ftList.length];
+        RSSInfoCategory[] r = new RSSInfoCategory[ftList.length];
         for (int i = 0; i < ftList.length; i++) {
-            r[i] = new RSSLogInfoBean();
-            r[i].setCode(ftList[i].getLogType());
-            r[i].setLogName(ftList[i].getDataName());
+            r[i] = new RSSInfoCategory();
+            r[i].setCategoryCode(ftList[i].getLogType());
+            r[i].setCategoryName(ftList[i].getDataName());
+            // Not currently used
+            /*
             int v = Integer.parseInt(ftList[i].getSearchType());
             switch((v & 0x03)) {
                 case 3:
-                    r[i].setLogType(0);
+                    r[i].setCategoryType(0);
                     break;
                 case 1:
-                    r[i].setLogType(1);
+                    r[i].setCategoryType(1);
                     break;
                 case 2:
-                    r[i].setLogType(2);
+                    r[i].setCategoryType(2);
                     break;
                 default:
-                    r[i].setLogType(3);
+                    r[i].setCategoryType(3);
             }
+            */
+
+            // Not currently used
+            /*
             if ((v & 0x10) == 0x10) {
                 r[i].setFileListForwarding(FILE_SELECT_IN_DIR_PAGE);
             } else {
                 r[i].setFileListForwarding(FILE_SELECT_PAGE);
             }
+            */
         }
-        return ResponseEntity.status(HttpStatus.OK).body(r);
+
+        resBody.put("lists", r);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
-
-    private boolean createFileList(FileServiceManage manager,
-                                   List<RSSFileInfoBeanResponse> list,
-                                   RSSRequestSearch request) {
-        if(manager==null || list==null || request==null)
-            return false;
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        Calendar from = Calendar.getInstance();
-        Calendar to = Calendar.getInstance();
-        try {
-            from.setTime(format.parse(request.getStartDate()));
-            to.setTime(format.parse(request.getEndDate()));
-        } catch (ParseException e) {
-            log.error("[createFileList] failed to parse datetime ("+request.getStructId()+":"+request.getLogCode());
-            return false;
-        }
-
-        FileInfoModel[] fileInfo;
-        int retry = 0;
-        while(retry<fileServiceRetryCount) {
-            try {
-                fileInfo = manager.createFileList(
-                        request.getTargetName(),
-                        request.getLogCode(),
-                        from,
-                        to,
-                        request.getKeyword(),
-                        request.getDir());
-
-                for(FileInfoModel file: fileInfo) {
-                    if(file.getName().endsWith(".") || file.getName().endsWith("..") || file.getSize()==0)
-                        continue;
-                    if(file.getType().equals("D")) {
-                        RSSRequestSearch child = request.getClone();
-                        child.setDir(file.getName());
-                        if(!createFileList(manager, list, child)) {
-                            log.warn(String.format("[createFileList]connection error (%s %s %s)",
-                                    request.getStructId(), request.getLogCode(), request.getDir()));
-                        }
-                    } else {
-                        RSSFileInfoBeanResponse info = new RSSFileInfoBeanResponse();
-                        info.setFile(true);
-                        info.setFileId(0);
-                        info.setLogId(request.getLogCode());
-                        info.setFileName(file.getName());
-                        String[] paths = file.getName().split("/");
-                        if(paths.length>1) {
-                            int lastIndex = file.getName().lastIndexOf("/");
-                            info.setFilePath(file.getName().substring(0, lastIndex));
-                        } else {
-                            info.setFilePath(".");
-                        }
-                        info.setFileSize(file.getSize());
-                        info.setFileDate(format.format(file.getTimestamp().getTime()));
-                        info.setFileStatus("");
-                        info.setStructId(request.getStructId());
-                        info.setTargetName(request.getTargetName());
-                        info.setLogName(request.getLogName());
-                        list.add(info);
-                    }
-                }
-                return true;
-            } catch (RemoteException e) {
-                log.error("[createFileList]request failed(retry: " + (++retry) + ")");
-                try {
-                    Thread.sleep(fileServiceRetryInterval);
-                } catch (InterruptedException interruptedException) {
-                    log.error("[createFileList]failed to sleep");
-                }
-            }
-        }
-        return false;
-    }
-
-    @PostMapping("/createFileList")
-    public ResponseEntity<RSSFileInfoBeanResponse[] > createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
-        log.info("/rss/rest/soap/createFileList");
-        List<RSSFileInfoBeanResponse> list = new ArrayList<>();
-        for(RSSRequestSearch request: requestList) {
-            if(!createFileList(serviceLocator.getFileServiceManage(), list, request)) {
-                log.warn("[createFileList]failed to connect "+request.getStructId());
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(list.toArray(new RSSFileInfoBeanResponse[0]));
-    }
-
-    /*
-    @Async
-    @PostMapping("/createFileList")
-    public RSSFileInfoBeanResponse[] createFileList(@RequestBody RSSRequestSearch[] requestList) throws Exception {
-        ArrayList<RSSFileInfoBeanResponse> resultList = new ArrayList<>();
-
-        System.out.println(requestList);
-
-        for(RSSRequestSearch request :  requestList) {
-            Calendar st = null;
-            Calendar ed = null;
-            SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
-            String structId = request.getStructId();
-            String targetName = request.getTargetName();
-            String logName = request.getLogName();
-            String startDate = request.getStartDate();
-            String endDate = request.getEndDate();
-            String toolId = request.getTargetName();
-            String logId = request.getLogCode();
-            String keyword = request.getKeyword();
-            String dir = request.getDir();
-
-            if (startDate != null) {
-                st = Calendar.getInstance();
-                st.setTime(f.parse(startDate));
-            }
-            if (endDate != null) {
-                ed = Calendar.getInstance();
-                ed.setTime(f.parse(endDate));
-            }
-
-            FileInfoModel[] src = serviceLocator.getFileServiceManage().createFileList(toolId, logId, st, ed, keyword, dir);
-            //FileInfoModel[] src = serviceLocator.getFileServiceManage(null).createFileList(toolId, logId, st, ed, keyword, dir);
-
-            if (src == null) src = new FileInfoModel[0];
-
-            for (int i = 0; i < src.length; i++) {
-                RSSFileInfoBeanResponse dest = new RSSFileInfoBeanResponse();
-                String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(src[i].getTimestamp().getTimeInMillis());
-                if(dest.isFile()) {
-                    dest.setFile(src[i].getType().equals("F"));
-                    dest.setFileId(0);
-                    dest.setLogId(logId);
-                    dest.setFileName(src[i].getName());
-                    dest.setFilePath(src[i].getName());
-                    dest.setFileSize(src[i].getSize());
-                    //dest.setFileDate(Long.toString(src[i].getTimestamp().getTimeInMillis()));
-                    dest.setFileDate(timeStamp);
-                    dest.setFileStatus("");
-
-                    // additional info
-                    dest.setStructId(structId);
-                    dest.setTargetName(targetName);
-                    dest.setLogName(logName);
-
-                    resultList.add(dest);
-                }
-            }
-        }
-
-        RSSFileInfoBeanResponse[] array = resultList.toArray(new RSSFileInfoBeanResponse[resultList.size()]);
-
-        return array;
-    }
-    */
 }

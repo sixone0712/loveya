@@ -61,6 +61,8 @@ rssportal:
       min-percent: 30
       interval: 3600 # seconds
 
+  constructDisplayTree: Equipments, test
+
 ---
 spring:
   profiles: dev

@@ -66,7 +66,11 @@ class ChangePwModal extends Component {
         console.log("isError: " + isError);
 
         if (!isError) {
-            await API.changePassword(this.props, this.state);
+            try {
+                await API.changePassword(this.props, this.state);
+            } catch (e) {
+                console.log(e);
+            }
             let  errCode = API.getErrCode(this.props);
             if(errCode)
             {
@@ -131,7 +135,7 @@ class ChangePwModal extends Component {
                                         autoComplete="off"
                                         onChange={this.changeHandler}
                                     />
-                                    <span className="error">{errors.oldPw}</span>
+                                    <span className={"error" + (typeof(errors.oldPw) === "undefined" ? "" : errors.oldPw.length > 0 ? " .active" : "")}>{errors.oldPw}</span>
                                 </div>
                                 <div className="password-input-area">
                                     <label>New Password</label>
@@ -161,7 +165,7 @@ class ChangePwModal extends Component {
                                             </p>
                                         </PopoverBody>
                                     </UncontrolledPopover>
-                                    <span className="error">{errors.newPw}</span>
+                                    <span className={"error" + (typeof(errors.newPw) === "undefined" ? "" : errors.newPw.length > 0 ? " .active" : "")}>{errors.newPw}</span>
                                 </div>
                                 <div className="password-input-area">
                                     <label>Confirm Password</label>

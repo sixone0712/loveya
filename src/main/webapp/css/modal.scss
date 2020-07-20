@@ -46,6 +46,9 @@
   &.auto-plan-calendar-modal {
     width: 300px;
   }
+  &.auto-plan-alert-modal.execute-command-list {
+    width: 1000px;
+  }
   &.auto-plan-calendar-modal .content-with-title,
   &.auto-plan-alert-modal .content-with-title,
   &.auto-plan-confirm-modal .content-with-title {
@@ -61,7 +64,7 @@
     margin-bottom: 4px
   }
   p.title.font-lg {
-    font-size: 19px;
+    font-size: 20px;
   }
   .Custom-ratio label {
     height: 130px !important;
@@ -143,8 +146,27 @@
 
   .content-with-title {
     border-top: 1px solid #ffa94d;
-    &.user-modal {
+    &.user-modal,
+    &.add-plan-modal{
       border-top: 1px solid rgba(0, 0, 0, 0.5);
+      .plan-btn-area {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        .btn-outline-info {
+          color: rgba(0, 0, 0, 0.8);
+          border-color: rgba(0, 0, 0, 0.8);
+          &:hover,
+          &:not(:disabled):not(.disabled):active {
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-color: rgba(0, 0, 0, 0.8);
+          }
+          &:focus,
+          &:not(:disabled):not(.disabled):active:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.5);
+          }
+        }
+      }
     }
     .password-input-area:first-child {
       margin-top: 1em;
@@ -168,14 +190,14 @@
         transition: box-shadow 0.1s, transform 0.2s;
       }
       label {
-        font-size: 16px;
+        font-size: 14px;
         position: relative;
         padding-left: 0.7em;
         color: rgba(0, 0, 0, 0.8);
       }
       label::before {
         position: absolute;
-        top: 10px;
+        top: 8px;
         left: 0;
         width: 6px;
         height: 6px;
@@ -230,6 +252,9 @@
       margin: 0;
       padding: 0;
     }
+    &.command-modal > .form-group {
+      margin-bottom: 1rem;
+    }
   }
 
   .button-wrap {
@@ -241,7 +266,7 @@
       padding: 12px 0;
       font-size: 14px;
       color: white;
-      border: 0;
+      border: 1px solid transparent;
       -webkit-transition: all 0.2s;
       transition: all 0.2s;
       cursor: pointer;
@@ -250,45 +275,57 @@
       }
     }
     button.primary {
+      border-color: #ffa94d;
       background-color: #ffa94d;
     }
     button.primary:hover,
     button.primary:active {
+      border-color: #ffc078;
       background-color: #ffc078;
     }
     button.secondary {
+      border-color: #85a4b3;
       background-color: #85a4b3;
     }
     button.secondary:hover,
     button.secondary:active {
+      border-color: #b6c6ce;
       background-color: #b6c6ce;
     }
     button.green {
+      border-color: #37b24d;
       background-color: #37b24d;
     }
     button.green:hover,
     button.green:active {
+      border-color: #40c057;
       background-color: #40c057;
     }
     button.auto-plan {
+      border-color: rgb(92, 124, 250);
       background-color: rgb(92, 124, 250);
     }
     button.auto-plan:hover,
     button.auto-plan:active {
+      border-color: rgba(92, 124, 250, 0.2);
       background-color: rgba(92, 124, 250, 0.7);
     }
     button.gray {
+      border-color: rgba(0,0,0,0);
       background-color: rgba(0,0,0,0.8);
     }
     button.gray:hover,
     button.gray:active {
+      border-color: rgba(0,0,0,0.1);
       background-color: rgba(0,0,0,0.5);
     }
     button.administrator {
+      border-color: rgb(23, 162, 184);
       background-color: rgb(23, 162, 184);
     }
     button.administrator:hover,
     button.administrator:active {
+      border-color: rgba(23, 162, 184, 0.3);
       background-color: rgba(23, 162, 184, 0.5);
     }
     button.alert-type {

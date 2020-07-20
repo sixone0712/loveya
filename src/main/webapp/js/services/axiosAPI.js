@@ -1,67 +1,298 @@
 import axios from 'axios';
 import * as Define from "../define";
 
-export const checkSession = async (data) => {
-    console.log("[axiosAPI][checkSession]");
-    console.log("[axiosAPI][checkSession]data.headers", data.headers)
-    const { userauth } = data.headers;
-    console.log("[axiosAPI][checkSession]userauth", userauth);
-    if(userauth == null || userauth == "false") {
-        console.log("[axiosAPI][checkSession]replace");
-        await axios.get(Define.REST_API_URL + "/user/logout");
-        window.sessionStorage.clear();
-        window.location.replace('/rss');
-        return null;
+export const checkSession = (response) => {
+    if(response !== undefined) {
+        console.log("[axiosAPI][checkSession]response", response);
+        //console.log("[axiosAPI][checkSession]response.data", response.data);
+        //console.log("[axiosAPI][checkSession]response.headers", response.headers)
+        const { userauth } = response.headers;
+        console.log("[axiosAPI][checkSession]userauth", userauth);
+        if (userauth == null || userauth == "false") {
+            console.log("[axiosAPI][checkSession]logout then go to login page");
+            axios.get(Define.REST_API_URL + "/user/logout")
+              .then(
+                (res) => {
+                    window.sessionStorage.clear();
+                    window.location.replace('/rss');
+                })
+              .catch(error => {
+                  window.sessionStorage.clear();
+                  window.location.replace('/rss');
+              });
+        }
+    } else {
+        console.log("[axiosAPI][checkSession] response is undefined");
     }
-
-    return data;
 }
 
-export const isLogin = async (getId) => {
-    const res =  await axios.get(getId, {
-        headers: {
-            'Pragma': 'no-cache'
-        }});
+export const getCancelToken = axios.CancelToken;
+export let getCancel;
+export const postCancelToken = axios.CancelToken;
+export let postCancel;
+export const putCancelToken = axios.CancelToken;
+export let putCancel;
+export const patchCancelToken = axios.CancelToken;
+export let patchCancel;
+export const deleteCancelToken = axios.CancelToken;
+export let deleteCancel;
 
-    return res;
+export const isLogin = async (url) => {
+    try {
+        const res =  await axios.get(url, {
+            headers: {
+                'Pragma': 'no-cache'
+            }});
+        return res;
+    } catch (error) {
+        return error.response;
+    }
+}
+
+export const getPender = async (getId) => {
+    try {
+        const res = await axios.get(getId, {
+            headers: {
+                // Internet Explorer requests caching
+                // If the cache header is not set, Internet Explorer 11 (and earlier) caches all resources by default,
+                // and in case of successive get requests, the cached data is responded without sending a get request to the server.
+
+                // This setting was not applied in IE11.
+                //'Cache-Control': 'no-cache',
+
+                // Add headers to all API requests on the client side
+                'Pragma': 'no-cache'
+
+                // References
+                // https://cherniavskii.com/internet-explorer-requests-caching/
+                // https://kdevkr.github.io/archives/2018/understanding-cache-control/
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new getCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                getCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        return new Promise(function (resolve, reject) {
+            checkSession(error.response);
+            reject(error.response);
+        })
+    }
+}
+
+export const postPender = async (url, postData) => {
+    try {
+        const res = await axios.post(url, postData, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new postCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                postCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        checkSession(error.response);
+        return new Promise(function (resolve, reject) {
+            checkSession(error.response)
+            reject(error.response);
+        })
+    }
+}
+
+export const putPender = async (url, data) => {
+    try {
+        const res = await axios.put(url, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new putCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                putCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        return new Promise(function (resolve, reject) {
+            checkSession(error.response)
+            reject(error.response);
+        })
+    }
+}
+
+export const patchPander = async (url, data) => {
+    console.log("patchPander/data", data);
+    try {
+        const res = await axios.patch(url, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new patchCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                patchCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        return new Promise(function (resolve, reject) {
+            checkSession(error.response)
+            reject(error.response);
+        })
+    }
+}
+
+export const deletePender = async (url) => {
+    try {
+        const res = await axios.delete(url, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new deleteCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                deleteCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        return new Promise(function (resolve, reject) {
+            checkSession(error.response)
+            reject(error.response);
+        })
+    }
 }
 
 export const get = async (getId) => {
-    const res =  await axios.get(getId, {
-        headers: {
-            // Internet Explorer requests caching
-            // If the cache header is not set, Internet Explorer 11 (and earlier) caches all resources by default,
-            // and in case of successive get requests, the cached data is responded without sending a get request to the server.
+    try {
+        const res = await axios.get(getId, {
+            headers: {
+                // Internet Explorer requests caching
+                // If the cache header is not set, Internet Explorer 11 (and earlier) caches all resources by default,
+                // and in case of successive get requests, the cached data is responded without sending a get request to the server.
 
-            // This setting was not applied in IE11.
-            //'Cache-Control': 'no-cache',
+                // This setting was not applied in IE11.
+                //'Cache-Control': 'no-cache',
 
-            // Add headers to all API requests on the client side
-            'Pragma': 'no-cache'
+                // Add headers to all API requests on the client side
+                'Pragma': 'no-cache'
 
+                // References
+                // https://cherniavskii.com/internet-explorer-requests-caching/
+                // https://kdevkr.github.io/archives/2018/understanding-cache-control/
+            },
             // References
-            // https://cherniavskii.com/internet-explorer-requests-caching/
-            // https://kdevkr.github.io/archives/2018/understanding-cache-control/
-        }});
-
-    return checkSession(res);
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new getCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                getCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch(error) {
+        checkSession(error.response)
+        return error.response;
+    }
 };
 
-export const postCancelToken = axios.CancelToken;
-export let postCancel;
 export const post = async (url, postData) => {
-    const res =  await axios.post(url, postData, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        // References
-        // https://yamoo9.github.io/axios/guide/cancellation.html
-        cancelToken: new postCancelToken(function executor(c) {
-            // The executor function takes the cancel function as a parameter.
-            postCancel = c;
-        })
-    });
-    return checkSession(res);
+    try {
+        const res = await axios.post(url, postData, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new postCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                postCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        checkSession(error.response)
+        return error.response;
+    }
+}
+
+export const putReqeust = async (url, data) => {
+    try {
+        const res = await axios.put(url, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new putCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                putCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        checkSession(error.response)
+        return error.response;
+    }
+}
+
+export const PatchRequest = async (url, data) => {
+    try {
+        const res = await axios.patch(url, data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new patchCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                patchCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        checkSession(error.response)
+        return error.response;
+    }
+}
+
+export const deleteRequest = async (url) => {
+    try {
+        const res = await axios.delete(url, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // References
+            // https://yamoo9.github.io/axios/guide/cancellation.html
+            cancelToken: new deleteCancelToken(function executor(c) {
+                // The executor function takes the cancel function as a parameter.
+                deleteCancel = c;
+            })
+        });
+        checkSession(res);
+        return res;
+    } catch (error) {
+        checkSession(error.response)
+        return error.response;
+    }
 }
 
 export const downloadFile = async (url) => {

@@ -86,46 +86,45 @@ class RSSautoplanlist extends Component {
         };
     }
 
-    async componentDidMount() {
-        await this.loadPlanList();
+    componentDidMount() {
+        this.loadPlanList().then(r => r).catch(e => console.log(e));
     }
 
     loadPlanList = async () => {
-        const res =  await services.axiosAPI.get(Define.REST_API_URL + "/plan/list");
-        //console.log("[AUTO][loadPlanList]res", res);
-        const { data } = res;
-        const newData = data.map((item, idx) => {
-            const targetArray = item.logType.split(",")
-            return (
-                {
-                    planId: item.planName,
-                    planDescription: item.description,
-                    planTarget: targetArray.length,
-                    planPeriodStart: moment(item.start).format("YYYY-MM-DD HH:mm:ss"),
-                    planPeriodEnd:moment(item.end).format("YYYY-MM-DD HH:mm:ss"),
-                    planStatus: item.status,
-                    planLastRun: item.lastCollect == null ? "-" : moment(item.lastCollect).format("YYYY-MM-DD HH:mm:ss"),
-                    planDetail: item.detail,
-                    id: item.id,
-                    tool: item.tool,
-                    logType: item.logType,
-                    interval: item.interval,
-                    collectStart: moment(item.collectStart).format("YYYY-MM-DD HH:mm:ss"),
-                    collectTypeStr: item.collectTypeStr,
-                    expired: item.expired,
-                    keyIndex: idx + 1
-                }
-            );
-        })
-
-        //console.log("[AUTO][loadPlanList]newData", newData);
-
-        await this.setState({
-            ...this.state,
-            registeredList: newData
-        })
-
-        return true;
+        try {
+            const res = await services.axiosAPI.get(Define.REST_PLANS_GET_PLANS);
+            const { lists } = res.data;
+            const newData = lists.map((item, idx) => {
+                return (
+                  {
+                      planId: item.planName,
+                      planDescription: item.description,
+                      planTarget: item.categoryCodes.length,
+                      planPeriodStart: moment(item.from, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planPeriodEnd: moment(item.to, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planStatus: item.status,
+                      planLastRun: item.lastCollection == null
+                        ? "-"
+                        : moment(item.lastCollection, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      planDetail: item.detailedStatus,
+                      id: item.planId,
+                      tool: item.machineNames,
+                      logType: item.categoryCodes,
+                      interval: item.interval,
+                      collectStart: moment(item.start, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+                      collectTypeStr: item.type,
+                      keyIndex: idx + 1
+                  }
+                );
+            })
+            //console.log("[AUTO][loadPlanList]newData", newData);
+            await this.setState({
+                ...this.state,
+                registeredList: newData
+            })
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     setEditPlanList = (id, status, detail) => {
@@ -176,7 +175,7 @@ class RSSautoplanlist extends Component {
         const numerator = deleteIndex - 1 === 0 ? 1 : deleteIndex - 1;
 
         if(deleting) {
-            res = await services.axiosAPI.get(Define.REST_API_URL + '/plan/delete?id='+selectedPlanId);
+            res = await services.axiosAPI.deleteRequest(`${Define.REST_PLANS_DELETE_PLANS}/${selectedPlanId}`);
         }
 
         await this.setState({
@@ -255,12 +254,12 @@ class RSSautoplanlist extends Component {
     };
 
     stopDownload = async (planId) => {
-        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/stop?id=${planId}`);
+        const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/stop`);
         await this.loadPlanList();
     }
 
     restartDownload = async (planId) => {
-        const res = await services.axiosAPI.get(`${Define.REST_API_URL}/plan/restart?id=${planId}`);
+        const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/restart`);
         await this.loadPlanList();
     }
 
@@ -378,7 +377,7 @@ class RSSautoplanlist extends Component {
                                                     <span
                                                         className="plan-id-area"
                                                         onClick={ () => {
-                                                            const param = `?id=${plan.id}&name=${plan.planId}`;
+                                                            const param = `?planId=${plan.id}&planName=${plan.planId}`;
                                                             this.props.history.push(Define.PAGE_AUTO_DOWNLOAD + param);
                                                         }}
                                                     >

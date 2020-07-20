@@ -67,8 +67,14 @@ export const startLogout = (props, url) => {
 };
 
 export const changePassword = (props, state) => {
-    const { loginActions } = props;
-    const { oldPw, newPw} = state;
-    return loginActions.changeUserPassword(`${Define.REST_API_URL}/user/changePw?oldPw=${md5(oldPw)}&newPw=${md5(newPw)}`);
+    const { loginActions, loginInfo } = props;
+    const { userId } = loginInfo.toJS();
+    const { oldPw, newPw } = state;
+    const requestData = {
+        newPassword: md5(newPw),
+        oldPassword: md5(oldPw)
+    }
+
+    return loginActions.changeUserPassword(`${Define.REST_USERS_PATCH_CHANGE_PASSWORD}/${userId}/password`, requestData);
 };
 

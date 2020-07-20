@@ -24,12 +24,12 @@ class MoveRefreshPage extends Component {
             history.replace(Define.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
         } else if (target.includes(Define.PAGE_AUTO_PLAN_ADD)) {
             console.log("PAGE_AUTO_PLAN_ADD");
-            const {viewListActions} = this.props;
-            const {autoPlanActions} = this.props;
+            const {viewListActions, autoPlanActions} = this.props;
+            const { type } = query;
             await viewListActions.viewCheckAllToolList(false);
             await viewListActions.viewCheckAllLogTypeList(false)
             await autoPlanActions.autoPlanInit();
-            history.replace(Define.PAGE_AUTO_PLAN_ADD);
+            history.replace(Define.PAGE_AUTO_PLAN_ADD + "?type=" + type);
         } else if (target.includes(Define.PAGE_MANUAL)) {
             console.log("PAGE_MANUAL");
             history.replace(Define.PAGE_MANUAL);
