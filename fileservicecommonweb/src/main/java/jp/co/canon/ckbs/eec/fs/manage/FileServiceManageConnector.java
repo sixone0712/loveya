@@ -130,7 +130,7 @@ public class FileServiceManageConnector {
     }
 
     /* SSS DOWNLOAD */
-    public VFtpSssDownloadRequestResponse createVFtpCompatDownloadRequest(String machine, String directory, String[] fileList, boolean archive){
+    public VFtpSssDownloadRequestResponse createVFtpSssDownloadRequest(String machine, String directory, String[] fileList, boolean archive){
         String url = this.prefix + "/fsm/vftp/sss/download/{machine}";
 
         CreateVFtpSssDownloadRequestParam param = new CreateVFtpSssDownloadRequestParam();
@@ -144,7 +144,7 @@ public class FileServiceManageConnector {
         return res.getBody();
     }
 
-    public VFtpSssDownloadRequestResponse getVFtpCompatDownloadRequest(String machine, String requestNo){
+    public VFtpSssDownloadRequestResponse getVFtpSssDownloadRequest(String machine, String requestNo){
         String url = this.prefix + "/fsm/vftp/sss/download/{machine}/{requestNo}";
 
         ResponseEntity<VFtpSssDownloadRequestResponse> res =
@@ -172,7 +172,7 @@ public class FileServiceManageConnector {
         return res.getBody();
     }
 
-    public VFtpCompatDownloadRequestResponse getVFtpDownloadRequest(String machine, String requestNo){
+    public VFtpCompatDownloadRequestResponse getVFtpCompatDownloadRequest(String machine, String requestNo){
         String url = this.prefix + "/fsm/vftp/compat/download/{machine}/{requestNo}";
 
         ResponseEntity<VFtpCompatDownloadRequestResponse> res =

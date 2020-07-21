@@ -140,6 +140,11 @@ public class VFtpDownloadService {
         request.setRequestNo(requestNo);
         addRequest(request);
 
+        if (request.isArchive()){
+            request.setArchiveFileName(request.getFile().getName() + ".zip");
+            request.setArchiveFilePath(request.getRequestNo() + "/" + request.getArchiveFileName());
+        }
+
         CompatDownloadProcessThread thread = new CompatDownloadProcessThread(request, ftpServerInfo, workingDir, downloadDir, this);
         compatRequestThreadMap.put(request.getRequestNo(), thread);
         thread.start();

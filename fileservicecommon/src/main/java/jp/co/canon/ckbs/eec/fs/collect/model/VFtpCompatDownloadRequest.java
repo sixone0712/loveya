@@ -34,12 +34,18 @@ public class VFtpCompatDownloadRequest {
     Status status = Status.WAIT;
 
     @Getter @Setter
+    String archiveFileName;
+
+    @Getter @Setter
     String archiveFilePath;
 
     public void downloaded(String filename, long size){
         if (file.getName().equals(filename)){
             file.setSize(size);
             file.setDownloaded(true);
+            if (archive == false){
+                file.setDownloadPath(this.requestNo + "/" + filename);
+            }
         }
     }
 }
