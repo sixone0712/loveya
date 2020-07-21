@@ -55,7 +55,7 @@ public class FtpFileService {
                                       String path) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-            throw new FileServiceManageException("", "unknown machine name");
+            throw new FileServiceManageException(400, "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         return connector.getFtpFileList(machine, category, from, to, keyword, path);
@@ -79,7 +79,7 @@ public class FtpFileService {
     public FtpDownloadRequestResponse createFtpDownloadRequest(String machine, String category, boolean archive, String[] fileList) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-            throw new FileServiceManageException("", "unknown machine name");
+            throw new FileServiceManageException(400, "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         FtpDownloadRequestResponse res = connector.createFtpDownloadRequest(machine, category, archive, fileList);
@@ -96,7 +96,7 @@ public class FtpFileService {
         String[] hosts = new String[1];
         hosts[0] = configurationService.getFileServiceHost(machine);
         if (hosts[0] == null){
-            throw new FileServiceManageException("", "unknown machine name");
+            throw new FileServiceManageException(400, "unknown machine name");
         }
         return hosts;
     }
@@ -104,7 +104,7 @@ public class FtpFileService {
     public FtpDownloadRequestListResponse getFtpDownloadRequestList(String machine, String requestNo) throws FileServiceManageException {
         String[] hosts = getHostsForMachine(machine);
         if (hosts.length == 0){
-            throw new FileServiceManageException("", "unknown machine name");
+            throw new FileServiceManageException(400, "unknown machine name");
         }
 
         ArrayList<GetRequestThread> threadArrayList = new ArrayList<>();
@@ -166,7 +166,7 @@ public class FtpFileService {
     public void cancelAndDeleteRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
-            throw new FileServiceManageException("", "unknown machine name");
+            throw new FileServiceManageException(400, "unknown machine name");
         }
         FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
         connector.cancelAndDeleteRequest(machine, requestNo);

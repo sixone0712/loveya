@@ -70,12 +70,12 @@ public class VFtpListService {
     }
 
     public VFtpSssListRequest addListRequest(VFtpSssListRequest request) throws FileServiceCollectException {
-        FtpServerInfo info = configurationService.getFtpServerInfo(request.getMachine());
-        if (info == null){
-            throw new FileServiceCollectException("400", "Parameter(machine) is not valid.");
+        FtpServerInfo ftpServerInfo = configurationService.getFtpServerInfo(request.getMachine());
+        if (ftpServerInfo == null){
+            throw new FileServiceCollectException(400, "Parameter(machine) is not valid.");
         }
         if (isValidDirectory(request.getDirectory()) == false){
-            throw new FileServiceCollectException("400", "Parameter(directory) is not valid");
+            throw new FileServiceCollectException(400, "Parameter(directory) is not valid");
         }
 
         Date requestTime = generateRequestTime();
@@ -83,8 +83,6 @@ public class VFtpListService {
         String requestNo = generateRequestNoFromTime(requestTime, request.getMachine(), request.getDirectory());
         request.setRequestNo(requestNo);
         addRequest(request);
-
-        FtpServerInfo ftpServerInfo = configurationService.getFtpServerInfo(request.getMachine());
 
         ListRequestThread thread = new ListRequestThread(request, ftpServerInfo, getWorkingDir());
         listRequestThreadMap.put(request.getRequestNo(), thread);

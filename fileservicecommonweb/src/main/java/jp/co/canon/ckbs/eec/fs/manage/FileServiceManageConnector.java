@@ -2,6 +2,8 @@ package jp.co.canon.ckbs.eec.fs.manage;
 
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.*;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
+import jp.co.canon.ckbs.eec.fs.manage.service.CategoryList;
+import jp.co.canon.ckbs.eec.fs.manage.service.MachineList;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,9 +18,32 @@ public class FileServiceManageConnector {
         this.prefix = String.format("http://%s", this.host);
     }
 
+    public MachineList getMachineList(){
+        String url = this.prefix + "/fsm/machines";
+        ResponseEntity<MachineList> res =
+                restTemplate.getForEntity(url, MachineList.class);
+
+        return res.getBody();
+    }
+
+    public CategoryList getCategoryList(){
+        String url = this.prefix + "/fsm/ftp/categories";
+        ResponseEntity<CategoryList> res =
+                restTemplate.getForEntity(url, CategoryList.class);
+        return res.getBody();
+    }
+
+    public CategoryList getCategoryList(String machine){
+        String url = this.prefix + "/fsm/ftp/categories?machine={machine}";
+        ResponseEntity<CategoryList> res =
+                restTemplate.getForEntity(url, CategoryList.class, machine);
+        return res.getBody();
+    }
+
     /*
     FTP INTERFACE
     */
+
     public LogFileList getFtpFileList(String machine,
                                       String category,
                                       String from,

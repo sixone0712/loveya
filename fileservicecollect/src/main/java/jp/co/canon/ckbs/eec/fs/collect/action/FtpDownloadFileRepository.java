@@ -62,7 +62,7 @@ public class FtpDownloadFileRepository {
             if (request.getStatus() == FtpDownloadRequest.Status.WAIT){
                 continue;
             }
-            if (request.getStatus() == FtpDownloadRequest.Status.EXECTUTED){
+            if (request.getStatus() == FtpDownloadRequest.Status.EXECUTED){
                 continue;
             }
             if (request.getStatus() == FtpDownloadRequest.Status.EXECUTING){

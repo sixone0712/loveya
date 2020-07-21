@@ -2,15 +2,11 @@ package jp.co.canon.ckbs.eec.service;
 
 public class FtpCommand {
     static Command createCommandFromName(String str){
-        Command command = null;
         if (str.equals("list")){
             return new ListFtpCommand();
         }
         if (str.equals("get")){
             return new GetFtpCommand();
-        }
-        if (str.equals("stop")){
-            return new StopCommand();
         }
         return null;
     }

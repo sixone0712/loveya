@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class FtpDownloadRequest {
     public enum Status{
-        EXECTUTED,
+        EXECUTED,
         ERROR,
         CANCEL,
         WAIT,
@@ -100,7 +100,7 @@ public class FtpDownloadRequest {
         if (sts == Status.ERROR){
             return true;
         }
-        if (sts == Status.EXECTUTED){
+        if (sts == Status.EXECUTED){
             return true;
         }
         return false;

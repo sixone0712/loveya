@@ -8,9 +8,9 @@ public class VFtpSssListRequest {
     public enum Status{
         WAIT,
         EXECUTING,
+        EXECUTED,
         CANCEL,
-        ERROR,
-        EXECUTED
+        ERROR
     }
 
     @Getter @Setter

@@ -7,6 +7,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class GetFtpCommand extends BaseFtpCommand {
 
@@ -16,7 +18,7 @@ public class GetFtpCommand extends BaseFtpCommand {
     boolean zip = false;
     String zipFileName;
 
-    void loadFileList(String fileListFile){
+    void loadFileList(String fileListFile) throws IOException{
         try {
             List<String> fileList = new ArrayList<>();
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileListFile))));
@@ -32,9 +34,9 @@ public class GetFtpCommand extends BaseFtpCommand {
             }
             files = fileList.toArray(new String[0]);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new IOException(e);
         } catch (IOException e){
-
+            throw e;
         }
     }
 
@@ -57,12 +59,15 @@ public class GetFtpCommand extends BaseFtpCommand {
         }
         byte[] buffer = new byte[8192];
 
+        long total_readed = 0;
         int readed;
         try {
+            System.out.println("DOWNLOADING:"+fileName+";" + total_readed);
             while ((readed = inputStream.read(buffer)) > 0) {
                 outputStream.write(buffer, 0, readed);
+                total_readed += readed;
             }
-            System.out.println("STATUS:DOWNLOAD_COMPLETE( "+fileName+" )");
+            System.out.println("DOWNLOAD_COMPLETE:"+fileName+";"+total_readed);
         } catch (IOException e) {
             System.out.println("ERR: IOException:"+e.getMessage());
         } finally{
@@ -121,12 +126,52 @@ public class GetFtpCommand extends BaseFtpCommand {
         }
     }
 
-    void zipFiles(){
-        
+    void appendZipFile(ZipOutputStream out, File f) throws IOException {
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(f));
+            byte[] buffer = new byte[1024];
+            while (true) {
+                int size = in.read(buffer);
+                if (size <= 0) break;
+                out.write(buffer, 0, size);
+            }
+        } finally {
+            if (in != null) in.close();
+        }
     }
 
-    void deleteFiles(){
+    void zipFiles(){
+        File zipFile = new File(downloadDirectory, zipFileName);
 
+        ZipOutputStream out = null;
+        try {
+            out = new ZipOutputStream(new FileOutputStream(zipFile));
+            for (String filename : files) {
+                File f = new File(downloadDirectory, filename);
+                ZipEntry temp = new ZipEntry(f.getName());
+                temp.setTime(f.lastModified());
+                out.putNextEntry(temp);
+                appendZipFile(out, f);
+                out.closeEntry();
+            }
+            out.close();
+            out = null;
+            for (String filename : files){
+                File f = new File(downloadDirectory, filename);
+                f.delete();
+            }
+        } catch (IOException e){
+
+        } finally {
+            if (out != null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     void doCommand(){
@@ -156,9 +201,7 @@ public class GetFtpCommand extends BaseFtpCommand {
 
             if (zip){
                 zipFiles();
-
             }
-
             System.out.println("END DOWNLOAD TOTAL:" + 0);
         } catch (IOException e) {
             System.out.println("ERR: IOEXCEPTION");
@@ -211,8 +254,12 @@ public class GetFtpCommand extends BaseFtpCommand {
 
             doCommand();
         } catch (ParseException e) {
+            System.out.println("ERR:Command Line Parse Exception");
             e.printStackTrace();
 //            throw new Exception (e.getMessage());
+        } catch (IOException e) {
+            System.out.println("ERR:IOException");
+            e.printStackTrace();
         }
 
     }

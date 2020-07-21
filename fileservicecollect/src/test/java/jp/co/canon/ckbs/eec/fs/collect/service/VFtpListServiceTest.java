@@ -15,7 +15,11 @@ public class VFtpListServiceTest {
         VFtpSssListRequest request = new VFtpSssListRequest();
         request.setMachine("MPA_1");
         request.setDirectory("IP_AS_RAW_AAA");
-        listService.addListRequest(request);
+        try {
+            listService.addListRequest(request);
+        } catch (FileServiceCollectException e) {
+            e.printStackTrace();
+        }
 
         while(true){
             if (request.getStatus() == VFtpSssListRequest.Status.CANCEL){

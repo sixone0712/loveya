@@ -1,14 +1,14 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
 public class FileServiceManageException extends Exception{
-    String code;
+    int code;
 
-    public FileServiceManageException(String code, String message){
+    public FileServiceManageException(int code, String message){
         super(message);
         this.code = code;
     }
 
-    public String getCode(){
+    public int getCode(){
         return this.code;
     }
 }

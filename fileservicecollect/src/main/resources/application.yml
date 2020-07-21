@@ -13,7 +13,7 @@ fileservice:
       downloadDirectory: /LOG/downloads
       requestDirectory: /LOG/ftpRequests
     vftp:
-      downloadDirectory: /LOG/vdownloads
+      downloadDirectory: /LOG/downloads
       requestDirectory: /LOG/vftpRequests
     threadWaitTime: 2000
     ftpPath: /

@@ -119,7 +119,7 @@ public class FtpCommandExecutorThread implements Runnable{
 
             request.setCompletedTime(System.currentTimeMillis());
             if (request.getStatus() == FtpDownloadRequest.Status.EXECUTING) {
-                request.setStatus(FtpDownloadRequest.Status.EXECTUTED);
+                request.setStatus(FtpDownloadRequest.Status.EXECUTED);
             }
             downloadFileRepository.writeRequest(request);
             setCurrentRequest(null);
