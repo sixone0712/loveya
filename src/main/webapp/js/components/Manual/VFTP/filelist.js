@@ -7,6 +7,7 @@ import { Select } from "antd";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { filePaginate, RenderPagination } from "../../Common/Pagination";
+import _ from "lodash";
 
 const { Option } = Select;
 
@@ -207,6 +208,8 @@ const RSSvftpFilelist = () => {
             changeDirection = "desc";
         }
 
+        // changed to use lodash
+        /*
         const list = sortedList.sort((a, b) => {
             const preVal = a[key].toLowerCase();
             const nextVal = b[key].toLowerCase();
@@ -217,6 +220,8 @@ const RSSvftpFilelist = () => {
                 return nextVal.localeCompare(preVal, "en", { numeric: true });
             }
         });
+        */
+        const list = _.orderBy(sortedList, key, changeDirection);
 
         setSortedList(list);
         setSortKey(key);
@@ -307,7 +312,7 @@ const RSSvftpFilelist = () => {
                                 </thead>
                                 <tbody>
                                     <CreateFileList
-                                        fileList={filePaginate(initialFileList, currentPage, pageSize)}
+                                        fileList={filePaginate(sortedList, currentPage, pageSize)}
                                         checkedList={checkedList}
                                         trClick={handleTrClick}
                                         checkboxClick={handleCheckboxClick}

@@ -18,6 +18,7 @@ import services from "../../../services";
 import { filePaginate, RenderPagination } from "../../Common/Pagination";
 import ConfirmModal from "../../Common/ConfirmModal";
 import AlertModal from "../../Common/AlertModal";
+import _ from "lodash";
 
 const { Option } = Select;
 
@@ -361,6 +362,9 @@ class FileList extends Component {
       const tempKey = sortKey === "" ? "targetName" : sortKey;
       const tempDirection = sortDirection === "" ? "asc" : sortDirection;
 
+
+      // changed to use lodash
+      /*
       const sortedList = responseList.sort((a, b) => {
         const preVal = a[tempKey].toLowerCase();
         const nextVal = b[tempKey].toLowerCase();
@@ -371,6 +375,9 @@ class FileList extends Component {
           return nextVal.localeCompare(preVal, "en", { numeric: true });
         }
       });
+      */
+      const sortedList = _.orderBy(responseList, tempKey, sortDirection);
+
       const files = filePaginate(sortedList, currentPage, pageSize);
       const { totalFiles, downloadFiles } = this.props.downloadStatus.toJS();
 
