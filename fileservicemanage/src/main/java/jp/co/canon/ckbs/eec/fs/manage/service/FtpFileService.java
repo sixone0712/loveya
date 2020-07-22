@@ -1,6 +1,8 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
+import jp.co.canon.ckbs.eec.fs.collect.DefaultFileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnector;
+import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnectorFactory;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
@@ -22,6 +24,9 @@ import java.util.List;
 public class FtpFileService {
     @Autowired
     ConfigurationService configurationService;
+
+    @Autowired
+    FileServiceCollectConnectorFactory connectorFactory;
 
     @PostConstruct
     void postConstruct(){
@@ -57,7 +62,7 @@ public class FtpFileService {
         if (host == null){
             throw new FileServiceManageException(400, "unknown machine name");
         }
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         return connector.getFtpFileList(machine, category, from, to, keyword, path);
     }
 
@@ -81,7 +86,7 @@ public class FtpFileService {
         if (host == null){
             throw new FileServiceManageException(400, "unknown machine name");
         }
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         FtpDownloadRequestResponse res = connector.createFtpDownloadRequest(machine, category, archive, fileList);
 
         convertFtpDownloadRequest(res);
@@ -110,7 +115,7 @@ public class FtpFileService {
         ArrayList<GetRequestThread> threadArrayList = new ArrayList<>();
         ArrayList<FtpDownloadRequestListResponse> responseList = new ArrayList<>();
         for(String host : hosts){
-            final FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+            FileServiceCollectConnector connector = connectorFactory.getConnector(host);
 
             GetRequestThread th = new GetRequestThread(connector, machine, requestNo);
             threadArrayList.add(th);
@@ -168,7 +173,7 @@ public class FtpFileService {
         if (host == null){
             throw new FileServiceManageException(400, "unknown machine name");
         }
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         connector.cancelAndDeleteRequest(machine, requestNo);
     }
 

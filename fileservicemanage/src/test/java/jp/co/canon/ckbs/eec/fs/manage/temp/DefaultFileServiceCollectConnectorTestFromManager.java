@@ -1,14 +1,14 @@
 package jp.co.canon.ckbs.eec.fs.manage.temp;
 
-import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnector;
+import jp.co.canon.ckbs.eec.fs.collect.DefaultFileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import org.junit.jupiter.api.Test;
 
-public class FileServiceCollectConnectorTestFromManager {
+public class DefaultFileServiceCollectConnectorTestFromManager {
     @Test
     void test(){
-        FileServiceCollectConnector connector =
-                new FileServiceCollectConnector("10.1.36.118:8080");
+        DefaultFileServiceCollectConnector connector =
+                new DefaultFileServiceCollectConnector("10.1.36.118:8080");
 
         LogFileList logFileList =
                 connector.getFtpFileList("MPA_2",
