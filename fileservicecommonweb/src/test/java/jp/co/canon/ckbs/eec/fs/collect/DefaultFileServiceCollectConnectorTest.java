@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileServiceCollectConnectorTest {
+public class DefaultFileServiceCollectConnectorTest {
     @Test
     void test_001(){
-        FileServiceCollectConnector connector = new FileServiceCollectConnector("10.1.36.118:8080");
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector("10.1.36.118:8080");
 
         LogFileList logFileList =
                 connector.getFtpFileList("MPA_2", "002", "20200601000000", "20200706235959", "", "");
@@ -24,7 +24,7 @@ public class FileServiceCollectConnectorTest {
 
     @Test
     void test_002(){
-        FileServiceCollectConnector connector = new FileServiceCollectConnector("10.1.36.118:8080");
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector("10.1.36.118:8080");
 
         ArrayList<String> fileList = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public class FileServiceCollectConnectorTest {
 
     @Test
     void test_003(){
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(("10.1.36.118:8080"));
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector(("10.1.36.118:8080"));
         ArrayList<String> fileList = new ArrayList<>();
 
         fileList.add("20200629225500");
@@ -68,14 +68,14 @@ public class FileServiceCollectConnectorTest {
 
     @Test
     void test_004(){
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(("10.1.36.118:8080"));
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector(("10.1.36.118:8080"));
         FtpDownloadRequestListResponse res = connector.getFtpDownloadRequestList("MPA_1", "AAA");
         System.out.println(res);
     }
 
     @Test
     void test_005(){
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(("10.1.36.118:8080"));
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector(("10.1.36.118:8080"));
         List<String> fileList = new ArrayList<>();
         fileList.add("abcdefg.log");
 

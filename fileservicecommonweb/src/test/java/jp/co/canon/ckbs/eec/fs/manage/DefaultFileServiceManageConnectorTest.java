@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileServiceManageConnectorTest {
+public class DefaultFileServiceManageConnectorTest {
     @Test
     void test_001(){
-        FileServiceManageConnector connector = new FileServiceManageConnector("10.1.36.118:8081");
+        DefaultFileServiceManageConnector connector = new DefaultFileServiceManageConnector("10.1.36.118:8081");
 
         VFtpSssListRequestResponse res = connector.createVFtpSssListRequest("MPA_1", "IP_AS_RAW_AAA");
         connector.cancelAndDeleteVFtpSssListRequest("MPA_1", res.getRequest().getRequestNo());
@@ -30,7 +30,7 @@ public class FileServiceManageConnectorTest {
 
     @Test
     void test_002(){
-        FileServiceManageConnector connector = new FileServiceManageConnector("10.1.36.118:8081");
+        DefaultFileServiceManageConnector connector = new DefaultFileServiceManageConnector("10.1.36.118:8081");
 
         List<String> fileList = new ArrayList<>();
         fileList.add("abcdefg.log");
@@ -54,7 +54,7 @@ public class FileServiceManageConnectorTest {
 
     @Test
     void test_003(){
-        FileServiceManageConnector connector = new FileServiceManageConnector("10.1.36.118:8081");
+        DefaultFileServiceManageConnector connector = new DefaultFileServiceManageConnector("10.1.36.118:8081");
 
         VFtpCompatDownloadRequestResponse res =
                 connector.createVFtpCompatDownloadRequest("MPA_1", "aaa.log", false);

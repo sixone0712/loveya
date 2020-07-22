@@ -1,6 +1,8 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
+import jp.co.canon.ckbs.eec.fs.collect.DefaultFileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnector;
+import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnectorFactory;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpCompatDownloadRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssListRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssDownloadRequestResponse;
@@ -18,6 +20,9 @@ public class VFtpFileService {
     @Autowired
     ConfigurationService configurationService;
 
+    @Autowired
+    FileServiceCollectConnectorFactory connectorFactory;
+
     @PostConstruct
     void postConstruct(){
 
@@ -29,7 +34,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector(host);
         VFtpSssListRequestResponse res = connector.createVFtpSssListRequest(machine, directory);
         return res;
     }
@@ -40,7 +45,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpSssListRequestResponse res = connector.getVFtpSssListRequest(machine, requestNo);
         return res;
     }
@@ -51,7 +56,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         connector.cancelAndDeleteVFtpSssListRequest(machine, requestNo);
     }
 
@@ -78,7 +83,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpSssDownloadRequestResponse res = connector.createVFtpSssDownloadRequest(machine, directory, fileList, archive);
         updateVFtpSssDownloadRequestArchiveFilePath(res.getRequest());
         return res;
@@ -90,7 +95,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpSssDownloadRequestResponse res = connector.getVFtpSssDownloadRequest(machine, requestNo);
         updateVFtpSssDownloadRequestArchiveFilePath(res.getRequest());
         return res;
@@ -102,7 +107,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         connector.cancelAndDeleteVFtpSssDownloadRequest(machine, requestNo);
     }
 
@@ -126,7 +131,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpCompatDownloadRequestResponse res = connector.createVFtpCompatDownloadRequest(machine, filename, archive);
         updateVFtpCompatDownloadRequestArchiveFilePath(res.getRequest());
         return res;
@@ -138,7 +143,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpCompatDownloadRequestResponse res = connector.getVFtpCompatDownloadRequest(machine, requestNo);
         updateVFtpCompatDownloadRequestArchiveFilePath(res.getRequest());
         return res;
@@ -150,7 +155,7 @@ public class VFtpFileService {
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        FileServiceCollectConnector connector = new FileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         connector.cancelAndDeleteVFtpCompatDownloadRequest(machine, requestNo);
     }
 }
