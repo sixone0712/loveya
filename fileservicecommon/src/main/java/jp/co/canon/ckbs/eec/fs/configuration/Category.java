@@ -5,13 +5,13 @@ import lombok.Setter;
 
 public class Category {
     @Getter @Setter
-    String name;
+    String categoryCode;
 
     @Getter @Setter
-    String description;
+    String categoryName;
 
-    public Category(String name, String description){
-        this.name = name;
-        this.description = description;
+    public Category(String categoryCode, String categoryName){
+        this.categoryCode = categoryCode;
+        this.categoryName = categoryName;
     }
 }

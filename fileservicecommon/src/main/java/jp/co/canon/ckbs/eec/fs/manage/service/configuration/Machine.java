@@ -5,13 +5,13 @@ import lombok.Setter;
 
 public class Machine {
     @Getter @Setter
-    String name;
+    String machineName;
 
     @Getter @Setter
     String fabName;
 
-    public Machine(String name, String fabName){
-        this.name = name;
+    public Machine(String machineName, String fabName){
+        this.machineName = machineName;
         this.fabName = fabName;
     }
 }
