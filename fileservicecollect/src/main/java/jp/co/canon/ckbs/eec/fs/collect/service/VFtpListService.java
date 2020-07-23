@@ -129,7 +129,7 @@ public class VFtpListService {
                     .addArgument("jp.co.canon.ckbs.eec.service.FtpCommand")
                     .addArgument("list")
                     .addArgument("-host").addArgument(ftpServerInfo.getHost())
-                    .addArgument("-port").addArgument("21")
+                    .addArgument("-port").addArgument("22001")
                     .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
                     .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
                     .addArgument("-root").addArgument("/VROOT/SSS/Optional")

@@ -57,7 +57,7 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
                 .addArgument("jp.co.canon.ckbs.eec.service.FtpCommand")
                 .addArgument("get")
                 .addArgument("-host").addArgument(ftpServerInfo.getHost())
-                .addArgument("-port").addArgument("21")
+                .addArgument("-port").addArgument("22001")
                 .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
                 .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
                 .addArgument("-dir").addArgument("/VROOT/COMPAT/Optional")
