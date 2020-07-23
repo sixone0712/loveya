@@ -1,6 +1,9 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomExecutor;
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomOutputStreamLineHandler;
+import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
 import org.apache.commons.exec.CommandLine;
 
@@ -9,15 +12,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class CompatDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler{
-    VFtpCompatDownloadRequest request;
+public class SssDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler {
+    VFtpSssDownloadRequest request;
     FtpServerInfo ftpServerInfo;
+    CustomExecutor executor = new CustomExecutor();
     File workingDir;
     File downloadRoot;
     VFtpDownloadService downloadService;
-    CustomExecutor executor = new CustomExecutor();
 
-    public CompatDownloadProcessThread(VFtpCompatDownloadRequest request, FtpServerInfo ftpServerInfo, File workingDir, File downloadRoot, VFtpDownloadService downloadService){
+    public SssDownloadProcessThread(VFtpSssDownloadRequest request, FtpServerInfo ftpServerInfo, File workingDir, File downloadRoot, VFtpDownloadService downloadService){
         this.request = request;
         this.ftpServerInfo = ftpServerInfo;
         this.workingDir = workingDir;
@@ -31,8 +34,10 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
         try {
             file = File.createTempFile("FILE", ".LST", workingDir);
             out = new BufferedWriter(new FileWriter(file));
-            out.write(request.getFile().getName());
-            out.newLine();
+            for (RequestFileInfo info : request.getFileList()){
+                out.write(info.getName());
+                out.newLine();
+            }
             return file;
         } catch (IOException e) {
             throw new Exception("Failed in making file(" + file.getPath() + ").", e);
@@ -47,7 +52,6 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
         }
     }
 
-
     CommandLine createCommand(File fileList){
         File requestDownloadDir = new File(downloadRoot, request.getRequestNo());
 
@@ -60,24 +64,19 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
                 .addArgument("-port").addArgument("22001")
                 .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
                 .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
-                .addArgument("-dir").addArgument("/VROOT/COMPAT/Optional")
+                .addArgument("-dir").addArgument("/VROOT/SSS/Optional/"+request.getDirectory())
                 .addArgument("-dest").addArgument(requestDownloadDir.getAbsolutePath())
                 .addArgument("-fl").addArgument(fileList.getAbsolutePath());
         if (request.isArchive()){
             cmdLine.addArgument("-az");
-            cmdLine.addArgument(request.getFile().getName() + ".zip");
+            cmdLine.addArgument(request.getArchiveFileName());
         }
         return cmdLine;
     }
 
-    public void stopExecute(){
-        request.setStatus(VFtpCompatDownloadRequest.Status.CANCEL);
-        executor.stop();
-    }
-
     @Override
     public void run() {
-        request.setStatus(VFtpCompatDownloadRequest.Status.EXECUTING);
+        request.setStatus(VFtpSssDownloadRequest.Status.EXECUTING);
         File fileNameListFile = null;
         try {
             fileNameListFile = createFileNameList();
@@ -90,9 +89,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
             if (fileNameListFile != null){
                 fileNameListFile.delete();
             }
-            downloadService.removeCompatDownloadProcessThread(request.getRequestNo());
+            downloadService.removeSssDownloadProcessThread(request.getRequestNo());
             request.setCompletedTime(System.currentTimeMillis());
-            request.setStatus(VFtpCompatDownloadRequest.Status.EXECUTED);
+            request.setStatus(VFtpSssDownloadRequest.Status.EXECUTED);
         }
     }
 
@@ -107,7 +106,7 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
             return true;
         }
         if (line.startsWith("ERR:")){
-            request.setStatus(VFtpCompatDownloadRequest.Status.ERROR);
+            request.setStatus(VFtpSssDownloadRequest.Status.ERROR);
             return false;
         }
         return true;
@@ -116,5 +115,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
     @Override
     public boolean processErrorLine(String line) {
         return true;
+    }
+
+    public void stopExecute(){
+        executor.stop();
     }
 }

@@ -1,9 +1,10 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
 import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
+import jp.co.canon.ckbs.eec.fs.collect.service.FileServiceCollectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

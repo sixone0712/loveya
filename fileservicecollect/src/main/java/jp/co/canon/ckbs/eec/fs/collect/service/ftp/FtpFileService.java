@@ -1,10 +1,12 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.ftp;
 
 import jp.co.canon.ckbs.eec.fs.collect.action.CommandExecutionException;
 import jp.co.canon.ckbs.eec.fs.collect.action.ConfigurationException;
 import jp.co.canon.ckbs.eec.fs.collect.model.FileInfoModel;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

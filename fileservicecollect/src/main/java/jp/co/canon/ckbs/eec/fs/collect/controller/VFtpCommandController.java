@@ -5,7 +5,7 @@ import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.FileServiceCollectException;
-import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileService;
+import jp.co.canon.ckbs.eec.fs.collect.service.vftp.VFtpFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

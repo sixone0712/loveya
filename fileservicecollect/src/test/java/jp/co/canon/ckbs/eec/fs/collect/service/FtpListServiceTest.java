@@ -2,6 +2,7 @@ package jp.co.canon.ckbs.eec.fs.collect.service;
 
 import jp.co.canon.ckbs.eec.fs.collect.action.ConfigurationException;
 import jp.co.canon.ckbs.eec.fs.collect.model.FileInfoModel;
+import jp.co.canon.ckbs.eec.fs.collect.service.ftp.FtpListService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

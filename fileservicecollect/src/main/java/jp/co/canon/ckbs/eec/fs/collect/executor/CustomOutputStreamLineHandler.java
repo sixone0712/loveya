@@ -1,4 +1,4 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.executor;
 
 public interface CustomOutputStreamLineHandler {
     boolean processOutputLine(String line);
