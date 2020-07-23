@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group = 'jp.co.canon.cks.eec.fs'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+compileJava.options.encoding = "UTF-8"
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+}
+
+test {
+    useJUnitPlatform()
+}
