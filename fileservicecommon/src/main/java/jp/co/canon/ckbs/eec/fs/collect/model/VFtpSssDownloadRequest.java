@@ -35,7 +35,7 @@ public class VFtpSssDownloadRequest {
     @Getter @Setter
     long completedTime;
 
-    @Getter @Setter
+    @Getter
     Status status = Status.WAIT;
 
     @Getter @Setter
@@ -48,6 +48,12 @@ public class VFtpSssDownloadRequest {
         fileInfoMap.clear();
         for(RequestFileInfo info : fileList){
             fileInfoMap.put(info.getName(), info);
+        }
+    }
+
+    public synchronized void setStatus(Status status){
+        if (this.status == Status.WAIT || this.status == Status.EXECUTING){
+            this.status = status;
         }
     }
 
