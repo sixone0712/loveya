@@ -10,6 +10,10 @@ public class Category {
     @Getter @Setter
     String categoryName;
 
+    public Category(){
+
+    }
+
     public Category(String categoryCode, String categoryName){
         this.categoryCode = categoryCode;
         this.categoryName = categoryName;
