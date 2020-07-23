@@ -10,6 +10,10 @@ public class Machine {
     @Getter @Setter
     String fabName;
 
+    public Machine(){
+
+    }
+
     public Machine(String machineName, String fabName){
         this.machineName = machineName;
         this.fabName = fabName;
