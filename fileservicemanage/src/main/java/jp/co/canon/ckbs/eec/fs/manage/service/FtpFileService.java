@@ -1,6 +1,5 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
-import jp.co.canon.ckbs.eec.fs.collect.DefaultFileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnectorFactory;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
@@ -42,7 +41,7 @@ public class FtpFileService {
         if (machines.length == 0){
             return null;
         }
-        return machines[0].getName();
+        return machines[0].getMachineName();
     }
 
     public Category[] getCategories(String machine){
