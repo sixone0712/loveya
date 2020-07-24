@@ -1,12 +1,10 @@
 package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class SssListRequestMap {
-    Map<String, VFtpSssListRequest> requestMap = new HashMap<>();
+public class StringToOtherTypeMap<T>{
+    Map<String, T> requestMap = new HashMap<>();
 
     public void remove(String requestNo){
         synchronized (requestMap){
@@ -14,15 +12,21 @@ public class SssListRequestMap {
         }
     }
 
-    public VFtpSssListRequest get(String requestNo){
+    public T get(String requestNo){
         synchronized (requestMap){
             return requestMap.get(requestNo);
         }
     }
 
-    public void put(String requestNo, VFtpSssListRequest request){
+    public void put(String requestNo, T request){
         synchronized (requestMap){
             requestMap.put(requestNo, request);
+        }
+    }
+
+    public T[] getValues(){
+        synchronized (requestMap){
+            return (T[]) requestMap.values().toArray();
         }
     }
 }
