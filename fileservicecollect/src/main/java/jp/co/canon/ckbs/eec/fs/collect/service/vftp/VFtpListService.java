@@ -26,7 +26,7 @@ public class VFtpListService {
 
     SssListRequestMap requestMap = new SssListRequestMap();
     SssListProcessThreadMap listRequestThreadMap = new SssListProcessThreadMap();
-    CompletedSssListRequestQueue completedRequestQueue = new CompletedSssListRequestQueue();
+    SssListRequestQueue completedRequestQueue = new SssListRequestQueue();
 
     boolean stopPurgeThread = false;
 
