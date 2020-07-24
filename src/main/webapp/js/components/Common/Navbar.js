@@ -1,19 +1,19 @@
 import React, {Component} from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCircle, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCheckCircle, faUserCircle} from "@fortawesome/free-solid-svg-icons";
 import {
+  Button,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  FormGroup,
+  Nav,
   Navbar,
   NavbarBrand,
-  Nav,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  FormGroup,
-  Button
+  UncontrolledDropdown
 } from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import {NavLink as RRNavLink } from "react-router-dom";
+import {NavLink as RRNavLink} from "react-router-dom";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
@@ -23,7 +23,6 @@ import * as Define from "../../define";
 import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import AlertModal from "../Common/AlertModal";
-import services from "../../services";
 import axios from "axios";
 
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";

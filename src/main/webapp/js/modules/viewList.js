@@ -1,8 +1,7 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS } from 'immutable';
-import { pender } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from '../services';
-import moment from "moment";
 
 const VIEW_INIT_ALL_LIST= 'viewList/VIEW_INIT_ALL_LIST';
 const VIEW_LOAD_TOOLINFO_LIST= 'viewList/VIEW_LOAD_TOOLINFO_LIST';
@@ -15,8 +14,8 @@ const VIEW_APPLY_GENRE_LIST= 'viewList/VIEW_APPLY_GENRE_LIST';
 const VIEW_SET_EDIT_PLAN_LIST= 'viewList/VIEW_SET_EDIT_PLAN_LIST';
 
 export const viewInitAllList = createAction(VIEW_INIT_ALL_LIST);
-export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.getPender);	// getURL
-export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.getPender);		// getURL
+export const viewLoadToolInfoList = createAction(VIEW_LOAD_TOOLINFO_LIST, services.axiosAPI.requestGet);	// getURL
+export const viewLoadLogTypeList = createAction(VIEW_LOAD_LOGTYPE_LIST, services.axiosAPI.requestGet);		// getURL
 export const viewCheckToolList = createAction(VIEW_CHECK_TOOL_LIST); 	// index
 export const viewCheckAllToolList = createAction(VIEW_CHECK_ALL_TOOL_LIST);		// check
 export const viewCheckLogTypeList = createAction(VIEW_CHECK_LOGTYPE_LIST); 	// index

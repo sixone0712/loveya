@@ -1,9 +1,9 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import moment from "moment";
-import { DatetimePicker } from "rc-datetime-picker";
-import { Input, Label } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
+import {DatetimePicker} from "rc-datetime-picker";
+import {Input, Label} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCalendarCheck} from "@fortawesome/free-regular-svg-icons";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as searchListActions from "../../../modules/searchList";

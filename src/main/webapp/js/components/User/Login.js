@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import {bindActionCreators} from "redux";
 import * as loginActions from '../../modules/login';
 import * as API from "../../api";
@@ -7,8 +7,7 @@ import * as Define from "../../define";
 import "../../../css/user.css";
 import md5 from 'md5-hash'
 import AlertModal from "../Common/AlertModal";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 
 class Login extends Component {
     constructor(props) {

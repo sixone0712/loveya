@@ -1,6 +1,6 @@
-import {applyMiddleware, createStore, compose} from 'redux';
+import {applyMiddleware, compose, createStore} from 'redux';
 import modules from './modules';
-import { createLogger} from "redux-logger";
+import {createLogger} from "redux-logger";
 import ReduxThunk from "redux-thunk";
 import penderMiddleware from 'redux-pender';
 

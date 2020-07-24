@@ -1,11 +1,11 @@
-import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTerminal } from "@fortawesome/free-solid-svg-icons";
+import React, {Component} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faTerminal} from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
-import { Col, FormGroup, Label } from "reactstrap";
+import {Col, FormGroup, Label} from "reactstrap";
 import moment from "moment";
 import * as Define from "../../define";
 

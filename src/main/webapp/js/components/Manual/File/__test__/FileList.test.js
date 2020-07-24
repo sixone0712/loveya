@@ -268,7 +268,7 @@ describe('FileList', () => {
             store={store}
             {...initProps}
         />).dive().dive();
-        services.axiosAPI.get = jest.fn().mockResolvedValue("1");
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue("1");
         jest.useFakeTimers();
         wrapper2.instance().closeCancelModal(true);
         jest.advanceTimersByTime(100);

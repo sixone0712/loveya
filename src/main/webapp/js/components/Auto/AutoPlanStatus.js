@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Row, Col } from "reactstrap";
+import React, {Component} from "react";
+import {Col, Row} from "reactstrap";
 import PlanList from "./PlanList";
 
 class AutoPlanStatus extends Component {

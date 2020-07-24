@@ -1,8 +1,7 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS, Record } from 'immutable';
-import { pender , applyPenders } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {applyPenders} from 'redux-pender';
 import services from '../services';
-import * as Define from '../define';
 
 const GENRE_INIT_ALL_LIST = "genreList/GENRE_INIT_ALL_LIST";
 const GENRE_INIT_SERVER_ERROR = "genreList/GENRE_INIT_SERVER_ERROR";
@@ -12,9 +11,9 @@ const GENRE_SET_DB_LIST = "genreList/GENRE_SET_DB_LIST";
 
 export const genreInitAllList = createAction(GENRE_INIT_ALL_LIST);
 export const genreInitServerError = createAction(GENRE_INIT_SERVER_ERROR);
-export const genreLoadDbList = createAction(GENRE_LOAD_DB_LIST, services.axiosAPI.getPender);
-export const genreGetDbList = createAction(GENRE_GET_DB_LIST, services.axiosAPI.getPender);
-export const genreSetDbList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.postPender);
+export const genreLoadDbList = createAction(GENRE_LOAD_DB_LIST, services.axiosAPI.requestGet);
+export const genreGetDbList = createAction(GENRE_GET_DB_LIST, services.axiosAPI.requestGet);
+export const genreSetDbList = createAction(GENRE_SET_DB_LIST, services.axiosAPI.requestPost);
 
 const initialState = Map({
     genreList: Map({

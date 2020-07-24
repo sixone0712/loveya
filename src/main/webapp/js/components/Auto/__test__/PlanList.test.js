@@ -76,7 +76,7 @@ let localState;
 describe('PlanList', () => {
     beforeEach(() => {
 
-        services.axiosAPI.get = jest.fn().mockResolvedValue({
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({
             data: [
             {
                 collectStart: "2020-05-31T15:00:00.000+0000",
@@ -186,10 +186,10 @@ describe('PlanList', () => {
 
         await wrapper.instance().closeDeleteModal(false, 235);
 
-        services.axiosAPI.get = jest.fn().mockResolvedValue({status: 200});
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({status: 200});
         await wrapper.instance().closeDeleteModal(true, 235);
 
-        services.axiosAPI.get = jest.fn().mockResolvedValue({status: 0});
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({status: 0});
         await wrapper.instance().closeDeleteModal(true, 235);
 
         wrapper.setState({
@@ -269,7 +269,7 @@ describe('PlanList', () => {
             {...props}
         />).dive().dive();
         wrapper.setState(localState);
-        services.axiosAPI.get = jest.fn().mockResolvedValue();
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue();
         wrapper.instance().stopDownload(245);
     });
 
@@ -281,7 +281,7 @@ describe('PlanList', () => {
             {...props}
         />).dive().dive();
         wrapper.setState(localState);
-        services.axiosAPI.get = jest.fn().mockResolvedValue();
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue();
         wrapper.instance().restartDownload(245);
     });
 
@@ -299,7 +299,7 @@ describe('PlanList', () => {
     });
 
     it('lastCollect is null', () => {
-        services.axiosAPI.get = jest.fn().mockResolvedValue({
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({
             data: [
                 {
                     collectStart: "2020-05-31T15:00:00.000+0000",

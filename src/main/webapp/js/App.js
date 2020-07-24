@@ -1,28 +1,23 @@
 import React, {Component} from "react";
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux';
+import {connect} from 'react-redux'
+import {bindActionCreators} from 'redux';
 import * as viewListActions from './modules/viewList';
 import * as genreListActions from './modules/genreList';
 import * as searchListActions from './modules/searchList';
 import * as loginActions from './modules/login';
-import * as CmdActions from './modules/Command';
-import * as userActions from './modules/User';
-import * as dlHistoryAction from './modules/dlHistory';
 import services from './services'
-import { Map, List, fromJS } from 'immutable';
 import * as API from "./api";
 import Navbar from "./components/common/Navbar";
 import Manual from "./components/Manual/Manual";
 import Manual2 from "./components/Manual/ManualVftpCompat";
 import Manual3 from "./components/Manual/ManualVftpSss";
 import AccountList from "./components/User/UserList";
-import DlHistory from  "./components/User/DownloadHistory";
+import DlHistory from "./components/User/DownloadHistory";
 import Auto from "./components/Auto/Auto";
 import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
-import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
-import ManualVftpCompat from "./components/Manual/ManualVftpCompat";
 
 class App extends Component {
 
@@ -48,23 +43,23 @@ class App extends Component {
 
         const checkConnection = async () => {
           try {
-            const res = await services.axiosAPI.isLogin(Define.REST_AUTHS_GET_ME);
-            const {status} = res;
-            console.log("[App][componentDidMount]status", status);
-            if (status === 200) {
-              const {userName, userId, permission} = res.data;
+            const res = await services.axiosAPI.requestGet(Define.REST_AUTHS_GET_ME);
+            const { userName, userId, permission } = res.data;
+            if(userName && permission) {
               await API.setLoginIsLoggedIn(this.props, true);
               await API.setLoginUserName(this.props, userName);
               await API.setLoginAuth(this.props, permission);
               this.onMovePage(Define.PAGE_MANUAL);
             } else {
+              console.error("login info invalid");
               this.onMovePage(Define.PAGE_LOGIN);
             }
           } catch (e) {
             console.log(e);
+            this.onMovePage(Define.PAGE_LOGIN);
           }
         }
-        checkConnection().then(r => r).catch(e => console.log(e));
+        checkConnection().then(r => r).catch(e => e);
     }
 
     render() {

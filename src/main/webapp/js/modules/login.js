@@ -1,8 +1,7 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS, Record } from 'immutable';
-import { pender , applyPenders } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from '../services';
-import * as API from "../api";
 import * as Define from "../define";
 
 const LOGIN_INIT_ALL_DATA = "login/LOGIN_INIT_ALL_DATA";
@@ -21,9 +20,9 @@ export const loginSetUsername = createAction(LOGIN_SET_USERNAME);
 export const loginSetPassword = createAction(LOGIN_SET_PASSWORD);
 export const loginSetAuth = createAction(LOGIN_SET_AUTH);
 export const loginSetErrCode = createAction(LOGIN_SET_ERROR_CODE);
-export const loginCheckAuth = createAction(LOGIN_CHECK_AUTH, services.axiosAPI.getPender);
-export const loginSetLogOff = createAction(LOGIN_SET_LOGOFF,services.axiosAPI.getPender);
-export const changeUserPassword = createAction(CHANGE_USER_PASSWORD,services.axiosAPI.patchPander);
+export const loginCheckAuth = createAction(LOGIN_CHECK_AUTH, services.axiosAPI.requestGet);
+export const loginSetLogOff = createAction(LOGIN_SET_LOGOFF,services.axiosAPI.requestGet);
+export const changeUserPassword = createAction(CHANGE_USER_PASSWORD,services.axiosAPI.requestPatch);
 
 const initialState = Map({
     loginInfo : Map({
@@ -78,7 +77,7 @@ export default handleActions({
                             .setIn(["loginInfo", "auth"], data.permission);
             },
             onFailure: (state, action) => {
-                const { status, data }  = action.payload;
+                const { status, data }  = action.payload.response;
                 const { error } = data;
                 let errorCode = 0;
                 if (error.reason === Define.REASON_INVALID_PARAMETER) errorCode = Define.LOGIN_FAIL_NO_USERNAME_PASSWORD;
@@ -106,7 +105,7 @@ export default handleActions({
                 return state.setIn(["loginInfo", "errCode"], Define.RSS_SUCCESS);
             },
             onFailure: (state, action) => {
-                const {status, data: {error: {reason}}} = action.payload;
+                const {status, data: {error: {reason}}} = action.payload.response;
                 let result = Define.COMMON_FAIL_SERVER_ERROR;
                     if (reason !== undefined || reason !== null) {
                         if (status === Define.BAD_REQUEST) {

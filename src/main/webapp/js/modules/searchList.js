@@ -1,6 +1,6 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS } from 'immutable';
-import { pender } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from "../services";
 import moment from "moment";
 import * as  API from "../api";
@@ -21,7 +21,7 @@ export const searchSetRequestList = createAction(SEARCH_SET_REQUEST_LIST); 	// t
 export const searchSetRequestStartDate = createAction(SEARCH_SET_REQEUST_START_DATE); 	// toolList
 export const searchSetRequestEndDate = createAction(SEARCH_SET_REQUEST_END_DATE); 	// toolList
 export const searchInitResponseList = createAction(SEARCH_INIT_RESPONSE_LIST); 	// toolList
-export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, services.axiosAPI.postPender);
+export const searchLoadResponseList = createAction(SEARCH_LOAD_RESPONSE_LIST, services.axiosAPI.requestPost);
 export const searchCheckResponseList = createAction(SEARCH_CHECK_RESPONSE_LIST); 	// toolList
 export const searchCheckALLResponseList = createAction(SEARCH_CHECK_ALL_RESPONSE_LIST); 	// toolList
 export const searchSetResponsePerPage = createAction(SEARCH_SET_RESPONSE_PERPAGE); 	// toolList

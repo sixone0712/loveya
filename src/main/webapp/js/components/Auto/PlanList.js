@@ -1,20 +1,20 @@
-import React, { Component } from "react";
-import { Col, Card, CardHeader, CardBody, Table } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, {Component} from "react";
+import {Card, CardBody, CardHeader, Col, Table} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    faEdit,
-    faPlay,
-    faStop,
     faCheck,
-    faTimes,
-    faTrashAlt,
+    faEdit,
     faExclamationCircle,
+    faPause,
+    faPlay,
     faRegistered,
-    faPause
+    faStop,
+    faTimes,
+    faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import ClockLoader from "react-spinners/ClockLoader";
-import { Select } from "antd";
-import { filePaginate, RenderPagination } from "../Common/Pagination";
+import {Select} from "antd";
+import {filePaginate, RenderPagination} from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import * as Define from "../../define";
@@ -24,8 +24,6 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import * as viewListActions from "../../modules/viewList"
-import {setRowsPerPage} from "../../api";
-import {message} from "antd";
 
 const { Option } = Select;
 
@@ -92,7 +90,7 @@ class RSSautoplanlist extends Component {
 
     loadPlanList = async () => {
         try {
-            const res = await services.axiosAPI.get(Define.REST_PLANS_GET_PLANS);
+            const res = await services.axiosAPI.requestGet(Define.REST_PLANS_GET_PLANS);
             const { lists } = res.data;
             const newData = lists.map((item, idx) => {
                 return (
@@ -123,7 +121,7 @@ class RSSautoplanlist extends Component {
                 registeredList: newData
             })
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
 
@@ -170,12 +168,19 @@ class RSSautoplanlist extends Component {
     };
 
     closeDeleteModal = async (deleting, selectedPlanId) => {
-        let res = 0;
         const { pageSize, deleteIndex } = this.state;
         const numerator = deleteIndex - 1 === 0 ? 1 : deleteIndex - 1;
 
         if(deleting) {
-            res = await services.axiosAPI.deleteRequest(`${Define.REST_PLANS_DELETE_PLANS}/${selectedPlanId}`);
+            try {
+                const res = await services.axiosAPI.requestDelete(`${Define.REST_PLANS_DELETE_PLANS}/${selectedPlanId}`);
+                await this.setState({
+                    currentPage: Math.ceil(numerator / pageSize),
+                    deleteIndex: ""
+                });
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         await this.setState({
@@ -183,13 +188,6 @@ class RSSautoplanlist extends Component {
             isDeleteOpen: false,
             selectedPlanId: ""
         });
-
-        if(res.status === 200) {
-            await this.setState({
-                currentPage: Math.ceil(numerator / pageSize),
-                deleteIndex: ""
-            });
-        }
 
         setTimeout(this.loadPlanList, 200);
     };
@@ -254,13 +252,31 @@ class RSSautoplanlist extends Component {
     };
 
     stopDownload = async (planId) => {
-        const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/stop`);
-        await this.loadPlanList();
+        try {
+            const res = await services.axiosAPI.requestPut(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/stop`);
+        } catch (error) {
+            console.error(error);
+        }
+
+        try {
+            await this.loadPlanList();
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     restartDownload = async (planId) => {
-        const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/restart`);
-        await this.loadPlanList();
+        try {
+            const res = await services.axiosAPI.requestPut(`${Define.REST_PLANS_CHANGE_PLAN_STATUS}/${planId}/restart`);
+        } catch (error) {
+            console.error(error);
+        }
+
+        try {
+            await this.loadPlanList();
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     handleStatusChange = async (status, planId) => {

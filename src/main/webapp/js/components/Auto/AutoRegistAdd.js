@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import { Row, Col } from "reactstrap";
+import {Col, Row} from "reactstrap";
 import Wizard from "./PlanWizard";
 
 class RSSAutoRegistAdd extends Component {

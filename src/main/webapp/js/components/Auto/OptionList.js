@@ -1,15 +1,13 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
-import * as API from '../../api'
-import { Col, FormGroup, Input, Label, CustomInput, UncontrolledPopover, PopoverHeader, PopoverBody } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamation } from "@fortawesome/free-solid-svg-icons";
-import { DatetimePicker } from "rc-datetime-picker";
+import {Col, CustomInput, FormGroup, Input, Label, PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamation} from "@fortawesome/free-solid-svg-icons";
+import {DatetimePicker} from "rc-datetime-picker";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import moment from "moment";
-import { Select } from "antd";
+import {Select} from "antd";
 import * as Define from "../../define";
 
 const { Option } = Select;

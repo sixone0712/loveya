@@ -1,18 +1,17 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS, Record } from 'immutable';
-import { pender , applyPenders } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from '../services';
 import * as Define from "../define";
-
 
 const GET_DL_HISTORY = "dlHistory/GET_DL_HISTORY";
 const ADD_DL_HISTORY = "dlHistory/ADD_DL_HISTORY";
 const DELETE_DL_HISTORY = "dlHistory/DELETE_DL_HISTORY";
 const DL_HIS_INIT_SERVER_ERROR = "dlHistory/DL_HIS_INIT_SERVER_ERROR";
 
-export const loadDlHistoryList = createAction(GET_DL_HISTORY, services.axiosAPI.getPender);
-export const addDlHistory = createAction(ADD_DL_HISTORY, services.axiosAPI.getPender);
-export const deleteDlHistory = createAction(DELETE_DL_HISTORY, services.axiosAPI.getPender);
+export const loadDlHistoryList = createAction(GET_DL_HISTORY, services.axiosAPI.requestGet);
+export const addDlHistory = createAction(ADD_DL_HISTORY, services.axiosAPI.requestGet);
+export const deleteDlHistory = createAction(DELETE_DL_HISTORY, services.axiosAPI.requestGet);
 
 const initialState = Map({
     dlHistoryInfo :

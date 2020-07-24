@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import {Button} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

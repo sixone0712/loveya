@@ -1,24 +1,15 @@
-import React, { Component } from "react";
-import { Col, Card, CardHeader, CardBody, Button, Table } from "reactstrap";
-import { Select } from "antd";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faTrashAlt,
-    faCheck,
-    faExclamation,
-    faExclamationCircle,
-    faDownload
-} from "@fortawesome/free-solid-svg-icons";
-import { filePaginate, RenderPagination } from "../Common/Pagination";
+import React, {Component} from "react";
+import {Button, Card, CardBody, CardHeader, Col, Table} from "reactstrap";
+import {Select} from "antd";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCheck, faDownload, faExclamation, faExclamationCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {filePaginate, RenderPagination} from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services"
-import moment from "moment";
 import queryString from "query-string";
 import * as Define from "../../define";
-import {setRowsPerPage} from "../../api";
 import * as API from "../../api";
-import * as dlHistoryAction from "../../modules/dlHistory";
 
 const { Option } = Select;
 
@@ -176,7 +167,7 @@ class RSSAutoDownloadList extends Component {
             const res = await services.axiosAPI.downloadFile(downloadUrl);
             if(res.result == Define.RSS_SUCCESS) {
                 this.closeModal();
-                API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Completed")
+                await API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Completed")
             } else {
                 this.closeModal();
                 if(res.result == Define.COMMON_FAIL_NOT_FOUND) {
@@ -184,42 +175,34 @@ class RSSAutoDownloadList extends Component {
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
                 }
-                API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Fail")
+                await API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Fail")
             }
         } else {
             console.error("[DownladList][saveDownloadFile]downloadUrl is null");
             this.closeModal();
         }
-        this.loadDownloadList(this.state.requestId, this.state.requestName);
+        await this.loadDownloadList(this.state.requestId, this.state.requestName);
     }
 
-    requestDelete = async () => {
-        const { planId, fileId} = this.state.delete;
-        const res = await services.axiosAPI.deleteRequest(`${Define.REST_PLANS_DELETE_FILE}/${planId}/fileLists/${fileId}`)
-            .then( res  => {
-                return Define.RSS_SUCCESS;
-            })
-            .catch(error => {
-                const errResp = error.response;
-                let res = Define.COMMON_FAIL_SERVER_ERROR;
-                if(typeof errResp == "undefined") {
-                    return res;
-                }
-                console.error("[DownLoadList][deleteDownloadFile]errResp", error.response);
-                if(errResp.status === 404) {
-                    res = Define.COMMON_FAIL_NOT_FOUND;
-                }
-                return res;
-            });
+    requestDownloadCancel = async () => {
+        const { planId, fileId } = this.state.delete;
 
-        console.log("[DownLoadList][deleteDownloadFile]res", res);
-        return res;
+        try {
+            const res = await services.axiosAPI.requestDelete(`${Define.REST_PLANS_DELETE_FILE}/${planId}/fileLists/${fileId}`)
+            return Define.RSS_SUCCESS;
+
+        } catch (error) {
+            console.error(error);
+            const { response: { status } } = error;
+            if(status === Define.NOT_FOUND) return Define.COMMON_FAIL_NOT_FOUND;
+            else return Define.COMMON_FAIL_SERVER_ERROR
+        }
     }
 
     deleteDownloadFile = async () => {
         console.log("[DownladList][deleteDownloadFile]fileId", this.state.delete.fileId);
         if(this.state.delete.fileId !== "") {
-            const res = await this.requestDelete();
+            const res = await this.requestDownloadCancel();
             console.log("[DownladList][deleteDownloadFile]res", res);
             if(res === Define.RSS_SUCCESS) {
                 const numerator = this.state.delete.keyIndex - 1 === 0 ? 1 : this.state.delete.keyIndex - 1;
@@ -239,47 +222,49 @@ class RSSAutoDownloadList extends Component {
             console.error("[DownladList][deleteDownloadFile]id is null");
             this.closeModal();
         }
-        this.loadDownloadList(this.state.requestId, this.state.requestName);
+        await this.loadDownloadList(this.state.requestId, this.state.requestName);
     }
 
 
     loadDownloadList = async (planId, planName) => {
-        let result = false;
-        const res = await services.axiosAPI.get(`${Define.REST_PLANS_GET_FILELIST}/${planId}/filelists`);
-        const { lists } = res.data;
-        console.log("[DownloadList][componentDidMount]res", res);
-        let newRequestList = [];
-        if(lists !== undefined) {
-            newRequestList = lists.map((item, idx) => {
-                return {
-                    created: item.created,
-                    status: item.status,
-                    fileId: item.fileId,
-                    planId: item.planId,
-                    downloadUrl: item.downloadUrl,
-                    keyIndex: idx + 1
-                }
+        try {
+            const res = await services.axiosAPI.requestGet(`${Define.REST_PLANS_GET_FILELIST}/${planId}/filelists`);
+            const {lists} = res.data;
+            console.log("[DownloadList][componentDidMount]res", res);
+            let newRequestList = [];
+            if (lists !== undefined) {
+                newRequestList = lists.map((item, idx) => {
+                    return {
+                        created: item.created,
+                        status: item.status,
+                        fileId: item.fileId,
+                        planId: item.planId,
+                        downloadUrl: item.downloadUrl,
+                        keyIndex: idx + 1
+                    }
+                })
+            }
+
+            await this.setState({
+                ...this.state,
+                requestName: planName,
+                requestId: planId,
+                requestList: newRequestList
             })
-            result = true;
+        } catch (error) {
+            console.error(error);
         }
-
-        await this.setState({
-            ...this.state,
-            requestName: planName,
-            requestId: planId,
-            requestList: newRequestList
-        })
-
-        return result;
     }
 
-    async componentDidMount() {
-        const query = queryString.parse(this.props.location.search);
-        const { planId, planName } = query;
-        console.log("[DownloadList][componentDidMount]planId", planId);
-        console.log("[DownloadList][componentDidMount]planName", planName);
-
-        const res = await this.loadDownloadList(planId, planName);
+    componentDidMount() {
+        const requestList = async () => {
+            const query = queryString.parse(this.props.location.search);
+            const { planId, planName } = query;
+            console.log("[DownloadList][componentDidMount]planId", planId);
+            console.log("[DownloadList][componentDidMount]planName", planName);
+            return await this.loadDownloadList(planId, planName);
+        }
+        requestList().then(r => r).catch(e => console.error(e));
     }
 
     render() {

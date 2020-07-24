@@ -1,11 +1,10 @@
-import React, { Component } from "react";
-import {Button, Input, UncontrolledPopover, PopoverHeader, PopoverBody } from "reactstrap";
+import React, {Component} from "react";
+import {Button, Input, PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationCircle, faExclamation} from "@fortawesome/free-solid-svg-icons";
+import {faExclamation, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import * as Define from '../../../define';
 import * as API from "../../../api";
-import services from '../../../services'
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as genreListActions from "../../../modules/genreList";

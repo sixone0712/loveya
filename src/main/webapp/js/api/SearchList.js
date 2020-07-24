@@ -110,23 +110,22 @@ export const requestDownload = async (props) => {
         return acc;
     }, []);
 
-    const jsonList = new Object();
-    jsonList.lists = downloadList;
-
     //console.log("downloadList", downloadList);
-    //console.log("jsonList", jsonList);
 
-    const result = await services.axiosAPI.post(Define.REST_FTP_POST_DOWNLOAD, jsonList)
-        .then((res) => {/*console.log("data", data);*/ return  res})
-        .catch((error) => {
-            console.log("[startDownload]error", error);
-            return Define.GENRE_SET_FAIL_SEVER_ERROR;
-        });
+    const requestList = {
+        lists: downloadList
+    }
+    //console.log("requestList", requestList);
 
-    //console.log("result", result);
-    const { downloadId } = result.data;
-    console.log("[requestDownload]donwloadId", downloadId);
-    return downloadId;
+    try {
+        const response = await services.axiosAPI.requestPost(Define.REST_FTP_POST_DOWNLOAD, requestList)
+        const { downloadId } = response.data;
+        console.log("[requestDownload]donwloadId", downloadId);
+        return downloadId;
+    } catch (error) {
+        console.error(error);
+        return "";
+    }
 };
 
 
@@ -186,23 +185,28 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
         let { func } = downloadStatus;
         if(func === null) return;
 
-        const res = await services.axiosAPI.get(`${Define.REST_FTP_POST_DOWNLOAD}/${requestId}`)
-            .then(res => res)
-            .catch(res => {let newRes = { data: { status: "timeOut"}};  return newRes});
-
-        if(res.data.status === "done" || res.data.status ==="error" || res.data.status === "timeOut" || res.data === null) {
-            clearTimeout(func);
-            func = null;
-            modalFunc.closeProcessModal();
-            if(res.data.status === "done") {
-                modalFunc.openCompleteModal();
-            } else {
-                // 1. axios timeout
-                // 2. Respond error from /dl/status
-                // 3. Respond null from /dl/status
-                modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
-                modalFunc.openErrorModal();
+        let res;
+        try {
+            res = await services.axiosAPI.requestGet(`${Define.REST_FTP_POST_DOWNLOAD}/${requestId}`);
+            const { status } = res.data;
+            if(status === "done" || res.data.status ==="error") {
+                clearTimeout(func);
+                func = null;
+                modalFunc.closeProcessModal()
+                if(status === "done") {
+                    modalFunc.openCompleteModal();
+                } else {
+                    // 1. axios timeout
+                    // 2. Respond error from /dl/status
+                    // 3. Respond null from /dl/status
+                    modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
+                    modalFunc.openErrorModal();
+                }
             }
+        } catch (error) {
+            console.error(error);
+            modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
+            modalFunc.openErrorModal();
         }
 
         modalFunc.setSearchListActions({

@@ -5,7 +5,6 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as autoPlanActions from "../../modules/autoPlan";
-import {PAGE_ADMIN_ACCOUNT, PAGE_ADMIN_DL_HISTORY, PAGE_AUTO_PLAN_ADD} from "../../define";
 
 class MoveRefreshPage extends Component {
     async componentDidMount() {

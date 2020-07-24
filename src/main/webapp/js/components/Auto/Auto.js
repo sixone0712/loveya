@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import queryString from "query-string";
-import { Route, Switch } from 'react-router-dom';
-import { NavLink } from "react-router-dom";
+import {NavLink, Route, Switch} from 'react-router-dom';
 import ScrollToTop from "react-scroll-up";
 import * as Define from "../../define";
 import AutoPlanAdd from "./AutoRegistAdd";
@@ -9,7 +8,7 @@ import AutoPlanEdit from "./AutoRegistEdit";
 import AutoStatus from "./AutoPlanStatus";
 import AutoDownload from "./DownloadList"
 import Footer from "../Common/Footer";
-import {Breadcrumb, BreadcrumbItem, Container } from "reactstrap";
+import {Breadcrumb, BreadcrumbItem, Container} from "reactstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
 

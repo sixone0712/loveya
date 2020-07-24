@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Card, CardBody, Col, FormGroup, ButtonToggle } from "reactstrap";
+import React, {Component} from "react";
+import {ButtonToggle, Card, CardBody, Col, FormGroup} from "reactstrap";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../../modules/viewList";

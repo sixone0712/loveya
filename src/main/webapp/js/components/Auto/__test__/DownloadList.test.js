@@ -40,7 +40,7 @@ let store;
 
 describe('DownloadList', () => {
     beforeEach(() => {
-        services.axiosAPI.get = jest.fn().mockResolvedValue({
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({
             data: [{
                 collectStart: "2020-05-31T15:00:00.000+0000",
                 collectTypeStr: "cycle",
@@ -81,7 +81,7 @@ describe('DownloadList', () => {
     });
 
     it('renders correctly(there is not downloadlist)', () => {
-        services.axiosAPI.get = jest.fn().mockResolvedValue({ data: ""});
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({ data: ""});
         const wrapper = shallow(<DownloadList {...props} />)
         expect(wrapper).toMatchSnapshot();
     });
@@ -174,7 +174,7 @@ describe('DownloadList', () => {
 
     it('deleteDownloadFile, requestDelete', () => {
         const wrapper = shallow(<DownloadList {...props} />);
-        services.axiosAPI.get = jest.fn().mockResolvedValue({ data : "test"});
+        services.axiosAPI.requestGet = jest.fn().mockResolvedValue({ data : "test"});
         wrapper.setState({
             currentPage: 1,
             pageSize: 10,
@@ -227,7 +227,7 @@ describe('DownloadList', () => {
                 status: 404
             }
         }
-        services.axiosAPI.get = jest.fn().mockRejectedValue(error);
+        services.axiosAPI.requestGet = jest.fn().mockRejectedValue(error);
         wrapper.instance().deleteDownloadFile();
 
         error = {
@@ -235,11 +235,11 @@ describe('DownloadList', () => {
                 status: 0
             }
         }
-        services.axiosAPI.get = jest.fn().mockRejectedValue(error);
+        services.axiosAPI.requestGet = jest.fn().mockRejectedValue(error);
         wrapper.instance().deleteDownloadFile();
 
         error = { };
-        services.axiosAPI.get = jest.fn().mockRejectedValue(error);
+        services.axiosAPI.requestGet = jest.fn().mockRejectedValue(error);
         wrapper.instance().deleteDownloadFile();
     });
 });

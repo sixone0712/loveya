@@ -1,12 +1,18 @@
-import React, { Component } from "react";
-import {Col, CardHeader, CardBody, Table, Card, Container, Breadcrumb, BreadcrumbItem, Button} from "reactstrap";
+import React, {Component} from "react";
+import {Breadcrumb, BreadcrumbItem, Button, Card, CardBody, CardHeader, Col, Container, Table} from "reactstrap";
 import * as API from "../../api";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as userActions from "../../modules/User";
-import { Select } from "antd";
+import {Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faCheckCircle, faUser, faExclamationCircle, faTrashAlt, faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
+import {
+    faAngleDoubleUp,
+    faCheckCircle,
+    faExclamationCircle,
+    faTrashAlt,
+    faUser
+} from "@fortawesome/free-solid-svg-icons";
 import {filePaginate, RenderPagination} from "../Common/Pagination";
 import ConfirmModal from "../Common/ConfirmModal";
 import moment from "moment";

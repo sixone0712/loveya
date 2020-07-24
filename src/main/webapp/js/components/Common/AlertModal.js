@@ -1,6 +1,6 @@
 import React from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const AlertModal = ({isOpen, icon, message, style, closer}) => {
     return (

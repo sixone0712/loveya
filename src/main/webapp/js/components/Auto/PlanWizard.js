@@ -1,28 +1,18 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import services from '../../services';
 import * as Define from "../../define"
-import {
-  Col,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Button,
-  Carousel,
-  CarouselItem
-} from "reactstrap";
+import {Button, Card, CardBody, CardFooter, CardHeader, Carousel, CarouselItem, Col} from "reactstrap";
 import Machine from "./MachineList";
 import Target from "./TargetList";
 import Command from "./VFTP/commandlist";
 import Option from "./OptionList";
 import Check from "./CheckSetting";
 import moment from "moment";
-import * as API from "../../api";
 import * as autoPlanActions from "../../modules/autoPlan";
-import { faExclamationCircle, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import {faCheckCircle, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import AlertModal from "../Common/AlertModal";
 import ConfirmModal from "../Common/ConfirmModal";
 
@@ -127,25 +117,30 @@ class RSSautoplanwizard extends Component {
   }
 
   handleRequestAutoPlanAdd = async () => {
-    const reqData = this.makeRequestAutoPlanData();
-    //console.log("reqData", reqData);
-    const res = await services.axiosAPI.post(Define.REST_PLANS_POST_PLANS, reqData);
-    //console.log(res);
-
-    //console.log("this.props.history", this.props.history);
-    this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
-    // error process
+    try {
+      const reqData = this.makeRequestAutoPlanData();
+      //console.log("reqData", reqData);
+      const res = await services.axiosAPI.requestPost(Define.REST_PLANS_POST_PLANS, reqData);
+      //console.log(res);
+      //console.log("this.props.history", this.props.history);
+      this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   handleRequestAutoPlanEdit = async (editId) => {
-    const reqData = this.makeRequestAutoPlanData();
-    //console.log("reqData", reqData);
-    console.log("editID", editId);
-    const res = await services.axiosAPI.putReqeust(`${Define.REST_PLANS_MODIFY_PLAN}/${editId}`, reqData);
-    console.log(res);
-    //console.log("this.props.history", this.props.history);
-    this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
-    // error process
+    try {
+      const reqData = this.makeRequestAutoPlanData();
+      //console.log("reqData", reqData);
+      //console.log("editID", editId);
+      const res = await services.axiosAPI.requestPut(`${Define.REST_PLANS_MODIFY_PLAN}/${editId}`, reqData);
+      //console.log(res);
+      //console.log("this.props.history", this.props.history);
+      this.props.history.push(Define.PAGE_REFRESH_AUTO_STATUS);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
 

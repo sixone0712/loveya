@@ -1,14 +1,11 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as API from '../../api'
-import { Col, FormGroup, ButtonToggle, Input } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSearch,
-  faExclamationCircle
-} from "@fortawesome/free-solid-svg-icons";
+import {ButtonToggle, Col, FormGroup, Input} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle, faSearch} from "@fortawesome/free-solid-svg-icons";
 import CheckBox from "../Common/CheckBox";
 
 const SECTION_DISPLAY_ITEM = 10;

@@ -130,7 +130,7 @@ describe('PlanWiard', () => {
 
     it('call handleRequestAutoPlanAdd', () => {
 
-        services.axiosAPI.post = jest.fn().mockResolvedValue({
+        services.axiosAPI.requestPost = jest.fn().mockResolvedValue({
             data: {
                 id: 1,
             },
@@ -148,7 +148,7 @@ describe('PlanWiard', () => {
 
     it('call handleRequestAutoPlanEdit', () => {
 
-        services.axiosAPI.post = jest.fn().mockResolvedValue({
+        services.axiosAPI.requestPost = jest.fn().mockResolvedValue({
             data: {
                 id: 2,
             },

@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Card, CardBody, Col, FormGroup, Button } from "reactstrap";
+import React, {Component} from "react";
+import {Button, Card, CardBody, Col, FormGroup} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import DatePicker from "./DatePicker";

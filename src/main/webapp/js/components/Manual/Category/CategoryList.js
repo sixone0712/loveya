@@ -1,15 +1,7 @@
-import React, { Component } from "react";
-import {
-  Card,
-  CardBody,
-  Col,
-  FormGroup,
-  ButtonToggle,
-  Input,
-  Collapse
-} from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import React, {Component} from "react";
+import {ButtonToggle, Card, CardBody, Col, Collapse, FormGroup, Input} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle, faSearch} from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
 import CheckBox from "../../Common/CheckBox";
 import InputModal from "./InputModal";
@@ -19,7 +11,6 @@ import {bindActionCreators} from "redux";
 import * as viewListActions from "../../../modules/viewList";
 import * as genreListActions from "../../../modules/genreList";
 import * as API from '../../../api'
-import {element, object} from "prop-types";
 
 export const customSelectStyles = {
   container: (styles, { isDisabled }) => ({

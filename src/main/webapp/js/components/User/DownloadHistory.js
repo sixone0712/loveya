@@ -1,28 +1,19 @@
-import React, { Component } from "react";
-import {Col, CardHeader, CardBody, Table, Card, Container, Breadcrumb, BreadcrumbItem, Button} from "reactstrap";
+import React, {Component} from "react";
+import {Breadcrumb, BreadcrumbItem, Card, CardBody, CardHeader, Col, Container, Table} from "reactstrap";
 import * as API from "../../api";
 import * as Define from "../../define";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as dlHistoryAction from "../../modules/dlHistory";
-import { Select } from "antd";
+import {Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {
-    faCheckCircle,
-    faUser,
-    faExclamationCircle,
-    faPlus,
-    faTrashAlt,
-    faAngleDoubleUp
-} from "@fortawesome/free-solid-svg-icons";
+import {faAngleDoubleUp, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import {filePaginate, RenderPagination} from "../Common/Pagination";
 import Footer from "../Common/Footer";
 import ScrollToTop from "react-scroll-up";
 import moment from "moment";
 
 const { Option } = Select;
-
-
 
 export function getDownloadType(type) {
     let typeString = 0;

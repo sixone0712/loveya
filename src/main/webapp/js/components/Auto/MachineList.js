@@ -1,13 +1,13 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as viewListActions from "../../modules/viewList";
 import * as API from '../../api'
 
-import { Col, FormGroup, ButtonToggle } from "reactstrap";
-import { Collapse } from "react-collapse";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import {ButtonToggle, Col, FormGroup} from "reactstrap";
+import {Collapse} from "react-collapse";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faBars} from "@fortawesome/free-solid-svg-icons";
 import CheckBox from "../Common/CheckBox";
 
 class RSSautomachinelist extends Component {

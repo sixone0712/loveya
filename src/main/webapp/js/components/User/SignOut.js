@@ -1,17 +1,16 @@
 import React, {Component} from 'react';
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import * as API from "../../api";
 import * as Define from "../../define";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import UserAuthFrom from "../Form/UserAuthForm";
 import InputForm from "../Form/InputForm";
-import {UncontrolledPopover, PopoverHeader, PopoverBody} from "reactstrap";
+import {PopoverBody, PopoverHeader, UncontrolledPopover} from "reactstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamation, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import {faExclamation, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import {bindActionCreators} from "redux";
 import * as userActions from "../../modules/User";
 import AlertModal from "../Common/AlertModal";
-
 
 class SignOut extends Component {
     constructor(props) {

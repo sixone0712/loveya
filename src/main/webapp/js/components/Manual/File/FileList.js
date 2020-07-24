@@ -1,11 +1,11 @@
-import React, { Component } from "react";
-import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
+import React, {Component} from "react";
+import {Button, ButtonToggle, Card, CardBody, Table} from "reactstrap";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBan, faChevronCircleDown, faDownload, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { faFileAlt, faFolderOpen } from "@fortawesome/free-regular-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faBan, faChevronCircleDown, faDownload, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import {faFileAlt} from "@fortawesome/free-regular-svg-icons";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import { Select } from "antd";
+import {Select} from "antd";
 import CheckBox from "../../Common/CheckBox";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -15,7 +15,7 @@ import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
 import services from "../../../services";
-import { filePaginate, RenderPagination } from "../../Common/Pagination";
+import {filePaginate, RenderPagination} from "../../Common/Pagination";
 import ConfirmModal from "../../Common/ConfirmModal";
 import AlertModal from "../../Common/AlertModal";
 import _ from "lodash";
@@ -155,14 +155,17 @@ class FileList extends Component {
       if(func !== null){
         clearInterval(func);
         // Reauest Cancel
-        const res = await services.axiosAPI.deleteRequest(Define.REST_FTP_DELETE_DOWNLOAD + "/" + dlId);
-        console.log("res", res)
-        // error process
+        try {
+          const res = await services.axiosAPI.requestDelete(Define.REST_FTP_DELETE_DOWNLOAD + "/" + dlId);
+          //console.log("res", res)
+        } catch (error) {
+          console.error(error);
+        }
       }
 
-      const {searchListActions } = this.props;
+      const { searchListActions } = this.props;
       // Initialize state
-      searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
+      await searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
       this.setErrorStatus(Define.RSS_SUCCESS);
       this.closeProcessModal();
       setTimeout(() => {
@@ -209,17 +212,18 @@ class FileList extends Component {
       console.log("downloadStatus.toJS().downloadUrl", downloadStatus.toJS().downloadUrl);
       res = await services.axiosAPI.downloadFile(downloadStatus.toJS().downloadUrl);
       console.log("res: ",res);
-      (res.result == Define.RSS_SUCCESS)
-          ? API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Completed")
-          : API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Fail");
+      if(res.result === Define.RSS_SUCCESS)
+        await API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Completed")
+      else
+        await API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,res.fileName, "Download Fail");
       this.setErrorStatus(res.result);
     }
     else {
-      API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,"unknown", "User Cancel");
+      await API.addDlHistory(Define.RSS_TYPE_FTP_MANUAL ,"unknown", "User Cancel");
     }
     // Initialize state
     const { searchListActions } = this.props;
-    searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
+    await searchListActions.searchSetDlStatus({func:null, dlId: "", status: "init", totalFiles: 0, downloadFiles: 0});
     this.setErrorStatus(Define.RSS_SUCCESS);
   };
 

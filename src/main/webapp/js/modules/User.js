@@ -1,9 +1,8 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS, Record } from 'immutable';
-import { pender , applyPenders } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from '../services';
 import * as Define from "../define";
-
 
 const USER_CREATE = "user/USER_CREATE";
 const USER_DELETE = "user/USER_DELETE";
@@ -12,10 +11,10 @@ const USER_GET_LIST = "user/USER_GET_LIST";
 const USER_INIT_ALL_LIST = "user/USER_INIT_ALL_LIST";
 const USER_INIT_SERVER_ERROR = "user/USER_INIT_SERVER_ERROR";
 
-export const createUser = createAction(USER_CREATE, services.axiosAPI.postPender);
-export const deleteUser = createAction(USER_DELETE, services.axiosAPI.deletePender);
-export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.getPender);
-export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.patchPander);
+export const createUser = createAction(USER_CREATE, services.axiosAPI.requestPost);
+export const deleteUser = createAction(USER_DELETE, services.axiosAPI.requestDelete);
+export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.requestGet);
+export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.requestPatch);
 
 const initialState = Map({
     UserInfo : Map({
@@ -57,7 +56,7 @@ export default handleActions({
                 return  state.setIn(["UserInfo","result"], Define.RSS_SUCCESS);
             },
             onFailure: (state, action) => {
-              const { status, data : { error : { reason } } } = action.payload;
+              const { status, data : { error : { reason } } } = action.payload.response;
               let result = Define.USER_SET_FAIL_NO_REASON;
               if(reason !== undefined || reason !== null) {
                 if (status === Define.BAD_REQUEST) {
@@ -79,7 +78,7 @@ export default handleActions({
                 return  state.setIn(["UserInfo","result"], Define.RSS_SUCCESS);
             },
             onFailure: (state, action) => {
-              const { status, data : { error : { reason } } } = action.payload;
+              const { status, data : { error : { reason } } } = action.payload.response;
               let result = Define.USER_SET_FAIL_NO_REASON;
               if(reason !== undefined || reason !== null) {
                 if(status === Define.NOT_FOUND) {
@@ -101,7 +100,7 @@ export default handleActions({
                           .setIn(["UserInfo", "auth"], permission);
             },
             onFailure: (state, action) => {
-              const { status, data : { error : { reason } } } = action.payload;
+              const { status, data : { error : { reason } } } = action.payload.response;
               let result = Define.USER_SET_FAIL_NO_REASON;
               if(reason !== undefined || reason !== null) {
                 if(status === Define.BAD_REQUEST) {

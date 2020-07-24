@@ -5,7 +5,7 @@ import * as viewListActions from "../../modules/viewList";
 import * as genreListActions from "../../modules/genreList";
 import * as searchListActions from "../../modules/searchList";
 import * as Define from '../../define';
-import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import {Breadcrumb, BreadcrumbItem, Col, Container, Row} from "reactstrap";
 import Machinelist from "./Machine/MachineList";
 import Categorylist from "./Category/CategoryList";
 import Formlist from "./Search/FormList";

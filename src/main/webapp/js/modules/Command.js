@@ -1,8 +1,7 @@
-import { createAction, handleActions } from 'redux-actions';
-import { Map, List, fromJS, Record } from 'immutable';
-import { pender , applyPenders } from 'redux-pender';
+import {createAction, handleActions} from 'redux-actions';
+import {fromJS, List, Map} from 'immutable';
+import {pender} from 'redux-pender';
 import services from '../services';
-import * as API from "../api";
 import moment from "moment";
 
 const COMMAND_ADD = "cmd/COMMAND_ADD";
@@ -14,10 +13,10 @@ const COMMAND_INIT_SERVER_ERROR = "cmd/COMMAND_INIT_SERVER_ERROR";
 const COMMAND_SET_START_DATE= 'cmd/COMMAND_SET_START_DATE';
 const COMMAND_SET_END_DATE= 'cmd/COMMAND_SET_END_DATE';
 
-export const addCommand = createAction(COMMAND_ADD, services.axiosAPI.getPender);
-export const deleteCommand = createAction(COMMAND_DELETE, services.axiosAPI.getPender);
-export const updateCommand = createAction(COMMAND_UPDATE, services.axiosAPI.getPender);
-export const getCommandList = createAction(COMMAND_GET_LIST, services.axiosAPI.getPender);
+export const addCommand = createAction(COMMAND_ADD, services.axiosAPI.requestGet);
+export const deleteCommand = createAction(COMMAND_DELETE, services.axiosAPI.requestGet);
+export const updateCommand = createAction(COMMAND_UPDATE, services.axiosAPI.requestGet);
+export const getCommandList = createAction(COMMAND_GET_LIST, services.axiosAPI.requestGet);
 export const setCmdStartDate = createAction(COMMAND_SET_START_DATE);
 export const setCmdEndDate = createAction(COMMAND_SET_END_DATE);
 
