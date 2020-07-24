@@ -550,7 +550,7 @@ class FileList extends Component {
                           <td>{file.logName}</td>
                           <td>{convFileName}</td>
                           <td>{convFileDate}</td>
-                          <td>{file.file ? file.sizeKB : '-'}</td>
+                          <td>{file.sizeKB}</td>
                         </tr>
                     );
                   })}

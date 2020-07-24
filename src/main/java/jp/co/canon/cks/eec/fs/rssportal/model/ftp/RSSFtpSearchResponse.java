@@ -18,5 +18,5 @@ public class RSSFtpSearchResponse {
     private long fileSize = 0;
     private String fileDate = "";
     private String filePath = "";
-    private boolean file = false;
+    //private boolean file = false;     //Not currently in use
 }

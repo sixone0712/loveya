@@ -80,6 +80,8 @@ spring:
 rssportal:
   property:
     constructdisplay: devTemp/ConstructDisplay.xml
+  file-service-manager:
+    addr: 10.1.31.237
   vftp:
     objectlistfile: devTemp/ObjectList.xml
   collect:
@@ -107,6 +109,8 @@ spring:
 rssportal:
   property:
     constructdisplay: /usr/local/canon/esp/CanonFileService/definitions/ConstructDisplay.xml
+  file-service-manager:
+    addr: localhost
   vftp:
     objectlistfile: /usr/local/canon/esp/CanonFileService/definitions/ObjectList.xml
   collect:

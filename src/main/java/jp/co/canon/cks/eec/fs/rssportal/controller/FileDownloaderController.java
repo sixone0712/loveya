@@ -1,6 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
-import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
+import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
@@ -12,6 +14,7 @@ import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,8 +28,6 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -41,79 +42,69 @@ public class FileDownloaderController {
     private final HttpSession session;
     private final FileDownloader fileDownloader;
 
+    @Value("${rssportal.file-service-manager.addr}")
+    private String fileServiceAddress;
+
+    @Autowired
+    FileServiceManageConnectorFactory connectorFactory;
+
     @Autowired
     public FileDownloaderController(HttpSession session, FileDownloader fileDownloader) {
         this.session = session;
         this.fileDownloader = fileDownloader;
     }
+
     private boolean createFileList(List<RSSFtpSearchResponse> list, RSSFtpSearchRequest request) {
         if(list==null || request==null) return false;
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        Calendar from = Calendar.getInstance();
-        Calendar to = Calendar.getInstance();
-        try {
-            from.setTime(format.parse(request.getStartDate()));
-            to.setTime(format.parse(request.getEndDate()));
-        } catch (ParseException e) {
-            log.error("[createFileList] failed to parse datetime ("+request.getMachineName()+":"+request.getCategoryCode());
-            return false;
-        }
 
         int fileServiceRetryCount = fileDownloader.getFileServiceRetryCount();
         int fileServiceRetryInterval = fileDownloader.getFileServiceRetryInterval();
 
-        FileInfoModel[] fileInfo;
+        LogFileList fileInfo = null;
         int retry = 0;
         while(retry<fileServiceRetryCount) {
             try {
-                fileInfo = fileDownloader.getServiceManage().createFileList(
-                        request.getMachineName(),
+                fileInfo = connectorFactory.getConnector(fileServiceAddress).getFtpFileList(request.getMachineName(),
                         request.getCategoryCode(),
-                        from,
-                        to,
+                        request.getStartDate(),
+                        request.getEndDate(),
                         request.getKeyword(),
                         request.getDir());
 
-                for(FileInfoModel file: fileInfo) {
-                    if(file.getName().endsWith(".") || file.getName().endsWith("..") || file.getSize()==0)
-                        continue;
+                for(FileInfo file: fileInfo.getList()) {
                     if(file.getType().equals("D")) {
                         // Search for files in a directory only when the directory date falls within the search date range
                         // FTP Folder Date is UTC
                         /*
-                        long dirTimestamp = Long.parseLong(format.format(file.getTimestamp().getTime()));
-                        log.info("file.getTimestamp().getTime():" + file.getTimestamp().getTime());
-                        log.info("file.getTimestamp():" + file.getTimestamp());
+                        long dirTimestamp = Long.parseLong(file.getTimestamp());
                         log.info("dirTimestamp: " + dirTimestamp);
-                        log.info("file.getName(): " + file.getName());
+                        log.info("file.getFilename(): " + file.getFilename());
                         long searchFrom = Long.parseLong(request.getStartDate());
                         long searchTo = Long.parseLong(request.getEndDate());
                         if(dirTimestamp > searchTo || dirTimestamp < searchFrom) continue;
-                         */
-
+                        */
                         RSSFtpSearchRequest child = request.getClone();
-                        child.setDir(file.getName());
+                        child.setDir(file.getFilename());
                         if(!createFileList(list, child)) {
                             log.warn(String.format("[createFileList]connection error (%s %s %s)",
                                     request.getMachineName(), request.getCategoryCode(), request.getDir()));
                         }
                     } else {
+                        if(file.getFilename().endsWith(".") || file.getFilename().endsWith("..") || file.getSize()==0)
+                            continue;
+
                         RSSFtpSearchResponse info = new RSSFtpSearchResponse();
-                        info.setFile(true);
-                        //info.setFileId(0);
                         info.setCategoryCode(request.getCategoryCode());
-                        info.setFileName(file.getName());
-                        String[] paths = file.getName().split("/");
+                        info.setFileName(file.getFilename());
+                        String[] paths = file.getFilename().split("/");
                         if(paths.length>1) {
-                            int lastIndex = file.getName().lastIndexOf("/");
-                            info.setFilePath(file.getName().substring(0, lastIndex));
+                            int lastIndex = file.getFilename().lastIndexOf("/");
+                            info.setFilePath(file.getFilename().substring(0, lastIndex));
                         } else {
                             info.setFilePath(".");
                         }
                         info.setFileSize(file.getSize());
-                        info.setFileDate(format.format(file.getTimestamp().getTime()));
-                        //info.setFileStatus("");
+                        info.setFileDate(file.getTimestamp());
                         info.setFabName(request.getFabName());
                         info.setMachineName(request.getMachineName());
                         info.setCategoryName(request.getCategoryName());
@@ -121,8 +112,9 @@ public class FileDownloaderController {
                     }
                 }
                 return true;
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 log.error("[createFileList]request failed(retry: " + (++retry) + ")");
+                log.error("[createFileList]request failed: " + e);
                 try {
                     Thread.sleep(fileServiceRetryInterval);
                 } catch (InterruptedException interruptedException) {

@@ -61,11 +61,11 @@ const initialState = Map({
             fileSize: 0,
             fileDate: "",
             filePath: "",
-            file: false,
+            //file: false,      //Not currently in use
             structId: "",
             targetName: "",
             logName: "",
-            //sizeKB: 0,        //Not currently in use
+            sizeKB: 0,
             checked: false
 		})
     ]),
@@ -112,8 +112,8 @@ export default handleActions({
                         fileDate: list.fileDate,
                         filePath: list.filePath,
                         //fileStatus: list.fileStatus,  //Not currently in use
-                        file: list.file,
-                        //sizeKB: API.bytesToSize(list.fileSize),   //Not currently in use
+                        //file: list.file,  //Not currently in use
+                        sizeKB: API.bytesToSize(list.fileSize),
                         checked: true
                     }
                 });
