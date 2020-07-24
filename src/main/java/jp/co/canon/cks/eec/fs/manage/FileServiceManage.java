@@ -7,6 +7,7 @@
 
 package jp.co.canon.cks.eec.fs.manage;
 
+@Deprecated
 public interface FileServiceManage extends java.rmi.Remote {
     public int checkAuth(java.lang.String user, java.lang.String password, java.lang.String passType, java.lang.String compId) throws java.rmi.RemoteException;
     public jp.co.canon.cks.eec.fs.manage.ToolInfoModel[] createToolList() throws java.rmi.RemoteException;
