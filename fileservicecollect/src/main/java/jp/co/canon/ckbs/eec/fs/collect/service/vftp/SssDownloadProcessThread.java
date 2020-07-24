@@ -89,14 +89,15 @@ public class SssDownloadProcessThread extends Thread implements CustomOutputStre
             if (fileNameListFile != null){
                 fileNameListFile.delete();
             }
-            downloadService.removeSssDownloadProcessThread(request.getRequestNo());
             request.setCompletedTime(System.currentTimeMillis());
             request.setStatus(VFtpSssDownloadRequest.Status.EXECUTED);
+            downloadService.sssRequestCompleted(request.getRequestNo());
         }
     }
 
     @Override
     public boolean processOutputLine(String line) {
+        System.out.println("OUTPUT:" + line);
         if(line.startsWith("DOWNLOAD_COMPLETE:")){
             line = line.substring(18);
             String[] strArr = line.split(";");

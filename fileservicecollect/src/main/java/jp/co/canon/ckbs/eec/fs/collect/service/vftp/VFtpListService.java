@@ -24,8 +24,8 @@ public class VFtpListService {
     long lastRequestNumber = 0;
     DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
 
-    SssListRequestMap requestMap = new SssListRequestMap();
-    SssListProcessThreadMap listRequestThreadMap = new SssListProcessThreadMap();
+    StringToOtherTypeMap<VFtpSssListRequest> stringToOtherTypeMap = new StringToOtherTypeMap<>();
+    StringToOtherTypeMap<SssListProcessThread> listRequestThreadMap = new StringToOtherTypeMap<>();
     SssListRequestQueue completedRequestQueue = new SssListRequestQueue();
 
     boolean stopPurgeThread = false;
@@ -34,7 +34,7 @@ public class VFtpListService {
         long baseTime = System.currentTimeMillis() - 60*1000;
         VFtpSssListRequest request = completedRequestQueue.get();
         while (request != null && request.getCompletedTime() < baseTime) {
-            requestMap.remove(request.getRequestNo());
+            stringToOtherTypeMap.remove(request.getRequestNo());
             completedRequestQueue.pop();
             request = completedRequestQueue.get();
         }
@@ -57,13 +57,13 @@ public class VFtpListService {
 
     public void requestCompleted(String requestNo){
         listRequestThreadMap.remove(requestNo);
-        VFtpSssListRequest request = requestMap.get(requestNo);
+        VFtpSssListRequest request = stringToOtherTypeMap.get(requestNo);
         completedRequestQueue.add(request);
     }
 
     void addRequest(VFtpSssListRequest request){
         request.setTimestamp(System.currentTimeMillis());
-        requestMap.put(request.getRequestNo(), request);
+        stringToOtherTypeMap.put(request.getRequestNo(), request);
     }
 
     synchronized Date generateRequestTime(){
@@ -116,7 +116,7 @@ public class VFtpListService {
     }
 
     public VFtpSssListRequest getListRequest(String machine, String requestNo){
-        VFtpSssListRequest request = requestMap.get(requestNo);
+        VFtpSssListRequest request = stringToOtherTypeMap.get(requestNo);
         if (request != null){
             if (request.getMachine().equals(machine)){
                 return request;

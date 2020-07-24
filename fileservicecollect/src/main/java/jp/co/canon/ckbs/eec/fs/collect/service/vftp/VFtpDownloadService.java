@@ -14,8 +14,6 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class VFtpDownloadService {
@@ -25,20 +23,27 @@ public class VFtpDownloadService {
     @Value("${fileservice.collect.vftp.downloadDirectory}")
     String vftpDownloadDirectory;
 
+    @Value("${fileservice.collect.vftp.requestDirectory}")
+    String vftpRequestDirectory;
+
     @Autowired
     ConfigurationService configurationService;
 
     long lastRequestNumber = 0;
     DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
 
-    Map<String, VFtpSssDownloadRequest> sssRequestMap = new HashMap<>();
-    Map<String, SssDownloadProcessThread> sssRequestThreadMap = new HashMap<>();
+    StringToOtherTypeMap<VFtpSssDownloadRequest> sssRequestMap = new StringToOtherTypeMap<>();
+    StringToOtherTypeMap<SssDownloadProcessThread> sssRequestThreadMap = new StringToOtherTypeMap<>();
 
-    Map<String, VFtpCompatDownloadRequest> compatRequestMap = new HashMap<>();
-    Map<String, CompatDownloadProcessThread> compatRequestThreadMap = new HashMap<>();
+    StringToOtherTypeMap<VFtpCompatDownloadRequest> compatRequestMap = new StringToOtherTypeMap<>();
+    StringToOtherTypeMap<CompatDownloadProcessThread> compatRequestThreadMap = new StringToOtherTypeMap<>();
 
     File workingDir;
     File downloadDir;
+    File requestDir;
+
+    CompatDownloadRequestRepository compatDownloadRequestRepository;
+    SssDownloadRequestRepository sssDownloadRequestRepository;
 
     @PostConstruct
     private void postConstruct(){
@@ -47,6 +52,25 @@ public class VFtpDownloadService {
         File configDir = new File(configDirectory);
         workingDir = new File(configDir, "Working");
         workingDir.mkdirs();
+        requestDir = new File(vftpRequestDirectory);
+        requestDir.mkdirs();
+
+        compatDownloadRequestRepository = new CompatDownloadRequestRepository(new File(requestDir, "COMPAT"), downloadDir);
+        sssDownloadRequestRepository = new SssDownloadRequestRepository(new File(requestDir, "SSS"), downloadDir);
+    }
+
+    public synchronized void sssRequestCompleted(String requestNo){
+        sssRequestThreadMap.remove(requestNo);
+        VFtpSssDownloadRequest request = sssRequestMap.get(requestNo);
+        sssDownloadRequestRepository.save(request);
+        sssRequestMap.remove(requestNo);
+    }
+
+    public synchronized void compatRequestCompleted(String requestNo){
+        compatRequestThreadMap.remove(requestNo);
+        VFtpCompatDownloadRequest request = compatRequestMap.get(requestNo);
+        compatDownloadRequestRepository.save(request);
+        compatRequestMap.remove(requestNo);
     }
 
     Date generateRequestTime(){
@@ -76,14 +100,6 @@ public class VFtpDownloadService {
         sssRequestMap.put(request.getRequestNo(), request);
     }
 
-    public void removeSssDownloadProcessThread(String requestNo){
-        sssRequestThreadMap.remove(requestNo);
-    }
-
-    public void removeCompatDownloadProcessThread(String requestNo){
-        compatRequestThreadMap.remove(requestNo);
-    }
-
     public VFtpSssDownloadRequest addSssDownloadRequest(VFtpSssDownloadRequest request) throws FileServiceCollectException {
         FtpServerInfo ftpServerInfo = configurationService.getFtpServerInfo(request.getMachine());
         if (ftpServerInfo == null){
@@ -107,8 +123,17 @@ public class VFtpDownloadService {
         return request;
     }
 
-    public VFtpSssDownloadRequest getSssDownloadRequest(String machine, String requestNo){
+    VFtpSssDownloadRequest getSssDownloadRequest(String requestNo){
         VFtpSssDownloadRequest request = sssRequestMap.get(requestNo);
+        if (request != null){
+            return request;
+        }
+        request = sssDownloadRequestRepository.get(requestNo);
+        return request;
+    }
+
+    public VFtpSssDownloadRequest getSssDownloadRequest(String machine, String requestNo){
+        VFtpSssDownloadRequest request = getSssDownloadRequest(requestNo);
         if (request != null){
             if (request.getMachine().equals(machine)){
                 return request;
@@ -121,7 +146,6 @@ public class VFtpDownloadService {
         SssDownloadProcessThread thread = sssRequestThreadMap.get(requestNo);
         if (thread != null){
             thread.stopExecute();
-            sssRequestThreadMap.remove(requestNo);
         }
     }
 
@@ -153,8 +177,17 @@ public class VFtpDownloadService {
         return request;
     }
 
-    public VFtpCompatDownloadRequest getCompatDownloadRequest(String machine, String requestNo){
+    VFtpCompatDownloadRequest getCompatDownloadRequest(String requestNo){
         VFtpCompatDownloadRequest request = compatRequestMap.get(requestNo);
+        if (request != null){
+            return request;
+        }
+        request = compatDownloadRequestRepository.get(requestNo);
+        return request;
+    }
+
+    public VFtpCompatDownloadRequest getCompatDownloadRequest(String machine, String requestNo){
+        VFtpCompatDownloadRequest request = getCompatDownloadRequest(requestNo);
         if (request != null){
             if (request.getMachine().equals(machine)){
                 return request;
@@ -167,8 +200,6 @@ public class VFtpDownloadService {
         CompatDownloadProcessThread thread = compatRequestThreadMap.get(requestNo);
         if (thread != null){
             thread.stopExecute();
-            compatRequestThreadMap.remove(requestNo);
         }
     }
-
 }

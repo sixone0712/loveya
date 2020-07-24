@@ -92,9 +92,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
             if (fileNameListFile != null){
                 fileNameListFile.delete();
             }
-            downloadService.removeCompatDownloadProcessThread(request.getRequestNo());
             request.setCompletedTime(System.currentTimeMillis());
             request.setStatus(VFtpCompatDownloadRequest.Status.EXECUTED);
+            downloadService.compatRequestCompleted(request.getRequestNo());
         }
     }
 
