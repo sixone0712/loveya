@@ -7,7 +7,6 @@ import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
 import org.apache.commons.exec.CommandLine;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +15,12 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
     FtpServerInfo ftpServerInfo;
     List<VFtpFileInfo> fileInfoList = new ArrayList<>();
     CustomExecutor executor = new CustomExecutor();
+    VFtpListService listService;
 
-    public SssListProcessThread(VFtpSssListRequest request, FtpServerInfo ftpServerInfo){
+    public SssListProcessThread(VFtpSssListRequest request, FtpServerInfo ftpServerInfo, VFtpListService listService){
         this.request = request;
         this.ftpServerInfo = ftpServerInfo;
+        this.listService = listService;
     }
 
     CommandLine createCommand(){
@@ -47,6 +48,7 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
 
         request.setStatus(VFtpSssListRequest.Status.EXECUTED);
         request.setCompletedTime(System.currentTimeMillis());
+        listService.requestCompleted(request.getRequestNo());
     }
 
     public void stopExecute(){
@@ -81,7 +83,6 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
 
     @Override
     public boolean processErrorLine(String line) {
-        System.out.println("ERROR:" + line);
         return true;
     }
 }

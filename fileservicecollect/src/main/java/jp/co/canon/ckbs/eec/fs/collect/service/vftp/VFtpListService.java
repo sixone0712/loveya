@@ -24,11 +24,41 @@ public class VFtpListService {
     long lastRequestNumber = 0;
     DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
 
-    Map<String, VFtpSssListRequest> requestMap = new HashMap<>();
-    Map<String, SssListProcessThread> listRequestThreadMap = new HashMap<>();
+    SssListRequestMap requestMap = new SssListRequestMap();
+    SssListProcessThreadMap listRequestThreadMap = new SssListProcessThreadMap();
+    CompletedSssListRequestQueue completedRequestQueue = new CompletedSssListRequestQueue();
+
+    boolean stopPurgeThread = false;
+
+    void purgeRequests(){
+        long baseTime = System.currentTimeMillis() - 60*1000;
+        VFtpSssListRequest request = completedRequestQueue.get();
+        while (request != null && request.getCompletedTime() < baseTime) {
+            requestMap.remove(request.getRequestNo());
+            completedRequestQueue.pop();
+            request = completedRequestQueue.get();
+        }
+    }
 
     @PostConstruct
-    private void postConstruct(){
+    void postConstruct(){
+        Thread requestPurgeThread = new Thread(()->{
+            while(!stopPurgeThread){
+                try {
+                    Thread.sleep(30*1000);
+                    purgeRequests();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        requestPurgeThread.start();
+    }
+
+    public void requestCompleted(String requestNo){
+        listRequestThreadMap.remove(requestNo);
+        VFtpSssListRequest request = requestMap.get(requestNo);
+        completedRequestQueue.add(request);
     }
 
     void addRequest(VFtpSssListRequest request){
@@ -36,7 +66,7 @@ public class VFtpListService {
         requestMap.put(request.getRequestNo(), request);
     }
 
-    Date generateRequestTime(){
+    synchronized Date generateRequestTime(){
         final Date currentTime = new Date();
         if (lastRequestNumber >= currentTime.getTime()){
             currentTime.setTime(lastRequestNumber + 1);
@@ -72,7 +102,7 @@ public class VFtpListService {
         request.setRequestNo(requestNo);
         addRequest(request);
 
-        SssListProcessThread thread = new SssListProcessThread(request, ftpServerInfo);
+        SssListProcessThread thread = new SssListProcessThread(request, ftpServerInfo, this);
         listRequestThreadMap.put(request.getRequestNo(), thread);
         thread.start();
 
@@ -99,7 +129,6 @@ public class VFtpListService {
         SssListProcessThread listRequestThread = listRequestThreadMap.get(requestNo);
         if (listRequestThread != null){
             listRequestThread.stopExecute();
-            listRequestThreadMap.remove(requestNo);
         }
     }
 }
