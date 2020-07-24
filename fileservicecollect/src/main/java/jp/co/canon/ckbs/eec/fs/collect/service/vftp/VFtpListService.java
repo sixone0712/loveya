@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,8 +21,6 @@ public class VFtpListService {
     @Autowired
     ConfigurationService configurationService;
 
-    File workingDir = null;
-
     long lastRequestNumber = 0;
     DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
 
@@ -32,15 +29,6 @@ public class VFtpListService {
 
     @PostConstruct
     private void postConstruct(){
-        File configDir = new File(configDirectory);
-        workingDir = new File(configDir, "Working");
-        if (!workingDir.exists()){
-            workingDir.mkdirs();
-        }
-    }
-
-    private File getWorkingDir() {
-        return workingDir;
     }
 
     void addRequest(VFtpSssListRequest request){
@@ -84,9 +72,15 @@ public class VFtpListService {
         request.setRequestNo(requestNo);
         addRequest(request);
 
-        SssListProcessThread thread = new SssListProcessThread(request, ftpServerInfo, getWorkingDir());
+        SssListProcessThread thread = new SssListProcessThread(request, ftpServerInfo);
         listRequestThreadMap.put(request.getRequestNo(), thread);
         thread.start();
+
+        try {
+            thread.join(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return request;
     }
@@ -108,5 +102,4 @@ public class VFtpListService {
             listRequestThreadMap.remove(requestNo);
         }
     }
-
 }

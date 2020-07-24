@@ -14,14 +14,12 @@ import java.util.List;
 class SssListProcessThread extends Thread implements CustomOutputStreamLineHandler {
     VFtpSssListRequest request;
     FtpServerInfo ftpServerInfo;
-    File workDir;
     List<VFtpFileInfo> fileInfoList = new ArrayList<>();
     CustomExecutor executor = new CustomExecutor();
 
-    public SssListProcessThread(VFtpSssListRequest request, FtpServerInfo ftpServerInfo, File workDir){
+    public SssListProcessThread(VFtpSssListRequest request, FtpServerInfo ftpServerInfo){
         this.request = request;
         this.ftpServerInfo = ftpServerInfo;
-        this.workDir = workDir;
     }
 
     CommandLine createCommand(){
