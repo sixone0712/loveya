@@ -1,5 +1,7 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomExecutor;
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomOutputStreamLineHandler;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
 import org.apache.commons.exec.CommandLine;
@@ -9,7 +11,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class CompatDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler{
+public class CompatDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler {
     VFtpCompatDownloadRequest request;
     FtpServerInfo ftpServerInfo;
     File workingDir;
@@ -90,9 +92,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
             if (fileNameListFile != null){
                 fileNameListFile.delete();
             }
-            downloadService.removeCompatDownloadProcessThread(request.getRequestNo());
             request.setCompletedTime(System.currentTimeMillis());
             request.setStatus(VFtpCompatDownloadRequest.Status.EXECUTED);
+            downloadService.compatRequestCompleted(request.getRequestNo());
         }
     }
 

@@ -4,7 +4,7 @@ import jp.co.canon.ckbs.eec.fs.collect.controller.param.CreateFtpDownloadRequest
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
-import jp.co.canon.ckbs.eec.fs.collect.service.FtpFileService;
+import jp.co.canon.ckbs.eec.fs.collect.service.ftp.FtpFileService;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

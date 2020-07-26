@@ -30,7 +30,7 @@ public class VFtpCompatDownloadRequest {
     @Getter @Setter
     long completedTime;
 
-    @Getter @Setter
+    @Getter
     Status status = Status.WAIT;
 
     @Getter @Setter
@@ -38,6 +38,12 @@ public class VFtpCompatDownloadRequest {
 
     @Getter @Setter
     String archiveFilePath;
+
+    public synchronized void setStatus(Status status){
+        if (this.status == Status.WAIT || this.status == Status.EXECUTING){
+            this.status = status;
+        }
+    }
 
     public void downloaded(String filename, long size){
         if (file.getName().equals(filename)){

@@ -1,4 +1,4 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.ftp;
 
 import jp.co.canon.ckbs.eec.fs.collect.action.CommandRepository;
 import jp.co.canon.ckbs.eec.fs.collect.action.FtpCommandExecutorThread;

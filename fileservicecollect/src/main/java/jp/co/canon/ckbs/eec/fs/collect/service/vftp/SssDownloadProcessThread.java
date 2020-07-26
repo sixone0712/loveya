@@ -1,5 +1,7 @@
-package jp.co.canon.ckbs.eec.fs.collect.service;
+package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomExecutor;
+import jp.co.canon.ckbs.eec.fs.collect.executor.CustomOutputStreamLineHandler;
 import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
@@ -10,7 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class SssDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler{
+public class SssDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler {
     VFtpSssDownloadRequest request;
     FtpServerInfo ftpServerInfo;
     CustomExecutor executor = new CustomExecutor();
@@ -87,14 +89,15 @@ public class SssDownloadProcessThread extends Thread implements CustomOutputStre
             if (fileNameListFile != null){
                 fileNameListFile.delete();
             }
-            downloadService.removeSssDownloadProcessThread(request.getRequestNo());
             request.setCompletedTime(System.currentTimeMillis());
             request.setStatus(VFtpSssDownloadRequest.Status.EXECUTED);
+            downloadService.sssRequestCompleted(request.getRequestNo());
         }
     }
 
     @Override
     public boolean processOutputLine(String line) {
+        System.out.println("OUTPUT:" + line);
         if(line.startsWith("DOWNLOAD_COMPLETE:")){
             line = line.substring(18);
             String[] strArr = line.split(";");
