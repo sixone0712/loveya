@@ -32,13 +32,6 @@ public class CompatDownloadRequestRepository {
         requestPurgeThread.start();
     }
 
-    boolean isExpired(long baseTime, VFtpCompatDownloadRequest request){
-        if (request.getCompletedTime() < baseTime){
-            return true;
-        }
-        return false;
-    }
-
     void deleteRequest(VFtpCompatDownloadRequest request){
         if (request == null){
             return;
@@ -75,5 +68,9 @@ public class CompatDownloadRequestRepository {
 
     public VFtpCompatDownloadRequest get(String requestNo){
         return requestObjectRepository.load(requestNo + ".json");
+    }
+
+    public void stop(){
+        stopPurgeThread = true;
     }
 }

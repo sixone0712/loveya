@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -84,7 +85,9 @@ public class VFtpDownloadService {
 
 
     public void stopAll(){
-
+        System.out.println("VFtpDownloadService stopAll");
+        sssDownloadRequestRepository.stop();
+        compatDownloadRequestRepository.stop();
     }
 
     String generateRequestNoFromTime(Date requestTime, String machine){
@@ -201,5 +204,10 @@ public class VFtpDownloadService {
         if (thread != null){
             thread.stopExecute();
         }
+    }
+
+    @PreDestroy
+    public void preDestroy(){
+        this.stopAll();
     }
 }
