@@ -13,7 +13,7 @@ public class DownloadStatusResponseBody {
     private String downloadId;
     private String status = "invalid-id";
     private int totalFiles = -1;
-    private int downloadedFiles = -1;
+    private long downloadedFiles = -1;
     private String downloadUrl = "";
 
     public DownloadStatusResponseBody(@NonNull FileDownloader fileDownloader, @NonNull final String dlId) {
