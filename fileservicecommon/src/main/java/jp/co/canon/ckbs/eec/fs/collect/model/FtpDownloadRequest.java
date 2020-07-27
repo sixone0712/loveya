@@ -71,8 +71,8 @@ public class FtpDownloadRequest {
         for (RequestFileInfo info : fileList){
             if (info.netFileName().equals(fileName)){
                 info.setSize(fileSize);
-                info.setDownloaded(true);
                 if (info.isDownloaded() == false) {
+                    info.setDownloaded(true);
                     if (this.archive == false) {
                         info.setDownloadPath(directory + "/" + info.netFileName());
                     }
