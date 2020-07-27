@@ -233,6 +233,21 @@ public class FileDownloader extends Thread {
         return true;
     }
 
+    public boolean isBetween(String time, String start, String end) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            Date dtTime = dateFormat.parse(time);
+            Date dtStart = dateFormat.parse(start);
+            Date dtEnd = dateFormat.parse(end);
+            if((dtTime.after(dtStart) && dtTime.before(dtEnd)) || dtTime.compareTo(dtStart)==0 || dtTime.compareTo(dtEnd)==0) {
+                return true;
+            }
+        } catch (ParseException e) {
+            log.error("dateTime parse error");
+        }
+        return false;
+    }
+
     public FileServiceManageConnector getConnector() {
         if(connector==null) {
             log.info("file-service-manage.addr="+fileServiceAddress);
