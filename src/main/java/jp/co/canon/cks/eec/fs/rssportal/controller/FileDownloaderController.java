@@ -284,7 +284,7 @@ public class FileDownloaderController {
             String fileName = (String) item.get("fileName");
             String fileSize = Integer.toString((Integer) item.get("fileSize"));
             String fileDate = (String) item.get("fileDate");
-            boolean file = (boolean) item.get("file"); // if an item doesn't contains 'file', it occurs NullPointException.
+            boolean file = true; // (boolean) item.get("file"); // if an item doesn't contains 'file', it occurs NullPointException.
 
             if(fabName!=null && machineName!=null && categoryCode!=null && categoryName!=null && fileName!=null && fileSize!=null && fileDate!=null) {
                 if(file) {
