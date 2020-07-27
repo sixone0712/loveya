@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
@@ -33,8 +34,7 @@ public class FileDownloadContext {
 
     private final DownloadForm downloadForm;
 
-    private FileServiceManage fileManager;
-    private FileServiceModel fileService;
+    private FileServiceManageConnector connector;
 
     private String requestNo;
     private boolean downloadComplete;
@@ -47,7 +47,7 @@ public class FileDownloadContext {
     private String outPath;
     private String subDir;
 
-    private int downloadFiles;
+    private long downloadFiles;
 
     public FileDownloadContext(@NonNull String jobType, @NonNull String id, @NonNull DownloadForm form, @NonNull String baseDir) {
 
@@ -191,28 +191,20 @@ public class FileDownloadContext {
         return outPath;
     }
 
-    public int getDownloadFiles() {
+    public long getDownloadFiles() {
         return downloadFiles;
     }
 
-    public void setDownloadFiles(int downloadFiles) {
+    public void setDownloadFiles(long downloadFiles) {
         this.downloadFiles = downloadFiles;
     }
 
-    public FileServiceManage getFileManager() {
-        return fileManager;
+    public FileServiceManageConnector getConnector() {
+        return connector;
     }
 
-    public void setFileManager(FileServiceManage fileManager) {
-        this.fileManager = fileManager;
-    }
-
-    public FileServiceModel getFileService() {
-        return fileService;
-    }
-
-    public void setFileService(FileServiceModel fileService) {
-        this.fileService = fileService;
+    public void setConnector(FileServiceManageConnector connector) {
+        this.connector = connector;
     }
 
     public String getJobType() {

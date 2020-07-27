@@ -1,5 +1,9 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
@@ -16,8 +20,10 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.rpc.ServiceException;
 import java.rmi.RemoteException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,9 +37,9 @@ public class FileDownloader extends Thread {
     private static final String STS_DONE = "done";
 
     private final DownloadMonitor monitor;
-    private HashMap<String, FileDownloadExecutor> executorList;
-    private FileServiceModel service;
-    private FileServiceManage serviceManage;
+    private final FileServiceManageConnectorFactory connectorFactory;
+    private final HashMap<String, FileDownloadExecutor> executorList;
+    private FileServiceManageConnector connector;
 
     @Value("${rssportal.collect.cacheBase}")
     private String downloadCacheDir;
@@ -50,10 +56,14 @@ public class FileDownloader extends Thread {
     @Value("${rssportal.file-collect-service.retry-interval}")
     private int fileServiceRetryInterval;
 
+    @Value("${rssportal.file-service-manager.addr}")
+    private String fileServiceAddress;
+
     @Autowired
-    private FileDownloader(@NonNull DownloadMonitor monitor) {
+    private FileDownloader(DownloadMonitor monitor, FileServiceManageConnectorFactory connectorFactory) {
         log.info("initialize FileDownloader");
         this.monitor = monitor;
+        this.connectorFactory = connectorFactory;
         executorList = new HashMap<>();
     }
 
@@ -81,7 +91,7 @@ public class FileDownloader extends Thread {
 
     public String getStatus(@NonNull final String dlId) {
 
-        if(executorList.containsKey(dlId)==false) {
+        if(!executorList.containsKey(dlId)) {
             return STS_INVALID_ID;
         }
         FileDownloadExecutor executor = executorList.get(dlId);
@@ -102,22 +112,22 @@ public class FileDownloader extends Thread {
     }
 
     public boolean isValidId(@NonNull final String dlId) {
-        return executorList.containsKey(dlId)?true:false;
+        return executorList.containsKey(dlId);
     }
 
     public String getDownloadInfo(@NonNull final String dlId) {
-        if(executorList.containsKey(dlId)==false) {
+        if(!executorList.containsKey(dlId)) {
             return null;
         }
         FileDownloadExecutor executor = executorList.get(dlId);
-        if(executor.isRunning()==true) {
+        if(executor.isRunning()) {
             return null;
         }
         return executor.getDownloadPath();
     }
 
     public String getBaseDir(@NonNull final String dlId) {
-        if(executorList.containsKey(dlId)==false)
+        if(!executorList.containsKey(dlId))
             return null;
         FileDownloadExecutor executor = executorList.get(dlId);
         if(executor.isRunning())
@@ -126,14 +136,14 @@ public class FileDownloader extends Thread {
     }
 
     public int getTotalFiles(@NonNull final String dlId) {
-        if(isValidId(dlId)==false) {
+        if(!isValidId(dlId)) {
             return 0;
         }
         return executorList.get(dlId).getTotalFiles();
     }
 
-    public int getDownloadFiles(@NonNull final String dlId) {
-        if(isValidId(dlId)==false) {
+    public long getDownloadFiles(@NonNull final String dlId) {
+        if(!isValidId(dlId)) {
             return 0;
         }
         return executorList.get(dlId).getDownloadFiles();
@@ -165,7 +175,29 @@ public class FileDownloader extends Thread {
         while(retry<fileServiceRetryCount) {
             Thread.sleep(1); // job interrupt point
             try {
-                FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
+                if(true) {
+                    LogFileList logFileList = getConnector().getFtpFileList(tool, type, dateFormat.format(from.getTime()),
+                            dateFormat.format(to.getTime()), "", dir);
+                    for(FileInfo logFile:logFileList.getList()) {
+                        String fileName = logFile.getFilename();
+                        if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
+                            continue;
+                        }
+                        if(true || logFile.getType()=="D") {
+                            if(!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {
+                                log.warn("failed to createFileList(dir="+fileName+")");
+                                return false;
+                            }
+                        } else {
+                            Date date = dateFormat.parse(logFile.getTimestamp());
+                            form.addFile(fileName, logFile.getSize(), logFile.getTimestamp(), date.getTime());
+                        }
+                    }
+                } else {
+                    // Todo support vftp
+                }
+                break;
+                /*FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
                 for (FileInfoModel file : fileInfos) {
                     if(file.getSize()==0 || file.getName().endsWith(".") || file.getName().endsWith(".."))
                         continue;
@@ -180,9 +212,8 @@ public class FileDownloader extends Thread {
                         String time = dateFormat.format(file.getTimestamp().getTime());
                         form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
                     }
-                }
-                break;
-            } catch (RemoteException e) {
+                }*/
+            } /*catch (RemoteException e) {
                 log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
                 if((++retry)>=fileServiceRetryCount)
                     return false;
@@ -193,30 +224,21 @@ public class FileDownloader extends Thread {
                     log.error("interrupt exception occurs on thread sleep");
                     return false;
                 }
+            }*/ catch (ParseException e) {
+                log.error("error on parsing logFile date");
+                return false;
             }
         }
         formList.add(form);
         return true;
     }
 
-    public FileServiceModel getService() {
-        if(service==null) {
-            log.info("file-collect-service.addr="+fileCollectServiceAddr);
-            service = new FileServiceUsedSOAP(fileCollectServiceAddr);
+    public FileServiceManageConnector getConnector() {
+        if(connector==null) {
+            log.info("file-service-manage.addr="+fileServiceAddress);
+            connector = connectorFactory.getConnector(fileServiceAddress);
         }
-        return service;
-    }
-
-    public FileServiceManage getServiceManage() {
-        if(serviceManage==null) {
-            FileServiceManageServiceLocator serviceLocator = new FileServiceManageServiceLocator();
-            try {
-                serviceManage = serviceLocator.getFileServiceManage();
-            } catch (ServiceException e) {
-                e.printStackTrace();
-            }
-        }
-        return serviceManage;
+        return connector;
     }
 
     public String getDownloadCacheDir() {
