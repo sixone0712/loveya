@@ -90,8 +90,9 @@ public class ObjectListSaxHandler extends DefaultHandler {
         String user = attributes.getValue("user");
         String password = attributes.getValue("password");
         String urlPrefix = attributes.getValue("urlPrefix");
+        String ftpmode = attributes.getValue("ftpMode");
 
-        return new NetworkDL(user, password, urlPrefix);
+        return new NetworkDL(user, password, urlPrefix, ftpmode);
     }
 
 

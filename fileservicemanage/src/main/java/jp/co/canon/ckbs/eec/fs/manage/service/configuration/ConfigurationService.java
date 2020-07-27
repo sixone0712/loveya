@@ -7,5 +7,5 @@ public interface ConfigurationService {
     Category[] getCategories(String machineName);
     String[] getAllFileServiceHost();
     String getFileServiceHost(String machineName);
-    String getFileServiceDownloadUrlPrefix(String machineName);
+    String getFileServiceDownloadUrlPath(String machineName, String filePath);
 }

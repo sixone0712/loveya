@@ -13,9 +13,20 @@ public class NetworkDL {
     @Getter @Setter
     String urlPrefix;
 
-    public NetworkDL(String user, String password, String urlPrefix){
+    @Setter
+    String ftpmode="passive";
+
+    public NetworkDL(String user, String password, String urlPrefix, String ftpMode){
         this.user = user;
         this.password = password;
         this.urlPrefix = urlPrefix;
+        this.ftpmode = ftpMode;
+    }
+
+    public String getFtpmode(){
+        if (this.ftpmode != null && this.ftpmode.equalsIgnoreCase("active")){
+            return "active";
+        }
+        return "passive";
     }
 }

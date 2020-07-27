@@ -66,16 +66,19 @@ public class FtpFileService {
     }
 
     void convertFtpDownloadRequest(FtpDownloadRequest res){
-        String prefix = configurationService.getFileServiceDownloadUrlPrefix(res.getMachine());
         if (res.isArchive()){
             if (res.getArchiveFilePath() != null){
-                res.setArchiveFilePath(prefix + "/" + res.getArchiveFilePath());
+                res.setArchiveFilePath(
+                        configurationService.getFileServiceDownloadUrlPath(res.getMachine(),
+                                res.getArchiveFilePath()));
             }
             return;
         }
         for(RequestFileInfo info : res.getFileInfos()){
             if (info.getDownloadPath() != null){
-                info.setDownloadPath(prefix + "/" +info.getDownloadPath());
+                info.setDownloadPath(
+                        configurationService.getFileServiceDownloadUrlPath(res.getMachine(),
+                                info.getDownloadPath()));
             }
         }
     }

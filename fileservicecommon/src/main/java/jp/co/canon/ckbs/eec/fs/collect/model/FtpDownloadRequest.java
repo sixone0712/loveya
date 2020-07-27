@@ -67,15 +67,17 @@ public class FtpDownloadRequest {
     }
 
     public void fileDownloaded(String fileName, long fileSize){
-        RequestFileInfo info = fileInfoMap.get(fileName);
-        if (info != null){
-            info.setSize(fileSize);
-            if (info.isDownloaded() == false) {
+        RequestFileInfo[] fileList = getFileInfos();
+        for (RequestFileInfo info : fileList){
+            if (info.netFileName().equals(fileName)){
+                info.setSize(fileSize);
                 info.setDownloaded(true);
-                if (this.archive == false){
-                    info.setDownloadPath(directory + "/" + fileName);
+                if (info.isDownloaded() == false) {
+                    if (this.archive == false) {
+                        info.setDownloadPath(directory + "/" + info.netFileName());
+                    }
+                    ++downloadedFileCount;
                 }
-                ++downloadedFileCount;
             }
         }
     }

@@ -62,16 +62,19 @@ public class VFtpFileService {
 
     void updateVFtpSssDownloadRequestArchiveFilePath(VFtpSssDownloadRequest request){
         if (request != null){
-            String prefix = configurationService.getFileServiceDownloadUrlPrefix(request.getMachine());
             if (request.isArchive()){
                 if (request.getArchiveFilePath() != null){
-                    request.setArchiveFilePath(prefix + "/" + request.getArchiveFilePath());
+                    request.setArchiveFilePath(
+                            configurationService.getFileServiceDownloadUrlPath(request.getMachine(),
+                                    request.getArchiveFilePath()));
                 }
                 return;
             }
             for(RequestFileInfo info : request.getFileList()){
                 if (info.getDownloadPath() != null){
-                    info.setDownloadPath(prefix + "/" +info.getDownloadPath());
+                    info.setDownloadPath(
+                            configurationService.getFileServiceDownloadUrlPath(request.getMachine(),
+                                    info.getDownloadPath()));
                 }
             }
         }
@@ -113,15 +116,18 @@ public class VFtpFileService {
 
     void updateVFtpCompatDownloadRequestArchiveFilePath(VFtpCompatDownloadRequest request){
         if (request != null){
-            String prefix = configurationService.getFileServiceDownloadUrlPrefix(request.getMachine());
             if (request.isArchive()){
                 if (request.getArchiveFilePath() != null){
-                    request.setArchiveFilePath(prefix + "/" + request.getArchiveFilePath());
+                    request.setArchiveFilePath(
+                            configurationService.getFileServiceDownloadUrlPath(request.getMachine(),
+                                    request.getArchiveFilePath()));
                 }
                 return;
             }
             if (request.getFile().getDownloadPath() != null){
-                request.getFile().setDownloadPath(prefix + "/" + request.getFile().getDownloadPath());
+                request.getFile().setDownloadPath(
+                        configurationService.getFileServiceDownloadUrlPath(request.getMachine(),
+                                request.getFile().getDownloadPath()));
             }
         }
     }
