@@ -61,16 +61,16 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
         if (line.startsWith("FILE:")){
             String[] strArr = line.substring(5).split(";");
             VFtpFileInfo info = new VFtpFileInfo();
-            info.setFilename(strArr[0]);
-            info.setSize(Integer.parseInt(strArr[1]));
-            info.setType("F");
+            info.setFileName(strArr[0]);
+            info.setFileSize(Integer.parseInt(strArr[1]));
+            info.setFileType("F");
             fileInfoList.add(info);
             return true;
         }
         if (line.startsWith("DIRECTORY:")){
             VFtpFileInfo info = new VFtpFileInfo();
-            info.setFilename(line.substring(10));
-            info.setType("D");
+            info.setFileName(line.substring(10));
+            info.setFileType("D");
             fileInfoList.add(info);
             return true;
         }

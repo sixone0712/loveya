@@ -5,11 +5,11 @@ import lombok.Setter;
 
 public class VFtpFileInfo {
     @Getter @Setter
-    private String type;
+    private String fileType;
 
     @Getter @Setter
-    private String filename;
+    private String fileName;
 
     @Getter @Setter
-    private long size;
+    private long fileSize;
 }
