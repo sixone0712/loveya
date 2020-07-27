@@ -16,11 +16,23 @@ public class RequestFileInfo {
     @Getter @Setter
     String downloadPath;
 
+    String netName;
+
     public RequestFileInfo(){
 
     }
 
     public RequestFileInfo(String name){
         this.name = name;
+        netName = this.name;
+
+        int idx = this.name.lastIndexOf("/");
+        if (idx >= 0){
+            netName = this.name.substring(idx + 1);
+        }
+    }
+
+    public String netFileName(){
+        return this.netName;
     }
 }

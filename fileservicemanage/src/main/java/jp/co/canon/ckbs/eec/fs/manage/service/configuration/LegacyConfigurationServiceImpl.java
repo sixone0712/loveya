@@ -9,6 +9,7 @@ import jp.co.canon.ckbs.eec.fs.configuration.legacy.logcollectdefinition.LogColl
 import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.FileService;
 import jp.co.canon.ckbs.eec.fs.configuration.legacy.logconfiguration.LogConfiguration;
 import jp.co.canon.ckbs.eec.fs.configuration.legacy.logconfiguration.LogConfigurationLoader;
+import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.NetworkDL;
 import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.ObjectList;
 import jp.co.canon.ckbs.eec.fs.configuration.legacy.objectlist.Tool;
 import lombok.extern.slf4j.Slf4j;
@@ -103,10 +104,28 @@ public class LegacyConfigurationServiceImpl implements ConfigurationService{
         return null;
     }
 
-    public String getFileServiceDownloadUrlPrefix(String machineName){
+    @Override
+    public String getFileServiceDownloadUrlPath(String machineName, String filePath){
         FileService fileService = objectList.getFileServiceByToolName(machineName);
         if (fileService != null){
-            return fileService.getNetworkDL().getUrlPrefix();
+            NetworkDL networkDL = fileService.getNetworkDL();
+            StringBuilder builder = new StringBuilder();
+            builder.append(networkDL.getUrlPrefix())
+                    .append("/")
+                    .append(filePath)
+                    .append("<")
+                    .append(networkDL.getUser())
+                    .append("/")
+                    .append(networkDL.getPassword());
+            String ftpmode = networkDL.getFtpmode();
+            if (ftpmode != null && !ftpmode.isEmpty()){
+                builder.append("/")
+                        .append(networkDL.getFtpmode());
+
+            }
+            builder.append(">");
+
+            return builder.toString();
         }
         return null;
     }
