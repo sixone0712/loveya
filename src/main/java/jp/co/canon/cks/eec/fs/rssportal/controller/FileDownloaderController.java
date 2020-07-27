@@ -105,6 +105,7 @@ public class FileDownloaderController {
                         }
                         info.setFileSize(file.getSize());
                         info.setFileDate(file.getTimestamp());
+                        info.setFileType(file.getType());
                         info.setFabName(request.getFabName());
                         info.setMachineName(request.getMachineName());
                         info.setCategoryName(request.getCategoryName());
