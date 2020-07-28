@@ -64,7 +64,7 @@ public class CmdController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
-        if(!type.equals("vftp_compat") && !type.equals("vftp_ftp")) {
+        if(!type.equals("vftp_compat") && !type.equals("vftp_sss")) {
             error.setReason(RSSErrorReason.INVALID_PARAMETER);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
@@ -80,13 +80,15 @@ public class CmdController {
         CommandVo newCommand = new CommandVo();
         newCommand.setCmd_type(type);
         newCommand.setCmd_name(name);
-        if(!serviceCmd.addCmd(newCommand)) {
+        int newCommandId = serviceCmd.addCmd(newCommand);
+        if(newCommandId == -1) {
             error.setReason(RSSErrorReason.INTERNAL_ERROR);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+        resBody.put("id", newCommandId);
+        return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
     @DeleteMapping("/{id}")

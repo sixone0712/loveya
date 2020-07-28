@@ -58,9 +58,9 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public boolean addCmd(@NonNull CommandVo cmd) {
+    public int addCmd(@NonNull CommandVo cmd) {
         if(cmd.getCmd_name().isEmpty() || cmd.getCmd_type().isEmpty()) {
-            return false;
+            return -1;
         }
         return dao.add(cmd);
     }

@@ -26,14 +26,19 @@
     </select>
 
     <insert id="insert" parameterType="CommandVo">
+        <selectKey keyProperty="id" resultType="Integer" order="BEFORE">
+            select nextval('rsss.cmd_id_seq')
+        </selectKey>
         insert into rsss."cmd" (
-            cmd_name
+            id
+            ,cmd_name
             ,cmd_type
             ,created
             ,modified
             ,validity
             ) values (
-                #{cmd_name}
+                #{id}
+                ,#{cmd_name}
                 ,#{cmd_type}
                 ,now()
                 ,now()

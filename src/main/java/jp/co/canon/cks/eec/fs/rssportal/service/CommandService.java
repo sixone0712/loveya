@@ -11,7 +11,7 @@ public interface CommandService {
     List<CommandVo> getCommandList(String type);
     CommandVo getCommand(int id);
     CommandVo findCommand(String name, String type);
-    boolean addCmd(CommandVo cmd);
+    int addCmd(CommandVo cmd);
     boolean modifyCmd(CommandVo cmd);
     boolean deleteCmd(int id);
 }

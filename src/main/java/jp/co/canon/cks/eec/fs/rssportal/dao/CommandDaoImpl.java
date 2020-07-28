@@ -55,11 +55,11 @@ public class CommandDaoImpl implements CommandDao {
     }
 
     @Override
-    public boolean add(@NonNull CommandVo cmd) {
+    public int add(@NonNull CommandVo cmd) {
         SqlSession session = sessionFactory.openSession(true);
         session.insert("cmd.insert", cmd);
         session.close();
-        return true;
+        return cmd.getId();
     }
 
     @Override

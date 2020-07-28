@@ -10,7 +10,7 @@ public interface CommandDao {
     List<CommandVo> findAll();
     List<CommandVo> findCommandList(Map<String, Object> param);
     CommandVo find(Map<String, Object> param);
-    boolean add(CommandVo cmd);
+    int add(CommandVo cmd);
     boolean modify(CommandVo cmd);
     boolean delete(CommandVo cmd);
 }
