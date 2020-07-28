@@ -15,7 +15,7 @@ class RSSAutoRegistEdit extends Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         const query = queryString.parse(nextProps.location.search);
         const { editId } = query;
-        if(editId !== undefined) {
+        if(editId && editId !== "null") {
             return {
                 ...prevState,
                 editId: editId

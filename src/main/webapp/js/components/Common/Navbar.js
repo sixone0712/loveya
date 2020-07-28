@@ -219,7 +219,7 @@ const PlanModal = ({ isOpen, btnAction, closer }) => {
                         outline
                         block
                         tag={RRNavLink}
-                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=FTP"}
+                        to={`${Define.PAGE_REFRESH_AUTO_PLAN_ADD}&type=${Define.PLAN_TYPE_FTP}`}
                         onClick={() => btnAction("Auto")}
                     >
                       FTP
@@ -229,7 +229,7 @@ const PlanModal = ({ isOpen, btnAction, closer }) => {
                         outline
                         block
                         tag={RRNavLink}
-                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=VFTP_COMPAT"}
+                        to={`${Define.PAGE_REFRESH_AUTO_PLAN_ADD}&type=${Define.PLAN_TYPE_VFTP_COMPAT}`}
                         onClick={() => btnAction("Auto")}
                     >
                       VFTP(COMPAT)
@@ -239,7 +239,7 @@ const PlanModal = ({ isOpen, btnAction, closer }) => {
                         outline
                         block
                         tag={RRNavLink}
-                        to={Define.PAGE_REFRESH_AUTO_PLAN_ADD + "&type=VFTP_SSS"}
+                        to={`${Define.PAGE_REFRESH_AUTO_PLAN_ADD}&type=${Define.PLAN_TYPE_VFTP_SSS}`}
                         onClick={() => btnAction("Auto")}
                     >
                       VFTP(SSS)

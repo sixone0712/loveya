@@ -21,26 +21,14 @@ const scrollStyle = {
     zIndex: "101"
 };
 
-const planType = {
-    FTP: "FTP",
-    VFTP_COMPAT: "VFTP_COMPAT",
-    VFTP_SSS: "VFTP_SSS"
-};
-
-const planMessage = {
-    FTP: "(FTP)",
-    VFTP_COMPAT: "(VFTP COMPAT)",
-    VFTP_SSS: "(VFTP SSS)"
-}
-
 class Auto extends Component {
     constructor() {
         super();
         this.state = {
             page: Define.AUTO_CUR_PAGE_INIT,
             planInfo: {
-                type: planType.FTP,
-                message: planMessage.FTP
+                type: Define.PLAN_TYPE_FTP,
+                message: Define.PLAN_TYPE_MSG_FTP
             }
         }
     }
@@ -48,9 +36,8 @@ class Auto extends Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         let page = Define.AUTO_CUR_PAGE_ADD
         const { location } = nextProps;
-        const query = queryString.parse(location.search);
-        const { type } = query;
-        const newType = type !== null ? type : prevState.planInfo.type;
+        const { type } = queryString.parse(location.search);
+        const newType = (type && type !== "null") ? type : Define.PLAN_TYPE_FTP;
 
         if(location.pathname.includes(Define.PAGE_AUTO_STATUS)) {
             page = Define.AUTO_CUR_PAGE_STATUS;
@@ -94,14 +81,14 @@ class Auto extends Component {
 
 const writePlanMessage = (type) => {
     switch(type) {
-        case planType.FTP:
-            return planMessage.FTP;
+        case Define.PLAN_TYPE_FTP:
+            return Define.PLAN_TYPE_MSG_FTP;
 
-        case planType.VFTP_COMPAT:
-            return planMessage.VFTP_COMPAT;
+        case Define.PLAN_TYPE_VFTP_COMPAT:
+            return Define.PLAN_TYPE_MSG_VFTP_COMPAT;
 
-        case planType.VFTP_SSS:
-            return planMessage.VFTP_SSS;
+        case Define.PLAN_TYPE_VFTP_SSS:
+            return Define.PLAN_TYPE_MSG_VFTP_SSS;
 
         default:
             return null;

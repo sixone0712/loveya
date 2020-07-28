@@ -35,7 +35,8 @@ const initialState = Map({
         collectType: Define.AUTO_MODE_CONTINUOUS,
         interval: 1,
         intervalUnit: Define.AUTO_UNIT_MINUTE,
-        description: ""
+        description: "",
+        planType: Define.PLAN_TYPE_FTP,
     })
 });
 
@@ -76,7 +77,7 @@ const reducer =  handleActions({
         return state.setIn(["autoPlan", "description"], description);
     },
     [AUTO_PLAN_SET_EDIT_PLAN_LIST] : (state, action) => {
-        const { planId, collectStart, from, to, collectType, interval, description } = action.payload;
+        const { planId, collectStart, from, to, collectType, interval, description, planType } = action.payload;
         const intervalInt = Number(interval);
         let convInterval = ""
         let intervalUnit = "";
@@ -104,8 +105,8 @@ const reducer =  handleActions({
                     .setIn(["autoPlan", "collectType"], collectType)
                     .setIn(["autoPlan", "interval"], convInterval)
                     .setIn(["autoPlan", "intervalUnit"], intervalUnit)
-                    .setIn(["autoPlan", "description"], description);
-
+                    .setIn(["autoPlan", "description"], description)
+                    .setIn(["autoPlan", "planType"], planType);
     },
 
 }, initialState);

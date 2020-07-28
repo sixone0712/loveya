@@ -99,7 +99,7 @@ class RSSautoplanwizard extends Component {
 
     const reqData = {
       planName: planId,
-      planType: "ftp",    // need to add
+      planType: this.props.type,
       fabNames: structId,
       machineNames: tools,
       categoryCodes: logTypes,
@@ -270,6 +270,7 @@ class RSSautoplanwizard extends Component {
   render() {
     console.log("render");
     console.log("this.state.editID", this.state.editId);
+    console.log("this.props.type", this.props.type);
     const { currentStep, isNew, editId, isAlertOpen, isConfirmOpen, modalMessage } = this.state;
     const { logTypeSuccess, toolInfoSuccess, logTypeFailure, toolInfoFailure, type } = this.props;
 
@@ -332,7 +333,7 @@ class RSSautoplanwizard extends Component {
                     <Machine isNew={isNew} />
                   </CarouselItem>
                   <CarouselItem key={wizardStep.TARGET_COMMAND}>
-                    {type === "FTP" ? (
+                    {type === Define.PLAN_TYPE_FTP ? (
                         <Target isNew={isNew} />
                     ) : (
                         <Command isNew={isNew} />

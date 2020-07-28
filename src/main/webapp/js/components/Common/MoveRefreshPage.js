@@ -13,14 +13,14 @@ class MoveRefreshPage extends Component {
         const query = queryString.parse(location.search);
         const { target } = query;
 
-        console.log("query", query);
-        console.log("target", target);
+        console.log("[MoveRefreshPage]query", query);
+        console.log("[MoveRefreshPage]target", target);
 
         if (target.includes(Define.PAGE_AUTO_PLAN_EDIT)) {
             console.log("PAGE_AUTO_PLAN_EDIT");
-            const { editId } = query;
+            const { editId, type } = query;
             console.log("editId", editId);
-            history.replace(Define.PAGE_AUTO_PLAN_EDIT + "?editId=" + editId);
+            history.replace(`${Define.PAGE_AUTO_PLAN_EDIT}?editId=${editId}&type=${type}`);
         } else if (target.includes(Define.PAGE_AUTO_PLAN_ADD)) {
             console.log("PAGE_AUTO_PLAN_ADD");
             const {viewListActions, autoPlanActions} = this.props;

@@ -111,7 +111,9 @@ class RSSautoplanlist extends Component {
                       interval: item.interval,
                       collectStart: moment(item.start, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
                       collectTypeStr: item.type,
-                      keyIndex: idx + 1
+                      keyIndex: idx + 1,
+                      planType: null,       //need to add
+                      commands: null,       //need to add
                   }
                 );
             })
@@ -146,10 +148,12 @@ class RSSautoplanlist extends Component {
                 to: findList.planPeriodEnd,
                 collectType: findList.collectTypeStr,
                 interval: findList.interval,
-                description: findList.planDescription
+                description: findList.planDescription,
+                planType: findList.planType
             });
             console.log("id", id);
-            this.props.history.push(Define.PAGE_REFRESH_AUTO_PLAN_EDIT + "&editId=" + String(id));
+            console.log("findList.planType", findList.planType);
+            this.props.history.push(`${Define.PAGE_REFRESH_AUTO_PLAN_EDIT}&editId=${String(id)}&type=${findList.planType}`);
         }
     }
 
