@@ -2,6 +2,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
+import jp.co.canon.cks.eec.fs.rssportal.model.vftp.VFtpCmdResponse;
 import jp.co.canon.cks.eec.fs.rssportal.service.CommandService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CommandVo;
 import org.apache.commons.logging.Log;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +45,19 @@ public class CmdController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
-        resBody.put("lists", list);
+        List<VFtpCmdResponse> response = new ArrayList<VFtpCmdResponse>();
+        SimpleDateFormat conTimeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        for(CommandVo item : list) {
+            VFtpCmdResponse cmd = new VFtpCmdResponse();
+            cmd.setId(item.getId());
+            cmd.setCmd_name(item.getCmd_name());
+            cmd.setCmd_type(item.getCmd_type());
+            cmd.setCreated(conTimeFormat.format(item.getCreated()));
+            cmd.setModified(conTimeFormat.format(item.getModified()));
+            response.add(cmd);
+        }
+
+        resBody.put("lists", response);
         return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
@@ -162,7 +177,7 @@ public class CmdController {
         }
 
         findCommand.setCmd_name(cmdName);
-        if(serviceCmd.modifyCmd(findCommand)) {
+        if(!serviceCmd.modifyCmd(findCommand)) {
             error.setReason(RSSErrorReason.INTERNAL_ERROR);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
