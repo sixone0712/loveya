@@ -184,9 +184,12 @@ public class FileDownloader extends Thread {
                             continue;
                         }
                         if(true || logFile.getType()=="D") {
-                            if(!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {
-                                log.warn("failed to createFileList(dir="+fileName+")");
-                                return false;
+                            long current = System.currentTimeMillis();
+                            if(current>=from.getTimeInMillis() && current<=to.getTimeInMillis()) {
+                                if (!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {
+                                    log.warn("failed to createFileList(dir=" + fileName + ")");
+                                    return false;
+                                }
                             }
                         } else {
                             Date date = dateFormat.parse(logFile.getTimestamp());

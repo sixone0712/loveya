@@ -67,6 +67,7 @@ public class DownloadMonitor extends Thread {
         log.info("download monitor start");
         try {
             while(true) {
+                //log.info(String.format("## download monitor running"));
                 synchronized (targets) {
                     if (targets.size() == 0) {
                         sleep(500);
@@ -74,30 +75,27 @@ public class DownloadMonitor extends Thread {
 
                     for (Target target : targets) {
                         if (target.activated) {
-                            synchronized (target) {
-                                if(target.protocol.equals("ftp")) {
-                                    log.info(String.format("## %s/%s", target.requestNo, target.machine));
-                                    FtpDownloadRequestListResponse response = connector.getFtpDownloadRequestList(target.machine, target.requestNo);
-                                    if(response.getErrorCode()!=null) {
-                                        log.error("error ("+response.getErrorCode()+") on getting download information " +
-                                                "(machine="+target.machine+" request="+target.requestNo+")");
-                                        continue;
-                                    }
-                                    for(FtpDownloadRequest r: response.getRequestList()) {
-                                        if(r.getRequestNo().equals(target.requestNo)) {
-                                            target.ftp = r;
-                                            target.timestamp = System.currentTimeMillis();
-                                            target.updateDownloadFiles.accept(r.getDownloadedFileCount());
-                                        }
-                                    }
-                                } else {
-                                    // Todo  support vftp
+                            if(target.protocol.equals("ftp")) {
+                                FtpDownloadRequestListResponse response = connector.getFtpDownloadRequestList(target.machine, target.requestNo);
+                                if(response.getErrorCode()!=null) {
+                                    log.error("error ("+response.getErrorCode()+") on getting download information " +
+                                            "(machine="+target.machine+" request="+target.requestNo+")");
+                                    continue;
                                 }
+                                for(FtpDownloadRequest r: response.getRequestList()) {
+                                    if(r.getRequestNo().equals(target.requestNo)) {
+                                        target.ftp = r;
+                                        target.timestamp = System.currentTimeMillis();
+                                        target.updateDownloadFiles.accept(r.getDownloadedFileCount());
+                                    }
+                                }
+                            } else {
+                                // Todo  support vftp
                             }
                         } else {
                             // Todo  delete the deactivated target.
                         }
-                        sleep(1000);
+                        sleep(1);
                     }
                 }
                 sleep(1000);
@@ -119,7 +117,7 @@ public class DownloadMonitor extends Thread {
         return null;
     }
 
-    public void add(String machine, String requestNo, String protocol, Consumer<Long> updateDownloadFiles) {
+    public synchronized void add(String machine, String requestNo, String protocol, Consumer<Long> updateDownloadFiles) {
         log.info("monitor.add(machine="+machine+" request="+requestNo+")");
         Target target = getTarget(machine, requestNo);
         if(target==null) {
@@ -127,7 +125,7 @@ public class DownloadMonitor extends Thread {
         }
     }
 
-    public void delete(String machine, String requestNo) {
+    public synchronized void delete(String machine, String requestNo) {
         Target target = getTarget(machine, requestNo);
         if(target!=null) {
             synchronized (targets) {

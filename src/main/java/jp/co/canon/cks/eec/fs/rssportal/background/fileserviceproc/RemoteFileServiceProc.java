@@ -34,14 +34,18 @@ public class RemoteFileServiceProc extends FileServiceProc {
     @Override
     void register() {
         log.info("register()");
-        FtpDownloadRequestResponse response = context.getConnector().createFtpDownloadRequest(
-                context.getTool(), context.getLogType(), true, context.getFileNames());
-        if(response.getErrorCode()!=null) {
-            log.error("failed to create ftp request");
-            // Todo  add error handling routine
+        try {
+            FtpDownloadRequestResponse response = context.getConnector().createFtpDownloadRequest(
+                    context.getTool(), context.getLogType(), true, context.getFileNames());
+            if (response.getErrorCode() != null) {
+                log.error("failed to create ftp request");
+                // Todo  add error handling routine
+            }
+            context.setRequestNo(response.getRequestNo());
+            log.info("request-no=" + context.getRequestNo());
+        } catch (Exception e) {
+            log.error("wefwefwefew");
         }
-        context.setRequestNo(response.getRequestNo());
-        log.info("request-no="+context.getRequestNo());
     }
 
     @Override
