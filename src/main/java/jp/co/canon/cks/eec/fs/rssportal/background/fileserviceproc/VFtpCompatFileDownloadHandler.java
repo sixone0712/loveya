@@ -3,28 +3,27 @@ package jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpCompatDownloadRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
-import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloadContext;
 
 public class VFtpCompatFileDownloadHandler implements FileDownloadHandler {
 
     private final FileServiceManageConnector connector;
     private final String machine;
-    private final String category;
+    private final String command;
     private boolean achieve;
 
     private String request;
 
-    public VFtpCompatFileDownloadHandler(FileServiceManageConnector connector, String machine, String category) {
+    public VFtpCompatFileDownloadHandler(FileServiceManageConnector connector, String machine, String command) {
         this.connector = connector;
         this.machine = machine;
-        this.category = category;
+        this.command = command;
         achieve = true;
     }
 
     @Override
     public String createDownloadRequest() {
         VFtpCompatDownloadRequestResponse response =
-                connector.createVFtpCompatDownloadRequest(machine, category, achieve);
+                connector.createVFtpCompatDownloadRequest(machine, command, achieve);
         if(response.getErrorMessage()!=null) {
             return null;
         }
@@ -54,7 +53,7 @@ public class VFtpCompatFileDownloadHandler implements FileDownloadHandler {
 
         if(status==VFtpCompatDownloadRequest.Status.ERROR) {
             info.setError(true);
-        } else if(download.getFile().isDownloaded()) {
+        } else if(status==VFtpCompatDownloadRequest.Status.EXECUTED) {
             info.setDownloadFiles(1);
             info.setDownloadBytes(download.getFile().getSize());
             info.setFinish(true);

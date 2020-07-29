@@ -12,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -25,7 +27,7 @@ public class FileDownloadServiceProc extends Thread {
     private final FileDownloadServiceCallback callback;
 
     private Status status;
-    private Runnable[] pipes = {this::register, this::download, this::transfer, this::extract};
+    private List<Runnable> pipes;
 
     public FileDownloadServiceProc(FileDownloadHandler handler,
                                    FileDownloadContext context,
@@ -37,8 +39,19 @@ public class FileDownloadServiceProc extends Thread {
         this.start();
     }
 
+    private void buildPipes() {
+        pipes = new ArrayList<>();
+        pipes.add(this::register);
+        pipes.add(this::download);
+        pipes.add(this::transfer);
+        if(context.isAchieveDecompress()) {
+            pipes.add(this::decompress);
+        }
+    }
+
     @Override
     public void run() {
+        buildPipes();
         log.info("download pipe start");
         for(Runnable pipe: pipes) {
             if(status==Status.Error) {
@@ -109,56 +122,52 @@ public class FileDownloadServiceProc extends Thread {
         worker.close();
     }
 
-    private void extract() {
-        if(context.isAchieve()) {
-            log.info("extract [achieve="+context.getLocalFilePath()+")");
-            if (!context.getLocalFilePath().endsWith(".zip")) {
-                log.error("no achieve file");
-                status = Status.Error;
-                return;
-            }
-            File zip = new File(context.getLocalFilePath());
-            if(!zip.exists() || zip.isDirectory()) {
-                log.error("wrong achieve file type  "+zip.toString());
-                status = Status.Error;
-                return;
-            }
-
-            Path path;
-            String sub = context.getSubDir();
-            if(sub!=null && !sub.isEmpty()) {
-                path = Paths.get(zip.getParent(), sub);
-            } else {
-                path = Paths.get(zip.getParent());
-            }
-            File outDir = path.toFile();
-            if(!outDir.exists()) {
-                outDir.mkdirs();
-            }
-
-            byte[] buf = new byte[1024*64];
-            int size;
-            try(ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
-                ZipEntry entry = zis.getNextEntry();
-                while(entry!=null) {
-                    File tmpFile = new File(path.toString(), entry.getName());
-                    try(FileOutputStream fos = new FileOutputStream(tmpFile)) {
-                        while((size=zis.read(buf))>0) {
-                            fos.write(buf, 0, size);
-                        }
-                    }
-                    entry = zis.getNextEntry();
-                }
-            } catch (IOException e) {
-                log.error("extraction failed");
-                status = Status.Error;
-                return;
-            }
-            zip.delete();
-        } else {
-            log.error("tbd");
+    private void decompress() {
+        log.info("decompress [achieve="+context.getLocalFilePath()+")");
+        if (!context.getLocalFilePath().endsWith(".zip")) {
+            log.error("no achieve file");
             status = Status.Error;
+            return;
         }
+
+        File zip = new File(context.getLocalFilePath());
+        if(!zip.exists() || zip.isDirectory()) {
+            log.error("wrong achieve file type  "+zip.toString());
+            status = Status.Error;
+            return;
+        }
+
+        Path path;
+        String sub = context.getSubDir();
+        if(sub!=null && !sub.isEmpty()) {
+            path = Paths.get(zip.getParent(), sub);
+        } else {
+            path = Paths.get(zip.getParent());
+        }
+        File outDir = path.toFile();
+        if(!outDir.exists()) {
+            outDir.mkdirs();
+        }
+
+        byte[] buf = new byte[1024*64];
+        int size;
+        try(ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+            ZipEntry entry = zis.getNextEntry();
+            while(entry!=null) {
+                File tmpFile = new File(path.toString(), entry.getName());
+                try(FileOutputStream fos = new FileOutputStream(tmpFile)) {
+                    while((size=zis.read(buf))>0) {
+                        fos.write(buf, 0, size);
+                    }
+                }
+                entry = zis.getNextEntry();
+            }
+        } catch (IOException e) {
+            log.error("extraction failed");
+            status = Status.Error;
+            return;
+        }
+        zip.delete();
     }
 
     public Status getStatus() {

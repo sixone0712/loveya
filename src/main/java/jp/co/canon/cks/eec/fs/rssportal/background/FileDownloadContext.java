@@ -1,11 +1,11 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.lang.NonNull;
 
 import java.io.File;
@@ -18,19 +18,19 @@ import java.util.Calendar;
 
 public class FileDownloadContext {
 
-    private final String jobType;
+    private final String ftpType;
     private final String id;
-    private final String user;
-    private final String comment;
     private final String system;
     private final String tool;
-    private final String logType;
-    private final String logTypeStr;
+    //private String user;
+    private String comment;
+    private String logType;
+    private String logTypeStr;
 
-    private final int files;
-    private final String[] fileNames;
-    private final long[] fileSizes;
-    private final Calendar[] fileDates;
+    private int files;
+    private String[] fileNames;
+    private long[] fileSizes;
+    private Calendar[] fileDates;
 
     private final DownloadForm downloadForm;
 
@@ -45,52 +45,77 @@ public class FileDownloadContext {
     private File rootDir;
     private String outPath;
     private String subDir;
+
     private boolean achieve;
+
+    @Setter @Getter
+    private boolean achieveDecompress;
+
+    @Getter
+    private String command;
 
     private long downloadFiles;
 
-    public FileDownloadContext(@NonNull String jobType, @NonNull String id, @NonNull DownloadForm form, @NonNull String baseDir) {
+    public FileDownloadContext(@NonNull String ftpType, @NonNull String id, @NonNull DownloadForm form, @NonNull String baseDir) {
 
-        this.jobType = jobType;
+        this.ftpType = ftpType;
         this.downloadForm = form;
         this.id = id;
         this.system = form.getSystem();
         this.tool = form.getTool();
-        // When logs place in a sub-directory not the log root,
-        // logType is possible to include sub-directory information.
-        String[] split = form.getLogType().split("/");
-        if(split.length==1) {
-            this.logType = form.getLogType();
-        } else {
-            this.logType = split[0];
-        }
-        this.logTypeStr = form.getLogTypeStr();
-        this.user = "eecAdmin";
         this.comment = "";
 
-        files = form.getFiles().size();
-        fileNames = new String[files];
-        fileSizes = new long[files];
-        fileDates = new Calendar[files];
+        if(ftpType.equals("ftp")) {
+            // When logs place in a sub-directory not the log root,
+            // logType is possible to include sub-directory information.
+            String[] split = form.getLogType().split("/");
+            if (split.length == 1) {
+                this.logType = form.getLogType();
+            } else {
+                this.logType = split[0];
+            }
+            this.logTypeStr = form.getLogTypeStr();
+            //this.user = "eecAdmin";
 
-        for(int i=0; i<files; ++i) {
-            FileInfo fileInfo = form.getFiles().get(i);
-            fileNames[i] = fileInfo.getName();
-            fileSizes[i] = fileInfo.getSize();
-            fileDates[i] = convertStringToCalendar(fileInfo.getDate());
-        }
+            files = form.getFiles().size();
+            fileNames = new String[files];
+            fileSizes = new long[files];
+            fileDates = new Calendar[files];
 
-        // check the first file name in the array and, if a file name includes '/'
-        // we consider it placed in a sub directory.
-        String[] firsts = fileNames[0].split("/");
-        if(firsts.length!=1) {
-            subDir = firsts[0];
+            for (int i = 0; i < files; ++i) {
+                FileInfo fileInfo = form.getFiles().get(i);
+                fileNames[i] = fileInfo.getName();
+                fileSizes[i] = fileInfo.getSize();
+                fileDates[i] = convertStringToCalendar(fileInfo.getDate());
+            }
+
+            // check the first file name in the array and, if a file name includes '/'
+            // we consider it placed in a sub directory.
+            String[] firsts = fileNames[0].split("/");
+            if (firsts.length != 1) {
+                subDir = firsts[0];
+            } else {
+                subDir = null;
+            }
+
+            Path path = Paths.get(baseDir, tool, logTypeStr == null ? logType : logTypeStr);
+            this.outPath = path.toString();
+
+        } else if(ftpType.equals("vftp-compat")) {
+            fileNames = new String[1];
+            fileSizes = new long[1];
+            fileDates = new Calendar[1];
+            command = form.getCommand();
+            fileNames[0] = form.getCommand();
+            fileSizes[0] = 0;
+            fileDates[0] = Calendar.getInstance();
+            fileDates[0].setTimeInMillis(System.currentTimeMillis());
+
+            Path path = Paths.get(baseDir, tool);
+            this.outPath = path.toString();
         } else {
-            subDir = null;
+            // TBD
         }
-
-        Path path = Paths.get(baseDir, tool, logTypeStr==null?logType:logTypeStr);
-        this.outPath = path.toString();
 
         downloadFiles = 0;
         downloadComplete = false;
@@ -150,9 +175,9 @@ public class FileDownloadContext {
         return comment;
     }
 
-    public String getUser() {
+    /*public String getUser() {
         return user;
-    }
+    }*/
 
     public String getLogType() {
         return logType;
@@ -202,8 +227,8 @@ public class FileDownloadContext {
         this.connector = connector;
     }
 
-    public String getJobType() {
-        return jobType;
+    public String getFtpType() {
+        return ftpType;
     }
 
     public String getSubDir() {

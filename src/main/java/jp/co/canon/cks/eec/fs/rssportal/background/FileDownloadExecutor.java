@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class FileDownloadExecutor {
     }
 
     private static int mUniqueKey = 1;
-    private final String jobType;
+    private final String ftpType;
     private final String desc;
     private final String downloadId;
     private Status status;
@@ -46,7 +47,7 @@ public class FileDownloadExecutor {
     private boolean attrDownloadFilesViaMultiSessions;
 
     public FileDownloadExecutor(
-            @NonNull final String jobType,
+            @NonNull final String ftpType,
             @Nullable final String desc,
             @NonNull final FileDownloader downloader,
             @NonNull final List<DownloadForm> request,
@@ -59,7 +60,7 @@ public class FileDownloadExecutor {
             log = LogFactory.getLog(String.format(fmt, getClass().toString(), desc));
         }
 
-        this.jobType = jobType;
+        this.ftpType = ftpType;
         this.downloader = downloader;
         this.connector = downloader.getConnector();
 
@@ -80,19 +81,30 @@ public class FileDownloadExecutor {
     private void initialize() {
         setStatus(Status.init);
         log.info(downloadId+": initialize()");
-        for(DownloadForm form: downloadForms) {
-            if(form.getFiles().size()==0)
+        for (DownloadForm form : downloadForms) {
+            if (form.getFtpType().equals("ftp") && form.getFiles().size() == 0)
                 continue;
-            FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
+            FileDownloadContext context = new FileDownloadContext(ftpType, downloadId, form, baseDir);
             context.setConnector(connector);
-            context.setAchieve(isAchieveJobType());
+            switch (ftpType) {
+                default :
+                    log.error("undefined ftp-type  "+ftpType);
+                    setStatus(Status.error);
+                    return;
+                case "ftp":
+                    context.setAchieve(true);
+                    context.setAchieveDecompress(true);
+                    break;
+                case "vftp-compat":
+                    context.setAchieve(false);
+                    context.setAchieveDecompress(false);
+                    break;
+            }
             downloadContexts.add(context);
         }
         totalFiles = 0;
-        downloadContexts.forEach(context -> totalFiles +=context.getFileCount());
+        downloadContexts.forEach(context -> totalFiles += context.getFileCount());
     }
-
-
 
     private void compress() {
         log.info(downloadId+": compress()");
@@ -110,6 +122,38 @@ public class FileDownloadExecutor {
 
     private void wrapup() {
         log.info(downloadId+": wrapup()");
+
+        // When the executor didn't compress the downloads then the result path is null.
+        // Because wrapup() means this download has finished successfully.
+        // Therefore we have to fill the download path information below.
+        if(mPath==null) {
+            if(downloadContexts.size()==1) {
+                FileDownloadContext context = downloadContexts.get(0);
+                File destination = new File(context.getLocalFilePath());
+                if(!destination.exists()) {
+                    log.error("destination doesn't exist  "+destination.toString());
+                    setStatus(Status.error);
+                    return;
+                }
+                if(destination.isDirectory()) {
+                    File[] files = destination.listFiles();
+                    if(files.length!=1 || (files.length>0 && files[0].isDirectory())) {
+                        log.error("cannot specify destination");
+                        setStatus(Status.error);
+                        return;
+                    } else {
+                        mPath = files[0].toString();
+                    }
+                } else {
+                    mPath = destination.toString();
+                }
+            } else {
+                log.error("download config error");
+                setStatus(Status.error);
+                return;
+            }
+        }
+        log.info("output destination="+mPath);
         setStatus(Status.complete);
     }
 
@@ -154,8 +198,16 @@ public class FileDownloadExecutor {
                         if (status == Status.stop || status == Status.error)
                             break;
                         FileDownloadHandler handler;
-                        if(true) { // if get job type
-                            handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
+                        switch(ftpType) {
+                            default:
+                            case "ftp":
+                                handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
+                                break;
+                            case "vftp-compat":
+                            case "vftp-sss":    // TBD
+                                handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
+                                break;
+
                         }
                         procs.add(new FileDownloadServiceProc(handler, context, process->{
                             if(process.getStatus()==FileDownloadServiceProc.Status.Error) {
@@ -198,7 +250,7 @@ public class FileDownloadExecutor {
                         }
 
                         FileServiceProc proc = null;
-                        switch (context.getJobType()) {
+                        switch (context.getFtpType()) {
                             case "manual":
                             case "auto":
                                 proc = new RemoteFileServiceProc(context);
@@ -223,8 +275,9 @@ public class FileDownloadExecutor {
                     }
                 }
 
-                if(attrCompression)
+                if(attrCompression) {
                     compress();
+                }
 
                 wrapup();
             } catch (InterruptedException e) {
@@ -247,10 +300,14 @@ public class FileDownloadExecutor {
         log.info("path.base="+baseDir);
         log.info("download");
         for(DownloadForm form: downloadForms) {
-            log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
-            /*for(FileInfo f:form.getFiles()) {
-                log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
-            }*/
+            if(form.getCommand()!=null) {
+                log.info("    "+form.getTool()+" / "+form.getCommand());
+            } else {
+                log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
+                /*for(FileInfo f:form.getFiles()) {
+                    log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
+                }*/
+            }
         }
     }
 
@@ -316,7 +373,7 @@ public class FileDownloadExecutor {
     }
 
     private boolean isAchieveJobType() {
-        if(jobType.equals("vftp-sss"))
+        if(ftpType.equals("vftp-sss"))
             return false;
         return true;
     }
