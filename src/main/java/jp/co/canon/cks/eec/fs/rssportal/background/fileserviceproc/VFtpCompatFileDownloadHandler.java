@@ -12,6 +12,8 @@ public class VFtpCompatFileDownloadHandler implements FileDownloadHandler {
     private final String category;
     private boolean achieve;
 
+    private String request;
+
     public VFtpCompatFileDownloadHandler(FileServiceManageConnector connector, String machine, String category) {
         this.connector = connector;
         this.machine = machine;
@@ -26,47 +28,52 @@ public class VFtpCompatFileDownloadHandler implements FileDownloadHandler {
         if(response.getErrorMessage()!=null) {
             return null;
         }
-        return response.getRequest().getRequestNo();
+        request = response.getRequest().getRequestNo();
+        return request;
     }
 
     @Override
-    public void cancelDownloadRequest(String requestNo) {
-        connector.cancelAndDeleteVFtpCompatDownloadRequest(machine, requestNo);
+    public void cancelDownloadRequest() {
+        if(request!=null)
+            connector.cancelAndDeleteVFtpCompatDownloadRequest(machine, request);
     }
 
     @Override
-    public FileDownloadInfo getDownloadedFiles(String requestNo) {
-        VFtpCompatDownloadRequest request = getDownloadRequest(requestNo);
-        if(request==null) {
+    public FileDownloadInfo getDownloadedFiles() {
+        if(request==null)
             return null;
-        }
+
+        VFtpCompatDownloadRequest download = getDownloadRequest();
+        if(download==null)
+            return null;
 
         FileDownloadInfo info = new FileDownloadInfo();
         info.setRequestFiles(1);
         info.setRequestBytes(0);
-        VFtpCompatDownloadRequest.Status status = request.getStatus();
+        VFtpCompatDownloadRequest.Status status = download.getStatus();
 
         if(status==VFtpCompatDownloadRequest.Status.ERROR) {
             info.setError(true);
-        } else if(request.getFile().isDownloaded()) {
+        } else if(download.getFile().isDownloaded()) {
             info.setDownloadFiles(1);
-            info.setDownloadBytes(request.getFile().getSize());
+            info.setDownloadBytes(download.getFile().getSize());
             info.setFinish(true);
         }
         return info;
     }
 
     @Override
-    public String getFtpAddress(String requestNo) {
-        VFtpCompatDownloadRequest request = getDownloadRequest(requestNo);
-        if(request==null || request.getStatus()!= VFtpCompatDownloadRequest.Status.EXECUTED) {
+    public String getFtpAddress() {
+        if(request==null)
             return null;
-        }
-        return request.getArchiveFilePath();
+        VFtpCompatDownloadRequest download = getDownloadRequest();
+        if(download==null || download.getStatus()!= VFtpCompatDownloadRequest.Status.EXECUTED)
+            return null;
+        return download.getArchiveFilePath();
     }
 
-    private VFtpCompatDownloadRequest getDownloadRequest(String requestNo) {
-        VFtpCompatDownloadRequestResponse response = connector.getVFtpCompatDownloadRequest(machine, requestNo);
+    private VFtpCompatDownloadRequest getDownloadRequest() {
+        VFtpCompatDownloadRequestResponse response = connector.getVFtpCompatDownloadRequest(machine, request);
         if(response.getErrorMessage()!=null) {
             return null;
         }

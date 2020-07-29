@@ -1,8 +1,7 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
-import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
-import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.*;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,11 +85,14 @@ public class FileDownloadExecutor {
                 continue;
             FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
             context.setConnector(connector);
+            context.setAchieve(isAchieveJobType());
             downloadContexts.add(context);
         }
         totalFiles = 0;
         downloadContexts.forEach(context -> totalFiles +=context.getFileCount());
     }
+
+
 
     private void compress() {
         log.info(downloadId+": compress()");
@@ -144,40 +146,81 @@ public class FileDownloadExecutor {
                     return;
 
                 setStatus(Status.download);
-                List<FileServiceProc> procs = new ArrayList<>();
 
-                for(int i=0; i<downloadContexts.size();) {
-                    FileDownloadContext context = downloadContexts.get(i);
-                    if(status==Status.stop || status==Status.error)
-                        break;
+                if(true) {
+                    List<FileDownloadServiceProc> procs = new ArrayList<>();
 
-                    while(runnings.get()>=maxThreads) {
-                        Thread.sleep(500);
-                    }
-
-                    FileServiceProc proc = null;
-                    switch (context.getJobType()) {
-                        case "manual":
-                        case "auto":
-                            proc = new RemoteFileServiceProc(context);
+                    for(FileDownloadContext context: downloadContexts) {
+                        if (status == Status.stop || status == Status.error)
                             break;
-                        default:
-                            throw new IllegalArgumentException("invalid jobType");
+                        FileDownloadHandler handler;
+                        if(true) { // if get job type
+                            handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
+                        }
+                        procs.add(new FileDownloadServiceProc(handler, context, process->{
+                            if(process.getStatus()==FileDownloadServiceProc.Status.Error) {
+                                status = Status.error;
+                                log.error("download error occurs");
+                            }}));
                     }
-                    proc.setMonitor(monitor);
-                    proc.setNotifyError(errorCallback);
-                    proc.setNotifyFinish(finishCallback);
-                    proc.start();
-                    procs.add(proc);
-                    runnings.getAndIncrement();
-                    log.info(proc.getName()+" starts");
-                    ++i;
-                }
 
-                while(runnings.get()>0) {
-                    Thread.sleep(500);
-                    if(status==Status.stop || status==Status.error)
-                        return;
+                    thread_wait:
+                    for (FileDownloadServiceProc proc : procs) {
+                        while(true) {
+                            if (status == Status.stop || status == Status.error) {
+                                log.info("stop waiting threads");
+                                break thread_wait;
+                            }
+                            if (proc.getStatus() == FileDownloadServiceProc.Status.InProgress) {
+                                Thread.sleep(100);
+                                continue;
+                            } else if(proc.getStatus()==FileDownloadServiceProc.Status.Finished) {
+                                continue thread_wait;
+                            }
+                        }
+                    }
+
+                    log.info("threads terminate");
+                    for (FileDownloadServiceProc proc : procs) {
+                        proc.interrupt();
+                        proc.join();
+                    }
+                } else {
+                    List<FileServiceProc> procs = new ArrayList<>();
+
+                    for (int i = 0; i < downloadContexts.size(); ) {
+                        FileDownloadContext context = downloadContexts.get(i);
+                        if (status == Status.stop || status == Status.error)
+                            break;
+
+                        while (runnings.get() >= maxThreads) {
+                            Thread.sleep(500);
+                        }
+
+                        FileServiceProc proc = null;
+                        switch (context.getJobType()) {
+                            case "manual":
+                            case "auto":
+                                proc = new RemoteFileServiceProc(context);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("invalid jobType");
+                        }
+                        proc.setMonitor(monitor);
+                        proc.setNotifyError(errorCallback);
+                        proc.setNotifyFinish(finishCallback);
+                        proc.start();
+                        procs.add(proc);
+                        runnings.getAndIncrement();
+                        log.info(proc.getName() + " starts");
+                        ++i;
+                    }
+
+                    while (runnings.get() > 0) {
+                        Thread.sleep(500);
+                        if (status == Status.stop || status == Status.error)
+                            return;
+                    }
                 }
 
                 if(attrCompression)
@@ -270,6 +313,12 @@ public class FileDownloadExecutor {
 
     public long getLastUpdate() {
         return lastUpdate;
+    }
+
+    private boolean isAchieveJobType() {
+        if(jobType.equals("vftp-sss"))
+            return false;
+        return true;
     }
 
     /* Attributes */

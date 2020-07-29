@@ -5,8 +5,8 @@ import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloadContext;
 public interface FileDownloadHandler {
 
     String createDownloadRequest();
-    void cancelDownloadRequest(String requestNo);
-    FileDownloadInfo getDownloadedFiles(String requestNo);
-    String getFtpAddress(String requestNo);
+    void cancelDownloadRequest();
+    FileDownloadInfo getDownloadedFiles();
+    String getFtpAddress();
 
 }
