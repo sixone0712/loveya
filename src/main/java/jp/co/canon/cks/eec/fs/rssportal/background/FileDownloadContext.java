@@ -43,9 +43,9 @@ public class FileDownloadContext {
     private String localFilePath;
 
     private File rootDir;
-    private File outFile;
     private String outPath;
     private String subDir;
+    private boolean achieve;
 
     private long downloadFiles;
 
@@ -112,11 +112,6 @@ public class FileDownloadContext {
 
     public void setLocalFilePath(String localFilePath) {
         this.localFilePath = localFilePath;
-    }
-
-    public void setOutFile(@NonNull final File outFile) {
-        this.outFile = outFile;
-        ftpProcComplete = true;
     }
 
     public CustomURL getAchieveUrl() {
@@ -213,6 +208,14 @@ public class FileDownloadContext {
 
     public String getSubDir() {
         return subDir;
+    }
+
+    public boolean isAchieve() {
+        return achieve;
+    }
+
+    public void setAchieve(boolean achieve) {
+        this.achieve = achieve;
     }
 
     private Calendar convertStringToCalendar(@NonNull final String str) {

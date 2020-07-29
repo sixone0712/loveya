@@ -1,8 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
@@ -150,7 +148,6 @@ public class FileDownloadExecutor {
 
                 for(int i=0; i<downloadContexts.size();) {
                     FileDownloadContext context = downloadContexts.get(i);
-
                     if(status==Status.stop || status==Status.error)
                         break;
 
