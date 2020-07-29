@@ -37,8 +37,8 @@
         )
     </insert>
 
-    <insert id="insertToken" parameterType="string">
-        insert into rsss."blackList" (token) values (#{token})
+    <insert id="insertToken" parameterType="hashMap">
+        insert into rsss."blackList" (token, expired) values (#{token}, #{exp})
     </insert>
 
     <update id="update" parameterType="UserVo">
@@ -66,8 +66,8 @@
             where id = #{id}
     </delete>
 
-    <delete id="truncateBlacklist">
-        truncate rsss."blackList" restart identity
+    <delete id="cleanBlacklist">
+        delete from rsss."blackList" where expired <![CDATA[ < ]]> #{queryDate}
     </delete>
 
 </mapper>

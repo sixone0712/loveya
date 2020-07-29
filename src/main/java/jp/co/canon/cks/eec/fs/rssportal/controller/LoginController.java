@@ -1,6 +1,5 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
-import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.model.auth.AccessToken;
 import jp.co.canon.cks.eec.fs.rssportal.model.auth.RefreshToken;
@@ -15,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +105,7 @@ public class LoginController {
 
                 if (calculateDate < 1) {
                     reissueToken = true;
-                    serviceUser.setToken(savedRefreshToken);
+                    serviceUser.setToken(savedRefreshToken, decodedRefresh.getExp());
                 }
             }
 
@@ -147,7 +144,8 @@ public class LoginController {
         try {
             String accessToken = request.getHeader(HEADER_STRING);
             if (jwtService.isUsable(accessToken)) {
-                serviceUser.setToken(accessToken.substring(TOKEN_PREFIX.length()));
+                AccessToken decodedAccess = jwtService.decodeAccessToken(accessToken);
+                serviceUser.setToken(accessToken.substring(TOKEN_PREFIX.length()), decodedAccess.getExp());
             }
             return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -97,17 +98,21 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean setToken(@NonNull String token) {
+    public boolean setToken(@NonNull Map<String, Object> param) {
+        if(!param.containsKey("token") || !param.containsKey("exp")) {
+            return false;
+        }
         SqlSession session = sessionFactory.openSession();
-        session.insert("users.insertToken", token);
+        session.insert("users.insertToken", param);
         session.close();
         return true;
     }
 
     @Override
-    public boolean cleanBlacklist() {
+    public boolean cleanBlacklist(Date now) {
+        Date queryDate = new Date(now.getTime());
         SqlSession session = sessionFactory.openSession();
-        int result = session.delete("users.truncateBlacklist");
+        int result = session.delete("users.cleanBlacklist", queryDate);
 
         if (result > 0) {
             session.commit();

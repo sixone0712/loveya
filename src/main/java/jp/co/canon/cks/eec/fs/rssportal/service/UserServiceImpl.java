@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,10 +126,13 @@ public class UserServiceImpl implements UserService {
     public boolean getToken(String token) { return dao.getToken(token); }
 
     @Override
-    public boolean setToken(String token) {
-        return dao.setToken(token);
+    public boolean setToken(String token, Date exp) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("token", token);
+        param.put("exp", exp);
+        return dao.setToken(param);
     }
 
     @Override
-    public boolean cleanBlacklist() { return dao.cleanBlacklist(); }
+    public boolean cleanBlacklist(Date now) { return dao.cleanBlacklist(now); }
 }

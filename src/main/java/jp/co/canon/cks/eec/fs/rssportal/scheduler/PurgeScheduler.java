@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class PurgeScheduler {
     private static UserService userService = null;
@@ -19,7 +21,7 @@ public class PurgeScheduler {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void truncateTable() {
-        log.info("[Scheduler] execute the process that clean all token in the blacklist");
-        userService.cleanBlacklist();
+        log.info("[Scheduler] execute the process that delete expired token in the blacklist");
+        userService.cleanBlacklist(new Date());
     }
 }

@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.service;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.springframework.lang.NonNull;
 
+import java.util.Date;
 import java.util.List;
 
 public interface UserService {
@@ -19,6 +20,6 @@ public interface UserService {
     boolean UpdateLastAccessTime(int id);
     boolean updateRefreshToken(int id, String token);
     boolean getToken(String token);
-    boolean setToken(String token);
-    boolean cleanBlacklist();
+    boolean setToken(String token, Date exp);
+    boolean cleanBlacklist(Date now);
 }

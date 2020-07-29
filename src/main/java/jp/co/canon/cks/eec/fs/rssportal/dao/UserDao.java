@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.dao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.springframework.lang.NonNull;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,6 @@ public interface UserDao {
     boolean UpdateAccessDate(Map<String, Object> param);
     boolean updateRefreshToken(Map<String, Object> param);
     boolean getToken(String token);
-    boolean setToken(String token);
-    boolean cleanBlacklist();
+    boolean setToken(Map<String, Object> param);
+    boolean cleanBlacklist(Date now);
 }
