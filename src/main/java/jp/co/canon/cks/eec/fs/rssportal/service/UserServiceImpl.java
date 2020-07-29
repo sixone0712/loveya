@@ -105,4 +105,30 @@ public class UserServiceImpl implements UserService {
             return  dao.UpdateAccessDate(param);
         }
     }
+
+    @Override
+    public boolean updateRefreshToken(int id, String token) {
+        Map<String, Object> param = new HashMap<>();
+        UserVo temp = getUser(id);
+
+        if (temp == null) {
+            return false;
+        } else {
+            param.put("id", id);
+            param.put("token", token);
+
+            return dao.updateRefreshToken(param);
+        }
+    }
+
+    @Override
+    public boolean getToken(String token) { return dao.getToken(token); }
+
+    @Override
+    public boolean setToken(String token) {
+        return dao.setToken(token);
+    }
+
+    @Override
+    public boolean cleanBlacklist() { return dao.cleanBlacklist(); }
 }

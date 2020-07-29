@@ -43,17 +43,22 @@ class App extends Component {
 
         const checkConnection = async () => {
           try {
-            const res = await services.axiosAPI.requestGet(Define.REST_AUTHS_GET_ME);
-            const { userName, userId, permission } = res.data;
-            if(userName && permission) {
-              await API.setLoginIsLoggedIn(this.props, true);
-              await API.setLoginUserName(this.props, userName);
-              await API.setLoginAuth(this.props, permission);
-              this.onMovePage(Define.PAGE_MANUAL);
-            } else {
-              console.error("login info invalid");
-              this.onMovePage(Define.PAGE_LOGIN);
-            }
+              if(sessionStorage.getItem("accessToken")) {
+                  const res = await services.axiosAPI.requestGet(Define.REST_AUTHS_GET_ME);
+                  const { status } = res;
+                  console.log("[App][componentDidMount]status", status);
+                  if (status === Define.OK) {
+                      const {userName, userId, permission} = res.data;
+                      await API.setLoginIsLoggedIn(this.props, true);
+                      await API.setLoginUserName(this.props, userName);
+                      await API.setLoginAuth(this.props, permission);
+                      this.onMovePage(Define.PAGE_MANUAL);
+                  } else {
+                      this.onMovePage(Define.PAGE_LOGIN);
+                  }
+              } else {
+                  this.onMovePage(Define.PAGE_LOGIN);
+              }
           } catch (e) {
             console.log(e);
             this.onMovePage(Define.PAGE_LOGIN);

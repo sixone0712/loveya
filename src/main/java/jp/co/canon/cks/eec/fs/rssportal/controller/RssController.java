@@ -20,7 +20,7 @@ public class RssController {
 
     @RequestMapping(value={"/rss/page/**"})
     public String redirect() {
-        log.info("[[RssController]] other url called");
+        log.info("[RssController] other url called");
         return "redirect:/rss";
     }
 }

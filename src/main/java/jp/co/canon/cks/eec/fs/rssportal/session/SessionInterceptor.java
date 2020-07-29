@@ -1,7 +1,13 @@
 package jp.co.canon.cks.eec.fs.rssportal.session;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
+import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -9,14 +15,21 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SessionInterceptor extends HandlerInterceptorAdapter {
+    private final JwtService jwtService;
+    private final UserService userService;
 
-    private static final long SESSION_TIMEOUT = 3600*1000;
+    public static final String TOKEN_PREFIX = "Bearer ";
+
+    @Autowired
+    public SessionInterceptor (JwtService jwtService, UserService userService) {
+        this.jwtService = jwtService;
+        this.userService = userService;
+    }
 
     private static final String[] allowedRegex = {
             "/",
@@ -25,12 +38,10 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             "/rss/main.*.css",
             "/error",
             "/rss/page/login",
-            "/rss/rest/user/login",
-            "/rss/rest/user/isLogin",
-            "/rss/rest/user/logout",
             "/rss/api/auths/login",
             "/rss/api/auths/logout",
-            "/rss/api/auths/me",
+            //"/rss/api/auths/me",
+            "/rss/api/auths/token",
             "/favicon\\.ico",
             "/dbtest/[\\w./]*",
             "/dbtest",
@@ -40,45 +51,40 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-        HttpSession session = request.getSession();
         String url = request.getServletPath();
         StringBuilder sb = new StringBuilder("request ");
         sb.append(url).append(" ");
+        log.info(sb.toString());
 
-        // If the client requests a page which permits guest access, this method does nothing here.
-        if(isUserspace(url)==false) {
+        if(isPageMove(url)) {
+            return true;
+        }
+
+        if(!isUserspace(url)) {
             response.addHeader("userauth", "true");
             sb.append("[guest][true]");
             log.info(sb.toString());
             return true;
         }
 
-        // Check session has been authorized.
-        SessionContext context = (SessionContext)session.getAttribute("context");
-        if(context==null) {
-            response.addHeader("userauth", "false");
-            if(isPageMove(url)) {
-                response.sendRedirect("/rss");
-            }
-            sb.append("[invalid-session][false]");
-            log.info(sb.toString());
+        log.info("[preHandle]Authorization: " + request.getHeader("Authorization"));
+        String accessToken = request.getHeader("Authorization");
+        log.info("[preHandle]accessToken: " + accessToken);
+        if (!jwtService.isUsable(accessToken) || userService.getToken(accessToken.replace(TOKEN_PREFIX, ""))) {
+            log.info("[preHandle]accessToken invalid");
+            Map<String, Object> resBody = new HashMap<>();
+            ObjectMapper objectMapper = new ObjectMapper();
+            RSSError error = new RSSError();
+            error.setReason(RSSErrorReason.INVALID_ACCESS_TOKEN);
+            resBody.put("error", error.getRSSError());
+            String resBodyJson = objectMapper.writeValueAsString(resBody);
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(resBodyJson);
             return false;
         }
-
-        long current = System.currentTimeMillis();
-        if((current-session.getLastAccessedTime())>SESSION_TIMEOUT) {
-            if(isPageMove(url)) {
-                response.sendRedirect("/rss");
-            }
-            session.invalidate();
-            sb.append("[timeout][false]");
-            log.info(sb.toString());
-            return false;
-        }
-
-        response.addHeader("userauth", "true");
-        //log.info(sb.toString());
         return true;
     }
 
@@ -95,7 +101,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     }
 
     private boolean isPageMove(@NonNull String url) {
-        return url.startsWith("/rss/page");
+        return url.startsWith("/rss/page") || url.equals("/rss");
     }
 
     @SuppressWarnings("unused")

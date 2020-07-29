@@ -17,5 +17,8 @@ public interface UserService {
     /*boolean modifyPerm(int id, int[] perms);*/
     int verify(String username, String password);
     boolean UpdateLastAccessTime(int id);
-
+    boolean updateRefreshToken(int id, String token);
+    boolean getToken(String token);
+    boolean setToken(String token);
+    boolean cleanBlacklist();
 }

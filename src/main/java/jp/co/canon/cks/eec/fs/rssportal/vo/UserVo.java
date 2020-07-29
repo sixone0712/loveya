@@ -19,5 +19,5 @@ public class UserVo {
     private Date lastAccess;
     private boolean validity;
     private String permissions;
-
+    private String refreshToken;
 }

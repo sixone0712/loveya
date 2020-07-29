@@ -58,6 +58,13 @@ class Login extends Component {
             try {
                 const res = await API.startLoginAuth(this.props,
                   `${Define.REST_AUTHS_GET_LOGIN}?username=${this.state.username}&password=${md5(this.state.password)}`);
+                const { accessToken, refreshToken } = res.data;
+                if(accessToken) {
+                    sessionStorage.setItem("accessToken", accessToken);
+                }
+                if(refreshToken) {
+                    sessionStorage.setItem("refreshToken", refreshToken);
+                }
             } catch (e) {
                 console.log(e)
             }

@@ -10,7 +10,7 @@ import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchRequest;
 import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchResponse;
-import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,17 +42,18 @@ public class FileDownloaderController {
 
     private final HttpSession session;
     private final FileDownloader fileDownloader;
+    private final JwtService jwtService;
+    private final FileServiceManageConnectorFactory connectorFactory;
 
     @Value("${rssportal.file-service-manager.addr}")
     private String fileServiceAddress;
 
     @Autowired
-    FileServiceManageConnectorFactory connectorFactory;
-
-    @Autowired
-    public FileDownloaderController(HttpSession session, FileDownloader fileDownloader) {
+    public FileDownloaderController(HttpSession session, FileDownloader fileDownloader, JwtService jwtService, FileServiceManageConnectorFactory connectorFactory) {
         this.session = session;
         this.fileDownloader = fileDownloader;
+        this.jwtService = jwtService;
+        this.connectorFactory = connectorFactory;
     }
 
     private boolean createFileList(List<RSSFtpSearchResponse> list, RSSFtpSearchRequest request) {
@@ -421,17 +422,8 @@ public class FileDownloaderController {
     private String createZipFilename(String downloadId) {
         // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
 
-        if(session==null) {
-            log.error("null session");
-            return null;
-        }
+        String username = jwtService.getCurAccTokenUserName();
 
-        SessionContext context = (SessionContext)session.getAttribute("context");
-        if(context==null || context.isAuthorized()==false) {
-            log.error("unauthorized download request");
-            return null;
-        }
-        String username = context.getUser().getUsername();
         if(username==null) {
             log.error("no username");
             return null;

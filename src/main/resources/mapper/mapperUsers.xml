@@ -19,6 +19,10 @@
             </if>
     </select>
 
+    <select id="selectToken" parameterType="string" resultType="int">
+        select count(token) from rsss."blackList" where token = #{token}
+    </select>
+
     <insert id="insert" parameterType="UserVo">
         insert into rsss."users" (
                 username,
@@ -31,6 +35,10 @@
                 #{permissions},
                 true
         )
+    </insert>
+
+    <insert id="insertToken" parameterType="string">
+        insert into rsss."blackList" (token) values (#{token})
     </insert>
 
     <update id="update" parameterType="UserVo">
@@ -48,10 +56,18 @@
             where id = #{id}
     </update>
 
+    <update id="updateRefreshToken" parameterType="hashMap">
+        update rsss."users" set refreshtoken = #{token} where id = #{id}
+    </update>
+
     <delete id="delete">
         delete
             from rsss."users"
             where id = #{id}
+    </delete>
+
+    <delete id="truncateBlacklist">
+        truncate rsss."blackList" restart identity
     </delete>
 
 </mapper>
