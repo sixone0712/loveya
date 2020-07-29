@@ -81,6 +81,54 @@ public class PlanController {
         }
     }
 
+    private RSSPlanCollectionPlan makePlanResponse(CollectPlanVo plan) {
+        RSSPlanCollectionPlan newPlan = new RSSPlanCollectionPlan();
+        SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
+        newPlan.setPlanId(plan.getId());
+        newPlan.setPlanType("");      // need to add
+        newPlan.setOwnerId(plan.getOwner());
+        newPlan.setPlanName(plan.getPlanName());
+        newPlan.setFabNames(plan.getFab());
+        newPlan.setMachineNames(plan.getTool());
+        newPlan.setCategoryCodes(plan.getLogType());
+        newPlan.setCategoryNames(plan.getLogTypeStr());
+        newPlan.setCommands(null);      // need to add
+        newPlan.setType(plan.getCollectTypeStr());
+        newPlan.setInterval(Long.toString(plan.getInterval()));
+        newPlan.setDescription(plan.getDescription());
+        newPlan.setStart(plan.getCollectStart() != null ? conTimeFormat.format(plan.getCollectStart()) : null);
+        newPlan.setFrom(plan.getStart() != null ? conTimeFormat.format(plan.getStart()): null);
+        newPlan.setTo(plan.getEnd() != null ? conTimeFormat.format(plan.getEnd()): null);
+        newPlan.setLastCollection(plan.getLastCollect() != null ? conTimeFormat.format(plan.getLastCollect()) : null);
+        newPlan.setStatus(plan.getStatus());
+        newPlan.setDetailedStatus(plan.getDetail());
+
+        return newPlan;
+    }
+
+    @GetMapping("/{planId}")
+    @ResponseBody
+    public ResponseEntity<?> getPlan(HttpServletRequest request, @PathVariable("planId") String planId) {
+        log.info(String.format("[Get] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        if(planId == null || planId.isEmpty()) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        CollectPlanVo plan = service.getPlan(Integer.parseInt(planId));
+        if(plan == null) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(makePlanResponse(plan));
+    }
+
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> listPlan(HttpServletRequest request, @RequestParam Map<String, Object> param) {
@@ -101,31 +149,10 @@ public class PlanController {
 
         List<RSSPlanCollectionPlan> convList = new ArrayList<RSSPlanCollectionPlan>();
         for(CollectPlanVo plan : plans) {
-            RSSPlanCollectionPlan newPlan = new RSSPlanCollectionPlan();
-            SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
-            newPlan.setPlanId(plan.getId());
-            newPlan.setPlanType("");      // need to add
-            newPlan.setOwnerId(plan.getOwner());
-            newPlan.setPlanName(plan.getPlanName());
-            newPlan.setFabNames(plan.getFab());
-            newPlan.setMachineNames(plan.getTool());
-            newPlan.setCategoryCodes(plan.getLogType());
-            newPlan.setCategoryNames(plan.getLogTypeStr());
-            newPlan.setCommands(null);      // need to add
-            newPlan.setType(plan.getCollectTypeStr());
-            newPlan.setInterval(Long.toString(plan.getInterval()));
-            newPlan.setDescription(plan.getDescription());
-            newPlan.setStart(plan.getCollectStart() != null ? conTimeFormat.format(plan.getCollectStart()) : null);
-            newPlan.setFrom(plan.getStart() != null ? conTimeFormat.format(plan.getStart()): null);
-            newPlan.setTo(plan.getEnd() != null ? conTimeFormat.format(plan.getEnd()): null);
-            newPlan.setLastCollection(plan.getLastCollect() != null ? conTimeFormat.format(plan.getLastCollect()) : null);
-            newPlan.setStatus(plan.getStatus());
-            newPlan.setDetailedStatus(plan.getDetail());
-            convList.add(newPlan);
+            convList.add(makePlanResponse((plan)));
         }
 
         resBody.put("lists", convList);
-
         return ResponseEntity.status(HttpStatus.OK).body(resBody);
     }
 
