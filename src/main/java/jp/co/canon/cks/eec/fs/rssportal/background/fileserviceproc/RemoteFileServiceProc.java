@@ -1,5 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc;
 
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
+import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
@@ -19,10 +22,10 @@ import java.util.zip.ZipInputStream;
 
 public class RemoteFileServiceProc extends FileServiceProc {
 
-    private int downloadFiles = 0;
+    private long downloadFiles = 0;
     private final long checkPointExpire = 60000*3; // 3 minutes
     private long checkPointTime;
-    private int checkPointFiles;
+    private long checkPointFiles;
 
     public RemoteFileServiceProc(@NonNull FileDownloadContext context) {
         super(context, RemoteFileServiceProc.class);
@@ -32,31 +35,25 @@ public class RemoteFileServiceProc extends FileServiceProc {
     void register() {
         log.info("register()");
         try {
-            FileServiceManage manager = context.getFileManager();
-            String request = manager.registRequest(
-                    context.getSystem(),
-                    context.getUser(),
-                    context.getTool(),
-                    context.getComment(),
-                    context.getLogType(),
-                    context.getFileNames(),
-                    context.getFileSizes(),
-                    context.getFileDates());
-
-            log.info("requestNo="+request);
-            context.setRequestNo(request);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            FtpDownloadRequestResponse response = context.getConnector().createFtpDownloadRequest(
+                    context.getTool(), context.getLogType(), true, context.getFileNames());
+            if (response.getErrorCode() != null) {
+                log.error("failed to create ftp request");
+                // Todo  add error handling routine
+            }
+            context.setRequestNo(response.getRequestNo());
+            log.info("request-no=" + context.getRequestNo());
+        } catch (Exception e) {
+            log.error("wefwefwefew");
         }
     }
 
     @Override
     boolean download() {
-        log.info("download() (tool="+context.getTool()+" type="+context.getLogType()+")");
-        FileServiceManage manager = context.getFileManager();
-        FileServiceModel service = context.getFileService();
+        log.info("download() (machine="+context.getTool()+" category="+context.getLogType()+")");
 
-        monitor.add(context.getSystem(), context.getTool(), context.getRequestNo(), service, files->{
+        // Todo support vftp
+        monitor.add(context.getTool(), context.getRequestNo(), "ftp", files->{
             downloadFiles = files;
             context.setDownloadFiles(files);
             setCheckPoint();
@@ -71,20 +68,30 @@ public class RemoteFileServiceProc extends FileServiceProc {
                             String.format("%s/%s/%s", context.getTool(), context.getLogType(), context.getSubDir()));
                 }
             }
-            monitor.delete(context.getSystem(), context.getTool(), context.getRequestNo());
+            monitor.delete(context.getTool(), context.getRequestNo());
             log.info("ready to download (tool="+context.getTool()+" type="+context.getLogType()+")");
 
             while(true) {
-                RequestListBean requestList = service.createDownloadList(context.getSystem(), context.getTool(), context.getRequestNo());
-                RequestInfoBean reqInfo = requestList.get(context.getRequestNo());
-                if(reqInfo==null) {
-                    Thread.sleep(100);
-                    continue;
+                FtpDownloadRequestListResponse response = context.getConnector().getFtpDownloadRequestList(
+                        context.getTool(), context.getRequestNo());
+                if(response.getErrorCode()!=null) {
+                    log.error("failed to get ftp download list");
+                    // Todo  add error handler.
+                }
+                FtpDownloadRequest request = null;
+                for(FtpDownloadRequest r: response.getRequestList()) {
+                    if(r.getRequestNo().equals(context.getRequestNo())) {
+                        request = r;
+                        break;
+                    }
+                }
+                if(request==null) {
+                    log.error("cannot find request list");
+                    // Todo
                 }
 
-                String achieveUrl = manager.download(context.getUser(), context.getSystem(), context.getTool(),
-                        context.getRequestNo(), reqInfo.getArchiveFileName());
-                log.info("download " + reqInfo.getArchiveFileName() + "(url=" + achieveUrl + ")");
+                String achieveUrl = request.getArchiveFilePath();
+                log.info("download (url=" + achieveUrl + ")");
                 if(achieveUrl==null) {
                     // When there is no file to download, 'achieveUrl' is null.
                     // We consider that who asks this download requested invalid download.
@@ -95,10 +102,7 @@ public class RemoteFileServiceProc extends FileServiceProc {
                 break;
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ServiceException e) {
-            e.printStackTrace();
-        } catch (RemoteException e) {
+            log.error("thread interrupted");
             e.printStackTrace();
         }
         return true;

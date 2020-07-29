@@ -32,6 +32,7 @@ import java.util.Map;
  * 2013-06-30	T.TATEYAMA	ユーザ認証 コンポーネントＩＤを指定できる様に修正
  * 2013-06-30	T.TATEYAMA	要求一覧、完了一覧の戻り値をそれぞれRequestListBeanに変更
  */
+@Deprecated
 public interface FileServiceModel {
 	/**
 	 * ログアウトを実行する

@@ -38,6 +38,7 @@ public abstract class FileServiceProc extends Thread {
             notifyCall(notifyError);
             return;
         }
+
         transfer();
         extract();
         completed = 0;

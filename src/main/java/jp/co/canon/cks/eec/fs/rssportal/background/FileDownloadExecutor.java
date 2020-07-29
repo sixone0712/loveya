@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
 import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
@@ -15,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class FileDownloadExecutor {
@@ -23,20 +25,19 @@ public class FileDownloadExecutor {
 
     private enum Status {
         idle, init, download, compress, complete, stop, error
-    };
+    }
 
     private static int mUniqueKey = 1;
-    private String jobType;
-    private String desc;
-    private String downloadId;
+    private final String jobType;
+    private final String desc;
+    private final String downloadId;
     private Status status;
-    private List<DownloadForm> downloadForms;
-    private List<FileDownloadContext> downloadContexts;
-    private String baseDir;
+    private final List<DownloadForm> downloadForms;
+    private final List<FileDownloadContext> downloadContexts;
+    private final String baseDir;
 
-    private FileDownloader downloader;
-    private FileServiceManage serviceManage;
-    private FileServiceModel service;
+    private final FileDownloader downloader;
+    private final FileServiceManageConnector connector;
     private DownloadMonitor monitor;
     private int totalFiles = -1;
     private String mPath = null;
@@ -63,8 +64,7 @@ public class FileDownloadExecutor {
 
         this.jobType = jobType;
         this.downloader = downloader;
-        this.serviceManage = downloader.getServiceManage();
-        this.service = downloader.getService();
+        this.connector = downloader.getConnector();
 
         Timestamp stamp = new Timestamp(System.currentTimeMillis());
         downloadId = "DL"+(mUniqueKey++)+stamp.getTime();
@@ -87,8 +87,7 @@ public class FileDownloadExecutor {
             if(form.getFiles().size()==0)
                 continue;
             FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
-            context.setFileManager(serviceManage);
-            context.setFileService(service);
+            context.setConnector(connector);
             downloadContexts.add(context);
         }
         totalFiles = 0;
@@ -248,9 +247,9 @@ public class FileDownloadExecutor {
         return mPath;
     }
 
-    public int getDownloadFiles() {
-        AtomicInteger files = new AtomicInteger();
-        downloadContexts.forEach(context-> files.addAndGet(context.getDownloadFiles()));
+    public long getDownloadFiles() {
+        AtomicLong files = new AtomicLong();
+        downloadContexts.forEach(context->files.addAndGet(context.getDownloadFiles()));
         return files.get();
     }
 

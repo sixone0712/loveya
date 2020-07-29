@@ -1,14 +1,19 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
+import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.cks.eec.fs.portal.bean.RequestInfoBean;
-import jp.co.canon.cks.eec.fs.portal.bean.RequestListBean;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.ServiceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -16,37 +21,45 @@ import java.util.function.Consumer;
 @Component
 public class DownloadMonitor extends Thread {
 
+    @Value("${rssportal.file-service-manager.addr}")
+    private String fileServiceAddress;
+
+    private final Log log = LogFactory.getLog(getClass());
+    private final FileServiceManageConnectorFactory connectorFactory;
+    private FileServiceManageConnector connector;
+    private List<Target> targets;
+
+    @Autowired
+    public DownloadMonitor(FileServiceManageConnectorFactory connectorFactory) {
+        this.connectorFactory = connectorFactory;
+    }
+
+    @PostConstruct
+    public void __initialize() {
+        log.info("DownloadMonitor initialize");
+        connector = connectorFactory.getConnector(fileServiceAddress);
+        targets = new ArrayList<>();
+        this.start();
+    }
 
     private class Target {
-        FileServiceModel service;
-        String system;
-        String tool;
+        String protocol;
+        String machine;
         String requestNo;
-        RequestInfoBean reqInfo;
-        RequestInfoBean downloadInfo;
+        FtpDownloadRequest ftp;
 
-        long ts;
+        long timestamp;
         boolean activated;
-        Consumer<Integer> updateDownloadFiles;
+        Consumer<Long> updateDownloadFiles;
 
-        private Target(FileServiceModel service, String system, String tool, String requestNo,
-                       RequestInfoBean reqInfo, RequestInfoBean downloadInfo, long ts, Consumer<Integer> updateDownloadFiles) {
-            this.service = service;
-            this.system = system;
-            this.tool = tool;
+        private Target(String machine, String requestNo, String protocol, Consumer<Long> updateDownloadFiles) {
+            this.machine = machine;
             this.requestNo = requestNo;
-            this.reqInfo = reqInfo;
-            this.downloadInfo = downloadInfo;
-            this.ts = ts;
+            this.protocol = protocol;
+            this.timestamp = 0;
             this.activated = true;
             this.updateDownloadFiles = updateDownloadFiles;
         }
-    }
-
-    private List<Target> targets = new ArrayList<>();
-
-    public DownloadMonitor() {
-        this.start();
     }
 
     @Override
@@ -54,6 +67,7 @@ public class DownloadMonitor extends Thread {
         log.info("download monitor start");
         try {
             while(true) {
+                //log.info(String.format("## download monitor running"));
                 synchronized (targets) {
                     if (targets.size() == 0) {
                         sleep(500);
@@ -61,34 +75,27 @@ public class DownloadMonitor extends Thread {
 
                     for (Target target : targets) {
                         if (target.activated) {
-                            synchronized (target) {
-                                try {
-                                    RequestListBean downloadList = target.service.createDownloadList(target.system,
-                                            target.tool, target.requestNo);
-                                    if (downloadList != null) {
-                                        for (Object item : downloadList.getRequestList()) {
-                                            RequestInfoBean bean = (RequestInfoBean) item;
-                                            if (bean.getRequestNo().equalsIgnoreCase(target.requestNo)) {
-                                                target.downloadInfo = bean;
-                                                target.updateDownloadFiles.accept(bean.getFileListCount());
-                                            }
-                                        }
-                                    }
-                                    /* deprecated
-                                    RequestListBean requestList = target.service.createRequestList(
-                                            target.system, target.tool, target.requestNo);
-                                    if (requestList != null) {
-                                        target.reqInfo = requestList.get(target.requestNo);
-                                        if (target.reqInfo != null) {
-                                            target.ts = System.currentTimeMillis();
-                                        }
-                                    }
-                                     */
-                                } catch (ServiceException e) {
-                                    e.printStackTrace();
+                            if(target.protocol.equals("ftp")) {
+                                FtpDownloadRequestListResponse response = connector.getFtpDownloadRequestList(target.machine, target.requestNo);
+                                if(response.getErrorCode()!=null) {
+                                    log.error("error ("+response.getErrorCode()+") on getting download information " +
+                                            "(machine="+target.machine+" request="+target.requestNo+")");
+                                    continue;
                                 }
+                                for(FtpDownloadRequest r: response.getRequestList()) {
+                                    if(r.getRequestNo().equals(target.requestNo)) {
+                                        target.ftp = r;
+                                        target.timestamp = System.currentTimeMillis();
+                                        target.updateDownloadFiles.accept(r.getDownloadedFileCount());
+                                    }
+                                }
+                            } else {
+                                // Todo  support vftp
                             }
+                        } else {
+                            // Todo  delete the deactivated target.
                         }
+                        sleep(1);
                     }
                 }
                 sleep(1000);
@@ -99,10 +106,10 @@ public class DownloadMonitor extends Thread {
         }
     }
 
-    private Target getTarget(String system, String tool, String requestNo) {
+    private Target getTarget(String machine, String requestNo) {
         synchronized (targets) {
             for (Target target : targets) {
-                if (target.system.equals(system) && target.tool.equals(tool) && target.requestNo.equals(requestNo)) {
+                if (target.machine.equals(machine) && target.requestNo.equals(requestNo)) {
                     return target;
                 }
             }
@@ -110,52 +117,20 @@ public class DownloadMonitor extends Thread {
         return null;
     }
 
-    public void add(
-            @NonNull final String system,
-            @NonNull final String tool,
-            @NonNull final String requestNo,
-            @NonNull final FileServiceModel service,
-            @NonNull final Consumer<Integer> updateDownloadFiles) {
-
-        log.info("monitor.add(system="+system+" tool="+tool+" reqNo="+requestNo+")");
-        if(getTarget(system, tool, requestNo)==null) {
-            try {
-                RequestListBean requestList = service.createDownloadList(system, tool, requestNo);
-                RequestInfoBean inf = requestList.get(requestNo);
-                synchronized (targets) {
-                    targets.add(
-                            new Target(service, system, tool, requestNo, inf, null,
-                            System.currentTimeMillis(), updateDownloadFiles)
-                    );
-                }
-            } catch (ServiceException e) {
-                e.printStackTrace();
-            }
+    public synchronized void add(String machine, String requestNo, String protocol, Consumer<Long> updateDownloadFiles) {
+        log.info("monitor.add(machine="+machine+" request="+requestNo+")");
+        Target target = getTarget(machine, requestNo);
+        if(target==null) {
+            targets.add(new Target(machine, requestNo, protocol, updateDownloadFiles));
         }
     }
 
-    public void delete(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
-        Target target = getTarget(system, tool, requestNo);
+    public synchronized void delete(String machine, String requestNo) {
+        Target target = getTarget(machine, requestNo);
         if(target!=null) {
             synchronized (targets) {
-                //targets.remove(target);
                 target.activated = false;
             }
         }
     }
-
-    /*
-    public RequestInfoBean get(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
-        Target target = getTarget(system, tool, requestNo);
-        return target!=null?target.reqInfo:null;
-    }
-
-     */
-
-    public RequestInfoBean getDownloadInfo(@NonNull final String system, @NonNull final String tool, @NonNull final String requestNo) {
-        Target target = getTarget(system, tool, requestNo);
-        return target!=null?target.downloadInfo:null;
-    }
-
-    private final Log log = LogFactory.getLog(getClass());
 }

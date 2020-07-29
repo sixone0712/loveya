@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -83,6 +84,9 @@ public class FileDownloaderController {
                         long searchTo = Long.parseLong(request.getEndDate());
                         if(dirTimestamp > searchTo || dirTimestamp < searchFrom) continue;
                         */
+                        if(!fileDownloader.isBetween(file.getTimestamp(), request.getStartDate(), request.getEndDate())) {
+                            continue;
+                        }
                         RSSFtpSearchRequest child = request.getClone();
                         child.setDir(file.getFilename());
                         if(!createFileList(list, child)) {
@@ -285,7 +289,7 @@ public class FileDownloaderController {
             String fileName = (String) item.get("fileName");
             String fileSize = Integer.toString((Integer) item.get("fileSize"));
             String fileDate = (String) item.get("fileDate");
-            boolean file = (boolean) item.get("file"); // if an item doesn't contains 'file', it occurs NullPointException.
+            boolean file = true; // (boolean) item.get("file"); // if an item doesn't contains 'file', it occurs NullPointException.
 
             if(fabName!=null && machineName!=null && categoryCode!=null && categoryName!=null && fileName!=null && fileSize!=null && fileDate!=null) {
                 if(file) {
