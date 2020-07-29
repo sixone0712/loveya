@@ -1,8 +1,12 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.model.auth.AccessToken;
+import jp.co.canon.cks.eec.fs.rssportal.model.auth.RefreshToken;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
@@ -11,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,12 +29,17 @@ import java.util.Map;
 public class LoginController {
     private final HttpSession httpSession;
     private final UserService serviceUser;
+    private final JwtService jwtService;
+
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String HEADER_STRING = "Authorization";
     private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
-    public LoginController(HttpSession httpSession, UserService serviceUser) {
+    public LoginController(HttpSession httpSession, UserService serviceUser, JwtService jwtService) {
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/me")
@@ -36,12 +48,12 @@ public class LoginController {
         log.info(String.format("[Get] %s", request.getServletPath()));
         Map<String, Object> resBody = new HashMap<>();
         RSSError error = new RSSError();
+
         try {
-            SessionContext context = (SessionContext) httpSession.getAttribute("context");
-            UserVo user = context.getUser();
-            resBody.put("userName", user.getUsername());
-            resBody.put("userId", user.getId());
-            resBody.put("permission", user.getPermissions());
+            AccessToken decodedAccess = jwtService.decodeAccessToken(request.getHeader(HEADER_STRING));
+            resBody.put("userId", decodedAccess.getUserId());
+            resBody.put("userName", decodedAccess.getUserName());
+            resBody.put("permission", decodedAccess.getPermission());
             return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (Exception e) {
             error.setReason(RSSErrorReason.NOT_FOUND);
@@ -77,8 +89,37 @@ public class LoginController {
             resBody.put("userName", LoginUser.getUsername());
             resBody.put("userId", LoginUser.getId());
             resBody.put("permission", LoginUser.getPermissions());
-            resBody.put("accessToken", "");     // need to add`
-            resBody.put("refreshToken", "");    // need to add
+
+            AccessToken accessTokenInfo = new AccessToken();
+            accessTokenInfo.setUserId(LoginUser.getId());
+            accessTokenInfo.setUserName(LoginUser.getUsername());
+            accessTokenInfo.setPermission(LoginUser.getPermissions());
+            String accessToken = jwtService.create(accessTokenInfo, "accessToken");
+            resBody.put("accessToken", accessToken);
+
+            boolean reissueToken = false;
+            String savedRefreshToken = LoginUser.getRefreshToken();
+
+            if (savedRefreshToken == null || !jwtService.isUsable(savedRefreshToken)) {
+                reissueToken = true;
+            } else {
+                RefreshToken decodedRefresh = jwtService.decodeRefreshToken(savedRefreshToken);
+                long calculateDate = (decodedRefresh.getExp().getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000);
+
+                if (calculateDate < 1) {
+                    reissueToken = true;
+                    serviceUser.setToken(savedRefreshToken);
+                }
+            }
+
+            if (reissueToken) {
+                RefreshToken refreshTokenInfo = new RefreshToken();
+                refreshTokenInfo.setUserId(LoginUser.getId());
+                refreshTokenInfo.setUserName(LoginUser.getUsername());
+                String refreshToken = jwtService.create(refreshTokenInfo, "refreshToken");
+                serviceUser.updateRefreshToken(LoginUser.getId(), refreshToken);
+                resBody.put("refreshToken", refreshToken);
+            }
         }
         else {
             if(userId == 34) {
@@ -102,18 +143,53 @@ public class LoginController {
     public ResponseEntity<?> logout(HttpServletRequest request)  throws Exception {
         log.info(String.format("[Get] %s", request.getServletPath()));
         Map<String, Object> resBody = new HashMap<>();
-        RSSError error = new RSSError();;
+        RSSError error = new RSSError();
         try {
-            SessionContext context = (SessionContext) httpSession.getAttribute("context");
-            UserVo user = context.getUser();
-            resBody.put("userName", user.getUsername());
-            resBody.put("userId", user.getId());
-            this.httpSession.invalidate();
+            String accessToken = request.getHeader(HEADER_STRING);
+            if (jwtService.isUsable(accessToken)) {
+                serviceUser.setToken(accessToken.substring(TOKEN_PREFIX.length()));
+            }
             return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (Exception e) {
             error.setReason(RSSErrorReason.NOT_FOUND);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
+    }
+
+    @PostMapping("/token")
+    @ResponseBody
+    public ResponseEntity<?> reissueAccessToken(HttpServletRequest request,
+                                                @RequestBody Map<String, Object> param)  throws Exception {
+        log.info(String.format("[Post] %s", request.getServletPath()));
+        Map<String, Object> resBody = new HashMap<>();
+        RSSError error = new RSSError();
+
+        String refreshToken = param.containsKey("refreshToken") ? (String) param.get("refreshToken") : null;
+
+        if(refreshToken == null) {
+            error.setReason(RSSErrorReason.INVALID_REFRESH_TOKEN);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resBody);
+        }
+
+        try {
+            RefreshToken decodedRefresh = jwtService.decodeRefreshToken(refreshToken);
+            UserVo userInfo = serviceUser.getUser(decodedRefresh.getUserId());
+            AccessToken tokenInfo = new AccessToken();
+            tokenInfo.setUserId(userInfo.getId());
+            tokenInfo.setUserName(userInfo.getUsername());
+            tokenInfo.setPermission(userInfo.getPermissions());
+
+            String newAccessToken = jwtService.create(tokenInfo, "accessToken");
+            resBody.put("accessToken", newAccessToken);
+            return ResponseEntity.status(HttpStatus.OK).body(resBody);
+        } catch (Exception e) {
+            log.error(e);
+            error.setReason(RSSErrorReason.INVALID_REFRESH_TOKEN);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resBody);
+        }
+
     }
 }

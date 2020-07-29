@@ -6,4 +6,6 @@ public class RSSErrorReason {
     public static final String INVALID_PARAMETER = "invalidParameter";
     public static final String INTERNAL_ERROR = "internalError";
     public static final String DUPLICATE_USER = "duplicateUser";
+    public static final String INVALID_REFRESH_TOKEN = "invalidRefreshToken";
+    public static final String INVALID_ACCESS_TOKEN = "invalidAccessToken";
 }

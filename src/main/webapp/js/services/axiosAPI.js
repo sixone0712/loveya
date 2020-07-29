@@ -1,30 +1,54 @@
 import axios from 'axios';
 import * as Define from "../define";
 
-export const checkSession = (response) => {
-    if(response !== undefined) {
-        console.log("[axiosAPI][checkSession]response", response);
-        //console.log("[axiosAPI][checkSession]response.data", response.data);
-        //console.log("[axiosAPI][checkSession]response.headers", response.headers)
-        const { userauth } = response.headers;
-        console.log("[axiosAPI][checkSession]userauth", userauth);
-        if (userauth == null || userauth == "false") {
-            console.log("[axiosAPI][checkSession]logout then go to login page");
-            axios.get(Define.REST_API_URL + "/user/logout")
-              .then(
-                (res) => {
-                    window.sessionStorage.clear();
-                    window.location.replace('/rss');
-                })
-              .catch(error => {
-                  window.sessionStorage.clear();
-                  window.location.replace('/rss');
-              });
+// Add a request interceptor
+axios.interceptors.request.use(
+    config => {
+        const token = sessionStorage.getItem("accessToken");
+        if(token) {
+            config.headers['Authorization'] = 'Bearer ' + token;
         }
-    } else {
-        console.log("[axiosAPI][checkSession] response is undefined");
+        config.headers['Content-Type'] = 'application/json';
+        console.log("[axios.interceptors.request]config.headers", config.headers);
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    });
+
+//Add a response interceptor
+axios.interceptors.response.use(
+    (response) => {
+        console.log("[axios.interceptors.response.use] response", response);
+        return response
+    },
+    function (error) {
+        console.log("[axios.interceptors.response.use] error", error);
+        const originalRequest = error.config;
+        if (error.response.status === Define.UNAUTHORIZED && originalRequest.url === '/rss/api/auths/token') {
+            console.log("[axios.interceptors.response.use] case 1");
+            //router.push('/login');
+            window.sessionStorage.clear();
+            window.location.replace('/rss');
+            return Promise.reject(error);
+        }
+        if (error.response.status === Define.UNAUTHORIZED && !originalRequest._retry) {
+            console.log("[axios.interceptors.response.use] case 2");
+            originalRequest._retry = true;
+            const refreshToken = sessionStorage.getItem("refreshToken");
+            return axios.post('/rss/api/auths/token', { "refreshToken": refreshToken })
+                .then(res => {
+                    //if (res.status === 201) {
+                    if (res.status === Define.OK) {
+                        sessionStorage.setItem("accessToken", res.data.accessToken);
+                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + sessionStorage.getItem("accessToken");
+                        return axios(originalRequest);
+                    }
+                })
+        }
+        return Promise.reject(error);
     }
-}
+);
 
 export const getCancelToken = axios.CancelToken;
 export let getCancel;

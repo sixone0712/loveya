@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
@@ -7,7 +8,7 @@ import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlanCollectionPlan;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
-import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,14 +41,16 @@ public class PlanController {
     private final CollectPlanner collector;
     private final CollectPlanService service;
     private final DownloadListService downloadService;
+    private final JwtService jwtService;
 
     @Autowired
     public PlanController(@NonNull HttpSession session, @NonNull CollectPlanner collector,
-                          @NonNull CollectPlanService service, @NonNull DownloadListService downloadListService) {
+                          @NonNull CollectPlanService service, @NonNull DownloadListService downloadListService, @NonNull JwtService jwtService) {
         this.session = session;
         this.collector = collector;
         this.service = service;
         this.downloadService = downloadListService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping
@@ -280,17 +282,8 @@ public class PlanController {
     private String createDownloadFilename(CollectPlanVo plan, DownloadListVo item) {
         // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
 
-        if(session==null) {
-            log.error("null session");
-            return null;
-        }
+        String username = jwtService.getCurAccTokenUserName();
 
-        SessionContext context = (SessionContext)session.getAttribute("context");
-        if(context==null || context.isAuthorized()==false) {
-            log.error("unauthorized download request");
-            return null;
-        }
-        String username = context.getUser().getUsername();
         if(username==null) {
             log.error("no username");
             return null;
@@ -370,12 +363,10 @@ public class PlanController {
         Date toDate = toDate(to);
         long interval = Long.valueOf(intervalStr);
 
-        int userId = 0;
-        if(session!=null) {
-            SessionContext context = (SessionContext) session.getAttribute("context");
-            if(context!=null) {
-                userId = context.getUser().getId();
-            }
+        int userId = jwtService.getCurAccTokenUserID();
+
+        if(userId == 0) {
+            log.error("no userId");
         }
 
         int id;

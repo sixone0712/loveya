@@ -14,4 +14,8 @@ public interface UserDao {
     boolean modify(UserVo user);
     boolean delete(UserVo user);
     boolean UpdateAccessDate(Map<String, Object> param);
+    boolean updateRefreshToken(Map<String, Object> param);
+    boolean getToken(String token);
+    boolean setToken(String token);
+    boolean cleanBlacklist();
 }

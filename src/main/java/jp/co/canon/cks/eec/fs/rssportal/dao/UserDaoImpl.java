@@ -76,4 +76,46 @@ public class UserDaoImpl implements UserDao {
         return true;
     }
 
+    @Override
+    public boolean updateRefreshToken(@NonNull Map<String, Object> param) {
+        if(!param.containsKey("id")) {
+            return false;
+        }
+
+        SqlSession session = sessionFactory.openSession();
+        session.update("users.updateRefreshToken", param);
+        session.close();
+        return true;
+    }
+
+    @Override
+    public boolean getToken(@NonNull String token) {
+        SqlSession session = sessionFactory.openSession();
+        int savedToken = session.selectOne("users.selectToken", token);
+        session.close();
+        return savedToken > 0;
+    }
+
+    @Override
+    public boolean setToken(@NonNull String token) {
+        SqlSession session = sessionFactory.openSession();
+        session.insert("users.insertToken", token);
+        session.close();
+        return true;
+    }
+
+    @Override
+    public boolean cleanBlacklist() {
+        SqlSession session = sessionFactory.openSession();
+        int result = session.delete("users.truncateBlacklist");
+
+        if (result > 0) {
+            session.commit();
+        } else {
+            session.rollback();
+        }
+
+        session.close();
+        return true;
+    }
 }

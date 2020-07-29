@@ -28,13 +28,15 @@ public class CollectPlanServiceImpl implements CollectPlanService {
 
     private final HttpSession session;
     private final CollectionPlanDao dao;
+    private final JwtService jwtService;
 
     private List<Runnable> notifiers;
 
     @Autowired
-    public CollectPlanServiceImpl(HttpSession session, CollectionPlanDao dao) {
+    public CollectPlanServiceImpl(HttpSession session, CollectionPlanDao dao, JwtService jwtService) {
         this.session = session;
         this.dao = dao;
+        this.jwtService = jwtService;
         notifiers = new ArrayList<>();
     }
 
@@ -56,11 +58,6 @@ public class CollectPlanServiceImpl implements CollectPlanService {
                        @NonNull String collectType,
                        @NonNull long interval,
                        @Nullable String description) {
-
-        SessionContext context = null;
-        if(session!=null) {
-            context = (SessionContext) session.getAttribute("context");
-        }
 
         int colType = toCollectTypeInteger(collectType);
         if (colType<0) {
@@ -90,12 +87,14 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         if(description!=null) {
             plan.setDescription(description);
         }
-        if(context==null) {
-            log.warn("sessionContext is null");
+        int loginId = jwtService.getCurAccTokenUserID();
+        if(userId == 0) {
+            log.error("userId of accessToken is null");
             plan.setOwner(0);
         } else {
-            plan.setOwner(context.getUser().getId());
+            plan.setOwner(loginId);
         }
+
         int planId = dao.addPlan(plan);
         //schedulePlan(plan);
         notifyChanges();
