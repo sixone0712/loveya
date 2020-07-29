@@ -73,7 +73,7 @@ class Login extends Component {
             console.log("isLoggedIn", isLoggedIn);
             console.log("errCode", errCode);
             if (isLoggedIn) {
-                this.props.history.replace(Define.PAGE_MANUAL);
+                this.props.history.replace(Define.PAGE_MANUAL_FTP);
             } else {
                 const msg = API.getErrorMsg(errCode);
                 if (msg.length > 0) {

@@ -52,7 +52,7 @@ class App extends Component {
                       await API.setLoginIsLoggedIn(this.props, true);
                       await API.setLoginUserName(this.props, userName);
                       await API.setLoginAuth(this.props, permission);
-                      this.onMovePage(Define.PAGE_MANUAL);
+                      this.onMovePage(Define.PAGE_MANUAL_FTP);
                   } else {
                       this.onMovePage(Define.PAGE_LOGIN);
                   }
@@ -78,9 +78,9 @@ class App extends Component {
                     <Switch>
                         <Route path={Define.PAGE_REFRESH} component={MoveRefreshPage}/>
                         <Route path={Define.PAGE_LOGIN} component={Login}/>
-                        <Route path={Define.PAGE_MANUAL} component={Manual}/>
-                        <Route path={Define.PAGE_MANUAL2} component={Manual2}/>
-                        <Route path={Define.PAGE_MANUAL3} component={Manual3} />
+                        <Route path={Define.PAGE_MANUAL_FTP} component={Manual}/>
+                        <Route path={Define.PAGE_MANUAL_VFTP_COMPAT} component={Manual2}/>
+                        <Route path={Define.PAGE_MANUAL_VFTP_SSS} component={Manual3} />
                         <Route path={Define.PAGE_AUTO} component={Auto}/>
                         <Route path={Define.PAGE_ADMIN_ACCOUNT} component={AccountList} />
                         <Route path={Define.PAGE_ADMIN_DL_HISTORY} component={DlHistory} />

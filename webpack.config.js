@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const banner = require('./banner');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = (env, options) => {
     //context: path.resolve(__dirname, 'src/main/webapp/js'),
@@ -66,6 +67,7 @@ module.exports = (env, options) => {
                     ? [ new MiniCssExtractPlugin({filename: `[name].[hash].css?`}) ]
                     : []
             ),
+            new Dotenv(),
         ]
     }
 

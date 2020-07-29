@@ -127,19 +127,20 @@ class RSSNavbar extends Component{
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
               <NavbarBrand className="custom-brand">Rapid Collector</NavbarBrand>
+              {/*<NavbarBrand className="custom-brand">{`Rapid Collector ${process.env.RSS_VERSION}`}</NavbarBrand>*/}
             <Nav className="mr-auto" navbar>
               <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
                 <DropdownToggle nav>Manual Download</DropdownToggle>
                 <DropdownMenu>
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL} onClick={() => this.handlePageChange("Manual")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL_FTP} onClick={() => this.handlePageChange("Manual")}>
                         FTP
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL2} onClick={() => this.handlePageChange("Manual")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL_VFTP_COMPAT} onClick={() => this.handlePageChange("Manual")}>
                         VFTP(COMPAT)
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem tag={RRNavLink} to={Define.PAGE_MANUAL3} onClick={() => this.handlePageChange("Manual")}>
+                    <DropdownItem tag={RRNavLink} to={Define.PAGE_REFRESH_MANUAL_VFTP_SSS} onClick={() => this.handlePageChange("Manual")}>
                         VFTP(SSS)
                     </DropdownItem>
                 </DropdownMenu>

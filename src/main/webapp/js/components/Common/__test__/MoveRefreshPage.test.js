@@ -64,7 +64,7 @@ describe('PAGE_AUTO_PLAN_EDIT', () => {
         const newProps = {
             ...initProps,
             location: {
-                search: `?target=${Define.PAGE_MANUAL}`
+                search: `?target=${Define.PAGE_MANUAL_FTP}`
             }
         }
         const wrapper = shallow(<MoveRefreshPage

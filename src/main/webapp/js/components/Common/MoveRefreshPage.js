@@ -29,9 +29,15 @@ class MoveRefreshPage extends Component {
             await viewListActions.viewCheckAllLogTypeList(false)
             await autoPlanActions.autoPlanInit();
             history.replace(Define.PAGE_AUTO_PLAN_ADD + "?type=" + type);
-        } else if (target.includes(Define.PAGE_MANUAL)) {
-            console.log("PAGE_MANUAL");
-            history.replace(Define.PAGE_MANUAL);
+        } else if (target.includes(Define.PAGE_MANUAL_FTP)) {
+            console.log("PAGE_MANUAL_FTP");
+            history.replace(Define.PAGE_MANUAL_FTP);
+        } else if (target.includes(Define.PAGE_MANUAL_VFTP_COMPAT)) {
+            console.log("PAGE_MANUAL_VFTP_COMPAT");
+            history.replace(Define.PAGE_MANUAL_VFTP_COMPAT);
+        } else if (target.includes(Define.PAGE_MANUAL_VFTP_SSS)) {
+            console.log("PAGE_MANUAL_VFTP_SSS");
+            history.replace(Define.PAGE_MANUAL_VFTP_SSS);
         } else if (target.includes(Define.PAGE_AUTO_STATUS)) {
             console.log("PAGE_AUTO_STATUS");
             history.replace(Define.PAGE_AUTO_STATUS);
