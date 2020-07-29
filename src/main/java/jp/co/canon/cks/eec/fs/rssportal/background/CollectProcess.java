@@ -2,7 +2,6 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
@@ -83,12 +82,12 @@ public class CollectProcess implements Runnable {
         PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
 
         setStatus(PlanStatus.collecting);
-        List<DownloadForm> downloadList = null;
+        List<DownloadRequestForm> downloadList = null;
         int totalFiles = 0;
 
         try {
             downloadList = createDownloadList(plan);
-            totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+            totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
         } catch (InterruptedException e) {
             printInfo("interrupt occurs on creating list");
             setStatus(lastStatus);
@@ -333,8 +332,8 @@ public class CollectProcess implements Runnable {
         return zipPath.toString();
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
-        List<DownloadForm> downloadList = new ArrayList<>();
+    private List<DownloadRequestForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
+        List<DownloadRequestForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
         String[] typeStrs = plan.getLogTypeStr().split(",");
@@ -369,9 +368,10 @@ public class CollectProcess implements Runnable {
                 Thread.sleep(1);
             }
         }
-        int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        int totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
         if(updateLastPoint) {
-            for(DownloadForm form: downloadList) {
+            for(DownloadRequestForm f: downloadList) {
+                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
                 for(FileInfo file: form.getFiles()) {
                     if (expectedLastPoint < file.getMilliTime())
                         expectedLastPoint = file.getMilliTime();

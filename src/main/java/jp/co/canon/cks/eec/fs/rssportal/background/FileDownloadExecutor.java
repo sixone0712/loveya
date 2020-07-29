@@ -1,8 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.*;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -30,7 +30,7 @@ public class FileDownloadExecutor {
     private final String desc;
     private final String downloadId;
     private Status status;
-    private final List<DownloadForm> downloadForms;
+    private final List<DownloadRequestForm> downloadForms;
     private final List<FileDownloadContext> downloadContexts;
     private final String baseDir;
 
@@ -50,7 +50,7 @@ public class FileDownloadExecutor {
             @NonNull final String ftpType,
             @Nullable final String desc,
             @NonNull final FileDownloader downloader,
-            @NonNull final List<DownloadForm> request,
+            @NonNull final List<DownloadRequestForm> request,
             boolean compress) {
 
         if(desc==null) {
@@ -81,10 +81,14 @@ public class FileDownloadExecutor {
     private void initialize() {
         setStatus(Status.init);
         log.info(downloadId+": initialize()");
-        for (DownloadForm form : downloadForms) {
-            if (form.getFtpType().equals("ftp") && form.getFiles().size() == 0)
-                continue;
-            FileDownloadContext context = new FileDownloadContext(ftpType, downloadId, form, baseDir);
+        for (DownloadRequestForm f : downloadForms) {
+            if(f instanceof FtpDownloadRequestForm) {
+                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
+                if (form.getFtpType().equals("ftp") && form.getFiles().size() == 0)
+                    continue;
+            }
+
+            FileDownloadContext context = new FileDownloadContext(ftpType, downloadId, f, baseDir);
             context.setConnector(connector);
             switch (ftpType) {
                 default :
@@ -299,11 +303,12 @@ public class FileDownloadExecutor {
         log.info("    .ReplaceFileForSameFileName"+attrReplaceFileForSameFileName);
         log.info("path.base="+baseDir);
         log.info("download");
-        for(DownloadForm form: downloadForms) {
-            if(form.getCommand()!=null) {
-                log.info("    "+form.getTool()+" / "+form.getCommand());
+        for(DownloadRequestForm form: downloadForms) {
+            if(form instanceof VFtpCompatDownloadRequestForm) {
+                log.info("    "+form.getMachine()+" / "+((VFtpCompatDownloadRequestForm)form).getCommand());
             } else {
-                log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
+                log.info("    " + form.getMachine() + " / " + ((FtpDownloadRequestForm)form).getCategoryType()
+                        + " (" + ((FtpDownloadRequestForm)form).getFiles().size() + " files)");
                 /*for(FileInfo f:form.getFiles()) {
                     log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
                 }*/
@@ -360,7 +365,7 @@ public class FileDownloadExecutor {
 
     public List<String> getFabs() {
         List<String> fabs = new ArrayList<>();
-        for(DownloadForm form: downloadForms) {
+        for(DownloadRequestForm form: downloadForms) {
             String fab = form.getFab();
             if(!fabs.contains(fab))
                 fabs.add(fab);

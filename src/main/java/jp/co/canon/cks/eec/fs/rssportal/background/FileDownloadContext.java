@@ -2,7 +2,6 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,10 +19,10 @@ public class FileDownloadContext {
 
     private final String ftpType;
     private final String id;
-    private final String system;
+    //private final String system;
     private final String tool;
     //private String user;
-    private String comment;
+    //private String comment;
     private String logType;
     private String logTypeStr;
 
@@ -32,7 +31,7 @@ public class FileDownloadContext {
     private long[] fileSizes;
     private Calendar[] fileDates;
 
-    private final DownloadForm downloadForm;
+    private final DownloadRequestForm downloadForm;
 
     private FileServiceManageConnector connector;
 
@@ -56,34 +55,35 @@ public class FileDownloadContext {
 
     private long downloadFiles;
 
-    public FileDownloadContext(@NonNull String ftpType, @NonNull String id, @NonNull DownloadForm form, @NonNull String baseDir) {
+    public FileDownloadContext(@NonNull String ftpType, @NonNull String id, @NonNull DownloadRequestForm form, @NonNull String baseDir) {
 
         this.ftpType = ftpType;
         this.downloadForm = form;
         this.id = id;
-        this.system = form.getSystem();
-        this.tool = form.getTool();
-        this.comment = "";
+        //this.system = form.getSystem();
+        this.tool = form.getMachine();
+        //this.comment = "";
 
         if(ftpType.equals("ftp")) {
+            FtpDownloadRequestForm ftp = (FtpDownloadRequestForm)form;
             // When logs place in a sub-directory not the log root,
             // logType is possible to include sub-directory information.
-            String[] split = form.getLogType().split("/");
+            String[] split = ftp.getCategoryType().split("/");
             if (split.length == 1) {
-                this.logType = form.getLogType();
+                this.logType = ftp.getCategoryType();
             } else {
                 this.logType = split[0];
             }
-            this.logTypeStr = form.getLogTypeStr();
+            this.logTypeStr = ftp.getCategoryName();
             //this.user = "eecAdmin";
 
-            files = form.getFiles().size();
+            files = ftp.getFiles().size();
             fileNames = new String[files];
             fileSizes = new long[files];
             fileDates = new Calendar[files];
 
             for (int i = 0; i < files; ++i) {
-                FileInfo fileInfo = form.getFiles().get(i);
+                FileInfo fileInfo = ftp.getFiles().get(i);
                 fileNames[i] = fileInfo.getName();
                 fileSizes[i] = fileInfo.getSize();
                 fileDates[i] = convertStringToCalendar(fileInfo.getDate());
@@ -102,19 +102,21 @@ public class FileDownloadContext {
             this.outPath = path.toString();
 
         } else if(ftpType.equals("vftp-compat")) {
+            VFtpCompatDownloadRequestForm compat = (VFtpCompatDownloadRequestForm) form;
             fileNames = new String[1];
             fileSizes = new long[1];
             fileDates = new Calendar[1];
-            command = form.getCommand();
-            fileNames[0] = form.getCommand();
+            command = compat.getCommand();
+            fileNames[0] = compat.getCommand();
             fileSizes[0] = 0;
             fileDates[0] = Calendar.getInstance();
             fileDates[0].setTimeInMillis(System.currentTimeMillis());
 
             Path path = Paths.get(baseDir, tool);
             this.outPath = path.toString();
-        } else {
-            // TBD
+        } else if(ftpType.equals("vftp-sss")){
+            VFtpSssDownloadRequestForm sss = (VFtpSssDownloadRequestForm) form;
+            // Todo
         }
 
         downloadFiles = 0;
@@ -163,17 +165,17 @@ public class FileDownloadContext {
         return rootDir;
     }
 
-    public String getSystem() {
+    /*public String getSystem() {
         return system;
-    }
+    }*/
 
     public String getTool() {
         return tool;
     }
 
-    public String getComment() {
+    /*public String getComment() {
         return comment;
-    }
+    }*/
 
     /*public String getUser() {
         return user;

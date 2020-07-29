@@ -1,12 +1,9 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpCompatDownloadRequestResponse;
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.ckbs.eec.fs.manage.service.MachineList;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -63,7 +60,7 @@ class FileDownloadExecutorTest {
         assertNotNull(machine);
 
         List list = new ArrayList();
-        list.add(new DownloadForm("vftp-compat", machine.getMachineName(), "AABBCC_DDDD"));
+        list.add(new VFtpCompatDownloadRequestForm("Fab1", machine.getMachineName(), "AABBCC_DDDD"));
         FileDownloadExecutor e = new FileDownloadExecutor("vftp-compat", "test", downloader, list, false);
         e.start();
 
