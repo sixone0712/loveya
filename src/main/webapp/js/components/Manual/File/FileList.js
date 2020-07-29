@@ -509,10 +509,10 @@ class FileList extends Component {
                           <span className={this.sortIconRender("fileDate")}>➜</span>
                         </span>
                       </th>
-                      <th onClick={() => this.handleThClick("sizeKB")}>
+                      <th onClick={() => this.handleThClick("fileSize")}>
                         <span className="sortLabel-root">
                           Size
-                          <span className={this.sortIconRender("sizeKB")}>➜</span>
+                          <span className={this.sortIconRender("fileSize")}>➜</span>
                         </span>
                       </th>
                     </tr>
@@ -554,7 +554,7 @@ class FileList extends Component {
                           <td>{file.logName}</td>
                           <td>{convFileName}</td>
                           <td>{convFileDate}</td>
-                          <td>{file.sizeKB}</td>
+                          <td>{API.bytesToSize(file.fileSize)}</td>
                         </tr>
                     );
                   })}

@@ -3,7 +3,6 @@ import {fromJS, List, Map} from 'immutable';
 import {pender} from 'redux-pender';
 import services from "../services";
 import moment from "moment";
-import * as  API from "../api";
 
 const SEARCH_SET_INIT_ALL_LIST = 'searchList/SEARCH_SET_INIT_ALL_LIST';
 const SEARCH_SET_REQUEST_LIST= 'searchList/SEARCH_SET_REQUEST_LIST';
@@ -65,7 +64,6 @@ const initialState = Map({
             structId: "",
             targetName: "",
             logName: "",
-            sizeKB: 0,
             checked: false
 		})
     ]),
@@ -113,7 +111,6 @@ export default handleActions({
                         filePath: list.filePath,
                         //fileStatus: list.fileStatus,  //Not currently in use
                         //file: list.file,  //Not currently in use
-                        sizeKB: API.bytesToSize(list.fileSize),
                         checked: true
                     }
                 });
