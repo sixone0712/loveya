@@ -112,8 +112,10 @@ public class PlanManager extends Thread {
         killList = new ArrayList<>();
         List<CollectPlanVo> plans = planDao.findAll();
         for(CollectPlanVo plan: plans) {
-            collects.add(new CollectProcess(this, plan, planDao, downloader, log));
-            log.info(plan.toString());
+            if(!plan.getLastStatus().equals("completed")) {
+                collects.add(new CollectProcess(this, plan, planDao, downloader, log));
+                log.info(plan.toString());
+            }
         }
         inited = true;
     }
