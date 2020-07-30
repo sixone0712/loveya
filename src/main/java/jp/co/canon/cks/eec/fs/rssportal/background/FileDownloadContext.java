@@ -53,6 +53,9 @@ public class FileDownloadContext {
     @Getter
     private String command;
 
+    @Getter
+    private String directory;
+
     private long downloadFiles;
 
     public FileDownloadContext(@NonNull String ftpType, @NonNull String id, @NonNull DownloadRequestForm form, @NonNull String baseDir) {
@@ -116,7 +119,23 @@ public class FileDownloadContext {
             this.outPath = path.toString();
         } else if(ftpType.equals("vftp-sss")){
             VFtpSssDownloadRequestForm sss = (VFtpSssDownloadRequestForm) form;
-            // Todo
+
+            files = sss.getFiles().size();
+            fileNames = new String[files];
+            fileSizes = new long[files];
+            fileDates = new Calendar[files];
+
+            directory = sss.getDirectory();
+
+            for(int i=0; i<sss.getFiles().size(); ++i) {
+                FileInfo file = sss.getFiles().get(i);
+                fileNames[i] = file.getName();
+                fileSizes[i] = file.getSize();
+                fileDates[i] = null;
+            }
+
+            Path path = Paths.get(baseDir, tool, directory);
+            outPath = path.toString();
         }
 
         downloadFiles = 0;

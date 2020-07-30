@@ -96,6 +96,7 @@ public class FileDownloadExecutor {
                     setStatus(Status.error);
                     return;
                 case "ftp":
+                case "vftp-sss":
                     context.setAchieve(true);
                     context.setAchieveDecompress(true);
                     break;
@@ -208,8 +209,10 @@ public class FileDownloadExecutor {
                                 handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
                                 break;
                             case "vftp-compat":
-                            case "vftp-sss":    // TBD
                                 handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
+                                break;
+                            case "vftp-sss":
+                                handler = new VFtpSssFileDownloadHandler(connector, context.getTool(), context.getDirectory(), context.getFileNames());
                                 break;
 
                         }
@@ -305,10 +308,13 @@ public class FileDownloadExecutor {
         log.info("download");
         for(DownloadRequestForm form: downloadForms) {
             if(form instanceof VFtpCompatDownloadRequestForm) {
-                log.info("    "+form.getMachine()+" / "+((VFtpCompatDownloadRequestForm)form).getCommand());
+                log.info("    " + form.getMachine() + " / " + ((VFtpCompatDownloadRequestForm) form).getCommand());
+            } else if(form instanceof VFtpSssDownloadRequestForm) {
+                log.info("    " + form.getMachine() + " / " + ((VFtpSssDownloadRequestForm) form).getDirectory() +
+                        " ("+((VFtpSssDownloadRequestForm)form).getFiles().size()+" files)");
             } else {
-                log.info("    " + form.getMachine() + " / " + ((FtpDownloadRequestForm)form).getCategoryType()
-                        + " (" + ((FtpDownloadRequestForm)form).getFiles().size() + " files)");
+                log.info("    " + form.getMachine() + " / " + ((FtpDownloadRequestForm)form).getCategoryType() +
+                        " (" + ((FtpDownloadRequestForm)form).getFiles().size() + " files)");
                 /*for(FileInfo f:form.getFiles()) {
                     log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
                 }*/

@@ -6,6 +6,7 @@ import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssDownloadRequestRe
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssListRequestResponse;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileInfo;
@@ -125,14 +126,65 @@ class FileDownloadExecutorTest {
                     connector.getVFtpSssDownloadRequest(machine.getMachineName(), request.getRequestNo());
             assertNotNull(listResponse);
             assertTrue(listResponse.getErrorMessage()==null);
-            assertTrue(listResponse.getRequest().getRequestNo().equals(request.getRequestNo()));
+            VFtpSssDownloadRequest downloadRequest = listResponse.getRequest();
+            assertTrue(downloadRequest.getRequestNo().equals(request.getRequestNo()));
 
-            if(listResponse.getRequest().getStatus()==VFtpSssDownloadRequest.Status.EXECUTED) {
-                log.info("vFtpSssBasicTest: downloaded achieve=" + listResponse.getRequest().getArchiveFilePath());
+            if(downloadRequest.getStatus()==VFtpSssDownloadRequest.Status.ERROR) {
+                log.info("vFtpSssBasicTest: download error");
+                break;
+            }
+
+            if(downloadRequest.getStatus()==VFtpSssDownloadRequest.Status.EXECUTED) {
+                log.info("vFtpSssBasicTest: downloaded achieve=" + downloadRequest.getArchiveFilePath());
                 break;
             }
         }
 
+    }
+
+    @Test
+    @Timeout(360)
+    void vFtpSssBasicTest2() throws InterruptedException {
+        log.info("vFtpSssBasicTest2: start");
+        assertNotNull(connectorFactory);
+        FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
+        MachineList machines = connector.getMachineList();
+        assertNotNull(machines);
+        assertTrue(machines.getMachineCount()>0);
+        Machine machine = machines.getMachines()[0];
+        log.info("vFtpSssBasicTest2: machine="+machine.getMachineName());
+
+        final String directory = "aabbccdd";
+
+        VFtpSssListRequestResponse fileResponse = connector.createVFtpSssListRequest(machine.getMachineName(), directory);
+        assertNotNull(fileResponse);
+        assertTrue(fileResponse.getErrorMessage()==null);
+        VFtpSssListRequest fileRequest = fileResponse.getRequest();
+        assertTrue(fileRequest.getFileList().length>0);
+
+
+        VFtpSssDownloadRequestForm form =
+                new VFtpSssDownloadRequestForm(machine.getFabName(), machine.getMachineName(), directory);
+        for(VFtpFileInfo file: fileRequest.getFileList()) {
+            if(!file.getFileName().startsWith("###")) {
+                form.addFile(file.getFileName(), file.getFileSize());
+            }
+        }
+
+        log.info("vFtpSssBasicTest2: request files="+form.getFiles().size());
+
+        List<DownloadRequestForm> list = new ArrayList<>();
+        list.add(form);
+
+        FileDownloadExecutor e = new FileDownloadExecutor("vftp-sss", "test", downloader, list, true);
+        e.start();
+
+        while(!e.getStatus().equals("complete")) {
+            Thread.sleep(3000);
+            log.info("vFtpSssBasicTest2: waiting download files="+e.getDownloadFiles());
+        }
+        log.info("vFtpSssBasicTest2: download complete");
+        log.info("vFtpSssBasicTest2: download path="+e.getDownloadPath());
     }
 
 
@@ -158,11 +210,13 @@ class FileDownloadExecutorTest {
             assertTrue(files.getList().length>0);
             List<String> fileNameList = new ArrayList<>();
             for(FileInfo file:files.getList()) {
-                fileNameList.add(file.getFilename());
+                if(!file.getFilename().startsWith("###FileOverLimit")) {
+                    fileNameList.add(file.getFilename());
+                }
             }
             String[] fileNameArray = new String[fileNameList.size()];
             fileNameArray = fileNameList.toArray(fileNameArray);
-            log.info("ftpBasicTest: request files="+files.getList().length);
+            log.info("ftpBasicTest: request files="+fileNameArray.length);
             FtpDownloadRequestResponse requestResponse = connector.createFtpDownloadRequest(machine.getMachineName(),
                     category.getCategoryCode(), true, fileNameArray);
             assertNotNull(requestResponse);
@@ -226,7 +280,9 @@ class FileDownloadExecutorTest {
 
         //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
         for(FileInfo file: files.getList()) {
-            form.addFile(file.getFilename(), file.getSize(), file.getTimestamp());
+            if(!file.getFilename().startsWith("###FileOverLimit")) {
+                form.addFile(file.getFilename(), file.getSize(), file.getTimestamp());
+            }
         }
         list.add(form);
 
@@ -235,7 +291,7 @@ class FileDownloadExecutorTest {
         e.start();
 
         while(!e.getStatus().equals("complete")) {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             log.info("ftpBasicTest2: waiting download files="+e.getDownloadFiles());
         }
         log.info("ftpBasicTest2: download complete");
