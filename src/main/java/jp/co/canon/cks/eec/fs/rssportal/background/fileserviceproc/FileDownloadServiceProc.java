@@ -66,33 +66,33 @@ public class FileDownloadServiceProc extends Thread {
     }
 
     private void register() {
-        log.info("register()");
+        log.info("[pipe#register] register()");
         String requestNo = handler.createDownloadRequest();
         if(requestNo==null) {
-            log.error("faield to create vftp(compat) request");
+            log.error("[pipe#register] faield to create vftp(compat) request");
             return;
         }
         context.setRequestNo(requestNo);
-        log.info("request-no="+requestNo);
+        log.info("[pipe#register] request-no="+requestNo);
     }
 
     private void download() {
-        log.info("download  machine="+context.getTool()+" category="+context.getLogType());
+        log.info("[pipe#download] download  machine="+context.getTool()+" category="+context.getLogType());
         while(true) {
             FileDownloadInfo info = handler.getDownloadedFiles();
             if(info.isError()) {
-                log.error("download error occurs");
+                log.error("[pipe#download] download error occurs");
                 status = Status.Error;
                 return;
             }
             if(info.isFinish()) {
-                log.info("download completed");
+                log.info("[pipe#download] download completed");
                 break;
             }
             try {
                 sleep(500);
             } catch (InterruptedException e) {
-                log.info("downloading interrupt occurs");
+                log.info("[pipe#download] downloading interrupt occurs");
                 handler.cancelDownloadRequest();
                 status = Status.Error;
             }
@@ -100,16 +100,16 @@ public class FileDownloadServiceProc extends Thread {
 
         String ftpAddress = handler.getFtpAddress();
         if(ftpAddress==null) {
-            log.error("no ftp address error");
+            log.error("[pipe#download] no ftp address error");
             status = Status.Error;
             return;
         }
-        log.info("ftp-address="+ftpAddress);
+        log.info("[pipe#download] ftp-address="+ftpAddress);
         context.setAchieveUrl(ftpAddress);
     }
 
     private void transfer() {
-        log.info("transfer()");
+        log.info("[pipe#transfer] transfer()");
         CustomURL address = context.getAchieveUrl();
         FtpWorker worker = new FtpWorker(address.getHost(), address.getPort(), address.getLoginUser(),
                 address.getLoginPassword(), address.getFtpMode());
@@ -123,7 +123,7 @@ public class FileDownloadServiceProc extends Thread {
     }
 
     private void decompress() {
-        log.info("decompress [achieve="+context.getLocalFilePath()+")");
+        log.info("[pipe#decompress] decompress [achieve="+context.getLocalFilePath()+")");
         if (!context.getLocalFilePath().endsWith(".zip")) {
             log.error("no achieve file");
             status = Status.Error;
@@ -132,7 +132,7 @@ public class FileDownloadServiceProc extends Thread {
 
         File zip = new File(context.getLocalFilePath());
         if(!zip.exists() || zip.isDirectory()) {
-            log.error("wrong achieve file type  "+zip.toString());
+            log.error("[pipe#decompress] wrong achieve file type  "+zip.toString());
             status = Status.Error;
             return;
         }
@@ -163,7 +163,7 @@ public class FileDownloadServiceProc extends Thread {
                 entry = zis.getNextEntry();
             }
         } catch (IOException e) {
-            log.error("extraction failed");
+            log.error("[pipe#decompress] extraction failed");
             status = Status.Error;
             return;
         }

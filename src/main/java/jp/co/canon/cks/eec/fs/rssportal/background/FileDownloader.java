@@ -161,7 +161,7 @@ public class FileDownloader extends Thread {
             to = Calendar.getInstance();
             to.set(3000, 12,31);
         }
-        FtpDownloadRequestForm form = new FtpDownloadRequestForm("FS_P#A", fab, tool, type, typeStr);
+        FtpDownloadRequestForm form = new FtpDownloadRequestForm(fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
         while(retry<fileServiceRetryCount) {

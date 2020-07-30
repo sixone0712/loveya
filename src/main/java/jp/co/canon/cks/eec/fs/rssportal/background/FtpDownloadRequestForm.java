@@ -15,7 +15,7 @@ public class FtpDownloadRequestForm extends DownloadRequestForm {
     private String directory;
     private List<FileInfo> files;
 
-    public FtpDownloadRequestForm(String system, String fab, String machine, String categoryType, String categoryName) {
+    public FtpDownloadRequestForm(String fab, String machine, String categoryType, String categoryName) {
         super("ftp", fab, machine);
         this.categoryType = categoryType;
         this.categoryName = categoryName;

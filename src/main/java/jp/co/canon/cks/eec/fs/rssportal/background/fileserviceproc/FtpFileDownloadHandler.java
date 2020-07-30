@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class FtpFileDownloadHandler implements FileDownloadHandler {
 
+    private Log log = LogFactory.getLog(getClass());
     private final FileServiceManageConnector connector;
     private final String machine;
     private final String category;
@@ -31,6 +32,7 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
         FtpDownloadRequestResponse response = connector.createFtpDownloadRequest(
                 machine, category, achieve, files);
         if(response.getErrorCode()!=null) {
+            log.error("createDownloadRequest: error  "+response.getErrorMessage());
             return null;
         }
         request = response.getRequestNo();
@@ -39,14 +41,17 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
 
     @Override
     public void cancelDownloadRequest() {
-        if(request!=null)
+        if(request!=null) {
             connector.cancelAndDeleteRequest(machine, request);
+        }
     }
 
     @Override
     public FileDownloadInfo getDownloadedFiles() {
-        if(request==null)
+        if(request==null) {
+            log.error("getDownloadedFiles: null request");
             return null;
+        }
         FtpDownloadRequest download = getDownloadRequest();
         if(download!=null) {
             FileDownloadInfo info = new FileDownloadInfo();
@@ -62,8 +67,10 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
             info.setDownloadBytes(downloadSize);
             info.setRequestFiles(download.getTotalFileCount());
             info.setDownloadFiles(download.getDownloadedFileCount());
+            log.info("### "+download.getDownloadedFileCount()+"/"+download.getTotalFileCount());
 
             if(download.getStatus()==FtpDownloadRequest.Status.ERROR) {
+                log.error("getDownloadedFiles: error "+download.getErrorMessage());
                 info.setError(true);
             } else if(download.getStatus()==FtpDownloadRequest.Status.EXECUTED) {
                 info.setFinish(true);
@@ -75,8 +82,10 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
 
     @Override
     public String getFtpAddress() {
-        if(request==null)
+        if(request==null) {
+            log.error("getFtpAddress: null request");
             return null;
+        }
         FtpDownloadRequest download = getDownloadRequest();
         if(download!=null)
             return download.getArchiveFilePath();
@@ -88,12 +97,17 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
             return null;
         FtpDownloadRequestListResponse response = connector.getFtpDownloadRequestList(machine, request);
         if(response!=null) {
+            if(response.getErrorCode()!=null) {
+                log.error("getDownloadRequest: error  "+response.getErrorCode());
+                return null;
+            }
             for (FtpDownloadRequest download : response.getRequestList()) {
                 if (download.getRequestNo().equals(request)) {
                     return download;
                 }
             }
         }
+        log.error("getDownloadRequest: failed to get response");
         return null;
     }
 }

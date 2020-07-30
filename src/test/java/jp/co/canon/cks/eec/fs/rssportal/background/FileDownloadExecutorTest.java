@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,7 +138,7 @@ class FileDownloadExecutorTest {
 
     @Test
     @Timeout(360)
-    void ftpBasicTest() throws InterruptedException {
+    void ftpBasicTest1() throws InterruptedException {
         log.info("ftpBasicTest: start");
         assertNotNull(connectorFactory);
         FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
@@ -180,6 +182,10 @@ class FileDownloadExecutorTest {
                 assertTrue(requestResponse.getRequestNo().equals(request.getRequestNo()));
 
                 log.info("ftpBasicTest: download files="+request.getDownloadedFileCount());
+                if(request.getErrorMessage()!=null) {
+                    log.info("ftpBasicTest: download error occurs  "+request.getErrorMessage());
+                    break;
+                }
                 if(request.getStatus()==FtpDownloadRequest.Status.EXECUTED) {
                     log.info("ftpBasicTest: downloaded achieve=" + request.getArchiveFilePath());
                     break;
@@ -187,7 +193,53 @@ class FileDownloadExecutorTest {
             }
             break;
         }
+    }
 
+    @Test
+    @Timeout(360)
+    void ftpBasicTest2() throws InterruptedException, ParseException {
+        log.info("ftpBasicTest2: start");
+        assertNotNull(connectorFactory);
+        assertNotNull(fileServiceAddress);
+        FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
+
+        MachineList machines = connector.getMachineList();
+        assertTrue(machines.getMachineCount()>0);
+        Machine machine = machines.getMachines()[0];
+        assertNotNull(machine);
+
+        log.info("ftpBasicTest2: machine="+machine.getMachineName());
+        CategoryList categories = connector.getCategoryList(machine.getMachineName());
+        assertTrue(categories.getCategories().length>0);
+
+        Category category = categories.getCategories()[1];
+        log.info("ftpBasicTest2: category="+category.getCategoryCode());
+
+        List<DownloadRequestForm> list = new ArrayList<>();
+        FtpDownloadRequestForm form = new FtpDownloadRequestForm("Fab1", machine.getMachineName(),
+                category.getCategoryCode(), category.getCategoryName());
+
+        LogFileList files = connector.getFtpFileList(
+                machine.getMachineName(), category.getCategoryCode(), "20200101000000", "20201231000000",
+                null, null);
+        assertTrue(files.getList().length>0);
+
+        //SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        for(FileInfo file: files.getList()) {
+            form.addFile(file.getFilename(), file.getSize(), file.getTimestamp());
+        }
+        list.add(form);
+
+        log.info("ftpBasicTest2: request files="+form.getFiles().size());
+        FileDownloadExecutor e = new FileDownloadExecutor("ftp", "test", downloader, list, true);
+        e.start();
+
+        while(!e.getStatus().equals("complete")) {
+            Thread.sleep(1000);
+            log.info("ftpBasicTest2: waiting download files="+e.getDownloadFiles());
+        }
+        log.info("ftpBasicTest2: download complete");
+        log.info("ftpBasicTest2: download path="+e.getDownloadPath());
     }
 
 

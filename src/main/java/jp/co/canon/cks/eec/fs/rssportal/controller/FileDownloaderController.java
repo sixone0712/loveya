@@ -474,11 +474,11 @@ public class FileDownloaderController {
             if(submap.containsKey(logType)) {
                 form = submap.get(logType);
             } else {
-                form = new FtpDownloadRequestForm("FS_P#M", fab, tool, logType, logTypeStr);
+                form = new FtpDownloadRequestForm(fab, tool, logType, logTypeStr);
                 submap.put(logType, form);
             }
         } else {
-            form = new FtpDownloadRequestForm("FS_P#M", fab, tool, logType, logTypeStr);
+            form = new FtpDownloadRequestForm(fab, tool, logType, logTypeStr);
             Map<String, FtpDownloadRequestForm> submap = new HashMap<>();
             submap.put(logType, form);
             map.put(tool, submap);

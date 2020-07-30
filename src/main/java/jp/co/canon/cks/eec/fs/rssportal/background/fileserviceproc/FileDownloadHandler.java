@@ -8,5 +8,4 @@ public interface FileDownloadHandler {
     void cancelDownloadRequest();
     FileDownloadInfo getDownloadedFiles();
     String getFtpAddress();
-
 }
