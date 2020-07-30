@@ -5,6 +5,7 @@
 
     <sql id="selectFields">
         id,
+        plantype as planType,
         planname,
         fab,
         tool,
@@ -24,6 +25,8 @@
         tslastpoint as lastPoint,
         laststatus as detail,
         laststatus as lastStatus,
+        command,
+        directory,
         case when laststatus='halted' or laststatus='completed' or stop=true then 'stop' else 'running' end as status,
         case when collecttype=1 then 'cycle' else 'continuous' end as collectTypeStr
     </sql>
@@ -68,6 +71,7 @@
         </selectKey>
         insert into rsss."collection_plan" (
             id,
+            plantype,
             planname,
             fab,
             tool,
@@ -82,9 +86,12 @@
             tsend,
             ownerid,
             tsnext,
-            tslastpoint
+            tslastpoint,
+            command,
+            directory
         ) values (
             #{id},
+            #{planType},
             #{planName},
             #{fab},
             #{tool},
@@ -99,7 +106,9 @@
             #{end},
             #{owner},
             #{nextAction},
-            #{lastPoint}
+            #{lastPoint},
+            #{command},
+            #{directory}
         )
     </insert>
 
