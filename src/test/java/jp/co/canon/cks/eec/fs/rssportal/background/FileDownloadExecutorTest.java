@@ -1,7 +1,18 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestListResponse;
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.FtpDownloadRequestResponse;
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssDownloadRequestResponse;
+import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpSssListRequestResponse;
+import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
+import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
+import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
+import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileInfo;
+import jp.co.canon.ckbs.eec.fs.configuration.Category;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
+import jp.co.canon.ckbs.eec.fs.manage.service.CategoryList;
 import jp.co.canon.ckbs.eec.fs.manage.service.MachineList;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
 import org.apache.commons.logging.Log;
@@ -70,6 +81,113 @@ class FileDownloadExecutorTest {
         }
         log.info("download complete");
         log.info("download path="+e.getDownloadPath());
+    }
+
+    @Test
+    @Timeout(360)
+    void vFtpSssBasicTest() throws InterruptedException {
+        log.info("vFtpSssBasicTest: start");
+        assertNotNull(connectorFactory);
+        FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
+        MachineList machines = connector.getMachineList();
+        assertNotNull(machines);
+        assertTrue(machines.getMachineCount()>0);
+        Machine machine = machines.getMachines()[0];
+        log.info("vFtpSssBasicTest: machine="+machine.getMachineName());
+
+        final String directory = "aabbccdd";
+
+        VFtpSssListRequestResponse fileResponse = connector.createVFtpSssListRequest(machine.getMachineName(), directory);
+        assertNotNull(fileResponse);
+        assertTrue(fileResponse.getErrorMessage()==null);
+        VFtpFileInfo[] files = fileResponse.getRequest().getFileList();
+        assertTrue(files.length>0);
+        String[] fileNames = new String[files.length];
+        for(int i=0; i<files.length; ++i) {
+            fileNames[i] = files[i].getFileName();
+        }
+
+        log.info("vFtpSssBasicTest: request files="+fileNames.length);
+        VFtpSssDownloadRequestResponse downloadResponse =
+                connector.createVFtpSssDownloadRequest(machine.getMachineName(), directory, fileNames, true);
+        assertNotNull(downloadResponse);
+        assertTrue(downloadResponse.getErrorMessage()==null);
+        VFtpSssDownloadRequest request = downloadResponse.getRequest();
+        log.info("vFtpSssBasicTest: requestNo="+request.getRequestNo());
+
+        log.info("vFtpSssBasicTest: waiting");
+        while (true) {
+            Thread.sleep(3000);
+
+            VFtpSssDownloadRequestResponse listResponse =
+                    connector.getVFtpSssDownloadRequest(machine.getMachineName(), request.getRequestNo());
+            assertNotNull(listResponse);
+            assertTrue(listResponse.getErrorMessage()==null);
+            assertTrue(listResponse.getRequest().getRequestNo().equals(request.getRequestNo()));
+
+            if(listResponse.getRequest().getStatus()==VFtpSssDownloadRequest.Status.EXECUTED) {
+                log.info("vFtpSssBasicTest: downloaded achieve=" + listResponse.getRequest().getArchiveFilePath());
+                break;
+            }
+        }
+
+    }
+
+
+    @Test
+    @Timeout(360)
+    void ftpBasicTest() throws InterruptedException {
+        log.info("ftpBasicTest: start");
+        assertNotNull(connectorFactory);
+        FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
+        MachineList machines = connector.getMachineList();
+        assertTrue(machines.getMachineCount()>0);
+
+        for(Machine machine: machines.getMachines()) {
+            log.info("ftpBasicTest: machine="+machine.getMachineName());
+            CategoryList categories = connector.getCategoryList(machine.getMachineName());
+            assertTrue(categories.getCategories().length>0);
+
+            Category category = categories.getCategories()[1];
+            log.info("ftpBasicTest: category="+category.getCategoryCode());
+            LogFileList files = connector.getFtpFileList(
+                    machine.getMachineName(), category.getCategoryCode(), "20200101000000", "20201231000000",
+                    null, null);
+            assertTrue(files.getList().length>0);
+            List<String> fileNameList = new ArrayList<>();
+            for(FileInfo file:files.getList()) {
+                fileNameList.add(file.getFilename());
+            }
+            String[] fileNameArray = new String[fileNameList.size()];
+            fileNameArray = fileNameList.toArray(fileNameArray);
+            log.info("ftpBasicTest: request files="+files.getList().length);
+            FtpDownloadRequestResponse requestResponse = connector.createFtpDownloadRequest(machine.getMachineName(),
+                    category.getCategoryCode(), true, fileNameArray);
+            assertNotNull(requestResponse);
+            assertTrue(requestResponse.getErrorCode()==null);
+            log.info("ftpBasicTest: requestNo="+requestResponse.getRequestNo());
+
+            log.info("ftpBasicTest: waiting");
+            while (true) {
+                Thread.sleep(3000);
+
+                FtpDownloadRequestListResponse listResponse =
+                        connector.getFtpDownloadRequestList(machine.getMachineName(), requestResponse.getRequestNo());
+                assertNotNull(listResponse);
+                assertTrue(listResponse.getErrorCode()==null);
+                assertTrue(listResponse.getRequestList().length>0);
+                FtpDownloadRequest request = listResponse.getRequestList()[0];
+                assertTrue(requestResponse.getRequestNo().equals(request.getRequestNo()));
+
+                log.info("ftpBasicTest: download files="+request.getDownloadedFileCount());
+                if(request.getStatus()==FtpDownloadRequest.Status.EXECUTED) {
+                    log.info("ftpBasicTest: downloaded achieve=" + request.getArchiveFilePath());
+                    break;
+                }
+            }
+            break;
+        }
+
     }
 
 
