@@ -161,6 +161,11 @@ public class FtpCommandExecutorThread implements Runnable{
         if (request.getStatus() == FtpDownloadRequest.Status.EXECUTING){
             request.setStatus(FtpDownloadRequest.Status.CANCEL);
             CommandExecutor proc = new CommandExecutor(workingDir);
+            try {
+                proc.execute(buff.toString());
+            } catch (Exception e){
+
+            }
             return true;
         }
         return false;
