@@ -175,7 +175,7 @@ public class FileDownloader extends Thread {
                         if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
                             continue;
                         }
-                        if(true || logFile.getType()=="D") {
+                        if(true || logFile.getType().equalsIgnoreCase("D")) {
                             long current = System.currentTimeMillis();
                             if(current>=from.getTimeInMillis() && current<=to.getTimeInMillis()) {
                                 if (!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {

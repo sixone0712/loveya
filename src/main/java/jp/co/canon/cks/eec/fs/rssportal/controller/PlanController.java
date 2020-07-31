@@ -403,15 +403,15 @@ public class PlanController {
         } else {
             switch (planType.toLowerCase()) {
                 case "ftp":
-                    id = service.modifyPlan(modifyPlanId, userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
+                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
                             type, interval, description);
                     break;
                 case "vftp_compat":
-                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, commands, collectStartDate, fromDate, toDate,
+                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, commands, collectStartDate, fromDate, toDate,
                             type, interval, description);
                     break;
                 case "vftp_sss":
-                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, directories, collectStartDate, fromDate, toDate,
+                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, directories, collectStartDate, fromDate, toDate,
                             type, interval, description);
                     break;
                 default:
