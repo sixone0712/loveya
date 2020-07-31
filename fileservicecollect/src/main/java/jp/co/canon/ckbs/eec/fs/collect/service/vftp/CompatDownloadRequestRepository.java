@@ -13,29 +13,20 @@ public class CompatDownloadRequestRepository {
     ObjectRepository<VFtpCompatDownloadRequest> requestObjectRepository;
     boolean stopPurgeThread = false;
 
-    public CompatDownloadRequestRepository(File requestDir, File downloadDir){
-        this.requestDir = requestDir;
+    public CompatDownloadRequestRepository(File downloadDir){
         this.downloadDir = downloadDir;
-        requestObjectRepository = new ObjectRepository<>(this.requestDir, VFtpCompatDownloadRequest.class);
+        requestObjectRepository = new ObjectRepository<>(this.downloadDir, VFtpCompatDownloadRequest.class);
+    }
 
-        Thread requestPurgeThread = new Thread(()->{
-            while(!stopPurgeThread){
-                deleteExpiredRequests();
-                try {
-                    Thread.sleep(60*60 * 1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        requestPurgeThread.start();
+    String getRequestFileName(String requestNo){
+        return String.format("%s/%s.json", requestNo, requestNo);
     }
 
     void deleteRequest(VFtpCompatDownloadRequest request){
         if (request == null){
             return;
         }
-        requestObjectRepository.delete(request.getRequestNo() + ".json");
+        requestObjectRepository.delete(getRequestFileName(request.getRequestNo()));
         try {
             FileUtils.deleteDirectory(new File(downloadDir, request.getRequestNo()));
         } catch (IOException e) {
@@ -43,30 +34,12 @@ public class CompatDownloadRequestRepository {
         }
     }
 
-    void deleteExpiredRequest(long baseTime, VFtpCompatDownloadRequest request){
-        if (request == null){
-            return;
-        }
-        if (request.getCompletedTime() < baseTime){
-            deleteRequest(request);
-        }
-    }
-
-    void deleteExpiredRequests(){
-        long baseTime = System.currentTimeMillis() - 24*60*60*1000;
-        File[] files = this.requestDir.listFiles();
-        for (File f : files){
-            VFtpCompatDownloadRequest request = requestObjectRepository.load(f);
-            deleteExpiredRequest(baseTime, request);
-        }
-    }
-
     public void save(VFtpCompatDownloadRequest request){
-        requestObjectRepository.save(request.getRequestNo() + ".json", request);
+        requestObjectRepository.save(getRequestFileName(request.getRequestNo()), request);
     }
 
     public VFtpCompatDownloadRequest get(String requestNo){
-        return requestObjectRepository.load(requestNo + ".json");
+        return requestObjectRepository.load(getRequestFileName(requestNo));
     }
 
     public void stop(){

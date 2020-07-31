@@ -36,7 +36,7 @@ public class FtpDownloadService {
 
     BlockingDeque<FtpDownloadRequest> mainQueue = new LinkedBlockingDeque<>();
     long lastRequestNumber = 0;
-    DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
+    DateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS");
     List<FtpCommandExecutorThread> commandExecutorThreadList = new ArrayList<>();
 
     @PostConstruct
