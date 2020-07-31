@@ -4,8 +4,9 @@ import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.background.DownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.background.FtpDownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.ftp.RSSFtpSearchRequest;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -278,8 +278,8 @@ public class FileDownloaderController {
         }
         param.forEach((key, value)->log.info("key="+key+"\nvalue="+value));
 
-        List<DownloadForm> requestList = new ArrayList<>();
-        Map<String, Map<String, DownloadForm>> map = new HashMap<>();
+        List<DownloadRequestForm> requestList = new ArrayList<>();
+        Map<String, Map<String, FtpDownloadRequestForm>> map = new HashMap<>();
         List<Map<String, Object>> downloadList = (List<Map<String, Object>>) param.get("lists");
 
         for(Map item: downloadList) {
@@ -451,7 +451,7 @@ public class FileDownloaderController {
     private void addDownloadItem(final Map map, String fab, String tool, String logType, String logTypeStr,
                                  String file, String size, String date) {
 
-        DownloadForm form;
+        FtpDownloadRequestForm form;
 
         // We have to consider sub-directories now.
         String[] paths = file.split("/");
@@ -462,16 +462,16 @@ public class FileDownloaderController {
         }
 
         if(map.containsKey(tool)) {
-            Map<String, DownloadForm> submap = (Map<String, DownloadForm>) map.get(tool);
+            Map<String, FtpDownloadRequestForm> submap = (Map<String, FtpDownloadRequestForm>) map.get(tool);
             if(submap.containsKey(logType)) {
                 form = submap.get(logType);
             } else {
-                form = new DownloadForm("FS_P#M", fab, tool, logType, logTypeStr);
+                form = new FtpDownloadRequestForm(fab, tool, logType, logTypeStr);
                 submap.put(logType, form);
             }
         } else {
-            form = new DownloadForm("FS_P#M", fab, tool, logType, logTypeStr);
-            Map<String, DownloadForm> submap = new HashMap<>();
+            form = new FtpDownloadRequestForm(fab, tool, logType, logTypeStr);
+            Map<String, FtpDownloadRequestForm> submap = new HashMap<>();
             submap.put(logType, form);
             map.put(tool, submap);
         }

@@ -12,6 +12,7 @@ public interface CollectPlanService {
 
     boolean isReady();
     int addPlan(
+            String planType,
             int userId,
             String planName,
             List<String> fabs,
@@ -24,6 +25,10 @@ public interface CollectPlanService {
             String collectType,
             long interval,
             String description);
+
+    int addPlan(String planType, int userId, String planName, List<String> fabs, List<String> tools,
+                List<String> commandsOrDirectories, Date collectStart, Date start, Date end, String collectType, long interval,
+                String description);
 
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);
@@ -66,5 +71,7 @@ public interface CollectPlanService {
     /**
      *
      */
-    int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description);
+    int modifyPlan(int planId, String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description);
+
+    int modifyPlan(int planId, String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> commandsOrDirectories, Date collectStart, Date start, Date end, String collectType, long interval, String description);
 }

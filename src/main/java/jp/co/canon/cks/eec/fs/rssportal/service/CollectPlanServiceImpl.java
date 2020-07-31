@@ -46,8 +46,8 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    public int addPlan(int userId,
-                       @NonNull String planName,
+    public int addPlan(
+            String planType, int userId, @NonNull String planName,
                        @NonNull List<String> fabs,
                        @NonNull List<String> tools,
                        @NonNull List<String> logTypes,
@@ -99,6 +99,11 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         //schedulePlan(plan);
         notifyChanges();
         return planId;
+    }
+
+    @Override
+    public int addPlan(String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> commandsOrDirectories, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+        return 0;
     }
 
     private int toCollectTypeInteger(@NonNull String collectType) {
@@ -281,7 +286,12 @@ public class CollectPlanServiceImpl implements CollectPlanService {
     }
 
     @Override
-    public int modifyPlan(int planId, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+    public int modifyPlan(int planId, String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> logTypes, List<String> logTypeStr, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
+        return 0;
+    }
+
+    @Override
+    public int modifyPlan(int planId, String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> commandsOrDirectories, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
         return 0;
     }
 

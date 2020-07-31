@@ -4,12 +4,6 @@ import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
-import jp.co.canon.cks.eec.fs.manage.FileInfoModel;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManageServiceLocator;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceUsedSOAP;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import javax.xml.rpc.ServiceException;
-import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -67,7 +59,7 @@ public class FileDownloader extends Thread {
         executorList = new HashMap<>();
     }
 
-    public String addRequest(@NonNull final List<DownloadForm> dlList) {
+    public String addRequest(@NonNull final List<DownloadRequestForm> dlList) {
         log.info("addRequest( request-size="+dlList.size()+")");
 
         FileDownloadExecutor executor = new FileDownloadExecutor("manual","", this, dlList, true);
@@ -156,7 +148,7 @@ public class FileDownloader extends Thread {
     }
 
     public boolean createDownloadFileList(
-            final List<DownloadForm> formList,
+            final List<DownloadRequestForm> formList,
             @NonNull String fab, @NonNull String tool,
             @NonNull String type, @NonNull String typeStr,
             @Nullable Calendar from, @Nullable Calendar to, String dir) throws InterruptedException {
@@ -169,7 +161,7 @@ public class FileDownloader extends Thread {
             to = Calendar.getInstance();
             to.set(3000, 12,31);
         }
-        DownloadForm form = new DownloadForm("FS_P#A", fab, tool, type, typeStr);
+        FtpDownloadRequestForm form = new FtpDownloadRequestForm(fab, tool, type, typeStr);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         int retry = 0;
         while(retry<fileServiceRetryCount) {
@@ -183,7 +175,7 @@ public class FileDownloader extends Thread {
                         if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
                             continue;
                         }
-                        if(true || logFile.getType()=="D") {
+                        if(true || logFile.getType().equalsIgnoreCase("D")) {
                             long current = System.currentTimeMillis();
                             if(current>=from.getTimeInMillis() && current<=to.getTimeInMillis()) {
                                 if (!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {

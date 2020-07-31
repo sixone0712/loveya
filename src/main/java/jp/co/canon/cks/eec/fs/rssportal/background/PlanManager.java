@@ -112,8 +112,10 @@ public class PlanManager extends Thread {
         killList = new ArrayList<>();
         List<CollectPlanVo> plans = planDao.findAll();
         for(CollectPlanVo plan: plans) {
-            collects.add(new CollectProcess(this, plan, planDao, downloader, log));
-            log.info(plan.toString());
+            if(!plan.getLastStatus().equals("completed")) {
+                createCollectProcess(plan);
+                log.info(plan.toString());
+            }
         }
         inited = true;
     }
@@ -150,8 +152,25 @@ public class PlanManager extends Thread {
     public int addPlan(CollectPlanVo plan) {
         int planId = planDao.addPlan(plan);
         CollectPlanVo added = planDao.find(planId);
-        collects.add(new CollectProcess(this, added, planDao, downloader, log));
+        createCollectProcess(added);
         return planId;
+    }
+
+    private void createCollectProcess(CollectPlanVo plan) {
+        CollectProcess p;
+        switch (plan.getPlanType()) {
+            case "ftp":
+                p = new FtpCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            case "vftp-compat":
+            case "vftp-sss": // TBD
+                p = new VFtpCompatCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            default:
+                log.error("createCollectProcess: undefined plan type "+plan.getPlanType());
+                return;
+        }
+        collects.add(p);
     }
 
     public List<CollectPlanVo> getPlans() {

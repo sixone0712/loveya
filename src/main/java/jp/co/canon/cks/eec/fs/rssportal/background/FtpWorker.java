@@ -11,7 +11,7 @@ import java.io.*;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
-public class FtpWorker {
+public class FtpWorker implements Closeable {
 
     private final Log log = LogFactory.getLog(getClass());
     private FTP ftp;
@@ -119,5 +119,4 @@ public class FtpWorker {
         log.trace("FtpWorker.close()");
         ftp.close();
     }
-
 }

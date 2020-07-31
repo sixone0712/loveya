@@ -1,8 +1,8 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
@@ -20,20 +20,26 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CollectProcess implements Runnable {
+public abstract class CollectProcess implements Runnable {
 
-    private CollectPlanVo plan;
+    protected CollectPlanVo plan;
 
     private final PlanManager manager;
     private final CollectionPlanDao dao;
     private final FileDownloader downloader;
-    private final Log log;
+    protected final Log log;
+    protected final FileServiceManageConnector connector;
     private final String planName;
 
     private CollectThread thread;
     private boolean threading;
     private Runnable notifyJobDone;
 
+    protected List<DownloadRequestForm> requestList;
+    protected List<String> failMachines;
+    protected long requestFiles;
+
+    protected long currentMillis;
     private Timestamp jobStartTime;
     private Timestamp jobDoneTime;
     private Timestamp syncTime;
@@ -42,12 +48,16 @@ public class CollectProcess implements Runnable {
 
     private long expectedLastPoint;
 
-    public CollectProcess(
-            PlanManager manager,
-            CollectPlanVo plan,
-            CollectionPlanDao dao,
-            FileDownloader downloader,
-            Log log ) {
+    /**
+     * This method has to set `requestList` and `requestFiles` on success.
+     * @throws CollectException
+     * @throws InterruptedException     When the manager(parent) asks stop operation.
+     */
+    abstract protected void createDownloadFileList() throws CollectException, InterruptedException;
+
+    public CollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader,
+                          Log log ) {
+
         this.plan = plan;
         this.manager = manager;
         this.dao = dao;
@@ -57,6 +67,7 @@ public class CollectProcess implements Runnable {
         this.threading = false;
         this.stop = plan.isStop();
         this.kill = false;
+        this.connector = downloader.getConnector();
         syncTime = getTimestamp();
         schedule();
         push();
@@ -64,15 +75,40 @@ public class CollectProcess implements Runnable {
 
     private void startProc() {
         printInfo("start collecting");
+        requestList = new ArrayList<>();
+        failMachines = new ArrayList<>();
+        requestFiles = 0;
+        currentMillis = System.currentTimeMillis();
         jobStartTime = getTimestamp();
         jobDoneTime = null;
     }
 
     private void doneProc() {
         printInfo("collecting done");
+        requestList = null;
+        failMachines = null;
+        requestFiles = -1;
         jobDoneTime = getTimestamp();
         threading = false;
         notifyJobDone.run();
+    }
+
+    private Runnable[] pipes = {this::_listupFiles, this::_download, this::_copyFiles, this::_compress};
+
+    private void _listupFiles() {
+
+    }
+
+    private void _download() {
+
+    }
+
+    private void _copyFiles() {
+
+    }
+
+    private void _compress() {
+
     }
 
     @Override
@@ -83,16 +119,18 @@ public class CollectProcess implements Runnable {
         PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
 
         setStatus(PlanStatus.collecting);
-        List<DownloadForm> downloadList = null;
-        int totalFiles = 0;
+        List<DownloadRequestForm> downloadList = null;
+        long totalFiles = 0;
 
         try {
-            downloadList = createDownloadList(plan);
-            totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+            createDownloadFileList();
         } catch (InterruptedException e) {
             printInfo("interrupt occurs on creating list");
             setStatus(lastStatus);
             doneProc();
+        } catch (CollectException e) {
+            log.info("failed to create file list");
+            e.printStackTrace();
         }
 
         if(totalFiles>0) {
@@ -142,7 +180,6 @@ public class CollectProcess implements Runnable {
         push();
         doneProc();
     }
-
 
     private void pull() {
         if(!isChangeable()) {
@@ -333,8 +370,8 @@ public class CollectProcess implements Runnable {
         return zipPath.toString();
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
-        List<DownloadForm> downloadList = new ArrayList<>();
+    private List<DownloadRequestForm> createDownloadListDeprecated(CollectPlanVo plan) throws InterruptedException {
+        List<DownloadRequestForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
         String[] typeStrs = plan.getLogTypeStr().split(",");
@@ -369,9 +406,10 @@ public class CollectProcess implements Runnable {
                 Thread.sleep(1);
             }
         }
-        int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        int totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
         if(updateLastPoint) {
-            for(DownloadForm form: downloadList) {
+            for(DownloadRequestForm f: downloadList) {
+                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
                 for(FileInfo file: form.getFiles()) {
                     if (expectedLastPoint < file.getMilliTime())
                         expectedLastPoint = file.getMilliTime();
