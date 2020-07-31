@@ -111,7 +111,6 @@ public class FtpCommandExecutorThread implements Runnable{
             }
             request.setStatus(FtpDownloadRequest.Status.EXECUTING);
             setCurrentRequest(request);
-            downloadFileRepository.writeRequest(request);
 
             callCollectCommand(request);
 
