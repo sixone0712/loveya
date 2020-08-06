@@ -39,6 +39,9 @@ public abstract class CollectProcess implements Runnable {
     protected List<String> failMachines;
     protected long requestFiles;
 
+    private String downloadId;
+    private long updatedFiles;
+
     protected long currentMillis;
     private Timestamp jobStartTime;
     private Timestamp jobDoneTime;
@@ -78,6 +81,8 @@ public abstract class CollectProcess implements Runnable {
         requestList = new ArrayList<>();
         failMachines = new ArrayList<>();
         requestFiles = 0;
+        downloadId = null;
+        updatedFiles = 0;
         currentMillis = System.currentTimeMillis();
         jobStartTime = getTimestamp();
         jobDoneTime = null;
@@ -93,28 +98,113 @@ public abstract class CollectProcess implements Runnable {
         notifyJobDone.run();
     }
 
-    private Runnable[] pipes = {this::_listupFiles, this::_download, this::_copyFiles, this::_compress};
-
-    private void _listupFiles() {
-
+    @FunctionalInterface
+    interface CollectPipe {
+        void run() throws CollectException;
     }
 
-    private void _download() {
+    private CollectPipe[] pipes = {this::_listupFiles, this::_download, this::_copyFiles, this::_compress};
 
+    private void _listupFiles() throws CollectException {
+        String status = plan.getLastStatus();
+        if(status.equals("completed") || status.equals("halted")) {
+            throw new CollectException(plan, "collecting status failed");
+        }
+
+        try {
+            createDownloadFileList();
+        } catch (InterruptedException e) {
+            log.info("stop collecting");
+            __exit0();
+        }
     }
 
-    private void _copyFiles() {
+    private void _download() throws CollectException {
+        if(requestList==null)
+            throw new CollectException(plan, "null collect file list");
+        if(requestFiles==0) {
+            log.info("no files to collect");
+            __exit0();
+        }
 
+        downloadId = downloader.addRequest(requestList);
+        String status;
+        do {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                log.info("stop downloading");
+                __exit0();
+            }
+            status = downloader.getStatus(downloadId);
+        } while(status.equalsIgnoreCase("in-progress"));
+
+        if(!status.equalsIgnoreCase("done")) {
+            log.error("file download failed");
+            throw new CollectException(plan, "file download failed");
+        }
     }
 
-    private void _compress() {
+    private void _copyFiles() throws CollectException {
+        if(downloadId==null || downloadId.isEmpty())
+            throw new CollectException(plan, "null downloadId");
 
+        try {
+            updatedFiles = copyFiles(plan, downloader.getBaseDir(downloadId));
+        } catch (IOException e) {
+            log.error("copying files failed");
+            throw new CollectException(plan, "copying files failed");
+        }
+
+        if(updatedFiles>0) {
+            log.info("collecting complete. copied="+updatedFiles);
+            __exit0();
+        }
+    }
+
+    private void _compress() throws CollectException {
+        String out = compress(plan);
+        if(out==null) {
+            log.error("compressing failed");
+            throw new CollectException(plan, "compressing failed");
+        }
+        manager.addCollectLog(plan, out);
+    }
+
+    private void __exit0() throws CollectException {
+        throw new CollectException(plan, false);
     }
 
     @Override
     public void run() {
 
         startProc();
+
+        // from here
+
+        setStatus(PlanStatus.collecting);
+
+        try {
+            for(CollectPipe pipe: pipes) {
+                pipe.run();
+            }
+        } catch (CollectException e) {
+            if(e.isError()) {
+                e.getMessage();
+                setStatus(PlanStatus.suspended);
+            } else {
+                log.info("collecting done. "+updatedFiles+" updated");
+                setStatus(PlanStatus.collected);
+            }
+        }
+        plan.setLastCollect(getTimestamp());
+        schedule();
+        push();
+        doneProc();
+
+        // to here
+
+
         PlanStatus result = PlanStatus.collected;
         PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
 
