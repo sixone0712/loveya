@@ -75,7 +75,7 @@ class FileDownloadExecutorTest {
 
         List list = new ArrayList();
         list.add(new VFtpCompatDownloadRequestForm("Fab1", machine.getMachineName(), "AABBCC_DDDD"));
-        FileDownloadExecutor e = new FileDownloadExecutor("vftp-compat", "test", downloader, list, false);
+        FileDownloadExecutor e = new FileDownloadExecutor("vftp_compat", "test", downloader, list, false);
         e.start();
 
         log.info("waiting");
@@ -176,7 +176,7 @@ class FileDownloadExecutorTest {
         List<DownloadRequestForm> list = new ArrayList<>();
         list.add(form);
 
-        FileDownloadExecutor e = new FileDownloadExecutor("vftp-sss", "test", downloader, list, true);
+        FileDownloadExecutor e = new FileDownloadExecutor("vftp_sss", "test", downloader, list, true);
         e.start();
 
         while(!e.getStatus().equals("complete")) {

@@ -98,14 +98,10 @@ public abstract class CollectProcess implements Runnable {
         notifyJobDone.run();
     }
 
-    @FunctionalInterface
-    interface CollectPipe {
-        void run() throws CollectException;
-    }
+    private CollectPipe[] pipes = {this::_listFiles, this::_download, this::_copyFiles, this::_compress};
 
-    private CollectPipe[] pipes = {this::_listupFiles, this::_download, this::_copyFiles, this::_compress};
-
-    private void _listupFiles() throws CollectException {
+    private void _listFiles() throws CollectException {
+        printInfo("listFiles");
         String status = plan.getLastStatus();
         if(status.equals("completed") || status.equals("halted")) {
             throw new CollectException(plan, "collecting status failed");
@@ -120,6 +116,7 @@ public abstract class CollectProcess implements Runnable {
     }
 
     private void _download() throws CollectException {
+        printInfo("download");
         if(requestList==null)
             throw new CollectException(plan, "null collect file list");
         if(requestFiles==0) {
@@ -127,7 +124,9 @@ public abstract class CollectProcess implements Runnable {
             __exit0();
         }
 
-        downloadId = downloader.addRequest(requestList);
+        CollectType collectType = CollectType.valueOf(plan.getPlanType());
+        downloadId = downloader.addRequest(collectType, requestList);
+
         String status;
         do {
             try {
@@ -146,6 +145,7 @@ public abstract class CollectProcess implements Runnable {
     }
 
     private void _copyFiles() throws CollectException {
+        printInfo("copyFiles");
         if(downloadId==null || downloadId.isEmpty())
             throw new CollectException(plan, "null downloadId");
 
@@ -155,20 +155,20 @@ public abstract class CollectProcess implements Runnable {
             log.error("copying files failed");
             throw new CollectException(plan, "copying files failed");
         }
-
-        if(updatedFiles>0) {
-            log.info("collecting complete. copied="+updatedFiles);
-            __exit0();
-        }
+        log.info("collecting complete. copied="+updatedFiles);
     }
 
     private void _compress() throws CollectException {
-        String out = compress(plan);
-        if(out==null) {
-            log.error("compressing failed");
-            throw new CollectException(plan, "compressing failed");
+        if(updatedFiles>0) {
+            printInfo("compress");
+            String out = compress(plan);
+            if (out == null) {
+                log.error("compressing failed");
+                throw new CollectException(plan, "compressing failed");
+            }
+            manager.addCollectLog(plan, out);
+            printInfo("output="+out);
         }
-        manager.addCollectLog(plan, out);
     }
 
     private void __exit0() throws CollectException {
@@ -179,21 +179,19 @@ public abstract class CollectProcess implements Runnable {
     public void run() {
 
         startProc();
-
-        // from here
-
         setStatus(PlanStatus.collecting);
 
         try {
             for(CollectPipe pipe: pipes) {
                 pipe.run();
             }
+            printInfo("all pipe finished");
+            setStatus(PlanStatus.collected);
         } catch (CollectException e) {
             if(e.isError()) {
                 e.getMessage();
                 setStatus(PlanStatus.suspended);
             } else {
-                log.info("collecting done. "+updatedFiles+" updated");
                 setStatus(PlanStatus.collected);
             }
         }
@@ -202,73 +200,6 @@ public abstract class CollectProcess implements Runnable {
         push();
         doneProc();
 
-        // to here
-
-
-        PlanStatus result = PlanStatus.collected;
-        PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
-
-        setStatus(PlanStatus.collecting);
-        List<DownloadRequestForm> downloadList = null;
-        long totalFiles = 0;
-
-        try {
-            createDownloadFileList();
-        } catch (InterruptedException e) {
-            printInfo("interrupt occurs on creating list");
-            setStatus(lastStatus);
-            doneProc();
-        } catch (CollectException e) {
-            log.info("failed to create file list");
-            e.printStackTrace();
-        }
-
-        if(totalFiles>0) {
-            try {
-                String downloadId = downloader.addRequest(downloadList);
-                printInfo("downloading start");
-                while(downloader.getStatus(downloadId).equalsIgnoreCase("in-progress")) {
-                    Thread.sleep(500);
-                }
-                printInfo("download done");
-
-                if(!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
-                    printError("file download failed");
-                    result = PlanStatus.suspended;
-                } else {
-                    int copied = copyFiles(plan, downloader.getBaseDir(downloadId));
-                    printInfo("updated "+copied+" files");
-                    if(copied==0) {
-                        printInfo("collection complete.. but no updated files");
-                    } else {
-                        String outputPath = compress(plan);
-                        if(outputPath==null) {
-                            printError("failed to pack logs");
-                            result = PlanStatus.suspended;
-                        } else {
-                            manager.addCollectLog(plan, outputPath);
-                            plan.setLastPoint(new Timestamp(expectedLastPoint));
-                            printInfo(copied + " files collecting success");
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                printInfo("interrupt occurs, restore status "+lastStatus.name());
-                setStatus(lastStatus);
-                doneProc();
-                return;
-            } catch (IOException e) {
-                printError("copyFiles error");
-                e.printStackTrace();
-            }
-        } else {
-            printInfo("no files to collect");
-        }
-        setStatus(result);
-        plan.setLastCollect(getTimestamp());
-        schedule();
-        push();
-        doneProc();
     }
 
     private void pull() {

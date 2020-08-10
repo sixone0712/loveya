@@ -10,9 +10,11 @@ import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class FtpCollectProcess extends CollectProcess {
@@ -33,8 +35,8 @@ public class FtpCollectProcess extends CollectProcess {
         String[] categoryCodes = plan.getLogType().split(",");
         String[] categoryNames = plan.getLogTypeStr().split(",");
 
-        if(machines.length==0 || machines.length!=fabs.length || machines.length!=categoryCodes.length ||
-                machines.length!=categoryNames.length)
+        if(machines.length==0 || machines.length!=fabs.length || categoryCodes.length==0 ||
+                categoryCodes.length!=categoryNames.length)
             throw new CollectException(plan, "parameter exception");
 
         SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
@@ -101,6 +103,16 @@ public class FtpCollectProcess extends CollectProcess {
 
         for(FileInfo file: fileList.getList()) {
             if(file.getType().equalsIgnoreCase("D")) {
+                SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
+                try {
+                    long _timestamp = dateFormat.parse(file.getTimestamp()).getTime();
+                    long _start = dateFormat.parse(start).getTime();
+                    long _end = dateFormat.parse(end).getTime();
+                    if(_timestamp<_start || _timestamp>_end)
+                        continue;
+                } catch (ParseException e) {
+                    log.warn("timestamp parsing failed");
+                }
                 getFileList(list, machine, fab, categoryCode, categoryName, start, end, keyword, file.getFilename());
             } else {
                 form.addFile(file.getFilename(), file.getSize(), file.getTimestamp());

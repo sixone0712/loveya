@@ -96,11 +96,11 @@ public class FileDownloadExecutor {
                     setStatus(Status.error);
                     return;
                 case "ftp":
-                case "vftp-sss":
+                case "vftp_sss":
                     context.setAchieve(true);
                     context.setAchieveDecompress(true);
                     break;
-                case "vftp-compat":
+                case "vftp_compat":
                     context.setAchieve(false);
                     context.setAchieveDecompress(false);
                     break;
@@ -208,10 +208,10 @@ public class FileDownloadExecutor {
                             case "ftp":
                                 handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
                                 break;
-                            case "vftp-compat":
+                            case "vftp_compat":
                                 handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
                                 break;
-                            case "vftp-sss":
+                            case "vftp_sss":
                                 handler = new VFtpSssFileDownloadHandler(connector, context.getTool(), context.getDirectory(), context.getFileNames());
                                 break;
 
@@ -384,7 +384,7 @@ public class FileDownloadExecutor {
     }
 
     private boolean isAchieveJobType() {
-        if(ftpType.equals("vftp-sss"))
+        if(ftpType.equals("vftp_sss"))
             return false;
         return true;
     }

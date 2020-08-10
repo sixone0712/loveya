@@ -4,6 +4,7 @@ import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnectorFactory;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectType;
 import jp.co.canon.cks.eec.fs.rssportal.background.DownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.background.FtpDownloadRequestForm;
@@ -312,7 +313,7 @@ public class FileDownloaderController {
 
         map.forEach((m, submap)->submap.forEach((c, dlForm)->requestList.add(dlForm)));
         //log.info("requestList size="+requestList.size());
-        String downloadId = fileDownloader.addRequest(requestList);
+        String downloadId = fileDownloader.addRequest(CollectType.ftp, requestList);
         //log.info("downloadId: " + downloadId);
         resBody.put("downloadId", downloadId);
         return ResponseEntity.status(HttpStatus.OK).body(resBody);

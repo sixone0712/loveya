@@ -104,7 +104,7 @@ public class FileDownloadContext {
             Path path = Paths.get(baseDir, tool, logTypeStr == null ? logType : logTypeStr);
             this.outPath = path.toString();
 
-        } else if(ftpType.equals("vftp-compat")) {
+        } else if(ftpType.equals("vftp_compat")) {
             VFtpCompatDownloadRequestForm compat = (VFtpCompatDownloadRequestForm) form;
             fileNames = new String[1];
             fileSizes = new long[1];
@@ -117,7 +117,7 @@ public class FileDownloadContext {
 
             Path path = Paths.get(baseDir, tool);
             this.outPath = path.toString();
-        } else if(ftpType.equals("vftp-sss")){
+        } else if(ftpType.equals("vftp_sss")){
             VFtpSssDownloadRequestForm sss = (VFtpSssDownloadRequestForm) form;
 
             files = sss.getFiles().size();

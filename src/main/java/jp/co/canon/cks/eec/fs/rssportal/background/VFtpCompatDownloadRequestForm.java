@@ -9,7 +9,7 @@ public class VFtpCompatDownloadRequestForm extends DownloadRequestForm {
     private String command;
 
     public VFtpCompatDownloadRequestForm(String fab, String machine, String command) {
-        super("vftp-compat", fab, machine);
+        super("vftp_compat", fab, machine);
         this.command = command;
     }
 }

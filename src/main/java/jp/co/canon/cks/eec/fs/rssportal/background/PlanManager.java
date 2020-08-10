@@ -162,8 +162,8 @@ public class PlanManager extends Thread {
             case "ftp":
                 p = new FtpCollectProcess(this, plan, planDao, downloader, log);
                 break;
-            case "vftp-compat":
-            case "vftp-sss": // TBD
+            case "vftp_compat":
+            case "vftp_sss": // TBD
                 p = new VFtpCompatCollectProcess(this, plan, planDao, downloader, log);
                 break;
             default:

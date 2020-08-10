@@ -59,10 +59,10 @@ public class FileDownloader extends Thread {
         executorList = new HashMap<>();
     }
 
-    public String addRequest(@NonNull final List<DownloadRequestForm> dlList) {
+    public String addRequest(CollectType collectType, final List<DownloadRequestForm> dlList) {
         log.info("addRequest( request-size="+dlList.size()+")");
 
-        FileDownloadExecutor executor = new FileDownloadExecutor("manual","", this, dlList, true);
+        FileDownloadExecutor executor = new FileDownloadExecutor(collectType.name(),"", this, dlList, true);
         executor.setMonitor(monitor);
         executor.setAttrDownloadFilesViaMultiSessions(true);
         executorList.put(executor.getId(), executor);
