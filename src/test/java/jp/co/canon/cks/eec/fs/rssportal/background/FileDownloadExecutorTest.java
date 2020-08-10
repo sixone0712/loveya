@@ -74,7 +74,8 @@ class FileDownloadExecutorTest {
         assertNotNull(machine);
 
         List list = new ArrayList();
-        list.add(new VFtpCompatDownloadRequestForm("Fab1", machine.getMachineName(), "AABBCC_DDDD"));
+        list.add(new VFtpCompatDownloadRequestForm(machine.getFabName(), machine.getMachineName(),
+                "get 20200810_000000_20200810_154807"));
         FileDownloadExecutor e = new FileDownloadExecutor("vftp_compat", "test", downloader, list, false);
         e.start();
 
