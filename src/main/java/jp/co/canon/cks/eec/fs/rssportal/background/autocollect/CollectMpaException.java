@@ -1,4 +1,4 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
 

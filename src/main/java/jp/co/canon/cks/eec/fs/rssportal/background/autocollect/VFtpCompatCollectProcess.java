@@ -1,14 +1,15 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.DownloadRequestForm;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
+import jp.co.canon.cks.eec.fs.rssportal.background.VFtpCompatDownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
-import lombok.SneakyThrows;
 import org.apache.commons.logging.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class VFtpCompatCollectProcess extends CollectProcess {

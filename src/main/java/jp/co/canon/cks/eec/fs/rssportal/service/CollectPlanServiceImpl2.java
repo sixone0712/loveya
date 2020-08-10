@@ -1,6 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
-import jp.co.canon.cks.eec.fs.rssportal.background.PlanManager;
+import jp.co.canon.cks.eec.fs.rssportal.background.autocollect.PlanManager;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;

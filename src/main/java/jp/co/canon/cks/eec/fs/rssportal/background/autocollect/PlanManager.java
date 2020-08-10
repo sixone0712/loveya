@@ -1,5 +1,6 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;

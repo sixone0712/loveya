@@ -1,20 +1,18 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
 import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
-import jp.co.canon.ckbs.eec.fs.configuration.Category;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
+import jp.co.canon.cks.eec.fs.rssportal.background.DownloadRequestForm;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
+import jp.co.canon.cks.eec.fs.rssportal.background.FtpDownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class FtpCollectProcess extends CollectProcess {
