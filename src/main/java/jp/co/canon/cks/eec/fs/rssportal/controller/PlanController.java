@@ -9,6 +9,7 @@ import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlanCollectionPlan;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
+import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
