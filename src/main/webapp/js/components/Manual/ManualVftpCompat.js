@@ -365,8 +365,7 @@ import React from "react";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as API from "../../api";
-import * as CmdActions from "../../modules/Command";
-import CommandInfo from "../../modules/Command"
+import * as commandActions from "../../modules/command";
 import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -386,7 +385,7 @@ const scrollStyle = {
     zIndex: "101"
 };
 
-const ManualVftpCompat = () => {
+const ManualVftpCompat = ({ command, commandActions }) => {
     return (
         <>
             <Container className="rss-container vftp manual" fluid={true}>
@@ -410,11 +409,8 @@ const ManualVftpCompat = () => {
 };
 
 export default connect(
-    (state) => ({
-        CommandInfo: state.cmd.get('CommandInfo'),
-        CommandList: state.cmd.get('CommandList'),
-        startDate:state.cmd.get('startDate'),
-        endDate:state.cmd.get('endDate')
-    }),
-    (dispatch) => ({ CmdActions: bindActionCreators(CmdActions, dispatch) })
+  (state) => ({
+    command: state.command.get('command'),
+  }),
+  (dispatch) => ({ commandActions: bindActionCreators(commandActions, dispatch) })
 )(ManualVftpCompat);
