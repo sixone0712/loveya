@@ -62,7 +62,7 @@ public class VftpDownloadController {
         RSSError error = new RSSError();
         Map<String, Object> resBody = new HashMap<>();
 
-        List<String> fabs = param.containsKey("fabNames")?(List)param.get("fabNameas"):null;
+        List<String> fabs = param.containsKey("fabNames")?(List)param.get("fabNames"):null;
         List<String> machines = param.containsKey("machineNames")?(List)param.get("machineNames"):null;
         String command = param.containsKey("command") ? (String) param.get("command") : null;
 
@@ -347,21 +347,21 @@ public class VftpDownloadController {
             String machineName = (String) item.get("machineName");
             String directory = (String) item.get("command");
             String fileName = (String) item.get("fileName");
-            String fileSize = Integer.toString((Integer) item.get("fileSize"));
+            long fileSize = (long) item.get("fileSize");
 
             for(DownloadRequestForm _form: list) {
                 VFtpSssDownloadRequestForm form = (VFtpSssDownloadRequestForm)_form;
                 if(form.getMachine().equals(machineName) && form.getFab().equals(fabName) && form.getDirectory().equals(directory)) {
-                    form.addFile(fileName, Long.getLong(fileSize));
+                    form.addFile(fileName, fileSize);
                     continue loop_top;
                 }
             }
             VFtpSssDownloadRequestForm form = new VFtpSssDownloadRequestForm(fabName, machineName, directory);
-            form.addFile(fileName, Long.getLong(fileSize));
+            form.addFile(fileName, fileSize);
             list.add(form);
         }
 
-        String downloadId = fileDownloader.addRequest(CollectType.vftp_compat, list);
+        String downloadId = fileDownloader.addRequest(CollectType.vftp_sss, list);
         log.info("vftp-sss downloadId="+downloadId);
         resBody.put("downloadId", downloadId);
         return ResponseEntity.status(HttpStatus.OK).body(resBody);
