@@ -20,7 +20,7 @@ public class PurgeScheduler {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    public void truncateTable() {
+    public void deleteExpiredToken() {
         log.info("[Scheduler] execute the process that delete expired token in the blacklist");
         userService.cleanBlacklist(new Date());
     }

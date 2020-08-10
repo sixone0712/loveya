@@ -11,6 +11,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +29,11 @@ public class LoginController {
     private final UserService serviceUser;
     private final JwtService jwtService;
 
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
+    @Value("${rssportal.jwt.autoRefresh}")
+    private long autoRefresh;
+
+    private static final String TOKEN_PREFIX = "Bearer ";
+    private static final String HEADER_STRING = "Authorization";
     private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
@@ -101,7 +105,7 @@ public class LoginController {
                 reissueToken = true;
             } else {
                 RefreshToken decodedRefresh = jwtService.decodeRefreshToken(savedRefreshToken);
-                long calculateDate = (decodedRefresh.getExp().getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000);
+                long calculateDate = (decodedRefresh.getExp().getTime() - new Date().getTime()) / (1000 * 60 * autoRefresh);
 
                 if (calculateDate < 1) {
                     reissueToken = true;
@@ -116,6 +120,8 @@ public class LoginController {
                 String refreshToken = jwtService.create(refreshTokenInfo, "refreshToken");
                 serviceUser.updateRefreshToken(LoginUser.getId(), refreshToken);
                 resBody.put("refreshToken", refreshToken);
+            } else {
+                resBody.put("refreshToken", savedRefreshToken);
             }
         }
         else {

@@ -380,7 +380,8 @@ class RSSautoplanlist extends Component {
                                     <tr>
                                         <th>Plan ID</th>
                                         <th>Description</th>
-                                        <th>Target</th>
+                                        <th>Type</th>
+                                        <th>Target/Command</th>
                                         <th>Collection Period</th>
                                         <th>Status</th>
                                         <th>Last Run Time</th>
@@ -405,6 +406,7 @@ class RSSautoplanlist extends Component {
                                                     </span>
                                                 </td>
                                                 <td>{plan.planDescription}</td>
+                                                <td>-</td>
                                                 <td>{plan.planTarget}</td>
                                                 <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
                                                 <td>{CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id))}</td>
