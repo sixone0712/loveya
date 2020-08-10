@@ -38,8 +38,8 @@ class PlanManagerTest {
 
     @Test
     @Timeout(10)
-    void addVFtpCompat1() {
-        log.info("addVFtpCompat1");
+    void addVFtpCompatPlan1() {
+        log.info("addVFtpCompatPlan1");
         assertNotNull(service);
 
         assertNotNull(connectorFactory);
@@ -73,6 +73,46 @@ class PlanManagerTest {
 
         int planId = service.addPlan("vftp_compat", 10000, "vftp-compat-test", fabNames, machineNames,
                 commands, start, start, end, "continuous", 1000, "vftp-compat-test");
+        assertNotEquals(planId, -1);
+    }
+
+    @Test
+    @Timeout(10)
+    void addVFtpSssPlan1() {
+        log.info("addVFtpCompatPlan1");
+        assertNotNull(service);
+
+        assertNotNull(connectorFactory);
+        assertNotNull(fileServiceAddress);
+        FileServiceManageConnector connector = connectorFactory.getConnector(fileServiceAddress);
+
+        MachineList machines = connector.getMachineList();
+        assertTrue(machines.getMachineCount()>0);
+
+        List<String> machineNames = new ArrayList<>();
+        List<String> fabNames = new ArrayList<>();
+        List<String> directories = new ArrayList<>();
+
+        for(int i=0; i<3 && i<machines.getMachines().length; ++i) {
+            Machine machine = machines.getMachines()[i];
+            machineNames.add(machine.getMachineName());
+            fabNames.add(machine.getFabName());
+        }
+        directories.add("IP_AS_RAW");
+        directories.add("IP_AS");
+
+        SimpleDateFormat dateFormat = Tool.getVFtpSimpleDateFormat();
+        Date start, end;
+        try {
+            start = dateFormat.parse("20200810_000000");
+            end = dateFormat.parse("20200810_235959");
+        } catch (ParseException e) {
+            assertNotNull(null);
+            return;
+        }
+
+        int planId = service.addPlan("vftp_sss", 10000, "vftp-sss-test", fabNames, machineNames,
+                directories, start, start, end, "continuous", 1000, "vftp-sss-test");
         assertNotEquals(planId, -1);
     }
 }
