@@ -1,4 +1,4 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

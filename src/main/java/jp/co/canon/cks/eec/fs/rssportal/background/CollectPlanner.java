@@ -1,8 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -16,14 +14,12 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
-import javax.annotation.PostConstruct;
 import javax.xml.rpc.ServiceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,11 +88,11 @@ public class CollectPlanner extends Thread {
         PlanStatus lastStatus = PlanStatus.collected;
 
         // figure out a list the plan has to collect.
-        List<DownloadForm> downloadList = createDownloadList(plan);
-        int totalFiles = downloadList.stream().mapToInt(item -> item.getFiles().size()).sum();
+        List<DownloadRequestForm> downloadList = createDownloadList(plan);
+        int totalFiles = downloadList.stream().mapToInt(item -> ((FtpDownloadRequestForm)item).getFiles().size()).sum();
 
         if (totalFiles != 0) {
-            String downloadId = downloader.addRequest(downloadList);
+            String downloadId = downloader.addRequest(CollectType.ftp, downloadList);
             while (downloader.getStatus(downloadId).equalsIgnoreCase("in-progress"))
                 sleep(500);
 
@@ -144,8 +140,8 @@ public class CollectPlanner extends Thread {
         return true;
     }
 
-    private List<DownloadForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
-        List<DownloadForm> downloadList = new ArrayList<>();
+    private List<DownloadRequestForm> createDownloadList(CollectPlanVo plan) throws InterruptedException {
+        List<DownloadRequestForm> downloadList = new ArrayList<>();
         String[] tools = plan.getTool().split(",");
         String[] types = plan.getLogType().split(",");
         String[] typeStrs = plan.getLogTypeStr().split(",");
@@ -179,9 +175,10 @@ public class CollectPlanner extends Thread {
                 }
             }
         }
-        int totalFiles = downloadList.stream().mapToInt(item->item.getFiles().size()).sum();
+        int totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
         if(updateLastPoint) {
-            for(DownloadForm form: downloadList) {
+            for(DownloadRequestForm f: downloadList) {
+                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
                 for(FileInfo file: form.getFiles()) {
                     if (expectedLastPoint < file.getMilliTime())
                         expectedLastPoint = file.getMilliTime();

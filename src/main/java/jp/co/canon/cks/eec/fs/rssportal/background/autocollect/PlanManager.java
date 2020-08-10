@@ -1,5 +1,6 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -112,8 +114,10 @@ public class PlanManager extends Thread {
         killList = new ArrayList<>();
         List<CollectPlanVo> plans = planDao.findAll();
         for(CollectPlanVo plan: plans) {
-            collects.add(new CollectProcess(this, plan, planDao, downloader, log));
-            log.info(plan.toString());
+            if(!plan.getLastStatus().equals("completed")) {
+                createCollectProcess(plan);
+                log.info(plan.toString());
+            }
         }
         inited = true;
     }
@@ -150,8 +154,25 @@ public class PlanManager extends Thread {
     public int addPlan(CollectPlanVo plan) {
         int planId = planDao.addPlan(plan);
         CollectPlanVo added = planDao.find(planId);
-        collects.add(new CollectProcess(this, added, planDao, downloader, log));
+        createCollectProcess(added);
         return planId;
+    }
+
+    private void createCollectProcess(CollectPlanVo plan) {
+        CollectProcess p;
+        switch (plan.getPlanType()) {
+            case "ftp":
+                p = new FtpCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            case "vftp_compat":
+            case "vftp_sss": // TBD
+                p = new VFtpCompatCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            default:
+                log.error("createCollectProcess: undefined plan type "+plan.getPlanType());
+                return;
+        }
+        collects.add(p);
     }
 
     public List<CollectPlanVo> getPlans() {
@@ -159,6 +180,23 @@ public class PlanManager extends Thread {
         for(CollectProcess process: collects) {
             list.add(process.getPlan());
         }
+        return list;
+    }
+
+    public List<CollectPlanVo> getPlans(int userId) {
+        List<CollectPlanVo> myList = new ArrayList<>();
+        List<CollectPlanVo> otherList = new ArrayList<>();
+        for(CollectProcess process: collects) {
+            if(process.getPlan().getOwner()==userId)
+                myList.add(process.getPlan());
+            else
+                otherList.add(process.getPlan());
+        }
+        Collections.sort(myList);
+        Collections.sort(otherList);
+        List<CollectPlanVo> list = new ArrayList<>();
+        list.addAll(myList);
+        list.addAll(otherList);
         return list;
     }
 

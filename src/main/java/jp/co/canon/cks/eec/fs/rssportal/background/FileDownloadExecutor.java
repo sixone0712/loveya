@@ -1,16 +1,14 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
+import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
-import jp.co.canon.cks.eec.fs.manage.FileServiceManage;
-import jp.co.canon.cks.eec.fs.portal.bussiness.FileServiceModel;
-import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileServiceProc;
-import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.RemoteFileServiceProc;
-import jp.co.canon.cks.eec.fs.rssportal.model.DownloadForm;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,11 +26,11 @@ public class FileDownloadExecutor {
     }
 
     private static int mUniqueKey = 1;
-    private final String jobType;
+    private final String ftpType;
     private final String desc;
     private final String downloadId;
     private Status status;
-    private final List<DownloadForm> downloadForms;
+    private final List<DownloadRequestForm> downloadForms;
     private final List<FileDownloadContext> downloadContexts;
     private final String baseDir;
 
@@ -49,10 +47,10 @@ public class FileDownloadExecutor {
     private boolean attrDownloadFilesViaMultiSessions;
 
     public FileDownloadExecutor(
-            @NonNull final String jobType,
+            @NonNull final String ftpType,
             @Nullable final String desc,
             @NonNull final FileDownloader downloader,
-            @NonNull final List<DownloadForm> request,
+            @NonNull final List<DownloadRequestForm> request,
             boolean compress) {
 
         if(desc==null) {
@@ -62,7 +60,7 @@ public class FileDownloadExecutor {
             log = LogFactory.getLog(String.format(fmt, getClass().toString(), desc));
         }
 
-        this.jobType = jobType;
+        this.ftpType = ftpType;
         this.downloader = downloader;
         this.connector = downloader.getConnector();
 
@@ -83,15 +81,34 @@ public class FileDownloadExecutor {
     private void initialize() {
         setStatus(Status.init);
         log.info(downloadId+": initialize()");
-        for(DownloadForm form: downloadForms) {
-            if(form.getFiles().size()==0)
-                continue;
-            FileDownloadContext context = new FileDownloadContext(jobType, downloadId, form, baseDir);
+        for (DownloadRequestForm f : downloadForms) {
+            if(f instanceof FtpDownloadRequestForm) {
+                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
+                if (form.getFtpType().equals("ftp") && form.getFiles().size() == 0)
+                    continue;
+            }
+
+            FileDownloadContext context = new FileDownloadContext(ftpType, downloadId, f, baseDir);
             context.setConnector(connector);
+            switch (ftpType) {
+                default :
+                    log.error("undefined ftp-type  "+ftpType);
+                    setStatus(Status.error);
+                    return;
+                case "ftp":
+                case "vftp_sss":
+                    context.setAchieve(true);
+                    context.setAchieveDecompress(true);
+                    break;
+                case "vftp_compat":
+                    context.setAchieve(false);
+                    context.setAchieveDecompress(false);
+                    break;
+            }
             downloadContexts.add(context);
         }
         totalFiles = 0;
-        downloadContexts.forEach(context -> totalFiles +=context.getFileCount());
+        downloadContexts.forEach(context -> totalFiles += context.getFileCount());
     }
 
     private void compress() {
@@ -110,6 +127,38 @@ public class FileDownloadExecutor {
 
     private void wrapup() {
         log.info(downloadId+": wrapup()");
+
+        // When the executor didn't compress the downloads then the result path is null.
+        // Because wrapup() means this download has finished successfully.
+        // Therefore we have to fill the download path information below.
+        if(mPath==null) {
+            if(downloadContexts.size()==1) {
+                FileDownloadContext context = downloadContexts.get(0);
+                File destination = new File(context.getLocalFilePath());
+                if(!destination.exists()) {
+                    log.error("destination doesn't exist  "+destination.toString());
+                    setStatus(Status.error);
+                    return;
+                }
+                if(destination.isDirectory()) {
+                    File[] files = destination.listFiles();
+                    if(files.length!=1 || (files.length>0 && files[0].isDirectory())) {
+                        log.error("cannot specify destination");
+                        setStatus(Status.error);
+                        return;
+                    } else {
+                        mPath = files[0].toString();
+                    }
+                } else {
+                    mPath = destination.toString();
+                }
+            } else {
+                log.error("download config error");
+                setStatus(Status.error);
+                return;
+            }
+        }
+        log.info("output destination="+mPath);
         setStatus(Status.complete);
     }
 
@@ -146,45 +195,96 @@ public class FileDownloadExecutor {
                     return;
 
                 setStatus(Status.download);
-                List<FileServiceProc> procs = new ArrayList<>();
 
-                for(int i=0; i<downloadContexts.size();) {
-                    FileDownloadContext context = downloadContexts.get(i);
+                if(true) {
+                    List<FileDownloadServiceProc> procs = new ArrayList<>();
 
-                    if(status==Status.stop || status==Status.error)
-                        break;
-
-                    while(runnings.get()>=maxThreads) {
-                        Thread.sleep(500);
-                    }
-
-                    FileServiceProc proc = null;
-                    switch (context.getJobType()) {
-                        case "manual":
-                        case "auto":
-                            proc = new RemoteFileServiceProc(context);
+                    for(FileDownloadContext context: downloadContexts) {
+                        if (status == Status.stop || status == Status.error)
                             break;
-                        default:
-                            throw new IllegalArgumentException("invalid jobType");
+                        FileDownloadHandler handler;
+                        switch(ftpType) {
+                            default:
+                            case "ftp":
+                                handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
+                                break;
+                            case "vftp_compat":
+                                handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
+                                break;
+                            case "vftp_sss":
+                                handler = new VFtpSssFileDownloadHandler(connector, context.getTool(), context.getDirectory(), context.getFileNames());
+                                break;
+
+                        }
+                        procs.add(new FileDownloadServiceProc(handler, context, process->{
+                            if(process.getStatus()==FileDownloadServiceProc.Status.Error) {
+                                status = Status.error;
+                                log.error("download error occurs");
+                            }}));
                     }
-                    proc.setMonitor(monitor);
-                    proc.setNotifyError(errorCallback);
-                    proc.setNotifyFinish(finishCallback);
-                    proc.start();
-                    procs.add(proc);
-                    runnings.getAndIncrement();
-                    log.info(proc.getName()+" starts");
-                    ++i;
+
+                    thread_wait:
+                    for (FileDownloadServiceProc proc : procs) {
+                        while(true) {
+                            if (status == Status.stop || status == Status.error) {
+                                log.info("stop waiting threads");
+                                break thread_wait;
+                            }
+                            if (proc.getStatus() == FileDownloadServiceProc.Status.InProgress) {
+                                Thread.sleep(100);
+                                continue;
+                            } else if(proc.getStatus()==FileDownloadServiceProc.Status.Finished) {
+                                continue thread_wait;
+                            }
+                        }
+                    }
+
+                    log.info("threads terminate");
+                    for (FileDownloadServiceProc proc : procs) {
+                        proc.interrupt();
+                        proc.join();
+                    }
+                } else {
+                    List<FileServiceProc> procs = new ArrayList<>();
+
+                    for (int i = 0; i < downloadContexts.size(); ) {
+                        FileDownloadContext context = downloadContexts.get(i);
+                        if (status == Status.stop || status == Status.error)
+                            break;
+
+                        while (runnings.get() >= maxThreads) {
+                            Thread.sleep(500);
+                        }
+
+                        FileServiceProc proc = null;
+                        switch (context.getFtpType()) {
+                            case "manual":
+                            case "auto":
+                                proc = new RemoteFileServiceProc(context);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("invalid jobType");
+                        }
+                        proc.setMonitor(monitor);
+                        proc.setNotifyError(errorCallback);
+                        proc.setNotifyFinish(finishCallback);
+                        proc.start();
+                        procs.add(proc);
+                        runnings.getAndIncrement();
+                        log.info(proc.getName() + " starts");
+                        ++i;
+                    }
+
+                    while (runnings.get() > 0) {
+                        Thread.sleep(500);
+                        if (status == Status.stop || status == Status.error)
+                            return;
+                    }
                 }
 
-                while(runnings.get()>0) {
-                    Thread.sleep(500);
-                    if(status==Status.stop || status==Status.error)
-                        return;
-                }
-
-                if(attrCompression)
+                if(attrCompression) {
                     compress();
+                }
 
                 wrapup();
             } catch (InterruptedException e) {
@@ -206,11 +306,19 @@ public class FileDownloadExecutor {
         log.info("    .ReplaceFileForSameFileName"+attrReplaceFileForSameFileName);
         log.info("path.base="+baseDir);
         log.info("download");
-        for(DownloadForm form: downloadForms) {
-            log.info("    " + form.getTool() + " / " + form.getLogType() + " (" + form.getFiles().size() + " files)");
-            /*for(FileInfo f:form.getFiles()) {
-                log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
-            }*/
+        for(DownloadRequestForm form: downloadForms) {
+            if(form instanceof VFtpCompatDownloadRequestForm) {
+                log.info("    " + form.getMachine() + " / " + ((VFtpCompatDownloadRequestForm) form).getCommand());
+            } else if(form instanceof VFtpSssDownloadRequestForm) {
+                log.info("    " + form.getMachine() + " / " + ((VFtpSssDownloadRequestForm) form).getDirectory() +
+                        " ("+((VFtpSssDownloadRequestForm)form).getFiles().size()+" files)");
+            } else {
+                log.info("    " + form.getMachine() + " / " + ((FtpDownloadRequestForm)form).getCategoryType() +
+                        " (" + ((FtpDownloadRequestForm)form).getFiles().size() + " files)");
+                /*for(FileInfo f:form.getFiles()) {
+                    log.info("      - "+f.getName()+" "+f.getDate()+" "+f.getSize());
+                }*/
+            }
         }
     }
 
@@ -263,7 +371,7 @@ public class FileDownloadExecutor {
 
     public List<String> getFabs() {
         List<String> fabs = new ArrayList<>();
-        for(DownloadForm form: downloadForms) {
+        for(DownloadRequestForm form: downloadForms) {
             String fab = form.getFab();
             if(!fabs.contains(fab))
                 fabs.add(fab);
@@ -273,6 +381,12 @@ public class FileDownloadExecutor {
 
     public long getLastUpdate() {
         return lastUpdate;
+    }
+
+    private boolean isAchieveJobType() {
+        if(ftpType.equals("vftp_sss"))
+            return false;
+        return true;
     }
 
     /* Attributes */

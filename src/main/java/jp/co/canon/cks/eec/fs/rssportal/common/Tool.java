@@ -3,6 +3,10 @@ package jp.co.canon.cks.eec.fs.rssportal.common;
 import lombok.NonNull;
 
 import java.io.File;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -54,5 +58,25 @@ public class Tool {
         if(!filter.test(file)) {
             file.delete();
         }
+    }
+
+    static public SimpleDateFormat getSimpleDateFormat() {
+        return new SimpleDateFormat("yyyyMMddHHmmss");
+    }
+
+    static public SimpleDateFormat getVFtpSimpleDateFormat() {
+        return new SimpleDateFormat("yyyyMMdd_HHmmss");
+    }
+
+    static public String getFtpTimeFormat(Timestamp ts) {
+        if(ts==null)
+            return null;
+        return getSimpleDateFormat().format(ts.getTime());
+    }
+
+    static public String getVFtpTimeFormat(Timestamp ts) {
+        if(ts==null)
+            return null;
+        return getVFtpSimpleDateFormat().format(ts.getTime());
     }
 }

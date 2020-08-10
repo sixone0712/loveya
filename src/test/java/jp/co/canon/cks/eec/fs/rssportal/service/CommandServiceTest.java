@@ -24,31 +24,31 @@ public class CommandServiceTest {
         this.commandService = commandService;
     }
 
-    @Test
-    void TestScenario() {
-        Boolean ret = false;
-        CommandVo cVo = new CommandVo();
-        cVo.setCmd_name("AAA");
-        cVo.setCmd_type("1");
-        cVo.setValidity(true);
-        ret=commandService.addCmd(cVo);
-        if(ret)
-        {
-            CommandVo modifyVo = null;
-            modifyVo = commandService.findCommand("AAA","1");
-            if(modifyVo!= null)
-            {
-                CommandVo confirmVo = null;
-                modifyVo.setCmd_name("BBB");
-                commandService.modifyCmd(modifyVo);
-                confirmVo = commandService.getCommand(modifyVo.getId());
-                assertEquals(modifyVo.getCmd_name(),confirmVo.getCmd_name());
-                assertNotNull(commandService.getCommandListAll());
-                commandService.deleteCmd(modifyVo.getId());
-            }
-        }
-
-    }
+//    @Test
+//    void TestScenario() {
+//        Boolean ret = false;
+//        CommandVo cVo = new CommandVo();
+//        cVo.setCmd_name("AAA");
+//        cVo.setCmd_type("1");
+//        cVo.setValidity(true);
+//        ret=commandService.addCmd(cVo);
+//        if(ret)
+//        {
+//            CommandVo modifyVo = null;
+//            modifyVo = commandService.findCommand("AAA","1");
+//            if(modifyVo!= null)
+//            {
+//                CommandVo confirmVo = null;
+//                modifyVo.setCmd_name("BBB");
+//                commandService.modifyCmd(modifyVo);
+//                confirmVo = commandService.getCommand(modifyVo.getId());
+//                assertEquals(modifyVo.getCmd_name(),confirmVo.getCmd_name());
+//                assertNotNull(commandService.getCommandListAll());
+//                commandService.deleteCmd(modifyVo.getId());
+//            }
+//        }
+//
+//    }
 
     @Test
     void modifyCmd() {
