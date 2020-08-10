@@ -82,6 +82,11 @@ public class CollectPlanServiceImpl2 implements CollectPlanService {
     }
 
     @Override
+    public List<CollectPlanVo> getAllPlans(int userId) {
+        return manager.getPlans(userId);
+    }
+
+    @Override
     public List<CollectPlanVo> getAllPlansBySchedulePriority() {
         return null;
     }

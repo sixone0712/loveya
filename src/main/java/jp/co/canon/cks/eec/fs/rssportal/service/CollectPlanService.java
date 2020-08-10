@@ -33,6 +33,7 @@ public interface CollectPlanService {
     boolean deletePlan(int planId);
     boolean deletePlan(CollectPlanVo plan);
     List<CollectPlanVo> getAllPlans();
+    List<CollectPlanVo> getAllPlans(int userId);
     List<CollectPlanVo> getAllPlansBySchedulePriority();
     CollectPlanVo getPlan(int id);
     CollectPlanVo getNextPlan();

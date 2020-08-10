@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -179,6 +180,23 @@ public class PlanManager extends Thread {
         for(CollectProcess process: collects) {
             list.add(process.getPlan());
         }
+        return list;
+    }
+
+    public List<CollectPlanVo> getPlans(int userId) {
+        List<CollectPlanVo> myList = new ArrayList<>();
+        List<CollectPlanVo> otherList = new ArrayList<>();
+        for(CollectProcess process: collects) {
+            if(process.getPlan().getOwner()==userId)
+                myList.add(process.getPlan());
+            else
+                otherList.add(process.getPlan());
+        }
+        Collections.sort(myList);
+        Collections.sort(otherList);
+        List<CollectPlanVo> list = new ArrayList<>();
+        list.addAll(myList);
+        list.addAll(otherList);
         return list;
     }
 

@@ -95,9 +95,22 @@ public class PlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
+        int userId = -1;
+        SessionContext context = (SessionContext)session.getAttribute("context");
+        if(context!=null) {
+            userId = context.getUser().getId();
+        }
+
         List<CollectPlanVo> plans;
-        if(param.containsKey("withPriority")) plans = service.getAllPlansBySchedulePriority();
-        else plans = service.getAllPlans();
+        if(param.containsKey("withPriority")) {
+            plans = service.getAllPlansBySchedulePriority();
+        } else {
+            if(userId==-1) {
+                plans = service.getAllPlans();
+            } else {
+                plans = service.getAllPlans(userId);
+            }
+        }
 
         List<RSSPlanCollectionPlan> convList = new ArrayList<RSSPlanCollectionPlan>();
         for(CollectPlanVo plan : plans) {
