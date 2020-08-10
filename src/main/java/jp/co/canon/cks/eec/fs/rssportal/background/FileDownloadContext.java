@@ -117,6 +117,7 @@ public class FileDownloadContext {
 
             Path path = Paths.get(baseDir, tool);
             this.outPath = path.toString();
+            achieveDecompress = compat.isDecompress();
         } else if(ftpType.equals("vftp_sss")){
             VFtpSssDownloadRequestForm sss = (VFtpSssDownloadRequestForm) form;
 

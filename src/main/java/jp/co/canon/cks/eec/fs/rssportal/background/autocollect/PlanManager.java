@@ -165,8 +165,10 @@ public class PlanManager extends Thread {
                 p = new FtpCollectProcess(this, plan, planDao, downloader, log);
                 break;
             case "vftp_compat":
-            case "vftp_sss": // TBD
                 p = new VFtpCompatCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            case "vftp_sss":
+                p = new VFtpSssCollectProcess(this, plan, planDao, downloader, log);
                 break;
             default:
                 log.error("createCollectProcess: undefined plan type "+plan.getPlanType());

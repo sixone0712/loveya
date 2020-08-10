@@ -29,6 +29,8 @@ public class FileDownloadServiceProc extends Thread {
     private Status status;
     private List<Runnable> pipes;
 
+    private String _name;
+
     public FileDownloadServiceProc(FileDownloadHandler handler,
                                    FileDownloadContext context,
                                    FileDownloadServiceCallback callback) {
@@ -52,7 +54,7 @@ public class FileDownloadServiceProc extends Thread {
     @Override
     public void run() {
         buildPipes();
-        log.info("download pipe start");
+        log.info(getProcessName()+" download pipe start");
         for(Runnable pipe: pipes) {
             if(status==Status.Error) {
                 log.error("stop running");
@@ -66,33 +68,33 @@ public class FileDownloadServiceProc extends Thread {
     }
 
     private void register() {
-        log.info("[pipe#register] register()");
+        log.info("["+getProcessName()+"#register] register()");
         String requestNo = handler.createDownloadRequest();
         if(requestNo==null) {
-            log.error("[pipe#register] faield to create vftp(compat) request");
+            log.error("["+getProcessName()+"#register] faield to create vftp(compat) request");
             return;
         }
         context.setRequestNo(requestNo);
-        log.info("[pipe#register] request-no="+requestNo);
+        log.info("["+getProcessName()+"#register] request-no="+requestNo);
     }
 
     private void download() {
-        log.info("[pipe#download] download  machine="+context.getTool()+" category="+context.getLogType());
+        log.info("["+getProcessName()+"#download] download  machine="+context.getTool()+" category="+context.getLogType());
         while(true) {
             FileDownloadInfo info = handler.getDownloadedFiles();
             if(info.isError()) {
-                log.error("[pipe#download] download error occurs");
+                log.error("["+getProcessName()+"#download] download error occurs");
                 status = Status.Error;
                 return;
             }
             if(info.isFinish()) {
-                log.info("[pipe#download] download completed");
+                log.info("["+getProcessName()+"#download] download completed");
                 break;
             }
             try {
                 sleep(500);
             } catch (InterruptedException e) {
-                log.info("[pipe#download] downloading interrupt occurs");
+                log.info("["+getProcessName()+"#download] downloading interrupt occurs");
                 handler.cancelDownloadRequest();
                 status = Status.Error;
             }
@@ -100,16 +102,16 @@ public class FileDownloadServiceProc extends Thread {
 
         String ftpAddress = handler.getFtpAddress();
         if(ftpAddress==null) {
-            log.error("[pipe#download] no ftp address error");
+            log.error("["+getProcessName()+"#download] no ftp address error");
             status = Status.Error;
             return;
         }
-        log.info("[pipe#download] ftp-address="+ftpAddress);
+        log.info("["+getProcessName()+"#download] ftp-address="+ftpAddress);
         context.setAchieveUrl(ftpAddress);
     }
 
     private void transfer() {
-        log.info("[pipe#transfer] transfer()");
+        log.info("["+getProcessName()+"#transfer] transfer()");
         CustomURL address = context.getAchieveUrl();
         FtpWorker worker = new FtpWorker(address.getHost(), address.getPort(), address.getLoginUser(),
                 address.getLoginPassword(), address.getFtpMode());
@@ -123,7 +125,7 @@ public class FileDownloadServiceProc extends Thread {
     }
 
     private void decompress() {
-        log.info("[pipe#decompress] decompress [achieve="+context.getLocalFilePath()+")");
+        log.info("["+getProcessName()+"#decompress] decompress [achieve="+context.getLocalFilePath()+")");
         if (!context.getLocalFilePath().endsWith(".zip")) {
             log.error("no achieve file");
             status = Status.Error;
@@ -132,7 +134,7 @@ public class FileDownloadServiceProc extends Thread {
 
         File zip = new File(context.getLocalFilePath());
         if(!zip.exists() || zip.isDirectory()) {
-            log.error("[pipe#decompress] wrong achieve file type  "+zip.toString());
+            log.error("["+getProcessName()+"#decompress] wrong achieve file type  "+zip.toString());
             status = Status.Error;
             return;
         }
@@ -163,11 +165,36 @@ public class FileDownloadServiceProc extends Thread {
                 entry = zis.getNextEntry();
             }
         } catch (IOException e) {
-            log.error("[pipe#decompress] extraction failed");
+            log.error("["+getProcessName()+"#decompress] extraction failed");
             status = Status.Error;
             return;
         }
         zip.delete();
+    }
+
+    private String getProcessName() {
+        if(_name==null) {
+            if (context == null)
+                return "null";
+
+            StringBuilder sb = new StringBuilder(context.getTool());
+            sb.append(":");
+            switch (context.getFtpType()) {
+                case "ftp":
+                    sb.append(context.getLogType());
+                    break;
+                case "vftp_compat":
+                    sb.append(context.getCommand());
+                    break;
+                case "vftp_sss":
+                    sb.append(context.getDirectory());
+                    break;
+                default:
+                    sb.append("undef");
+            }
+            _name = sb.toString();
+        }
+        return _name;
     }
 
     public Status getStatus() {
