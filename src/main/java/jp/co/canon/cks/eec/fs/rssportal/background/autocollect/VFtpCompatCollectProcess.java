@@ -29,7 +29,7 @@ public class VFtpCompatCollectProcess extends CollectProcess {
         String[] machines = plan.getTool().split(",");
         String[] fabs = plan.getFab().split(",");
         String[] commands = plan.getCommand().split(",");
-        if(machines.length==0 || machines.length!=commands.length || machines.length!=fabs.length)
+        if(machines.length==0 || machines.length!=fabs.length)
             throw new CollectException(plan, "parameter exception");
 
         SimpleDateFormat dateFormat = Tool.getVFtpSimpleDateFormat();
@@ -48,8 +48,15 @@ public class VFtpCompatCollectProcess extends CollectProcess {
 
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.length; ++i) {
-            String command = String.format("%s_%s-%s", startTime, endTime, commands[i]);
-            list.add(new VFtpCompatDownloadRequestForm(fabs[i], machines[i], command));
+            for(String command: commands) {
+                String _command;
+                if(command.equals("")) {
+                    _command = String.format("get %s_%s", startTime, endTime);
+                } else {
+                    _command = String.format("get %s_%s-%s", startTime, endTime, command);
+                }
+                list.add(new VFtpCompatDownloadRequestForm(fabs[i], machines[i], _command, true));
+            }
         }
         requestList = list;
         requestFiles = list.size();

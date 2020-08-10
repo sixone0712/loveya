@@ -190,7 +190,7 @@ public abstract class CollectProcess implements Runnable {
             setStatus(PlanStatus.collected);
         } catch (CollectException e) {
             if(e.isError()) {
-                e.getMessage();
+                printError(e.getMessage());
                 setStatus(PlanStatus.suspended);
             } else {
                 setStatus(PlanStatus.collected);

@@ -102,7 +102,7 @@ public class FileDownloadExecutor {
                     break;
                 case "vftp_compat":
                     context.setAchieve(false);
-                    context.setAchieveDecompress(false);
+                    //context.setAchieveDecompress(false);
                     break;
             }
             downloadContexts.add(context);
