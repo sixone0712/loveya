@@ -116,7 +116,7 @@ class VftpDownloadControllerTest {
                 f.put("machineName", machine);
                 f.put("command", "IP_AS_RAW_ERR-DE_TEST_PR_2nd");
                 f.put("fileName", file.getFileName());
-                f.put("fileSize", file.getFileSize());
+                f.put("fileSize", (int)file.getFileSize());
                 lists.add(f);
             }
         }
