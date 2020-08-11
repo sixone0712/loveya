@@ -2,6 +2,7 @@ package jp.co.canon.ckbs.eec.fs.collect.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,7 @@ public class FtpDownloadFileRepository {
     @Value("${fileservice.collect.ftp.downloadDirectory}")
     String downloadDirectory;
 
-    @Value("${fileservice.collect.ftp.requestDirectory}")
-    String requestDirectory;
-
     File downDirFile;
-    File requestRootDir;
     ObjectMapper objectMapper = new ObjectMapper();
 
     Map<String, FtpDownloadRequest> requestMap = new HashMap<>();
@@ -29,10 +26,6 @@ public class FtpDownloadFileRepository {
         downDirFile = new File(downloadDirectory);
         if (!downDirFile.exists()){
             downDirFile.mkdirs();
-        }
-        requestRootDir = new File(requestDirectory);
-        if (!requestRootDir.exists()){
-            requestRootDir.mkdirs();
         }
     }
 
@@ -79,7 +72,6 @@ public class FtpDownloadFileRepository {
     public void addRequest(FtpDownloadRequest request) throws IOException{
         String requestDirStr = createRequestDirectory(request);
         request.setDirectory(requestDirStr);
-        this.writeRequest(request);
         requestMap.put(request.getRequestNo(), request);
     }
 
@@ -95,7 +87,7 @@ public class FtpDownloadFileRepository {
         synchronized (request) {
             File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
             requestDownDirectory.mkdirs();
-            File requestFile = new File(requestRootDir, request.getRequestNo() + ".json");
+            File requestFile = new File(requestDownDirectory, request.getRequestNo() + ".json");
             writeRequest(request, requestFile);
         }
     }
@@ -186,9 +178,9 @@ public class FtpDownloadFileRepository {
 
     void readDirectory(FtpDownloadRequest request) throws IOException {
         synchronized (request){
-            File requestDir = new File(downloadDirectory, request.getDirectory());
-            File error = new File(requestDir, "error.msg");
-            File requestFile = new File(requestRootDir, request.getRequestNo()+".json");
+            File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
+            File error = new File(requestDownDirectory, "error.msg");
+            File requestFile = new File(requestDownDirectory, request.getRequestNo()+".json");
 
             if (!requestFile.exists()){
                 return;
@@ -198,7 +190,7 @@ public class FtpDownloadFileRepository {
 
             if (request.isArchive()){
                 readDownFileList(request);
-                File zipFile = new File(requestDir, request.getRequestNo()+".zip");
+                File zipFile = new File(requestDownDirectory, request.getRequestNo()+".zip");
                 if (zipFile.exists()){
                     request.setArchiveFileName(zipFile.getName());
                     request.setArchiveFileSize(zipFile.length());
@@ -214,29 +206,19 @@ public class FtpDownloadFileRepository {
     }
 
     static void deleteDirectory(File dir){
-        if (dir.exists()){
-            File[] fileList = dir.listFiles();
-            if (fileList == null){
-                return;
-            }
-            for (File file : fileList){
-                if (file.isDirectory()){
-                    deleteDirectory(file);
-                    continue;
-                }
-                file.delete();
-            }
-            dir.delete();
+        try {
+            FileUtils.deleteDirectory(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     public void removeRequest(FtpDownloadRequest request){
         synchronized (request){
-            File requestFile = new File(requestRootDir, request.getRequestNo() + ".json");
+            File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
+            File requestFile = new File(requestDownDirectory, request.getRequestNo() + ".json");
             if (requestFile.exists()){
-                requestFile.delete();
-                File requestDir = new File(downloadDirectory, request.getDirectory());
-                deleteDirectory(requestDir);
+                deleteDirectory(requestDownDirectory);
             }
             requestMap.remove(request.getRequestNo());
         }

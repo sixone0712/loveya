@@ -4,29 +4,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StringToOtherTypeMap<T>{
-    Map<String, T> requestMap = new HashMap<>();
+    Map<String, T> map = new HashMap<>();
 
-    public void remove(String requestNo){
-        synchronized (requestMap){
-            requestMap.remove(requestNo);
+    public void remove(String key){
+        synchronized (map){
+            map.remove(key);
         }
     }
 
-    public T get(String requestNo){
-        synchronized (requestMap){
-            return requestMap.get(requestNo);
+    public T get(String key){
+        synchronized (map){
+            return map.get(key);
         }
     }
 
-    public void put(String requestNo, T request){
-        synchronized (requestMap){
-            requestMap.put(requestNo, request);
+    public void put(String key, T value){
+        synchronized (map){
+            map.put(key, value);
         }
     }
 
     public T[] getValues(){
-        synchronized (requestMap){
-            return (T[]) requestMap.values().toArray();
+        synchronized (map){
+            return (T[]) map.values().toArray();
         }
     }
 }

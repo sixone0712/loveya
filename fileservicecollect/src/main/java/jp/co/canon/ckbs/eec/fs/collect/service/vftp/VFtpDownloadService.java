@@ -24,14 +24,11 @@ public class VFtpDownloadService {
     @Value("${fileservice.collect.vftp.downloadDirectory}")
     String vftpDownloadDirectory;
 
-    @Value("${fileservice.collect.vftp.requestDirectory}")
-    String vftpRequestDirectory;
-
     @Autowired
     ConfigurationService configurationService;
 
     long lastRequestNumber = 0;
-    DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
+    DateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
     StringToOtherTypeMap<VFtpSssDownloadRequest> sssRequestMap = new StringToOtherTypeMap<>();
     StringToOtherTypeMap<SssDownloadProcessThread> sssRequestThreadMap = new StringToOtherTypeMap<>();
@@ -41,7 +38,6 @@ public class VFtpDownloadService {
 
     File workingDir;
     File downloadDir;
-    File requestDir;
 
     CompatDownloadRequestRepository compatDownloadRequestRepository;
     SssDownloadRequestRepository sssDownloadRequestRepository;
@@ -53,11 +49,9 @@ public class VFtpDownloadService {
         File configDir = new File(configDirectory);
         workingDir = new File(configDir, "Working");
         workingDir.mkdirs();
-        requestDir = new File(vftpRequestDirectory);
-        requestDir.mkdirs();
 
-        compatDownloadRequestRepository = new CompatDownloadRequestRepository(new File(requestDir, "COMPAT"), downloadDir);
-        sssDownloadRequestRepository = new SssDownloadRequestRepository(new File(requestDir, "SSS"), downloadDir);
+        compatDownloadRequestRepository = new CompatDownloadRequestRepository(downloadDir);
+        sssDownloadRequestRepository = new SssDownloadRequestRepository(downloadDir);
     }
 
     public synchronized void sssRequestCompleted(String requestNo){
@@ -74,7 +68,7 @@ public class VFtpDownloadService {
         compatRequestMap.remove(requestNo);
     }
 
-    Date generateRequestTime(){
+    synchronized Date generateRequestTime(){
         final Date currentTime = new Date();
         if (lastRequestNumber >= currentTime.getTime()){
             currentTime.setTime(lastRequestNumber + 1);
@@ -90,9 +84,17 @@ public class VFtpDownloadService {
         compatDownloadRequestRepository.stop();
     }
 
-    String generateRequestNoFromTime(Date requestTime, String machine){
+    String generateSssRequestNoFromTime(Date requestTime, String machine){
         StringBuilder builder = new StringBuilder()
-                .append("REQ_DOWN_")
+                .append("REQ_SSS_")
+                .append(machine).append("_")
+                .append(format.format(requestTime));
+        return builder.toString();
+    }
+
+    String generateCompatRequestNoFromTime(Date requestTime, String machine){
+        StringBuilder builder = new StringBuilder()
+                .append("REQ_COMPAT_")
                 .append(machine).append("_")
                 .append(format.format(requestTime));
         return builder.toString();
@@ -110,7 +112,7 @@ public class VFtpDownloadService {
         }
 
         Date requestTime = generateRequestTime();
-        String requestNo = generateRequestNoFromTime(requestTime, request.getMachine());
+        String requestNo = generateSssRequestNoFromTime(requestTime, request.getMachine());
         request.setRequestNo(requestNo);
         addRequest(request);
 
@@ -164,7 +166,7 @@ public class VFtpDownloadService {
         }
 
         Date requestTime = generateRequestTime();
-        String requestNo = generateRequestNoFromTime(requestTime, request.getMachine());
+        String requestNo = generateCompatRequestNoFromTime(requestTime, request.getMachine());
         request.setRequestNo(requestNo);
         addRequest(request);
 

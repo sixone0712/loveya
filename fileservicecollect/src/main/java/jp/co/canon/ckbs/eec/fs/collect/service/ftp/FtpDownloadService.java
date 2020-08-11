@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,7 +36,7 @@ public class FtpDownloadService {
 
     BlockingDeque<FtpDownloadRequest> mainQueue = new LinkedBlockingDeque<>();
     long lastRequestNumber = 0;
-    DateFormat format = new SimpleDateFormat("yyMMddHHmmssSSS");
+    DateFormat format = new SimpleDateFormat("yyyyMMddHHmmssSSS");
     List<FtpCommandExecutorThread> commandExecutorThreadList = new ArrayList<>();
 
     @PostConstruct
@@ -65,6 +66,7 @@ public class FtpDownloadService {
         }
     }
 
+    @PreDestroy
     public void stopAll(){
         for (FtpCommandExecutorThread commandExecutorThread : commandExecutorThreadList){
             commandExecutorThread.stop();
