@@ -27,23 +27,25 @@ const commandWriter = (element, string) => {
     };
 };
 
-const RSSCommandLine = () => {
+const RSSCommandLine = ({type, string, func}) => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const element = useRef();
-    const string = "get 20110811_000000_20110811_235959.log";
-
     const openModal = () => {
         setIsConfirmOpen(true);
     };
-
     const closeModal = () => {
         setIsConfirmOpen(false);
     };
 
     useEffect(() => {
+        console.log("===RSSCommandLine useEffect===");
+        console.log(string);
         setTimeout(() => {
             commandWriter(element.current, string).type();
         }, 500);
+        return ()=>{
+            console.log("===cleanup===");
+            console.log(string);}
     }, [string]);
 
     return (
@@ -58,6 +60,7 @@ const RSSCommandLine = () => {
                 <CardBody>
                     <div className="command-line">
                         Rapid Collector#
+                        { type == "compat/optional" ? " #get " : " #cd " }
                         <span className="command" ref={element} />
                     </div>
                     <Button color="info" outline onClick={openModal}>
@@ -73,7 +76,7 @@ const RSSCommandLine = () => {
                 rightBtn={"Cancel"}
                 style={"administrator"}
                 actionBg={closeModal}
-                actionLeft={closeModal}
+                actionLeft={func}
                 actionRight={closeModal}
             />
         </>

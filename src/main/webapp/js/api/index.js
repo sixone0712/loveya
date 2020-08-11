@@ -8,3 +8,4 @@ export * from './Login';
 export * from './Command';
 export * from './User';
 export * from './DownloadHistory';
+export * from './VftpCompat';

@@ -19,6 +19,7 @@ export const updateCommand = createAction(COMMAND_UPDATE, services.axiosAPI.requ
 export const getCommandList = createAction(COMMAND_GET_LIST, services.axiosAPI.requestGet);
 export const setCmdStartDate = createAction(COMMAND_SET_START_DATE);
 export const setCmdEndDate = createAction(COMMAND_SET_END_DATE);
+export const initializeCmd = createAction(COMMAND_INIT_ALL_LIST);
 
 const initialState = Map({
     CommandInfo : Map({

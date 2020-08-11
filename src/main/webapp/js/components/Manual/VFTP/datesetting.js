@@ -3,9 +3,9 @@ import { Card, CardBody, Col, FormGroup, Input, Label } from "reactstrap";
 import { DatetimePicker } from "rc-datetime-picker";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
-import moment from "moment";
 
-const RSSdatesettings = () => {
+
+const RSSdatesettings = ({from, handleChangeFromDate, to, handleChangeToDate}) => {
     return (
         <Card className="ribbon-wrapper formlist-card">
             <CardBody className="custom-scrollbar manual-card-body">
@@ -13,8 +13,8 @@ const RSSdatesettings = () => {
                 <Col>
                     <FormGroup className="formlist-form-group">
                         <div className="datepicker-item-area">
-                            <CreateDatetimePicker label={"From"} moment={moment().startOf("day")} />
-                            <CreateDatetimePicker label={"To"} moment={moment().endOf("day")} />
+                            <CreateDatetimePicker label={"From"} date={from} handleChange={date=> handleChangeFromDate(date)} />
+                            <CreateDatetimePicker label={"To"} date={to} handleChange={date=> handleChangeToDate(date)}/>
                         </div>
                     </FormGroup>
                 </Col>
@@ -23,10 +23,7 @@ const RSSdatesettings = () => {
     );
 };
 
-const CreateDatetimePicker = ({ label, moment }) => {
-    const [date, setDate] = useState(moment);
-    const handleChange = date => { setDate(date); };
-
+const CreateDatetimePicker = ({ label, date, handleChange}) => {
     return (
         <div className="datepicker-item">
             <Label>
