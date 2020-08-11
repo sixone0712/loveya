@@ -1,5 +1,6 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -162,9 +164,11 @@ public class PlanManager extends Thread {
             case "ftp":
                 p = new FtpCollectProcess(this, plan, planDao, downloader, log);
                 break;
-            case "vftp-compat":
-            case "vftp-sss": // TBD
+            case "vftp_compat":
                 p = new VFtpCompatCollectProcess(this, plan, planDao, downloader, log);
+                break;
+            case "vftp_sss":
+                p = new VFtpSssCollectProcess(this, plan, planDao, downloader, log);
                 break;
             default:
                 log.error("createCollectProcess: undefined plan type "+plan.getPlanType());
@@ -178,6 +182,23 @@ public class PlanManager extends Thread {
         for(CollectProcess process: collects) {
             list.add(process.getPlan());
         }
+        return list;
+    }
+
+    public List<CollectPlanVo> getPlans(int userId) {
+        List<CollectPlanVo> myList = new ArrayList<>();
+        List<CollectPlanVo> otherList = new ArrayList<>();
+        for(CollectProcess process: collects) {
+            if(process.getPlan().getOwner()==userId)
+                myList.add(process.getPlan());
+            else
+                otherList.add(process.getPlan());
+        }
+        Collections.sort(myList);
+        Collections.sort(otherList);
+        List<CollectPlanVo> list = new ArrayList<>();
+        list.addAll(myList);
+        list.addAll(otherList);
         return list;
     }
 

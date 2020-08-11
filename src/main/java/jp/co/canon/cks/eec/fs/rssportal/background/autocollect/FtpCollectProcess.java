@@ -1,18 +1,18 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
 import jp.co.canon.ckbs.eec.fs.collect.service.FileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.LogFileList;
-import jp.co.canon.ckbs.eec.fs.configuration.Category;
-import jp.co.canon.ckbs.eec.fs.manage.service.configuration.Machine;
+import jp.co.canon.cks.eec.fs.rssportal.background.DownloadRequestForm;
+import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
+import jp.co.canon.cks.eec.fs.rssportal.background.FtpDownloadRequestForm;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
-import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class FtpCollectProcess extends CollectProcess {
@@ -33,8 +33,8 @@ public class FtpCollectProcess extends CollectProcess {
         String[] categoryCodes = plan.getLogType().split(",");
         String[] categoryNames = plan.getLogTypeStr().split(",");
 
-        if(machines.length==0 || machines.length!=fabs.length || machines.length!=categoryCodes.length ||
-                machines.length!=categoryNames.length)
+        if(machines.length==0 || machines.length!=fabs.length || categoryCodes.length==0 ||
+                categoryCodes.length!=categoryNames.length)
             throw new CollectException(plan, "parameter exception");
 
         SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
@@ -101,6 +101,16 @@ public class FtpCollectProcess extends CollectProcess {
 
         for(FileInfo file: fileList.getList()) {
             if(file.getType().equalsIgnoreCase("D")) {
+                SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
+                try {
+                    long _timestamp = dateFormat.parse(file.getTimestamp()).getTime();
+                    long _start = dateFormat.parse(start).getTime();
+                    long _end = dateFormat.parse(end).getTime();
+                    if(_timestamp<_start || _timestamp>_end)
+                        continue;
+                } catch (ParseException e) {
+                    log.warn("timestamp parsing failed");
+                }
                 getFileList(list, machine, fab, categoryCode, categoryName, start, end, keyword, file.getFilename());
             } else {
                 form.addFile(file.getFilename(), file.getSize(), file.getTimestamp());

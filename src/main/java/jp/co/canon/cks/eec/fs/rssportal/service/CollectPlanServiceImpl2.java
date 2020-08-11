@@ -1,6 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.service;
 
-import jp.co.canon.cks.eec.fs.rssportal.background.PlanManager;
+import jp.co.canon.cks.eec.fs.rssportal.background.autocollect.PlanManager;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
@@ -82,6 +82,11 @@ public class CollectPlanServiceImpl2 implements CollectPlanService {
     }
 
     @Override
+    public List<CollectPlanVo> getAllPlans(int userId) {
+        return manager.getPlans(userId);
+    }
+
+    @Override
     public List<CollectPlanVo> getAllPlansBySchedulePriority() {
         return null;
     }
@@ -151,7 +156,7 @@ public class CollectPlanServiceImpl2 implements CollectPlanService {
     public int modifyPlan(int planId, String planType, int userId, String planName, List<String> fabs, List<String> tools, List<String> commandsOrDirectories, Date collectStart, Date start, Date end, String collectType, long interval, String description) {
 
         CollectPlanVo plan;
-        if(planType.equalsIgnoreCase("vftp-compat"))
+        if(planType.equalsIgnoreCase("vftp_compat"))
             plan = createVFtpCompatPlanObject(userId, planName, fabs, tools, commandsOrDirectories, collectStart, start, end, collectType, interval, description);
         else
             plan = createVFtpSssPlanObject(userId, planName, fabs, tools, commandsOrDirectories, collectStart, start, end, collectType, interval, description);

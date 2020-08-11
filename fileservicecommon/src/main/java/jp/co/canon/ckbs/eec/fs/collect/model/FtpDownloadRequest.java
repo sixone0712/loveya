@@ -6,35 +6,12 @@ import lombok.Setter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FtpDownloadRequest {
-    public enum Status{
-        EXECUTED,
-        ERROR,
-        CANCEL,
-        WAIT,
-        EXECUTING
-    }
-
-    @Getter @Setter
-    String requestNo;
-
-    @Getter @Setter
-    String machine;
-
+public class FtpDownloadRequest extends FtpRequest{
     @Getter @Setter
     String category;
 
     @Getter @Setter
-    long timestamp;
-
-    @Getter @Setter
-    Status status;
-
-    @Getter @Setter
     String result;
-
-    @Getter @Setter
-    long completedTime;
 
     @Getter @Setter
     boolean archive;

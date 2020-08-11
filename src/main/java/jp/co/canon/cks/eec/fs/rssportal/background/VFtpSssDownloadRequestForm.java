@@ -15,7 +15,7 @@ public class VFtpSssDownloadRequestForm extends DownloadRequestForm{
     private List<FileInfo> files;
 
     public VFtpSssDownloadRequestForm(String fab, String machine, String directory) {
-        super("vftp-sss", fab, machine);
+        super("vftp_sss", fab, machine);
         this.directory = directory;
         files = new ArrayList<>();
     }

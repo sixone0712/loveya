@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.sql.Timestamp;
 
 @Setter @Getter
-public class CollectPlanVo {
+public class CollectPlanVo implements Comparable<CollectPlanVo> {
 
     private int id;
     private String planType;
@@ -36,6 +36,11 @@ public class CollectPlanVo {
     private String status;
     private String detail;
     private String collectTypeStr;
+
+    @Override
+    public int compareTo(CollectPlanVo o) {
+        return this.id-o.getId();
+    }
 
     @Override
     public String toString() {

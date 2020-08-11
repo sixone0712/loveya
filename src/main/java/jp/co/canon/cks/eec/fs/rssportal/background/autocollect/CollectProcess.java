@@ -1,6 +1,7 @@
-package jp.co.canon.cks.eec.fs.rssportal.background;
+package jp.co.canon.cks.eec.fs.rssportal.background.autocollect;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
+import jp.co.canon.cks.eec.fs.rssportal.background.*;
 import jp.co.canon.cks.eec.fs.rssportal.common.Tool;
 import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
@@ -38,6 +39,9 @@ public abstract class CollectProcess implements Runnable {
     protected List<DownloadRequestForm> requestList;
     protected List<String> failMachines;
     protected long requestFiles;
+
+    private String downloadId;
+    private long updatedFiles;
 
     protected long currentMillis;
     private Timestamp jobStartTime;
@@ -78,6 +82,8 @@ public abstract class CollectProcess implements Runnable {
         requestList = new ArrayList<>();
         failMachines = new ArrayList<>();
         requestFiles = 0;
+        downloadId = null;
+        updatedFiles = 0;
         currentMillis = System.currentTimeMillis();
         jobStartTime = getTimestamp();
         jobDoneTime = null;
@@ -93,92 +99,108 @@ public abstract class CollectProcess implements Runnable {
         notifyJobDone.run();
     }
 
-    private Runnable[] pipes = {this::_listupFiles, this::_download, this::_copyFiles, this::_compress};
+    private CollectPipe[] pipes = {this::_listFiles, this::_download, this::_copyFiles, this::_compress};
 
-    private void _listupFiles() {
+    private void _listFiles() throws CollectException {
+        printInfo("listFiles");
+        String status = plan.getLastStatus();
+        if(status.equals("completed") || status.equals("halted")) {
+            throw new CollectException(plan, "collecting status failed");
+        }
 
+        try {
+            createDownloadFileList();
+        } catch (InterruptedException e) {
+            log.info("stop collecting");
+            __exit0();
+        }
     }
 
-    private void _download() {
+    private void _download() throws CollectException {
+        printInfo("download");
+        if(requestList==null)
+            throw new CollectException(plan, "null collect file list");
+        if(requestFiles==0) {
+            log.info("no files to collect");
+            __exit0();
+        }
 
+        CollectType collectType = CollectType.valueOf(plan.getPlanType());
+        downloadId = downloader.addRequest(collectType, requestList);
+
+        String status;
+        do {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                log.info("stop downloading");
+                __exit0();
+            }
+            status = downloader.getStatus(downloadId);
+        } while(status.equalsIgnoreCase("in-progress"));
+
+        if(!status.equalsIgnoreCase("done")) {
+            log.error("file download failed");
+            throw new CollectException(plan, "file download failed");
+        }
     }
 
-    private void _copyFiles() {
+    private void _copyFiles() throws CollectException {
+        printInfo("copyFiles");
+        if(downloadId==null || downloadId.isEmpty())
+            throw new CollectException(plan, "null downloadId");
 
+        try {
+            updatedFiles = copyFiles(plan, downloader.getBaseDir(downloadId));
+        } catch (IOException e) {
+            log.error("copying files failed");
+            throw new CollectException(plan, "copying files failed");
+        }
+        log.info("collecting complete. copied="+updatedFiles);
     }
 
-    private void _compress() {
+    private void _compress() throws CollectException {
+        if(updatedFiles>0) {
+            printInfo("compress");
+            String out = compress(plan);
+            if (out == null) {
+                log.error("compressing failed");
+                throw new CollectException(plan, "compressing failed");
+            }
+            manager.addCollectLog(plan, out);
+            printInfo("output="+out);
+        }
+    }
 
+    private void __exit0() throws CollectException {
+        throw new CollectException(plan, false);
     }
 
     @Override
     public void run() {
 
         startProc();
-        PlanStatus result = PlanStatus.collected;
-        PlanStatus lastStatus = PlanStatus.valueOf(plan.getLastStatus());
-
         setStatus(PlanStatus.collecting);
-        List<DownloadRequestForm> downloadList = null;
-        long totalFiles = 0;
 
         try {
-            createDownloadFileList();
-        } catch (InterruptedException e) {
-            printInfo("interrupt occurs on creating list");
-            setStatus(lastStatus);
-            doneProc();
-        } catch (CollectException e) {
-            log.info("failed to create file list");
-            e.printStackTrace();
-        }
-
-        if(totalFiles>0) {
-            try {
-                String downloadId = downloader.addRequest(downloadList);
-                printInfo("downloading start");
-                while(downloader.getStatus(downloadId).equalsIgnoreCase("in-progress")) {
-                    Thread.sleep(500);
-                }
-                printInfo("download done");
-
-                if(!downloader.getStatus(downloadId).equalsIgnoreCase("done")) {
-                    printError("file download failed");
-                    result = PlanStatus.suspended;
-                } else {
-                    int copied = copyFiles(plan, downloader.getBaseDir(downloadId));
-                    printInfo("updated "+copied+" files");
-                    if(copied==0) {
-                        printInfo("collection complete.. but no updated files");
-                    } else {
-                        String outputPath = compress(plan);
-                        if(outputPath==null) {
-                            printError("failed to pack logs");
-                            result = PlanStatus.suspended;
-                        } else {
-                            manager.addCollectLog(plan, outputPath);
-                            plan.setLastPoint(new Timestamp(expectedLastPoint));
-                            printInfo(copied + " files collecting success");
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                printInfo("interrupt occurs, restore status "+lastStatus.name());
-                setStatus(lastStatus);
-                doneProc();
-                return;
-            } catch (IOException e) {
-                printError("copyFiles error");
-                e.printStackTrace();
+            for(CollectPipe pipe: pipes) {
+                pipe.run();
             }
-        } else {
-            printInfo("no files to collect");
+            printInfo("all pipe finished");
+            setStatus(PlanStatus.collected);
+        } catch (CollectException e) {
+            if(e.isError()) {
+                printError(e.getMessage());
+                setStatus(PlanStatus.suspended);
+            } else {
+                setStatus(PlanStatus.collected);
+            }
         }
-        setStatus(result);
         plan.setLastCollect(getTimestamp());
         schedule();
         push();
         doneProc();
+
     }
 
     private void pull() {

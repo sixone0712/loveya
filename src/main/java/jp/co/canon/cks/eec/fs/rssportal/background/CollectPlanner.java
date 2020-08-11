@@ -92,7 +92,7 @@ public class CollectPlanner extends Thread {
         int totalFiles = downloadList.stream().mapToInt(item -> ((FtpDownloadRequestForm)item).getFiles().size()).sum();
 
         if (totalFiles != 0) {
-            String downloadId = downloader.addRequest(downloadList);
+            String downloadId = downloader.addRequest(CollectType.ftp, downloadList);
             while (downloader.getStatus(downloadId).equalsIgnoreCase("in-progress"))
                 sleep(500);
 

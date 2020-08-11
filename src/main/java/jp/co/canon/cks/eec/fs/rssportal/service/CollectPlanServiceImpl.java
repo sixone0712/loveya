@@ -138,6 +138,10 @@ public class CollectPlanServiceImpl implements CollectPlanService {
         return dao.findAll();
     }
 
+    @Override
+    public List<CollectPlanVo> getAllPlans(int userId) {
+        return null;
+    }
 
     @Override
     public List<CollectPlanVo> getAllPlansBySchedulePriority() {

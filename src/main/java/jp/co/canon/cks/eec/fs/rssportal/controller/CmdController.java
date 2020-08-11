@@ -129,7 +129,7 @@ public class CmdController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
         }
 
-        if(serviceCmd.deleteCmd(commandId)) {
+        if(!serviceCmd.deleteCmd(commandId)) {
             error.setReason(RSSErrorReason.INTERNAL_ERROR);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);

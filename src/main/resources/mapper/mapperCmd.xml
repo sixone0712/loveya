@@ -4,7 +4,7 @@
 <mapper namespace="cmd">
 
     <select id="selectAll" resultType="CommandVo">
-        select * from rsss."cmd" where validity is true
+        select * from rsss."cmd" where validity is true order by id asc
     </select>
 
     <select id="select" resultType="CommandVo">
@@ -76,5 +76,6 @@
         <if test="cmd_type!=null and cmd_type!=''">
             and cmd_type = #{cmd_type}
         </if>
+        order by id asc
     </select>
 </mapper>
