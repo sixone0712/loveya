@@ -37,8 +37,8 @@ function convertCommand (cmd, sDate,eDate) {
     if (eDate) {
         cmdString += (moment(eDate).format(formatDate));
     }
-    if (cmd) {
-        cmdString += ('-' + "DE_TEST");
+    if (cmd !== '') {
+        cmdString += ('-' + cmd);
     }
 
     console.log("eDate" + eDate);
@@ -79,6 +79,7 @@ const ManualVftpCompat = (props) => {
     const [command, setCommand] = useState(props.command);
     const [fromDate, setFromDate] = useState(props.startDate);
     const [toDate, setToDate] = useState(props.endDate);
+    const dbCommand = API.vftpConvertDBCommand(props.dbCommand.get("lists").toJS());
     const modalMsglist ={
         cancel: "Are you sure want to cancel the download?",
         process: "downloading.....",
@@ -94,12 +95,13 @@ const ManualVftpCompat = (props) => {
 
     useEffect(()=>{
         console.log("==== ManualVftpCompat Command Update ====");
-        setCommand(convertCommand("",fromDate,toDate));
-        API.vftpCompatSetRequestCommand(props,command);
-        API.vftpCompatSetRequestEndDate(props,toDate);
-        API.vftpCompatSetRequestStartDate(props,fromDate);
+        const selectCmd = dbCommand.find(item => item.checked && item.cmd_type === "vftp_compat");
+        setCommand(convertCommand(selectCmd === undefined ? "" : selectCmd.cmd_name, fromDate, toDate));
+        API.vftpCompatSetRequestCommand(props, command);
+        API.vftpCompatSetRequestEndDate(props, toDate);
+        API.vftpCompatSetRequestStartDate(props, fromDate);
         console.log("=====================================");
-    },[fromDate,toDate]);
+    },[fromDate, toDate, dbCommand]);
 
     return (
         <>

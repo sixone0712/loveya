@@ -6,12 +6,14 @@ import ReactTransitionGroup from "react-addons-css-transition-group";
 import { connect } from "react-redux";
 import {bindActionCreators} from "redux";
 import * as commandActions from "../../../modules/command";
+import * as CompatActions from "../../../modules/vftpCompat";
 import services from "../../../services";
+import * as API from "../../../api";
 
 const UNIQUE_COMMAND = "not use.";
 
 const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
-    const commandList = dbCommand.get("lists").toJS();
+    const commandList = API.vftpConvertDBCommand(dbCommand.get("lists").toJS());
     const [selectCommand, setSelectCommand] = useState(-1);
     const [actionId, setActionId] = useState(-1);
     const [currentCommand, setCurrentCommand] = useState("");
@@ -75,9 +77,11 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
 
         if (duplicateArray.length !== 0 || lowerCommand === UNIQUE_COMMAND) {
             setErrorMsg("This command is duplicate.");
+        } else if (lowerCommand.length === 0) {
+            setErrorMsg("The command is Empty.");
         } else {
             const addData = {
-                cmd_name: currentCommand,
+                cmd_name: `%s-%s-${currentCommand}`,
                 cmd_type: cmdType
             }
             try {
@@ -103,9 +107,11 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
 
         if ((duplicateArray.length !== 0 && duplicateArray[0].id !== actionId) || lowerCommand === UNIQUE_COMMAND) {
             setErrorMsg("This command is duplicate.");
+        } else if (lowerCommand.length === 0) {
+            setErrorMsg("The command is Empty.");
         } else {
             const editItem = {
-                cmd_name: currentCommand
+                cmd_name: `%s-%s-${currentCommand}`
             }
             try {
                 const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, editItem);
