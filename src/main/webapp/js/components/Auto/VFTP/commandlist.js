@@ -63,9 +63,9 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
             let currentCommand = "";
 
             if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                currentCommand = currentContext;
+                currentCommand = "%s-%s-" + currentContext;
             } else {
-                currentCommand = currentContext.length > 0 ? currentDataType + "-" + currentContext : currentDataType;
+                currentCommand = currentContext.length > 0 ? currentDataType + "-%s-%s-" + currentContext : currentDataType + "-%s-%s";
             }
 
             const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase());
@@ -106,9 +106,9 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
             let currentCommand = "";
 
             if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                currentCommand = currentContext;
+                currentCommand = "%s-%s-" + currentContext;
             } else {
-                currentCommand = currentContext.length > 0 ? currentDataType + "-" + currentContext : currentDataType;
+                currentCommand = currentContext.length > 0 ? currentDataType + "-%s-%s-" + currentContext : currentDataType + "-%s-%s";
             }
 
             const duplicateArray = commandList.filter(command => {
@@ -157,7 +157,7 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                 if (deleteItem.checked) {
                     newCount--;
                 }
-                setItemsChecked(commandList.length - 1 === newCount);
+                setItemsChecked(commandList.length - 1 < 1 ? false : commandList.length - 1 === newCount);
                 setCheckedCount(newCount);
             }
         } catch (e) {
@@ -202,13 +202,13 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
         setIsEditOpen(true);
         setActionId(id);
         if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-            setCurrentContext(value);
+            setCurrentContext(value.replace("%s-%s-", ""));
         } else {
-            if (value.indexOf("-") === -1) {
-                setCurrentDataType(value);
+            if (value.endsWith("%s")) {
+                setCurrentDataType(value.replace("-%s-%s", ""));
             } else {
-                setCurrentDataType(value.split("-")[0]);
-                setCurrentContext(value.split("-")[1]);
+                setCurrentDataType(value.split("-%s-%s-")[0]);
+                setCurrentContext(value.split("-%s-%s-")[1]);
             }
         }
     }, []);
@@ -277,6 +277,7 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                         query={query}
                         editModal={openEditModal}
                         deleteModal={openDeleteModal}
+                        type={type}
                     />
                 </Col>
             </div>
@@ -512,12 +513,14 @@ const CreateCommandList = React.memo(({
     checkHandler,
     query,
     editModal,
-    deleteModal
+    deleteModal,
+    type
 }) => {
         let filteredData = [];
+        const regex = /[-|%s]/g;
 
         if (query.length > 0) {
-            filteredData = commandList.filter(command => command.cmd_name.toLowerCase().includes(query.toLowerCase()));
+            filteredData = commandList.filter(command => command.cmd_name.replace(regex, "").toLowerCase().includes(query.toLowerCase()));
         } else {
             filteredData = commandList;
         }
@@ -527,6 +530,16 @@ const CreateCommandList = React.memo(({
                 {filteredData.length > 0 ? (
                     <ul>
                         {filteredData.map((command, index) => {
+                            let displayCommand = "";
+                            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                                displayCommand = command.cmd_name.replace("%s-%s-", "");
+                            } else {
+                                if (command.cmd_name.endsWith("%s")) {
+                                    displayCommand = command.cmd_name.replace("-%s-%s", "");
+                                } else {
+                                    displayCommand = command.cmd_name.replace("-%s-%s-", "-");
+                                }
+                            }
                             return (
                                 <li className="custom-control custom-checkbox" key={index}>
                                     <input
@@ -541,7 +554,7 @@ const CreateCommandList = React.memo(({
                                         className="custom-control-label form-check-label"
                                         htmlFor={command.id}
                                     >
-                                        {command.cmd_name}
+                                        {displayCommand}
                                     </label>
                                     <span className="icon" onClick={() => deleteModal(command.id)}>
                                     <FontAwesomeIcon icon={faTimes}/>
