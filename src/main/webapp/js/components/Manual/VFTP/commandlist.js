@@ -1,30 +1,19 @@
-import React, { useState, useCallback } from "react";
+import React, {useState, useCallback, useEffect} from "react";
 import { Card, CardBody, Col, FormGroup, Button, Input, CustomInput } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faPencilAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
+import { connect } from "react-redux";
+import {bindActionCreators} from "redux";
+import * as commandActions from "../../../modules/command";
+import services from "../../../services";
 
-const DEFAULT_COMMAND_ID = "command_0";
 const UNIQUE_COMMAND = "not use.";
-const initialCommandList = [
-    {
-        id: "command_1",
-        value: "TEST_COMMAND_1234"
-    },
-    {
-        id: "command_2",
-        value: "TEST_COMMAND_12345"
-    },
-    {
-        id: "command_3",
-        value: "TEST_COMMAND_123456"
-    }
-];
 
-const RSScommandlist = () => {
-    const [commandList, setCommandList] = useState(initialCommandList);
-    const [selectCommand, setSelectCommand] = useState(DEFAULT_COMMAND_ID);
-    const [actionId, setActionId] = useState("");
+const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
+    const commandList = dbCommand.get("lists").toJS();
+    const [selectCommand, setSelectCommand] = useState(-1);
+    const [actionId, setActionId] = useState(-1);
     const [currentCommand, setCurrentCommand] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [isNewOpen, setIsNewOpen] = useState(false);
@@ -33,6 +22,11 @@ const RSScommandlist = () => {
     /* const [isAlertOpen, setIsAlertOpen] = useState(false); */
 
     const handleCommandChange = useCallback(id => {
+        if(id === -1) {
+            commandActions.commandCheckAllList(false);
+        } else {
+            commandActions.commandCheckOnlyOneList(id);
+        }
         setSelectCommand(id);
     }, []);
 
@@ -59,14 +53,14 @@ const RSScommandlist = () => {
 
     const closeEditModal = useCallback(() => {
         setIsEditOpen(false);
-        setActionId("");
+        setActionId(-1);
         setCurrentCommand("");
         setErrorMsg("");
     }, []);
 
     const closeDeleteModal = useCallback(() => {
         setIsDeleteOpen(false);
-        setActionId("");
+        setActionId(-1);
     }, []);
 
     const onTextChange = useCallback(e => {
@@ -74,46 +68,78 @@ const RSScommandlist = () => {
         setErrorMsg("");
     }, []);
 
-    const addCommand = useCallback(() => {
+    const addCommand = useCallback(async () => {
         const lowerCommand = currentCommand.toLowerCase();
-        const duplicateArray = commandList.filter(command => command.value.toLowerCase() === lowerCommand);
+
+        const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === lowerCommand);
 
         if (duplicateArray.length !== 0 || lowerCommand === UNIQUE_COMMAND) {
             setErrorMsg("This command is duplicate.");
         } else {
-            const commandItem = { id: "command_" + commandList.length + 1, value: currentCommand };
-            setCommandList(commandList => commandList.concat(commandItem));
-            setIsNewOpen(false);
-            setCurrentCommand("");
-            setErrorMsg("");
+            const addData = {
+                cmd_name: currentCommand,
+                cmd_type: cmdType
+            }
+            try {
+                const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", addData);
+                const { data: { id } } = res;
+                await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
+                await commandActions.commandCheckOnlyOneList(id);
+                setSelectCommand(id)
+
+                setIsNewOpen(false);
+                setCurrentCommand("");
+                setErrorMsg("");
+            } catch (e) {
+                // 에러 처리
+                console.log(e.message())
+            }
         }
     }, [commandList, currentCommand]);
 
-    const saveCommand = useCallback(() => {
+    const editCommand = useCallback(async () => {
         const lowerCommand = currentCommand.toLowerCase();
-        const duplicateArray = commandList.filter(command => command.value.toLowerCase() === lowerCommand);
+        const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === lowerCommand);
 
         if ((duplicateArray.length !== 0 && duplicateArray[0].id !== actionId) || lowerCommand === UNIQUE_COMMAND) {
             setErrorMsg("This command is duplicate.");
         } else {
-            const result = commandList.filter(command => command.id !== actionId);
-            const commandItem = { id: actionId, value: currentCommand };
-            result.push(commandItem);
-            result.sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
-            setCommandList(result);
-            setIsEditOpen(false);
-            setActionId("");
-            setCurrentCommand("");
-            setErrorMsg("");
+            const editItem = {
+                cmd_name: currentCommand
+            }
+            try {
+                const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, editItem);
+                await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
+                if(selectCommand !== -1) {
+                    await commandActions.commandCheckOnlyOneList(selectCommand);
+                }
+                setIsEditOpen(false);
+                setActionId(-1);
+                setCurrentCommand("");
+                setErrorMsg("");
+            } catch (e) {
+                // 에러 처리
+                console.log(e.message())
+            }
         }
-    }, [commandList, actionId, currentCommand]);
+    }, [commandList, actionId, currentCommand, selectCommand]);
 
-    const deleteCommand = useCallback(() => {
-        setCommandList(commandList => commandList.filter(command => command.id !== actionId));
-        setSelectCommand(selectCommand === actionId ? DEFAULT_COMMAND_ID : selectCommand);
-        setIsDeleteOpen(false);
-        setActionId("");
-    }, [actionId]);
+    const deleteCommand = useCallback(async () => {
+        try {
+            const res = await services.axiosAPI.requestDelete(`/rss/api/vftp/command/${actionId}`);
+            await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
+            if(commandList.length == 0 || actionId === selectCommand) {
+                setSelectCommand(-1);
+            } else {
+                await commandActions.commandCheckOnlyOneList(selectCommand);
+            }
+            setIsDeleteOpen(false);
+            setActionId(-1);
+        } catch (e) {
+            // 에러 처리
+            console.log(e.message())
+        }
+    }, [actionId, selectCommand]);
 
     return (
         <>
@@ -126,11 +152,11 @@ const RSScommandlist = () => {
                                 <li>
                                     <CustomInput
                                         type="radio"
-                                        id="command_0"
-                                        name="command"
+                                        id={-1}
+                                        name="notUse"
                                         label="not use."
-                                        checked={selectCommand === DEFAULT_COMMAND_ID}
-                                        onChange={() => handleCommandChange(DEFAULT_COMMAND_ID)}
+                                        checked={selectCommand === -1}
+                                        onChange={() => handleCommandChange(-1)}
                                     />
                                 </li>
                                 <CreateCommandList
@@ -164,7 +190,7 @@ const RSScommandlist = () => {
                 editOpen={isEditOpen}
                 deleteOpen={isDeleteOpen}
                 actionNew={addCommand}
-                actionEdit={saveCommand}
+                actionEdit={editCommand}
                 actionDelete={deleteCommand}
                 closeNew={closeAddModal}
                 closeEdit={closeEditModal}
@@ -310,15 +336,15 @@ const CreateCommandList = React.memo(({ commandList, selectCommand, commandChang
                         <CustomInput
                             type="radio"
                             id={command.id}
-                            name={command.value}
-                            label={command.value}
-                            checked={selectCommand === command.id}
+                            name={command.cmd_name}
+                            label={command.cmd_name}
+                            checked={command.checked}
                             onChange={() => commandChanger(command.id)}
                         />
                         <span className="icon" onClick={() => deleteModal(command.id)}>
                             <FontAwesomeIcon icon={faTimes} />
                         </span>
-                        <span className="icon" onClick={() => editModal(command.id, command.value)}>
+                        <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
                             <FontAwesomeIcon icon={faPencilAlt} />
                         </span>
                     </li>
@@ -328,4 +354,11 @@ const CreateCommandList = React.memo(({ commandList, selectCommand, commandChang
     );
 });
 
-export default RSScommandlist;
+export default connect(
+  (state) => ({
+      dbCommand: state.command.get('command'),
+  }),
+  (dispatch) => ({
+      commandActions: bindActionCreators(commandActions, dispatch),
+  })
+)(RSScommandlist);

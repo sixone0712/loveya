@@ -110,7 +110,7 @@ const ManualVftpCompat = (props) => {
                 </Breadcrumb>
                 <Row>
                     <Col className="machinelist"><Machinelist/></Col>
-                    <Col><Commandlist /></Col>
+                    <Col><Commandlist cmdType={"vftp_compat"}/></Col>
                     <Col className="datesetting">
                         <Datesetting from={fromDate} handleChangeFromDate={setFromDate}
                                      to={toDate} handleChangeToDate={setToDate} />
@@ -135,6 +135,7 @@ export default connect(
         startDate:state.vftpCompat.get('startDate'),
         endDate:state.vftpCompat.get('endDate'),
         command:state.vftpCompat.getIn(['requestList', "command"]),
+        dbCommand: state.command.get('command'),
     }),
     (dispatch) => ({
         commandActions: bindActionCreators(commandActions, dispatch),

@@ -13,10 +13,11 @@ export const getRequestList = (props) => {
 };
 
 export const vftpCompatInitAll = (props) => {
-    const {CompatActions, commandActions} = props;
+    const {CompatActions, commandActions, viewListActions} = props;
+    viewListActions.viewCheckAllToolList(false);
     CompatActions.vftpCompatInitAll();
     commandActions.commandInit();
-    commandActions.commandLoadList("/rss/api/vftp/command");
+    commandActions.commandLoadList("/rss/api/vftp/command?type=vftp_compat");
 }
 export const vftpCompatSetRequestMachine = (props, machine) => {
     const { CompatActions } = props;
