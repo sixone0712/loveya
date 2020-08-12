@@ -347,7 +347,7 @@ public class VftpDownloadController {
             String machineName = (String) item.get("machineName");
             String directory = (String) item.get("command");
             String fileName = (String) item.get("fileName");
-            long fileSize = (long) item.get("fileSize");
+            long fileSize = ((Integer)item.get("fileSize")).longValue();
 
             for(DownloadRequestForm _form: list) {
                 VFtpSssDownloadRequestForm form = (VFtpSssDownloadRequestForm)_form;

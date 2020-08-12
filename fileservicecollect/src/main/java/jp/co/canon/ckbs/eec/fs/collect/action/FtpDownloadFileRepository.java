@@ -72,6 +72,9 @@ public class FtpDownloadFileRepository {
     public void addRequest(FtpDownloadRequest request) throws IOException{
         String requestDirStr = createRequestDirectory(request);
         request.setDirectory(requestDirStr);
+        File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
+        requestDownDirectory.mkdirs();
+
         requestMap.put(request.getRequestNo(), request);
     }
 
@@ -180,12 +183,6 @@ public class FtpDownloadFileRepository {
         synchronized (request){
             File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
             File error = new File(requestDownDirectory, "error.msg");
-            File requestFile = new File(requestDownDirectory, request.getRequestNo()+".json");
-
-            if (!requestFile.exists()){
-                return;
-            }
-
             readDirectoryFiles(request);
 
             if (request.isArchive()){
