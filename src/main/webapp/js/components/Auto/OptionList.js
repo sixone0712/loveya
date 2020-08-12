@@ -351,7 +351,7 @@ class RSSautoformlist extends Component {
                 <div className="Custom-modal-overlay" onClick={this.closeModal} />
                 <div className="Custom-modal auto-plan-calendar-modal">
                   <p className="title">Date Setting</p>
-                  <div className="auto-plan-calendar-modal content-with-title">
+                  <div className="content-with-title">
                     <FormGroup>
                       <CreateDatetimePicker
                           moment={this.getDateValue(currentModal)}

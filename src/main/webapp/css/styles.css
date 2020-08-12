@@ -1948,7 +1948,7 @@ a:hover {
 
 .auto-plan-card-body ul.wizard-step li {
   font-size: 14px;
-  margin-bottom: 30px;
+  margin-bottom: 4.6rem;
 }
 
 .auto-plan-card-body ul.wizard-step li:last-child {
@@ -2023,8 +2023,6 @@ a:hover {
 
 .auto-plan-card-body ul.wizard-step li > div .step-label {
   padding: 0 10px;
-  -webkit-transition: all 0.2s;
-  transition: all 0.2s;
   cursor: inherit;
 }
 
@@ -2567,16 +2565,6 @@ a:hover {
 
 .command-list li > .icon:hover {
   opacity: 0.9;
-}
-
-.command-modal-input {
-  margin-top: 1em;
-}
-
-.command-modal-input:focus,
-.command-modal-input:hover {
-  border-color: rgb(92, 124, 250);
-  box-shadow: 0 0 0 0.2em rgba(92, 124, 250, 0.5);
 }
 
 span.error {

@@ -336,7 +336,7 @@ class RSSautoplanwizard extends Component {
                     {type === Define.PLAN_TYPE_FTP ? (
                         <Target isNew={isNew} />
                     ) : (
-                        <Command isNew={isNew} />
+                        <Command isNew={isNew} type={type}/>
                     )}
                   </CarouselItem>
                   <CarouselItem key={wizardStep.OPTION}>

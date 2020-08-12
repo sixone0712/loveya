@@ -45,114 +45,106 @@
   }
   &.auto-plan-calendar-modal {
     width: 300px;
+    & > .content-with-title {
+      display: flex;
+      justify-content: center;
+      & > .form-group {
+        margin-top: 1rem;
+        margin-bottom: 1rem !important;
+        & > .datetime-picker {
+          transition: all 0.2s;
+          .fa-angle-left::before,
+          .fa-angle-right::before {
+            font-style: normal;
+            color: rgb(92, 124, 250);
+            cursor: pointer;
+          }
+          .fa-angle-left::before {
+            content: "\25c0";
+          }
+          .fa-angle-right::before {
+            content: "\25b6";
+          }
+          .calendar {
+            .calendar-nav .current-date:hover,
+            .calendar-nav button:hover,
+            table tbody tr td:hover {
+              background-color: rgb(230, 230, 230);
+            }
+            table tbody tr td {
+              &.selected {
+                background-color: rgb(92, 124, 250);
+                color: white !important;
+                font-weight: 400;
+                &:hover {
+                  background-color: rgba(92, 124, 250, 0.7);
+                  color: white;
+                }
+              }
+              &.now {
+                color: rgb(92, 124, 250);
+                font-weight: 400;
+              }
+            }
+          }
+          .time {
+            & > .show-time {
+              font-size: 14px;
+              margin: 0 10px;
+            }
+            & > .sliders {
+              flex: 0 1 100%;
+              & > .slider .thumb {
+                top: 3px;
+                &:focus,
+                &:active {
+                  background-color: rgb(92, 124, 250);
+                  border-color: rgb(92, 124, 250);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    & > .button-wrap {
+      margin: 0;
+    }
   }
-  &.auto-plan-alert-modal.execute-command-list {
+  &.auto-plan-alert-modal.execute-command-list,
+  &.auto-plan-confirm-modal.command {
     width: 1000px;
   }
-  &.auto-plan-calendar-modal .content-with-title,
-  &.auto-plan-alert-modal .content-with-title,
-  &.auto-plan-confirm-modal .content-with-title {
-    border-top: 1px solid rgb(92, 124, 250);
-  }
-  &.auto-plan-calendar-modal .button-wrap {
-    margin: 0;
+  &.auto-plan-calendar-modal,
+  &.auto-plan-alert-modal,
+  &.auto-plan-confirm-modal {
+    & > .content-with-title {
+      border-top: 1px solid rgb(92, 124, 250);
+    }
   }
   p.title {
     font-size: 16px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 4px
-  }
-  p.title.font-lg {
-    font-size: 20px;
+    margin-bottom: 4px;
+    &.font-lg {
+      font-size: 20px;
+    }
   }
   .Custom-ratio label {
     height: 130px !important;
   }
-  .auto-plan-calendar-modal {
-    display: flex;
-    justify-content: center;
-  }
-  .auto-plan-calendar-modal .form-group {
-    margin-top: 1rem;
-    margin-bottom: 1rem !important;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .fa-angle-left::before {
-    font-style: normal;
-    content: "\25c0";
-    color: rgb(92, 124, 250);
-    cursor: pointer;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .fa-angle-right::before {
-    font-style: normal;
-    content: "\25b6";
-    color: rgb(92, 124, 250);
-    cursor: pointer;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item {
-    width: 100%;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item:first-child {
-    margin-right: 10px;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .datepicker-item label {
-    font-size: 14px;
-    font-weight: 300;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .datetime-picker {
-    border: none;
-    font-size: 12px;
-    width: 250px;
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav .current-date,
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav button,
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td {
-    transition: all 0.2s;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav .current-date:hover,
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar .calendar-nav button:hover,
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td:hover {
-    background-color: rgb(230, 230, 230);
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.selected {
-    background-color: rgb(92, 124, 250);
-    color: white !important;
-    font-weight: 400;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.selected:hover {
-    background-color: rgba(92, 124, 250, 0.7);
-    color: white;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .calendar table tbody tr td.now {
-    color: rgb(92, 124, 250);
-    font-weight: 400;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .show-time {
-    font-size: 14px;
-    margin: 0 10px;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb:focus,
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb:active {
-    background-color: rgb(92, 124, 250);
-    border-color: rgb(92, 124, 250);
-  }
-  .auto-plan-optionlist-form-group .datetime-picker .time .sliders {
-    flex: 0 1 100%;
-  }
-  .auto-plan-calendar-modal .form-group .datetime-picker .time .sliders .slider .thumb {
-    top: 3px;
-  }
-
   .content-with-title {
     border-top: 1px solid #ffa94d;
     &.user-modal,
-    &.add-plan-modal{
+    &.add-plan-modal {
       border-top: 1px solid rgba(0, 0, 0, 0.5);
-      .plan-btn-area {
+    }
+    &.add-plan-modal {
+      & > .plan-btn-area {
         margin-top: 1rem;
         margin-bottom: 1rem;
-        .btn-outline-info {
+        & > .btn-outline-info {
           color: rgba(0, 0, 0, 0.8);
           border-color: rgba(0, 0, 0, 0.8);
           &:hover,
@@ -163,77 +155,99 @@
           }
           &:focus,
           &:not(:disabled):not(.disabled):active:focus {
-            box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 0.1rem rgba(0, 0, 0, 0.5);
           }
         }
       }
     }
-    .password-input-area:first-child {
-      margin-top: 1em;
-    }
-    .password-input-area:last-child {
-      margin-bottom: 1.5em;
-    }
-    .password-input-area:not(:first-child):not(:last-child) {
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    .password-input-area {
-      input {
-        width: 100%;
-        padding: 0.7em;
-        border-radius: 5px;
-        border: none;
-        background-color: rgba(155, 183, 222, 0.4);
-        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-        font-size: 14px;
-        transition: box-shadow 0.1s, transform 0.2s;
+    &.user-modal {
+      & > .password-input-area {
+        &:first-child {
+          margin-top: 1rem;
+        }
+        &:last-child {
+          margin-bottom: 1.5rem;
+        }
+        &:not(:first-child):not(:last-child) {
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+        }
+        & > input {
+          width: 100%;
+          padding: 0.7rem;
+          border-radius: 5px;
+          border: none;
+          background-color: rgba(155, 183, 222, 0.4);
+          box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+          font-size: 14px;
+          transition: transform 0.2s;
+        }
+        & > label {
+          font-size: 14px;
+          position: relative;
+          padding-left: 0.7rem;
+          color: rgba(0, 0, 0, 0.8);
+          &::before {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 3px;
+            content: " ";
+          }
+        }
+        &:hover > input {
+          transform: translateY(-3px);
+          box-shadow: 0 0 0 0.15rem rgba(155, 183, 222, 0.7);
+        }
       }
-      label {
-        font-size: 14px;
-        position: relative;
-        padding-left: 0.7em;
-        color: rgba(0, 0, 0, 0.8);
-      }
-      label::before {
-        position: absolute;
-        top: 8px;
-        left: 0;
-        width: 6px;
-        height: 6px;
-        background-color: rgba(0, 0, 0, 0.8);
-        border-radius: 3px;
-        content: " ";
-      }
-      span.error {
-        font-size:12px;
-        color: rgba(197, 48, 48, 0.8);
-        font-weight: bold;
-      }
-    }
-    .password-input-area:hover > input {
-      transform: translateY(-3px);
-      box-shadow: 0 0 0 0.2em rgba(155, 183, 222, 0.7);
     }
     .genre-name-input-area {
-      margin-top: 1em;
-      margin-bottom: 1em;
-      input {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      & > input[type="text"] {
         font-size: 14px;
+        &:hover,
+        &:focus {
+          border-color: rgb(255, 169, 77);
+          box-shadow: 0 0 0 0.1rem rgba(255, 169, 77, 0.5);
+        }
       }
-      input:hover,
-      input:focus{
-        border-color: rgb(255, 169, 77);
-        box-shadow: 0 0 0 0.2em rgba(255, 169, 77, 0.5);
+    }
+    & > .command-input-modal {
+      &.hidden {
+        display: none;
       }
-      span.error {
-        font-size:12px;
-        color: rgba(197, 48, 48, 0.8);
-        font-weight: bold;
+      & > label {
+        margin-top: .5rem;
+        position: relative;
+        padding-left: .7rem;
+        &::before {
+          position: absolute;
+          top: 8px;
+          left: 0;
+          width: 6px;
+          height: 6px;
+          background-color: rgb(92, 124, 250);
+          border-radius: 3px;
+          content: " ";
+        }
+      }
+      & > input[type="text"] {
+        font-size: 14px;
+        &:focus,
+        &:hover {
+          border-color: rgb(92, 124, 250);
+          box-shadow: 0 0 0 0.1rem rgba(92, 124, 250, 0.5);
+        }
+      }
+      &:last-child {
+        margin-bottom: 1rem;
       }
     }
   }
-
   .content-without-title {
     margin: 30px 0;
   }
@@ -244,16 +258,13 @@
       padding: 8px 0;
       font-size: 14px;
       text-align: center;
-    }
-    p:first-child {
-      margin-top: 1rem;
-    }
-    p.no-margin-no-padding {
-      margin: 0;
-      padding: 0;
-    }
-    &.command-modal > .form-group {
-      margin-bottom: 1rem;
+      &:first-child {
+        margin-top: 1rem;
+      }
+      &.no-margin-no-padding {
+        margin: 0;
+        padding: 0;
+      }
     }
   }
 
@@ -262,7 +273,7 @@
     &.no-margin {
       margin: 0;
     }
-    button {
+    & > button {
       padding: 12px 0;
       font-size: 14px;
       color: white;
@@ -273,73 +284,73 @@
       &:focus {
         outline: none;
       }
-    }
-    button.primary {
-      border-color: #ffa94d;
-      background-color: #ffa94d;
-    }
-    button.primary:hover,
-    button.primary:active {
-      border-color: #ffc078;
-      background-color: #ffc078;
-    }
-    button.secondary {
-      border-color: #85a4b3;
-      background-color: #85a4b3;
-    }
-    button.secondary:hover,
-    button.secondary:active {
-      border-color: #b6c6ce;
-      background-color: #b6c6ce;
-    }
-    button.green {
-      border-color: #37b24d;
-      background-color: #37b24d;
-    }
-    button.green:hover,
-    button.green:active {
-      border-color: #40c057;
-      background-color: #40c057;
-    }
-    button.auto-plan {
-      border-color: rgb(92, 124, 250);
-      background-color: rgb(92, 124, 250);
-    }
-    button.auto-plan:hover,
-    button.auto-plan:active {
-      border-color: rgba(92, 124, 250, 0.2);
-      background-color: rgba(92, 124, 250, 0.7);
-    }
-    button.gray {
-      border-color: rgba(0,0,0,0);
-      background-color: rgba(0,0,0,0.8);
-    }
-    button.gray:hover,
-    button.gray:active {
-      border-color: rgba(0,0,0,0.1);
-      background-color: rgba(0,0,0,0.5);
-    }
-    button.administrator {
-      border-color: rgb(23, 162, 184);
-      background-color: rgb(23, 162, 184);
-    }
-    button.administrator:hover,
-    button.administrator:active {
-      border-color: rgba(23, 162, 184, 0.3);
-      background-color: rgba(23, 162, 184, 0.5);
-    }
-    button.alert-type {
-      width: 100%;
-      border-radius: 0 0 10px 10px;
-    }
-    button.form-type {
-      width: 50%;
-    }
-    button.form-type.left-btn {
-      border-radius: 0 0 0 10px;
-    }
-    button.form-type.right-btn {
-      border-radius: 0 0 10px 0;
+      &.primary {
+        border-color: #ffa94d;
+        background-color: #ffa94d;
+        &:hover,
+        &:active {
+          border-color: #ffc078;
+          background-color: #ffc078;
+        }
+      }
+      &.secondary {
+        border-color: #85a4b3;
+        background-color: #85a4b3;
+        &:hover,
+        &:active {
+          border-color: #b6c6ce;
+          background-color: #b6c6ce;
+        }
+      }
+      &.green {
+        border-color: #37b24d;
+        background-color: #37b24d;
+        &:hover,
+        &:active {
+          border-color: #40c057;
+          background-color: #40c057;
+        }
+      }
+      &.auto-plan {
+        border-color: rgb(92, 124, 250);
+        background-color: rgb(92, 124, 250);
+        &:hover,
+        &:active {
+          border-color: rgba(92, 124, 250, 0.2);
+          background-color: rgba(92, 124, 250, 0.7);
+        }
+      }
+      &.gray {
+        border-color: rgba(0,0,0,0);
+        background-color: rgba(0,0,0,0.8);
+        &:hover,
+        &:active {
+          border-color: rgba(0,0,0,0.1);
+          background-color: rgba(0,0,0,0.5);
+        }
+      }
+      &.administrator {
+        border-color: rgb(23, 162, 184);
+        background-color: rgb(23, 162, 184);
+        &:hover,
+        &:active {
+          border-color: rgba(23, 162, 184, 0.3);
+          background-color: rgba(23, 162, 184, 0.5);
+        }
+      }
+      &.alert-type {
+        width: 100%;
+        border-radius: 0 0 10px 10px;
+      }
+      &.form-type {
+        width: 50%;
+        &.left-btn {
+          border-radius: 0 0 0 10px;
+        }
+        &.right-btn {
+          border-radius: 0 0 10px 0;
+        }
+      }
     }
   }
   &.Custom-modal-anim-enter {
