@@ -1,21 +1,18 @@
-import React, {useState, useCallback, useEffect} from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Col, FormGroup, ButtonToggle, Button, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faExclamationCircle, faTrashAlt, faPencilAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
+import services from "../../../services";
 import * as commandActions from "../../../modules/command";
 import * as Define from "../../../define";
-import services from "../../../services";
 
-const modalType = {
-  NEW: 1,
-  EDIT: 2
-};
+const modalType = { NEW: 1, EDIT: 2 };
 
 const RSSautoCommandList = ({ type, command, commandActions }) => {
-    const commandList = command.get("lists").toJS().filter(command => command.cmd_type === type);
+    const commandList = command.get("lists").toJS();
     const [query, setQuery] = useState("");
     const [itemsChecked, setItemsChecked] = useState(false);
     const [checkedCount, setCheckedCount] = useState(0);
@@ -49,70 +46,49 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
         setCheckedCount(newCount);
     }, [commandList, checkedCount]);
 
-    const handleSearch = useCallback(e => {
-        setQuery(e.target.value);
-    }, []);
+    const handleSearch = useCallback(e => { setQuery(e.target.value); }, []);
 
     const addCommand = useCallback(async () => {
         if (invalidCheck(modalType.NEW)) {
             setIsNewOpen(false);
-            setTimeout(() => {
-                setIsErrorOpen(true);
-            }, 500);
+            setTimeout(() => { setIsErrorOpen(true); }, 500);
         } else {
-            let currentCommand = "";
-
-            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                currentCommand = "%s-%s-" + currentContext;
-            } else {
-                currentCommand = currentContext.length > 0 ? currentDataType + "-%s-%s-" + currentContext : currentDataType + "-%s-%s";
-            }
-
+            const currentCommand = setCurrentCommand();
             const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase());
 
             if (duplicateArray.length !== 0) {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.NEW);
                 setIsNewOpen(false);
-                setTimeout(() => {
-                    setIsErrorOpen(true);
-                }, 500);
+                setTimeout(() => { setIsErrorOpen(true); }, 500);
             } else {
                 const commandItem = { cmd_name: currentCommand, cmd_type: type };
+
                 try {
                     const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", commandItem);
                     console.log(res);
-                } catch (e) {
-                    console.log(e.message());
-                }
+                } catch (e) { console.log(e.message()); }
+
                 setItemsChecked(false);
                 setIsNewOpen(false);
                 setCurrentContext("");
                 setCurrentDataType("");
                 setErrorMsg("");
                 setOpenedModal("");
+
                 await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
             }
         }
-    }, [commandList, currentContext, currentDataType]);
+    }, [commandList]);
 
     const saveCommand = useCallback(async () => {
         if (invalidCheck(modalType.EDIT)) {
             setIsEditOpen(false);
-            setTimeout(() => {
-                setIsErrorOpen(true);
-            }, 500);
+            setTimeout(() => { setIsErrorOpen(true); }, 500);
         } else {
-            let currentCommand = "";
-
-            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                currentCommand = "%s-%s-" + currentContext;
-            } else {
-                currentCommand = currentContext.length > 0 ? currentDataType + "-%s-%s-" + currentContext : currentDataType + "-%s-%s";
-            }
-
+            const currentCommand = setCurrentCommand();
             const duplicateArray = commandList.filter(command => {
-                if (command.index !== actionId) {
+                if (command.id !== actionId) {
                     return command.cmd_name.toLowerCase() === currentCommand.toLowerCase();
                 }
             });
@@ -121,28 +97,26 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.EDIT);
                 setIsEditOpen(false);
-                setTimeout(() => {
-                    setIsErrorOpen(true);
-                }, 500);
+                setTimeout(() => { setIsErrorOpen(true); }, 500);
             } else {
                 const commandItem = { cmd_name: currentCommand };
 
                 try {
                     const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, commandItem);
                     console.log(res);
-                } catch (e) {
-                    console.log(e.message());
-                }
+                } catch (e) { console.log(e.message()); }
+
                 setIsEditOpen(false);
                 setActionId("");
                 setCurrentContext("");
                 setCurrentDataType("");
                 setErrorMsg("");
                 setOpenedModal("");
+
                 await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
             }
         }
-    }, [commandList, actionId, currentContext, currentDataType]);
+    }, [commandList, actionId]);
 
     const deleteCommand = useCallback(async () => {
         const deleteItem = commandList.find(command => command.id === actionId);
@@ -154,30 +128,28 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
 
             if (res.status === 200) {
                 commandActions.commandDeleteItem(actionId);
-                if (deleteItem.checked) {
-                    newCount--;
-                }
+                if (deleteItem.checked) { newCount--; }
                 setItemsChecked(commandList.length - 1 < 1 ? false : commandList.length - 1 === newCount);
                 setCheckedCount(newCount);
             }
-        } catch (e) {
-            console.log(e.message());
-        }
+        } catch (e) { console.log(e.message()); }
+
         setIsDeleteOpen(false);
         setActionId("");
+
         await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
     }, [commandList, actionId, checkedCount]);
 
     const invalidCheck = useCallback((modal) => {
         if (type === Define.PLAN_TYPE_VFTP_SSS) {
             if (currentDataType === "") {
-                setErrorMsg("Data type is invalid.");
+                setErrorMsg("Data type is empty.");
                 setOpenedModal(modal);
                 return true;
             }
         } else {
             if (currentContext === "") {
-                setErrorMsg("Context is invalid.");
+                setErrorMsg("Context is empty.");
                 setOpenedModal(modal);
                 return true;
             }
@@ -186,17 +158,21 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
         return false;
     }, [currentContext, currentDataType]);
 
-    const onContextChange = useCallback(e => {
-        setCurrentContext(e.target.value);
-    }, []);
+    const setCurrentCommand = useCallback(() => {
+        if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+            return "%s-%s-" + currentContext;
+        } else {
+            if (currentContext.length > 0) {
+                return currentDataType + "-%s-%s-" + currentContext;
+            } else {
+                return currentDataType + "-%s-%s";
+            }
+        }
+    }, [currentContext, currentDataType]);
 
-    const onDataTypeChange = useCallback(e=> {
-        setCurrentDataType(e.target.value);
-    }, []);
-
-    const openAddModal = useCallback(() => {
-        setIsNewOpen(true);
-    }, []);
+    const onContextChange = useCallback(e => { setCurrentContext(e.target.value); }, []);
+    const onDataTypeChange = useCallback(e=> { setCurrentDataType(e.target.value); }, []);
+    const openAddModal = useCallback(() => { setIsNewOpen(true); }, []);
 
     const openEditModal = useCallback((id, value) => {
         setIsEditOpen(true);
@@ -304,25 +280,8 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
     );
 };
 
-const CreateModal = ({
-    listType,
-    dataType,
-    context,
-    dataTypeChanger,
-    contextChanger,
-    addOpen,
-    editOpen,
-    deleteOpen,
-    errorOpen,
-    actionAdd,
-    actionEdit,
-    actionDelete,
-    closeAdd,
-    closeEdit,
-    closeDelete,
-    closeError,
-    msg
- }) => {
+const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChanger, addOpen, editOpen, deleteOpen, errorOpen, actionAdd,
+                         actionEdit, actionDelete, closeAdd, closeEdit, closeDelete, closeError, msg }) => {
     if (addOpen) {
         return (
             <ReactTransitionGroup
@@ -461,15 +420,7 @@ const CreateModal = ({
     }
 };
 
-const CreateButtonArea = React.memo(({
-     isOpen,
-     searchToggler,
-     searchText,
-     textChanger,
-     isChecked,
-     itemToggler,
-     openModal
- }) => {
+const CreateButtonArea = React.memo(({ isOpen, searchToggler, searchText, textChanger, isChecked, itemToggler, openModal }) => {
         return (
             <div className="form-btn-section dis-flex">
                 <div className={"search-btn-area" + (isOpen ? " active" : "")}>
@@ -508,22 +459,13 @@ const CreateButtonArea = React.memo(({
     }
 );
 
-const CreateCommandList = React.memo(({
-    commandList,
-    checkHandler,
-    query,
-    editModal,
-    deleteModal,
-    type
-}) => {
+const CreateCommandList = React.memo(({ commandList, checkHandler, query, editModal, deleteModal, type }) => {
         let filteredData = [];
         const regex = /[-|%s]/g;
 
         if (query.length > 0) {
             filteredData = commandList.filter(command => command.cmd_name.replace(regex, "").toLowerCase().includes(query.toLowerCase()));
-        } else {
-            filteredData = commandList;
-        }
+        } else { filteredData = commandList; }
 
         return (
             <FormGroup className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
@@ -550,10 +492,7 @@ const CreateCommandList = React.memo(({
                                         checked={command.checked}
                                         onChange={checkHandler}
                                     />
-                                    <label
-                                        className="custom-control-label form-check-label"
-                                        htmlFor={command.id}
-                                    >
+                                    <label className="custom-control-label form-check-label" htmlFor={command.id}>
                                         {displayCommand}
                                     </label>
                                     <span className="icon" onClick={() => deleteModal(command.id)}>

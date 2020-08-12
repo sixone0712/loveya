@@ -12,26 +12,14 @@ import * as Define from "../../define";
 class RSSautoplanchecksetting extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            isModalOpen: false
-        };
-    }
-
-    openModal = () => {
-        this.setState({ isModalOpen: true });
-    }
-
-    closeModal = () => {
-        this.setState({ isModalOpen: false });
     }
 
     render() {
-        const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt, type } = this.props;
+        const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt, type, command } = this.props;
         const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
-
+        const { checkedCnt } = command.toJS();
         return (
             <>
-                <CommandList isOpen={this.state.isModalOpen} closer={this.closeModal} />
                 <div className="form-section checksetting">
                     <Col className="pd-0">
                         <div className="form-header-section">
@@ -82,16 +70,7 @@ class RSSautoplanchecksetting extends Component {
                                     <>
                                         <FormGroup>
                                             <Label>Command</Label>
-                                            <div className="setting-info">2 Commands</div>
-                                        </FormGroup>
-                                        <FormGroup>
-                                            <Label>Command to execute</Label>
-                                            <div
-                                                className="setting-info execute-command-list"
-                                                onClick={this.openModal}
-                                            >
-                                                Click for details.
-                                            </div>
+                                            <div className="setting-info">{checkedCnt} Commands</div>
                                         </FormGroup>
                                     </>
                                 )}
@@ -104,144 +83,6 @@ class RSSautoplanchecksetting extends Component {
     }
 }
 
-const CommandList = ({ isOpen, closer }) => {
-    return (
-        <>
-            {isOpen ? (
-                <ReactTransitionGroup
-                    transitionName={"Custom-modal-anim"}
-                    transitionEnterTimeout={200}
-                    transitionLeaveTimeout={200}
-                >
-                    <div className="Custom-modal-overlay" onClick={closer} />
-                    <div className="Custom-modal auto-plan-alert-modal execute-command-list">
-                        <p className="title">List of commands to execute</p>
-                        <div className="content-with-title">
-                            <ul>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                                <li>
-                                    <FontAwesomeIcon icon={faTerminal} />
-                                    TEST_1234
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="button-wrap">
-                            <button className="auto-plan alert-type" onClick={closer}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </ReactTransitionGroup>
-            ) : (
-                <ReactTransitionGroup
-                    transitionName={"Custom-modal-anim"}
-                    transitionEnterTimeout={200}
-                    transitionLeaveTimeout={200}
-                />
-            )}
-        </>
-    );
-};
-
 export default connect(
     (state) => ({
         autoPlan: state.autoPlan.get('autoPlan'),
@@ -249,8 +90,9 @@ export default connect(
         logInfoList: state.viewList.get('logInfoList'),
         toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
         logInfoListCheckCnt: state.viewList.get('logInfoListCheckCnt'),
+        command: state.command.get('command')
     }),
     (dispatch) => ({
-        autoPlanActions: bindActionCreators(autoPlanActions, dispatch),
+        autoPlanActions: bindActionCreators(autoPlanActions, dispatch)
     })
 )(RSSautoplanchecksetting);
