@@ -3,13 +3,13 @@ import React, {useEffect, useState} from "react";
 import {connect, useDispatch} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as API from "../../api";
-import * as CmdActions from "../../modules/Command";
+import * as commandActions from "../../modules/command";
 import * as CompatActions from "../../modules/vftpCompat";
 import * as viewListActions from "../../modules/viewList";
 import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { faAngleDoubleUp } from "@fortawesome/free-solid-svg-icons";
+import {faAngleDoubleUp, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import Machinelist from "../Manual/Machine/MachineList";
 import Commandlist from "../Manual/VFTP/commandlist";
 import Datesetting from "../Manual/VFTP/datesetting";
@@ -17,7 +17,6 @@ import Commandline from "../Manual/VFTP/commandline";
 import Footer from "../Common/Footer";
 import moment from "moment";
 import * as Define from "../../define";
-import {modalType} from "./Search/FormList";
 
 const scrollStyle = {
     backgroundColor: "#343a40",
@@ -48,39 +47,47 @@ function convertCommand (cmd, sDate,eDate) {
     return  cmdString + ".log";
 }
 
-const downloadFunc = async (props) => {
-    const {command, startDate, endDate, toolInfoListCheckCnt} = props;
-    console.log("================Modal================");
-    console.log("downloadFunc");
+const downloadFunc = (props) => {
+    const machines= props.toolInfoListCheckCnt;
+    const fromDate = props.startDate;
+    const toDate = props.endDate;
+    let error = Define.RSS_SUCCESS;
+    console.log("================downloadFunc================");
     let requestID = 0;
     //if ----- Machine is no selected
-    if (toolInfoListCheckCnt <= 0) {
-        console.log("checked machine: ", toolInfoListCheckCnt);
-    } else if (startDate.isAfter(endDate)) {
-        console.log("====startDate.isAfter(endDate)====");
-        console.log("startDate: ", startDate);
-        console.log("endDate: ", endDate);
+    if (machines <= 0) {
+        error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY;
+    } else if (fromDate.isAfter(toDate)) {
+        error = Define.SEARCH_FAIL_DATE;
     } else {
-        //await openModal(modalType.PROCESS);
         requestID = API.startVftpCompatDownload(props);
         if (requestID !== "") {
-
+            console.log("requestId", requestID);
+            CompatActions.vftpCompatSetDlStatus({dlId: requestID});
         } else {
             //await CompatActions.vftpCompatCheckDlStatus({toolList, logInfoList, startDate, endDate});
             //API.startVftpCompatDownload(props).then(r => );
         }
     }
+    return error;
+}
+
+const statusCheckFunc = (props) => {
 }
 
 const ManualVftpCompat = (props) => {
     const [command, setCommand] = useState(props.command);
     const [fromDate, setFromDate] = useState(props.startDate);
     const [toDate, setToDate] = useState(props.endDate);
-
-
+    const modalMsglist ={
+        cancel: "Are you sure want to cancel the download?",
+        process: "downloading.....",
+        confirm: "Do you want to execute the command?",
+        complete: "Download Complete!",
+        ready:"",
+    }
     useEffect(()=>{
         console.log("====ManualVftpCompat initialized=====");
-        API.initializeCmd(props);
         API.vftpCompatInitAll(props);
         console.log("=====================================");
         },[]);
@@ -89,6 +96,8 @@ const ManualVftpCompat = (props) => {
         console.log("==== ManualVftpCompat Command Update ====");
         setCommand(convertCommand("",fromDate,toDate));
         API.vftpCompatSetRequestCommand(props,command);
+        API.vftpCompatSetRequestEndDate(props,toDate);
+        API.vftpCompatSetRequestStartDate(props,fromDate);
         console.log("=====================================");
     },[fromDate,toDate]);
 
@@ -107,7 +116,7 @@ const ManualVftpCompat = (props) => {
                                      to={toDate} handleChangeToDate={setToDate} />
                     </Col>
                 </Row>
-                <Commandline type ="compat/optional" string={command} func={()=>downloadFunc(props)}/>
+                <Commandline type ="compat/optional" string={command} func={() => downloadFunc(props)} modalMsglist={modalMsglist}/>
             </Container>
             <Footer/>
             <ScrollToTop showUnder={160} style={scrollStyle}>
@@ -120,8 +129,6 @@ const ManualVftpCompat = (props) => {
 
 export default connect(
     (state) => ({
-        CommandInfo: state.cmd.get('CommandInfo'),
-        CommandList: state.cmd.get('CommandList'),
         equipmentList: state.viewList.get('equipmentList'),
         toolInfoList: state.viewList.get('toolInfoList'),
         toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
@@ -130,7 +137,7 @@ export default connect(
         command:state.vftpCompat.getIn(['requestList', "command"]),
     }),
     (dispatch) => ({
-        CmdActions: bindActionCreators(CmdActions, dispatch),
+        commandActions: bindActionCreators(commandActions, dispatch),
         CompatActions: bindActionCreators(CompatActions, dispatch),
         viewListActions: bindActionCreators(viewListActions, dispatch),
     })

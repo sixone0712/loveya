@@ -4,6 +4,7 @@ import * as Define from "../define";
 import axios from "axios";
 import * as CompatActions from "../modules/vftpCompat";
 import * as viewListActions from "../modules/viewList";
+import * as commandActions from "../modules/command";
 
 //vftp
 export const getRequestList = (props) => {
@@ -12,8 +13,10 @@ export const getRequestList = (props) => {
 };
 
 export const vftpCompatInitAll = (props) => {
-    const {CompatActions, viewListActions} = props;
+    const {CompatActions, commandActions} = props;
     CompatActions.vftpCompatInitAll();
+    commandActions.commandInit();
+    commandActions.commandLoadList("/rss/api/vftp/command");
 }
 export const vftpCompatSetRequestMachine = (props, machine) => {
     const { CompatActions } = props;

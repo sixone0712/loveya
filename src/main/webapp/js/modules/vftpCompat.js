@@ -9,6 +9,7 @@ const VFTP_COMPAT_SET_REQUEST_MACHINE= 'vftpCompat/VFTP_COMPAT_SET_REQUEST_MACHI
 const VFTP_COMPAT_SET_REQUEST_COMMAND= 'vftpCompat/VFTP_COMPAT_SET_REQUEST_COMMAND';
 const VFTP_COMPAT_SET_REQEUST_START_DATE= 'vftpCompat/VFTP_COMPAT_SET_REQEUST_START_DATE';
 const VFTP_COMPAT_SET_REQUEST_END_DATE= 'vftpCompat/VFTP_COMPAT_SET_REQUEST_END_DATE';
+const VFTP_COMPAT_SET_DOWNLOAD_STATUS = 'vftpCompat/VFTP_COMPAT_SET_DOWNLOAD_STATUS';
 const VFTP_COMPAT_CHECK_DOWNLOAD_STATUS = 'vftpCompat/VFTP_COMPAT_CHECK_DOWNLOAD_STATUS';
 const VFTP_COMPAT_INIT_RESPONSE_LIST = 'vftpCompat/VFTP_COMPAT_INIT_RESPONSE_LIST';
 
@@ -18,6 +19,7 @@ export const vftpCompatSetRequestCommand = createAction(VFTP_COMPAT_SET_REQUEST_
 export const vftpCompatSetRequestStartDate = createAction(VFTP_COMPAT_SET_REQEUST_START_DATE); 	// startDate
 export const vftpCompatSetRequestEndDate = createAction(VFTP_COMPAT_SET_REQUEST_END_DATE); 	// endDate
 export const vftpCompatCheckDlStatus = createAction(VFTP_COMPAT_CHECK_DOWNLOAD_STATUS);
+export const vftpCompatSetDlStatus = createAction(VFTP_COMPAT_SET_DOWNLOAD_STATUS);
 export const vftpCompatInitResponseList = createAction(VFTP_COMPAT_INIT_RESPONSE_LIST);
 
 
@@ -79,6 +81,44 @@ export default handleActions({
             .set("requestListCnt", 0)
             .set("responseListCnt", 0)
             .set('downloadCnt', 0);
+    },
+
+    [VFTP_COMPAT_SET_DOWNLOAD_STATUS] : (state, action) => {
+        const { func, dlId, status, totalFiles, downloadFiles, downloadUrl } = action.payload;
+        const downloadStatus = state.get("downloadStatus").toJS();
+//console.log("func", func);
+        if(func !== undefined ) {
+            downloadStatus.func = func;
+        }
+
+        //console.log("dlId", dlId);
+        if(dlId !== undefined) {
+            downloadStatus.dlId = dlId;
+        }
+        //console.log("status", status);
+        if(status !== undefined) {
+            if(status ==="done" || status === "error") {
+                clearInterval(downloadStatus.func);
+                downloadStatus.func = null;
+            }
+            downloadStatus.status = status;
+        }
+        //console.log("totalFiles", totalFiles);
+        if(totalFiles !== undefined) {
+            downloadStatus.totalFiles = totalFiles;
+        }
+        //console.log("downloadFiles", downloadFiles);
+        if(downloadFiles !== undefined) {
+            downloadStatus.downloadFiles = downloadFiles;
+        }
+        if(downloadUrl !== undefined) {
+            downloadStatus.downloadUrl = downloadUrl;
+        }
+
+        //console.log("downloadStatus", downloadStatus);
+        return state.set("downloadStatus", fromJS(downloadStatus));
+
+
     },
 
     [VFTP_COMPAT_CHECK_DOWNLOAD_STATUS] : (state, action) => {
