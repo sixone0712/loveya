@@ -72,6 +72,7 @@ public class PlanController {
         try {
             int id = addPlanProc(param, -1);
             if(id<0) {
+                log.error("failed to add plan");
                 error.setReason(RSSErrorReason.INVALID_PARAMETER);
                 resBody.put("error", error.getRSSError());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);

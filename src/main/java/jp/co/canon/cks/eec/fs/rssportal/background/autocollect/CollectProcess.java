@@ -536,6 +536,8 @@ public abstract class CollectProcess implements Runnable {
         this.plan.setLastStatus(PlanStatus.registered.name());
         this.plan.setDescription(plan.getDescription());
         this.plan.setOwner(plan.getOwner());
+        this.plan.setCommand(plan.getCommand());
+        this.plan.setDirectory(plan.getDirectory());
 
         schedule();
         push();
