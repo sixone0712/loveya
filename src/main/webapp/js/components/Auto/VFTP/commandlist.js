@@ -32,14 +32,12 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
     }, [showSearch]);
 
     const selectItem = useCallback(() => {
-        let checked = commandList.length !== checkedCount;
+        const checked = commandList.length !== checkedCount;
         commandActions.commandCheckAllList(checked);
     }, [commandList]);
 
     const handleCheckboxClick = useCallback(e => {
-        const { id, checked } = e.target;
-        const newCount = checked ? checkedCount + 1 : checkedCount - 1;
-        commandActions.commandCheckList(parseInt(id));
+        commandActions.commandCheckList(parseInt(e.target.id));
     }, [commandList]);
 
     const handleSearch = useCallback(e => { setQuery(e.target.value); }, []);

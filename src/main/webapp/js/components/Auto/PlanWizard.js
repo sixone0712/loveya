@@ -26,6 +26,7 @@ export const wizardStep = {
 const modalMessage = {
   MACHINE_ALERT_MESSAGE: "You must select at least one or more machines.",
   TARGET_ALERT_MESSAGE: "You must select at least one or more targets.",
+  COMMAND_ALERT_MESSAGE: "You must select at least one or more commands.",
   PLAN_ID_ALERT_MESSAGE: "Plan ID is invalid.",
   FROM_TO_ALERT_MESSAGE: "Please set the from(Period) time before the To(Period) time.",
   CYCLE_ALERT_MESSAGE: "Interval is invalid.",
@@ -154,8 +155,8 @@ class RSSautoplanwizard extends Component {
 
   handleNext = () => {
     const { currentStep, isNew } = this.state;
-    const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt, type } = this.props;
-    const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan, type);
+    const { autoPlan, toolInfoListCheckCnt, logInfoListCheckCnt, type, command } = this.props;
+    const message = invalidCheck(currentStep, toolInfoListCheckCnt, logInfoListCheckCnt, autoPlan, type, command);
 
     if(message === null) {
       if(currentStep === wizardStep.CHECK) {
@@ -394,7 +395,7 @@ class RSSautoplanwizard extends Component {
   }
 }
 
-export function invalidCheck(step, toolCnt, targetCnt, optionList, type) {
+export function invalidCheck(step, toolCnt, targetCnt, optionList, type, command) {
   switch(step) {
     case wizardStep.MACHINE:
       if (toolCnt === 0) {
@@ -404,8 +405,15 @@ export function invalidCheck(step, toolCnt, targetCnt, optionList, type) {
       }
 
     case wizardStep.TARGET_COMMAND:
-      if (targetCnt === 0 && type === "FTP") {
+      if (targetCnt === 0 && type === Define.PLAN_TYPE_FTP) {
         return modalMessage.TARGET_ALERT_MESSAGE;
+      } else if (type === Define.PLAN_TYPE_VFTP_SSS) {
+        const { checkedCnt } = command.toJS();
+        if (checkedCnt === 0) {
+          return modalMessage.COMMAND_ALERT_MESSAGE;
+        } else {
+          return null;
+        }
       } else {
         return null;
       }
