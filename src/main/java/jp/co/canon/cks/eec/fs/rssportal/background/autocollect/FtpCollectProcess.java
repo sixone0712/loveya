@@ -63,10 +63,12 @@ public class FtpCollectProcess extends CollectProcess {
 
             List<DownloadRequestForm> _list = new ArrayList<>();
             try {
-                getFileList(_list, machines[i].trim(), fabs[i].trim(), categoryCodes[i].trim(), categoryNames[i].trim(),
-                        startTime, endTime, "", "");
-                if(_list.size()>0) {
-                    list.addAll(_list);
+                for(int j=0; j<categoryCodes.length; ++j) {
+                    getFileList(_list, machines[i].trim(), fabs[i].trim(), categoryCodes[j].trim(), categoryNames[j].trim(),
+                            startTime, endTime, "", "");
+                    if (_list.size() > 0) {
+                        list.addAll(_list);
+                    }
                 }
             } catch (CollectMpaException e) {
                 failMachines.add(machines[i]);
