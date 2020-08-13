@@ -1,13 +1,14 @@
 package jp.co.canon.ckbs.eec.fs.collect.service.vftp;
 
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 
+@Slf4j
 public class CompatDownloadRequestRepository {
-    File requestDir;
     File downloadDir;
 
     ObjectRepository<VFtpCompatDownloadRequest> requestObjectRepository;
@@ -35,6 +36,7 @@ public class CompatDownloadRequestRepository {
     }
 
     public void save(VFtpCompatDownloadRequest request){
+        log.trace("save request({})", request.getRequestNo());
         requestObjectRepository.save(getRequestFileName(request.getRequestNo()), request);
     }
 

@@ -5,11 +5,13 @@ import jp.co.canon.ckbs.eec.fs.collect.executor.CustomOutputStreamLineHandler;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.VFtpFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 class SssListProcessThread extends Thread implements CustomOutputStreamLineHandler {
     VFtpSssListRequest request;
     FtpServerInfo ftpServerInfo;
@@ -40,6 +42,7 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
 
     @Override
     public void run() {
+        log.trace("process start ({})", request.getRequestNo());
         CommandLine cmdLine = createCommand();
         request.setStatus(VFtpSssListRequest.Status.EXECUTING);
 
@@ -49,9 +52,11 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
         request.setStatus(VFtpSssListRequest.Status.EXECUTED);
         request.setCompletedTime(System.currentTimeMillis());
         listService.requestCompleted(request.getRequestNo());
+        log.trace("process end ({})", request.getRequestNo());
     }
 
     public void stopExecute(){
+        log.trace("stop requested. {}", request.getRequestNo());
         request.setStatus(VFtpSssListRequest.Status.CANCEL);
         executor.stop();
     }
@@ -76,6 +81,7 @@ class SssListProcessThread extends Thread implements CustomOutputStreamLineHandl
         }
         if (line.startsWith("ERR:")){
             request.setStatus(VFtpSssListRequest.Status.ERROR);
+            log.error("error while processing. {}", request.getRequestNo());
             return false;
         }
         return true;
