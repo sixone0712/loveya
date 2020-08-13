@@ -368,7 +368,6 @@ public class PlanController {
         List<String> categoryNames = param.containsKey("categoryNames")?(List<String>) param.get("categoryNames"):null;
         List<String> categoryCodes = param.containsKey("categoryCodes")?(List<String>) param.get("categoryCodes"):null;
         List<String> commands = param.containsKey("commands")?(List<String>) param.get("commands"):null;
-        List<String> directories = param.containsKey("directories")?(List<String>)param.get("directories"):null;
         String start = param.containsKey("start")?(String)param.get("start"):null;
         String from = param.containsKey("from")?(String)param.get("from"):null;
         String to = param.containsKey("to")?(String)param.get("to"):null;
@@ -388,14 +387,11 @@ public class PlanController {
                 }
                 break;
             case "vftp_compat":
+            case "vftp_sss":
                 if(commands==null) {
                     return -1;
                 }
                 break;
-            case "vftp_sss":
-                if(directories==null) {
-                    return -1;
-                }
             default:
                 return -1;
         }
@@ -418,16 +414,13 @@ public class PlanController {
         if(modifyPlanId<0) {
             switch (planType.toLowerCase()) {
                 case "ftp":
-                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
-                        type, interval, description);
+                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, categoryCodes, categoryNames,
+                            collectStartDate, fromDate, toDate, type, interval, description);
                     break;
                 case "vftp_compat":
-                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, commands, collectStartDate, fromDate, toDate,
-                            type, interval, description);
-                    break;
                 case "vftp_sss":
-                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, directories, collectStartDate, fromDate, toDate,
-                            type, interval, description);
+                    id = service.addPlan(planType, userId, planName, fabNames, machineNames, commands, collectStartDate,
+                            fromDate, toDate, type, interval, description);
                     break;
                 default:
                     id = -1;
@@ -435,16 +428,13 @@ public class PlanController {
         } else {
             switch (planType.toLowerCase()) {
                 case "ftp":
-                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, categoryCodes, categoryNames, collectStartDate, fromDate, toDate,
-                            type, interval, description);
+                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames,
+                            categoryCodes, categoryNames, collectStartDate, fromDate, toDate, type, interval, description);
                     break;
                 case "vftp_compat":
-                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, commands, collectStartDate, fromDate, toDate,
-                            type, interval, description);
-                    break;
                 case "vftp_sss":
-                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, directories, collectStartDate, fromDate, toDate,
-                            type, interval, description);
+                    id = service.modifyPlan(modifyPlanId, planType, userId, planName, fabNames, machineNames, commands,
+                            collectStartDate, fromDate, toDate, type, interval, description);
                     break;
                 default:
                     id = -1;
