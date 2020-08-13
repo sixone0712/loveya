@@ -78,6 +78,14 @@ class PlanControllerTest {
     }
 
     @Test
+    void listPlan1() throws Exception {
+        log.info("listPlan1");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setServletPath("listPlan");
+        planController.listPlan(request, new HashMap<>());
+    }
+    
+    @Test
     void listPlan() throws Exception {
 //        printSeparator("listPlan");
 //        MockHttpServletRequest request = new MockHttpServletRequest();

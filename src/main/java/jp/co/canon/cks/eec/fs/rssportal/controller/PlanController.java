@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectType;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
@@ -88,14 +89,18 @@ public class PlanController {
         RSSPlanCollectionPlan newPlan = new RSSPlanCollectionPlan();
         SimpleDateFormat conTimeFormat  = new SimpleDateFormat("yyyyMMddHHmmss");
         newPlan.setPlanId(plan.getId());
-        newPlan.setPlanType("");      // need to add
+        newPlan.setPlanType(plan.getPlanType());
         newPlan.setOwnerId(plan.getOwner());
         newPlan.setPlanName(plan.getPlanName());
         newPlan.setFabNames(plan.getFab());
         newPlan.setMachineNames(plan.getTool());
         newPlan.setCategoryCodes(plan.getLogType());
         newPlan.setCategoryNames(plan.getLogTypeStr());
-        newPlan.setCommands(null);      // need to add
+        if(plan.getPlanType().equals(CollectType.vftp_compat.name())) {
+            newPlan.setCommands(plan.getCommand());
+        } else if(plan.getPlanType().equals(CollectType.vftp_sss.name())) {
+            newPlan.setCommands(plan.getDirectory());
+        }
         newPlan.setType(plan.getCollectTypeStr());
         newPlan.setInterval(Long.toString(plan.getInterval()));
         newPlan.setDescription(plan.getDescription());
