@@ -1,21 +1,20 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { Col, FormGroup, ButtonToggle, Button, Input } from "reactstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faExclamationCircle, faTrashAlt, faPencilAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
+import React, {useCallback, useEffect, useState} from "react";
+import {Button, ButtonToggle, Col, FormGroup, Input} from "reactstrap";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationCircle, faPencilAlt, faSearch, faTimes, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
 import services from "../../../services";
 import * as commandActions from "../../../modules/command";
 import * as Define from "../../../define";
 
 const modalType = { NEW: 1, EDIT: 2 };
 
-const RSSautoCommandList = ({ type, command, commandActions }) => {
+const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) => {
     const commandList = command.get("lists").toJS();
+    const checkedCount = command.get("checkedCnt");
     const [query, setQuery] = useState("");
-    const [itemsChecked, setItemsChecked] = useState(false);
-    const [checkedCount, setCheckedCount] = useState(0);
     const [showSearch, setShowSearch] = useState(false);
     const [actionId, setActionId] = useState("");
     const [currentDataType, setCurrentDataType] = useState("");
@@ -33,18 +32,15 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
     }, [showSearch]);
 
     const selectItem = useCallback(() => {
-        commandActions.commandCheckAllList(!itemsChecked);
-        setItemsChecked(!itemsChecked);
-        setCheckedCount(!itemsChecked ? commandList.length : 0);
-    }, [itemsChecked, commandList]);
+        let checked = commandList.length !== checkedCount;
+        commandActions.commandCheckAllList(checked);
+    }, [commandList]);
 
     const handleCheckboxClick = useCallback(e => {
         const { id, checked } = e.target;
         const newCount = checked ? checkedCount + 1 : checkedCount - 1;
         commandActions.commandCheckList(parseInt(id));
-        setItemsChecked(commandList.length === newCount);
-        setCheckedCount(newCount);
-    }, [commandList, checkedCount]);
+    }, [commandList]);
 
     const handleSearch = useCallback(e => { setQuery(e.target.value); }, []);
 
@@ -69,7 +65,6 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                     console.log(res);
                 } catch (e) { console.log(e.message()); }
 
-                setItemsChecked(false);
                 setIsNewOpen(false);
                 setCurrentContext("");
                 setCurrentDataType("");
@@ -119,26 +114,18 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
     }, [commandList, actionId]);
 
     const deleteCommand = useCallback(async () => {
-        const deleteItem = commandList.find(command => command.id === actionId);
-        let newCount = checkedCount;
-
         try {
             const res = await services.axiosAPI.requestDelete(`/rss/api/vftp/command/${actionId}`);
             console.log(res);
 
-            if (res.status === 200) {
-                commandActions.commandDeleteItem(actionId);
-                if (deleteItem.checked) { newCount--; }
-                setItemsChecked(commandList.length - 1 < 1 ? false : commandList.length - 1 === newCount);
-                setCheckedCount(newCount);
-            }
+            if (res.status === 200) { commandActions.commandDeleteItem(actionId); }
         } catch (e) { console.log(e.message()); }
 
         setIsDeleteOpen(false);
         setActionId("");
 
         await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
-    }, [commandList, actionId, checkedCount]);
+    }, [commandList, actionId]);
 
     const invalidCheck = useCallback((modal) => {
         if (type === Define.PLAN_TYPE_VFTP_SSS) {
@@ -224,9 +211,14 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
     }, [openedModal]);
 
     useEffect(() => {
-        commandActions.commandInit();
-        commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
-    }, [])
+        const fetchData = async () => {
+            const { commands } = autoPlan.toJS();
+            commandActions.commandInit();
+            await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
+            await commandActions.commandCheckInit(commands);
+        }
+        fetchData();
+    }, []);
 
     return (
         <>
@@ -239,10 +231,10 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                         </div>
                         <CreateButtonArea
                             isOpen={showSearch}
+                            isChecked={checkedCount === commandList.length}
                             searchToggler={handleSearchToggle}
                             searchText={query}
                             textChanger={handleSearch}
-                            isChecked={itemsChecked}
                             itemToggler={selectItem}
                             openModal={openAddModal}
                         />
@@ -280,26 +272,25 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
     );
 };
 
-const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChanger, addOpen, editOpen, deleteOpen, errorOpen, actionAdd,
-                         actionEdit, actionDelete, closeAdd, closeEdit, closeDelete, closeError, msg }) => {
-    if (addOpen) {
+const CreateModal = ({ ...props }) => {
+    if (props.addOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={closeAdd} />
+                <div className="Custom-modal-overlay" onClick={props.closeAdd} />
                 <div className="Custom-modal auto-plan-confirm-modal command">
                     <p className="title">Add</p>
                     <div className="content-with-title">
-                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                        <FormGroup className={"command-input-modal" + (props.listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
                             <label>Data type</label>
                             <Input
                                 type="text"
                                 placeholder="Enter data type"
-                                value={dataType}
-                                onChange={dataTypeChanger}
+                                value={props.dataType}
+                                onChange={props.dataTypeChanger}
                             />
                         </FormGroup>
                         <FormGroup className="command-input-modal">
@@ -307,40 +298,40 @@ const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChan
                             <Input
                                 type="text"
                                 placeholder="Enter context"
-                                value={context}
-                                onChange={contextChanger}
+                                value={props.context}
+                                onChange={props.contextChanger}
                             />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={actionAdd}>
+                        <button className="auto-plan form-type left-btn" onClick={props.actionAdd}>
                             Add
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={closeAdd}>
+                        <button className="auto-plan form-type right-btn" onClick={props.closeAdd}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (editOpen) {
+    } else if (props.editOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={closeEdit} />
+                <div className="Custom-modal-overlay" onClick={props.closeEdit} />
                 <div className="Custom-modal auto-plan-confirm-modal command">
                     <p className="title">Edit</p>
                     <div className="content-with-title">
-                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                        <FormGroup className={"command-input-modal" + (props.listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
                             <label>Data type</label>
                             <Input
                                 type="text"
                                 placeholder="Enter data type"
-                                value={dataType}
-                                onChange={dataTypeChanger}
+                                value={props.dataType}
+                                onChange={props.dataTypeChanger}
                             />
                         </FormGroup>
                         <FormGroup className="command-input-modal">
@@ -348,47 +339,47 @@ const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChan
                             <Input
                                 type="text"
                                 placeholder="Enter context"
-                                value={context}
-                                onChange={contextChanger}
+                                value={props.context}
+                                onChange={props.contextChanger}
                             />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={actionEdit}>
+                        <button className="auto-plan form-type left-btn" onClick={props.actionEdit}>
                             Save
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={closeEdit}>
+                        <button className="auto-plan form-type right-btn" onClick={props.closeEdit}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (deleteOpen) {
+    } else if (props.deleteOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={closeDelete}/>
+                <div className="Custom-modal-overlay" onClick={props.closeDelete}/>
                 <div className="Custom-modal">
                     <div className="content-without-title">
                         <p><FontAwesomeIcon icon={faTrashAlt} size="6x"/></p>
                         <p>Do you want to delete command?</p>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={actionDelete}>
+                        <button className="auto-plan form-type left-btn" onClick={props.actionDelete}>
                             Delete
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={closeDelete}>
+                        <button className="auto-plan form-type right-btn" onClick={props.closeDelete}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (errorOpen) {
+    } else if (props.errorOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
@@ -399,10 +390,10 @@ const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChan
                 <div className="Custom-modal">
                     <div className="content-without-title">
                         <p><FontAwesomeIcon icon={faExclamationCircle} size="6x" /></p>
-                        <p>{msg}</p>
+                        <p>{props.msg}</p>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan alert-type" onClick={closeError}>
+                        <button className="auto-plan alert-type" onClick={props.closeError}>
                             Close
                         </button>
                     </div>
@@ -420,103 +411,109 @@ const CreateModal = ({ listType, dataType, context, dataTypeChanger, contextChan
     }
 };
 
-const CreateButtonArea = React.memo(({ isOpen, searchToggler, searchText, textChanger, isChecked, itemToggler, openModal }) => {
-        return (
-            <div className="form-btn-section dis-flex">
-                <div className={"search-btn-area" + (isOpen ? " active" : "")}>
-                    <ButtonToggle
-                        outline
-                        size="sm"
-                        color="info"
-                        className={"form-btn" + (isOpen ? " active" : "")}
-                        onClick={searchToggler}
-                    >
-                        <FontAwesomeIcon icon={faSearch} />
-                    </ButtonToggle>
-                    <FormGroup>
-                        <Input
-                            type="text"
-                            className="form-search-input"
-                            placeholder="Enter the command to search."
-                            value={searchText}
-                            onChange={textChanger}
-                        />
-                    </FormGroup>
-                </div>
+const CreateButtonArea = React.memo(({ ...props}) => {
+    const { isOpen, isChecked, searchToggler, searchText, textChanger, itemToggler, openModal } = props;
+
+    return (
+        <div className="form-btn-section dis-flex">
+            <div className={"search-btn-area" + (isOpen ? " active" : "")}>
                 <ButtonToggle
                     outline
                     size="sm"
-                    className={"form-btn toggle-all" + (isChecked ? " active" : "")}
-                    onClick={itemToggler}
+                    color="info"
+                    className={"form-btn" + (isOpen ? " active" : "")}
+                    onClick={searchToggler}
                 >
-                    All
+                    <FontAwesomeIcon icon={faSearch} />
                 </ButtonToggle>
-                <Button outline size="sm" className="form-btn" onClick={openModal}>
-                    Add
-                </Button>
+                <FormGroup>
+                    <Input
+                        type="text"
+                        className="form-search-input"
+                        placeholder="Enter the command to search."
+                        value={searchText}
+                        onChange={textChanger}
+                    />
+                </FormGroup>
             </div>
-        );
-    }
-);
+            <ButtonToggle
+                outline
+                size="sm"
+                className={"form-btn toggle-all" + (isChecked ? " active" : "")}
+                onClick={itemToggler}
+            >
+                All
+            </ButtonToggle>
+            <Button outline size="sm" className="form-btn" onClick={openModal}>
+                Add
+            </Button>
+        </div>
+    );
+});
 
-const CreateCommandList = React.memo(({ commandList, checkHandler, query, editModal, deleteModal, type }) => {
-        let filteredData = [];
-        const regex = /[-|%s]/g;
+const CreateCommandList = React.memo(({ ...props }) => {
+    const { commandList, checkHandler, query, editModal, deleteModal, type } = props;
+    const regex = /[-|%s]/g;
+    let filteredData = [];
 
-        if (query.length > 0) {
-            filteredData = commandList.filter(command => command.cmd_name.replace(regex, "").toLowerCase().includes(query.toLowerCase()));
-        } else { filteredData = commandList; }
+    if (query.length > 0) {
+        filteredData = commandList.filter(command => command.cmd_name.replace(regex, "").toLowerCase().includes(query.toLowerCase()));
+    } else { filteredData = commandList; }
 
-        return (
-            <FormGroup className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
-                {filteredData.length > 0 ? (
-                    <ul>
-                        {filteredData.map((command, index) => {
-                            let displayCommand = "";
-                            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                                displayCommand = command.cmd_name.replace("%s-%s-", "");
+    return (
+        <FormGroup className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
+            {filteredData.length > 0 ? (
+                <ul>
+                    {filteredData.map((command, index) => {
+                        let displayCommand = "";
+                        if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                            displayCommand = command.cmd_name.replace("%s-%s-", "");
+                        } else {
+                            if (command.cmd_name.endsWith("%s")) {
+                                displayCommand = command.cmd_name.replace("-%s-%s", "");
                             } else {
-                                if (command.cmd_name.endsWith("%s")) {
-                                    displayCommand = command.cmd_name.replace("-%s-%s", "");
-                                } else {
-                                    displayCommand = command.cmd_name.replace("-%s-%s-", "-");
-                                }
+                                displayCommand = command.cmd_name.replace("-%s-%s-", "-");
                             }
-                            return (
-                                <li className="custom-control custom-checkbox" key={index}>
-                                    <input
-                                        type="checkbox"
-                                        className="custom-control-input"
-                                        id={command.id}
-                                        value={command.cmd_name}
-                                        checked={command.checked}
-                                        onChange={checkHandler}
-                                    />
-                                    <label className="custom-control-label form-check-label" htmlFor={command.id}>
-                                        {displayCommand}
-                                    </label>
-                                    <span className="icon" onClick={() => deleteModal(command.id)}>
-                                    <FontAwesomeIcon icon={faTimes}/>
-                                    </span>
-                                        <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
-                                        <FontAwesomeIcon icon={faPencilAlt}/>
-                                    </span>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                ) : (
-                    <div style={{ alignSelf: "center", textAlign: "center", margin: "auto" }}>
-                        <p><FontAwesomeIcon icon={faExclamationCircle} size="8x" /></p>
-                        <p>Command not found.</p>
-                    </div>
-                )}
-            </FormGroup>
-        );
-    }
-);
+                        }
+                        return (
+                            <li className="custom-control custom-checkbox" key={index}>
+                                <input
+                                    type="checkbox"
+                                    className="custom-control-input"
+                                    id={command.id}
+                                    value={command.cmd_name}
+                                    checked={command.checked}
+                                    onChange={checkHandler}
+                                />
+                                <label className="custom-control-label form-check-label" htmlFor={command.id}>
+                                    {displayCommand}
+                                </label>
+                                <span className="icon" onClick={() => deleteModal(command.id)}>
+                                <FontAwesomeIcon icon={faTimes}/>
+                                </span>
+                                    <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
+                                    <FontAwesomeIcon icon={faPencilAlt}/>
+                                </span>
+                            </li>
+                        );
+                    })}
+                </ul>
+            ) : (
+                <div style={{ alignSelf: "center", textAlign: "center", margin: "auto" }}>
+                    <p><FontAwesomeIcon icon={faExclamationCircle} size="8x" /></p>
+                    <p>Command not found.</p>
+                </div>
+            )}
+        </FormGroup>
+    );
+});
 
 export default connect(
-    (state) => ({ command: state.command.get('command') }),
-    (dispatch) => ({ commandActions: bindActionCreators(commandActions, dispatch) })
+    (state) => ({
+        command: state.command.get('command'),
+        autoPlan: state.autoPlan.get('autoPlan')
+    }),
+    (dispatch) => ({
+        commandActions: bindActionCreators(commandActions, dispatch)
+    })
 )(RSSautoCommandList);

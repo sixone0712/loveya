@@ -84,9 +84,11 @@ class RSSautoplanwizard extends Component {
   }
 
   makeRequestAutoPlanData = () => {
-    const { autoPlan, toolInfoList, logInfoList } = this.props;
+    const { autoPlan, toolInfoList, logInfoList, command } = this.props;
     const { planId, collectType, interval, intervalUnit, from, to, collectStart, description } = autoPlan.toJS();
+    const { lists } = command.toJS();
     const convInterval = this.calculateTime(collectType, interval, intervalUnit);
+
     const toolInfoListJS = toolInfoList.toJS();
     const logInfoListJS = logInfoList.toJS();
     const newToolInfoList = toolInfoListJS.filter(item => item.checked === true);
@@ -97,6 +99,13 @@ class RSSautoplanwizard extends Component {
     const logTypes = newLogInfoList.map(item => item.logCode);
     const logNames = newLogInfoList.map(item => item.logName);
 
+    const checkedCommand = [];
+    lists.map(item => {
+      if (item.checked) {
+        checkedCommand.push(item.cmd_name);
+      }
+    });
+
     const reqData = {
       planName: planId,
       planType: this.props.type,
@@ -104,7 +113,7 @@ class RSSautoplanwizard extends Component {
       machineNames: tools,
       categoryCodes: logTypes,
       categoryNames: logNames,
-      commands: null,   // need to add
+      commands: checkedCommand,   // need to add
       start: moment(collectStart).format("YYYYMMDDHHmmss"),
       from: moment(from).format("YYYYMMDDHHmmss"),
       to: moment(to).format("YYYYMMDDHHmmss"),
@@ -142,7 +151,6 @@ class RSSautoplanwizard extends Component {
       console.error(error);
     }
   }
-
 
   handleNext = () => {
     const { currentStep, isNew } = this.state;
@@ -467,6 +475,7 @@ export default connect(
       logInfoListCheckCnt: state.viewList.get('logInfoListCheckCnt'),
       logInfoList: state.viewList.get('logInfoList'),
       autoPlan: state.autoPlan.get('autoPlan'),
+      command: state.command.get('command'),
       logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],
       toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST'],
       logTypeFailure: state.pender.failure['viewList/VIEW_LOAD_TOOLINFO_LIST'],

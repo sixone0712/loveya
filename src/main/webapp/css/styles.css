@@ -960,7 +960,7 @@ a:hover {
 .rss-container,
 .navbar-container > .navbar,
 .footer-container > .row {
-    min-width: 1440px;
+    min-width: 1680px;
     max-width: 1680px;
 }
 /* container style end */
@@ -2409,7 +2409,21 @@ a:hover {
     animation-direction: alternate;
 }
 
-.auto-plan-collection-list table tbody tr td > .plan-id-area,
+.auto-plan-collection-list table tbody tr td.plan-id-area {
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    width: 200px;
+}
+
+.auto-plan-collection-list table tbody tr td.plan-id-area:hover {
+    color: rgb(92, 124, 250);
+    cursor: pointer;
+}
+
+.auto-plan-collection-list table tbody tr td.plan-description-area {
+    width: 250px;
+}
+
 .auto-plan-collection-list table tbody tr td > .request-id-area,
 .auto-plan-collection-list table tbody tr td > .status-area {
     padding: .3em 1em;
@@ -2418,7 +2432,6 @@ a:hover {
 }
 
 .auto-plan-collection-list table tbody tr td > .request-id-area:hover,
-.auto-plan-collection-list table tbody tr td > .plan-id-area:hover,
 .auto-plan-collection-list table tbody tr td > .status-area:hover {
     background-color: rgba(92, 124, 250, 0.2);
     border-radius: 3px;

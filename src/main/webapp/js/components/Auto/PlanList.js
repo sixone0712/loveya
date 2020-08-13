@@ -24,6 +24,8 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as autoPlanActions from "../../modules/autoPlan";
 import * as viewListActions from "../../modules/viewList"
+import Target from "./TargetList";
+import Command from "./VFTP/commandlist";
 
 const { Option } = Select;
 
@@ -33,6 +35,12 @@ const messageType = {
     CONFIRM_START_MESSAGE: "Are you sure you want to run this collection plan?",
     EDIT_ALERT_MESSAGE: "Because of the current collecting it can not be edited.",
     DELETE_ALERT_MESSAGE: "Because of the current collecting it can not be deleted."
+};
+
+const planTypeString = {
+    FTP: "FTP",
+    VFTP_COMPAT: "VFTP(COMPAT)",
+    VFTP_SSS: "VFTP(SSS)"
 };
 
 export const statusType = {
@@ -112,8 +120,9 @@ class RSSautoplanlist extends Component {
                       collectStart: moment(item.start, "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
                       collectTypeStr: item.type,
                       keyIndex: idx + 1,
-                      planType: null,       //need to add
-                      commands: null,       //need to add
+                      planType: item.planType,
+                      commandCount: item.commands.length,
+                      commands: item.commands
                   }
                 );
             })
@@ -149,7 +158,8 @@ class RSSautoplanlist extends Component {
                 collectType: findList.collectTypeStr,
                 interval: findList.interval,
                 description: findList.planDescription,
-                planType: findList.planType
+                planType: findList.planType,
+                commands: findList.commands
             });
             console.log("id", id);
             console.log("findList.planType", findList.planType);
@@ -394,20 +404,16 @@ class RSSautoplanlist extends Component {
                                     {plans.map((plan, idx) => {
                                         return (
                                             <tr key={idx}>
-                                                <td>
-                                                    <span
-                                                        className="plan-id-area"
-                                                        onClick={ () => {
-                                                            const param = `?planId=${plan.id}&planName=${plan.planId}`;
-                                                            this.props.history.push(Define.PAGE_AUTO_DOWNLOAD + param);
-                                                        }}
-                                                    >
-                                                        {plan.planId}
-                                                    </span>
+                                                <td className="plan-id-area"
+                                                    onClick={() => {
+                                                    const param = `?planId=${plan.id}&planName=${plan.planId}`;
+                                                    this.props.history.push(Define.PAGE_AUTO_DOWNLOAD + param);
+                                                }}>
+                                                    {plan.planId}
                                                 </td>
-                                                <td>{plan.planDescription}</td>
-                                                <td>-</td>
-                                                <td>{plan.planTarget}</td>
+                                                <td className="plan-description-area">{plan.planDescription}</td>
+                                                <td>{createType(plan.planType)}</td>
+                                                <td>{plan.planType === Define.PLAN_TYPE_FTP ? (plan.planTarget) : (plan.commandCount)}</td>
                                                 <td>{`${plan.planPeriodStart} ~ ${plan.planPeriodEnd}`}</td>
                                                 <td>{CreateStatus(plan.planStatus, () => this.openStatusModal(plan.planStatus, plan.id))}</td>
                                                 <td>{plan.planLastRun}</td>
@@ -492,6 +498,29 @@ export function CreateDetail(detail) {
     }
 
     return component;
+}
+
+const createType = (type) => {
+    let typeString = "";
+
+    switch(type) {
+        case Define.PLAN_TYPE_FTP:
+            typeString = planTypeString.FTP;
+            break;
+
+        case Define.PLAN_TYPE_VFTP_COMPAT:
+            typeString = planTypeString.VFTP_COMPAT;
+            break;
+
+        case Define.PLAN_TYPE_VFTP_SSS:
+            typeString = planTypeString.VFTP_SSS;
+            break;
+
+        default:
+            console.error("plan type error");   break;
+    }
+
+    return typeString;
 }
 
 export default connect(

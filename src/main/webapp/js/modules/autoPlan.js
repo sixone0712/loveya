@@ -1,5 +1,5 @@
 import {createAction, handleActions} from 'redux-actions';
-import {Map} from 'immutable';
+import {Map, List} from 'immutable';
 import {applyPenders} from 'redux-pender';
 import * as Define from '../define';
 import moment from "moment";
@@ -37,6 +37,7 @@ const initialState = Map({
         intervalUnit: Define.AUTO_UNIT_MINUTE,
         description: "",
         planType: Define.PLAN_TYPE_FTP,
+        commands: List([])
     })
 });
 
@@ -77,7 +78,7 @@ const reducer =  handleActions({
         return state.setIn(["autoPlan", "description"], description);
     },
     [AUTO_PLAN_SET_EDIT_PLAN_LIST] : (state, action) => {
-        const { planId, collectStart, from, to, collectType, interval, description, planType } = action.payload;
+        const { planId, collectStart, from, to, collectType, interval, description, planType, commands } = action.payload;
         const intervalInt = Number(interval);
         let convInterval = ""
         let intervalUnit = "";
@@ -106,9 +107,9 @@ const reducer =  handleActions({
                     .setIn(["autoPlan", "interval"], convInterval)
                     .setIn(["autoPlan", "intervalUnit"], intervalUnit)
                     .setIn(["autoPlan", "description"], description)
-                    .setIn(["autoPlan", "planType"], planType);
-    },
-
+                    .setIn(["autoPlan", "planType"], planType)
+                    .setIn(["autoPlan", "commands"], commands);
+    }
 }, initialState);
 
 export default applyPenders(reducer, [

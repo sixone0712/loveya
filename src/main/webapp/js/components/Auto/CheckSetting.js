@@ -61,7 +61,7 @@ class RSSautoplanchecksetting extends Component {
                                     <Label>Machine</Label>
                                     <div className="setting-info">{toolInfoListCheckCnt} Machines</div>
                                 </FormGroup>
-                                { type === "FTP" ? (
+                                { type === Define.PLAN_TYPE_FTP ? (
                                     <FormGroup>
                                         <Label>Target</Label>
                                         <div className="setting-info">{logInfoListCheckCnt} Targets</div>

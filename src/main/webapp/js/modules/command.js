@@ -8,6 +8,7 @@ const COMMAND_LOAD_LIST = "cmd/COMMAND_GET_LIST";
 const COMMAND_CHECK_ONLY_ONE_LIST = "cmd/COMMAND_CHECK_ONLY_ONE_LIST";
 const COMMAND_CHECK_LIST = "cmd/COMMAND_CHECK_LIST";
 const COMMAND_CHECK_ALL_LIST = "cmd/COMMAND_CHECK_ALL_LIST";
+const COMMAND_CHECK_INIT ="cmd/COMMAND_CHECK_INIT";
 const COMMAND_DELETE_ITEM = "cmd/COMMAND_DELETE_ITEM";
 
 export const commandInit = createAction(COMMAND_INIT);
@@ -15,6 +16,7 @@ export const commandLoadList = createAction(COMMAND_LOAD_LIST, services.axiosAPI
 export const commandCheckOnlyOneList = createAction(COMMAND_CHECK_ONLY_ONE_LIST);
 export const commandCheckList = createAction(COMMAND_CHECK_LIST);
 export const commandCheckAllList = createAction(COMMAND_CHECK_ALL_LIST);
+export const commandCheckInit = createAction(COMMAND_CHECK_INIT);
 export const commandDeleteItem = createAction(COMMAND_DELETE_ITEM);
 
 const initialState = Map({
@@ -89,6 +91,27 @@ const reducer = handleActions({
         return state.setIn(["command", "lists"], newLists)
                     .setIn(["command", "checkedLists"], newCheckedList)
                     .setIn(["command", "checkedCnt"], checkedCnt);
+    },
+    [COMMAND_CHECK_INIT]: (state, action) => {
+        const savedCommands = action.payload;
+        const lists = state.getIn(["command", "lists"]);
+
+        if (savedCommands.length === 0) { return state.setIn(["command", "lists"], lists); }
+
+        const newList = lists.map(list => list.set("checked", savedCommands.includes(list.get("cmd_name"))));
+        const newCheckedList = [];
+        let realCheckCnt = 0;
+
+        lists.map(list => {
+           if (savedCommands.includes(list.get("cmd_name"))) {
+               newCheckedList.push(list.get("id"));
+               realCheckCnt++;
+           }
+        });
+
+        return state.setIn(["command", "lists"], newList)
+            .setIn(["command", "checkedLists"], newCheckedList)
+            .setIn(["command", "checkedCnt"], realCheckCnt);
     },
     [COMMAND_DELETE_ITEM]: (state, action) => {
         const id = +action.payload;
