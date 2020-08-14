@@ -39,22 +39,16 @@ import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping("/rss/api/ftp")
-public class FileDownloaderController {
-
-    private final HttpSession session;
-    private final FileDownloader fileDownloader;
-    private final JwtService jwtService;
-    private final FileServiceManageConnectorFactory connectorFactory;
+public class FileDownloaderController extends DownloadControllerCommon {
+    private final Log log = LogFactory.getLog(getClass());
 
     @Value("${rssportal.file-service-manager.addr}")
     private String fileServiceAddress;
 
     @Autowired
-    public FileDownloaderController(HttpSession session, FileDownloader fileDownloader, JwtService jwtService, FileServiceManageConnectorFactory connectorFactory) {
-        this.session = session;
-        this.fileDownloader = fileDownloader;
-        this.jwtService = jwtService;
-        this.connectorFactory = connectorFactory;
+    public FileDownloaderController(FileDownloader fileDownloader, JwtService jwtService,
+                                    FileServiceManageConnectorFactory connectorFactory) {
+        super(jwtService, fileDownloader, connectorFactory);
     }
 
     private boolean createFileList(List<RSSFtpSearchResponse> list, RSSFtpSearchRequest request) {
@@ -420,34 +414,7 @@ public class FileDownloaderController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
     }
 
-    private String createZipFilename(String downloadId) {
-        // format: username_fabname{_fabname2}_YYYYMMDD_hhmmss.zip
 
-        String username = jwtService.getCurAccTokenUserName();
-
-        if(username==null) {
-            log.error("no username");
-            return null;
-        }
-
-        List<String> fabs = fileDownloader.getFabs(downloadId);
-        if(fabs==null || fabs.size()==0) {
-            log.error("no fab info");
-            return null;
-        }
-        String fab = fabs.get(0);
-        if(fabs.size()>1) {
-            for(int i=1; i<fabs.size(); ++i)
-                fab += "_"+fabs.get(i);
-        }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String cur = dateFormat.format(new Date(System.currentTimeMillis()));
-
-        String fileName = String.format("%s_%s_%s.zip", username, fab, cur);
-        log.info("filename = "+fileName);
-        return fileName;
-    }
 
     private void addDownloadItem(final Map map, String fab, String tool, String logType, String logTypeStr,
                                  String file, String size, String date) {
@@ -483,6 +450,4 @@ public class FileDownloaderController {
         }
         form.addFile(file, Long.parseLong(size), date);
     }
-
-    private final Log log = LogFactory.getLog(getClass());
 }

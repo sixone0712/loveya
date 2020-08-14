@@ -13,10 +13,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +46,7 @@ class VftpDownloadControllerTest {
     private String fileServiceAddress;
 
     @Test
-    void requestVFtpCompat1() throws InterruptedException {
+    void requestVFtpCompat1() throws InterruptedException, IOException {
         log.info("requestVFtpCompat1");
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -82,6 +89,28 @@ class VftpDownloadControllerTest {
             if(status.getStatus().equals("done")) {
                 log.info("download done");
                 log.info("download url="+status.getDownloadUrl());
+
+                request.setServletPath("/rss/api/vftp/compat/storage/"+downloadId);
+                ResponseEntity entity = controller.vftpCompatDownloadFile(downloadId, request, new MockHttpServletResponse());
+                InputStreamResource isr = (InputStreamResource) entity.getBody();
+                assertNotNull(isr);
+                InputStream is = isr.getInputStream();
+                assertNotNull(is);
+
+                File dir = Paths.get("jtest").toFile();
+                if(!dir.exists()) {
+                    log.info("create jtest directory");
+                    dir.mkdirs();
+                }
+
+                /*int size;
+                File output = Paths.get("jtest", "vftp1_compat.zip").toFile();
+                try(FileOutputStream fos = new FileOutputStream(output)) {
+                    while((size=zis.read(buf))>0) {
+                        fos.write(buf, 0, size);
+                    }
+                }*/
+
                 break;
             }
             log.info("downloading... ");
