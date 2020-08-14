@@ -32,10 +32,12 @@ const commandWriter = (element, string) => {
     };
 };
 
-const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc,cancelFunc}) => {
+const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
     const [prevModal, setPrevModal] = useState("ready");
     const [modalMsg, setModalMsg] = useState("");
+    const [isComplete, setComplete] = useState(false);
+    const [isCancel, setCancel] = useState(false);
     const element = useRef();
     const setModalOpen = (type) => {
         setPrevModal(modalType);
@@ -57,20 +59,33 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         const {modalType} = type;
         console.log("[cancelModal]yesno: ",yesno);
         console.log("[cancelModal]modalType: ",modalType);
-        if(yesno =="yes") {
-            closeModal();
-            let result = await cancelFunc();
-            console.log("result: ",result);
+        if (type === "compat/optional") {
+            if(yesno === "yes") {
+                closeModal();
+                let result = await cancelFunc();
+                console.log("result: ",result);
+            } else {
+                console.log("[cancelModal]prevModal: ",prevModal);
+                (modalType !== "complete") ? setModalOpen(prevModal): closeModal();
+            }
         } else {
-            console.log("[cancelModal]prevModal: ",prevModal);
-            (modalType !== "complete") ? setModalOpen(prevModal): closeModal();
+            if (yesno === "yes") {
+                if (!isComplete) {
+                    setCancel(true);
+                    cancelFunc();
+                }
+                closeModal();
+            } else {
+                if (!isComplete) setModalOpen(prevModal);
+                else closeModal();
+            }
         }
     };
 
     const completeModal = async () => {
-        if (type == "compat/optional") {
+        if (type === "compat/optional") {
             let res = await completeFunc();
-            if (res.result != Define.RSS_SUCCESS) {
+            if (res.result !== Define.RSS_SUCCESS) {
                 setModalOpen("alert");
                 setModalMsg(API.getErrorMsg(result.error));
             } else {
@@ -78,15 +93,16 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             }
         }
     };
-    const processSequence =() =>{
+
+    const processSequence = () => {
         setTimeout(async () => {
             console.log("==============process==============");
             try {
                 let result;
                 result = await processfunc();
-                if (result.status == "error" || result.status == "done") {
+                if (result.status === "error" || result.status === "done") {
                     clearTimeout(processSequence);
-                    if(result.status == "done") {
+                    if(result.status === "done") {
                         setModalOpen("complete");
                     } else {
                         setModalOpen("alert");
@@ -102,18 +118,48 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 setModalMsg(API.getErrorMsg(Define.FILE_FAIL_SERVER_ERROR));
             }
         }, 1000);
-    }
+    };
 
     const confirmLeftBtnFunc = async () => {
-        let result = await confirmfunc();
-        console.log("result ", result);
-        if (result.error != Define.RSS_SUCCESS) {
-            setModalOpen("alert");
-            setModalMsg(API.getErrorMsg(result.error));
+        setCancel(false);
+        setComplete(false);
+
+        if(type === "compat/optional") {
+            let result = await confirmfunc();
+            console.log("result ", result);
+            if (result.error !== Define.RSS_SUCCESS) {
+                setModalOpen("alert");
+                setModalMsg(API.getErrorMsg(result.error));
+            } else {
+                setModalOpen("process");
+                let tVal = processSequence();
+                console.log("tVal: ", tVal);
+            }
         } else {
-            setModalOpen("process");
-            let tVal= processSequence();
-            console.log("tVal: ",tVal);
+            const result = confirmfunc();
+            if (result === Define.RSS_SUCCESS) {
+                setModalOpen("process");
+                try {
+                    const res = await processfunc();
+                    if (res === Define.RSS_SUCCESS) {
+                        if (!isComplete) setModalOpen("ready");
+                    } else {
+                        setModalOpen("alert");
+                        setModalMsg(API.getErrorMsg(res));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    if (!isCancel) {
+                        setModalOpen("alert");
+                        setModalMsg(API.getErrorMsg(Define.SEARCH_FAIL_SERVER_ERROR));
+                    }
+                } finally {
+                    setComplete(true)
+                }
+            } else {
+                setModalOpen("alert");
+                setModalMsg(API.getErrorMsg(result));
+            }
         }
     };
 
@@ -140,7 +186,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 <CardBody>
                     <div className="command-line">
                         Rapid Collector
-                        { type == "compat/optional" ? "#get " : "#cd " }
+                        { type === "compat/optional" ? "#get " : "#cd " }
                         <span className="command" ref={element} />
                     </div>
                     <Button color="info" outline onClick={()=> setModalOpen("confirm")}>

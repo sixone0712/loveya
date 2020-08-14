@@ -26,6 +26,7 @@ export const SEARCH_FAIL_DATE = 23;
 export const SEARCH_FAIL_SERVER_ERROR = 24;
 
 export const SEARCH_FAIL_NO_DATA_TYPE = 25;
+export const SEARCH_FAIL_NO_COMMAND = 25;
 
 export const FILE_FAIL_NO_ITEM = 30;
 export const FILE_FAIL_SERVER_ERROR = 31;

@@ -81,7 +81,9 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             setErrorMsg("The command is Empty.");
         } else {
             const addData = {
-                cmd_name: `%s-%s-${currentCommand}`,
+                cmd_name: cmdType === "vftp_compat"
+                            ? `%s-%s-${currentCommand}`
+                            : `${currentCommand}-%s-%s`,
                 cmd_type: cmdType
             }
             try {
@@ -96,7 +98,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                 setErrorMsg("");
             } catch (e) {
                 // 에러 처리
-                console.log(e.message())
+                console.error(e);
             }
         }
     }, [commandList, currentCommand]);
@@ -111,7 +113,9 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             setErrorMsg("The command is Empty.");
         } else {
             const editItem = {
-                cmd_name: `%s-%s-${currentCommand}`
+                cmd_name: cmdType === "vftp_compat"
+                    ? `%s-%s-${currentCommand}`
+                    : `${currentCommand}-%s-%s`,
             }
             try {
                 const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, editItem);
@@ -125,7 +129,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                 setErrorMsg("");
             } catch (e) {
                 // 에러 처리
-                console.log(e.message())
+                console.error(e);
             }
         }
     }, [commandList, actionId, currentCommand, selectCommand]);
@@ -143,7 +147,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             setActionId(-1);
         } catch (e) {
             // 에러 처리
-            console.log(e.message())
+            console.error(e);
         }
     }, [actionId, selectCommand]);
 
@@ -155,16 +159,18 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                     <Col>
                         <FormGroup className="catlist-form-group">
                             <ul>
-                                <li>
-                                    <CustomInput
-                                        type="radio"
-                                        id={-1}
-                                        name="notUse"
-                                        label="not use."
-                                        checked={selectCommand === -1}
-                                        onChange={() => handleCommandChange(-1)}
-                                    />
-                                </li>
+                                {cmdType === "vftp_compat" &&
+                                    <li>
+                                        <CustomInput
+                                            type="radio"
+                                            id={-1}
+                                            name="notUse"
+                                            label="not use."
+                                            checked={selectCommand === -1}
+                                            onChange={() => handleCommandChange(-1)}
+                                        />
+                                    </li>
+                                }
                                 <CreateCommandList
                                     commandList={commandList}
                                     selectCommand={selectCommand}

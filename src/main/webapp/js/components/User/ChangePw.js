@@ -68,7 +68,7 @@ class ChangePwModal extends Component {
             try {
                 await API.changePassword(this.props, this.state);
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
             let  errCode = API.getErrCode(this.props);
             if(errCode)

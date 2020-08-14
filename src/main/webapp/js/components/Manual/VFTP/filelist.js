@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, {useState, useCallback, useMemo, useEffect} from "react";
 import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle, faDownload, faBan, faChevronCircleDown } from "@fortawesome/free-solid-svg-icons";
@@ -8,9 +8,15 @@ import ReactTransitionGroup from "react-addons-css-transition-group";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { filePaginate, RenderPagination } from "../../Common/Pagination";
 import _ from "lodash";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import * as sssActions from "../../../modules/vftpSss";
+import * as API from "../../../api";
+import services from "../../../services"
 
 const { Option } = Select;
 
+/*
 const propsCompare = (prevProps, nextProps) => {
     if (JSON.stringify(prevProps.fileList) === JSON.stringify(nextProps.fileList)) {
         return false;
@@ -21,185 +27,200 @@ const propsCompare = (prevProps, nextProps) => {
             return value === nextProps.checkedList.sort()[index];
         }));
 };
+*/
 
-const calculateCount = (list) => {
-    return list.length;
-}
+let gCancel = false;
+const geneDownloadStatus = function* (func) {
+    while (true) {
+        let response = yield func();
 
-const initialFileList = [
-    {
-        id: "file1",
-        fileName: "20110811_001234_345678_PlateNo001_ShotNo_01_MarkPosNo1_r0-0-0.bmp",
-        size: "7KB"
-    },
-    {
-        id: "file2",
-        fileName: "20110811_001234_345678_PlateNo001_ShotNo_01_MarkPosNo1_r0-0-1.bmp",
-        size: "56KB"
-    },
-    {
-        id: "file3",
-        fileName: "20110811_001234_345678_PlateNo001_ShotNo_01_MarkPosNo1_r0-0-2.bmp",
-        size: "2KB"
-    },
-    {
-        id: "file4",
-        fileName: "20110811_001234_345678_PlateNo002_ShotNo_01_MarkPosNo1_r0-0-0.bmp",
-        size: "8KB"
-    },
-    {
-        id: "file5",
-        fileName: "20110811_001234_345678_PlateNo002_ShotNo_01_MarkPosNo1_r0-0-1.bmp",
-        size: "99KB"
-    },
-    {
-        id: "file6",
-        fileName: "20110811_001234_345678_PlateNo002_ShotNo_01_MarkPosNo1_r0-0-2.bmp",
-        size: "40KB"
-    },
-    {
-        id: "file7",
-        fileName: "20110811_001234_345678_PlateNo003_ShotNo_01_MarkPosNo1_r0-0-0.bmp",
-        size: "56KB"
-    },
-    {
-        id: "file8",
-        fileName: "20110811_001234_345678_PlateNo003_ShotNo_01_MarkPosNo1_r0-0-1.bmp",
-        size: "51KB"
-    },
-    {
-        id: "file9",
-        fileName: "20110811_001234_345678_PlateNo003_ShotNo_01_MarkPosNo1_r0-0-2.bmp",
-        size: "9KB"
-    },
-    {
-        id: "file10",
-        fileName: "20110811_001234_345678_PlateNo004_ShotNo_01_MarkPosNo1_r0-0-0.bmp",
-        size: "104KB"
-    },
-    {
-        id: "file11",
-        fileName: "20110811_001234_345678_PlateNo004_ShotNo_01_MarkPosNo1_r0-0-1.bmp",
-        size: "10.2MB"
-    },
-    {
-        id: "file12",
-        fileName: "20110811_001234_345678_PlateNo004_ShotNo_01_MarkPosNo1_r0-0-2.bmp",
-        size: "7.6MB"
-    },
-    {
-        id: "file13",
-        fileName: "20110811_001234_345678_PlateNo005_ShotNo_01_MarkPosNo1_r0-0-0.bmp",
-        size: "224KB"
-    },
-    {
-        id: "file14",
-        fileName: "20110811_001234_345678_PlateNo005_ShotNo_01_MarkPosNo1_r0-0-1.bmp",
-        size: "22KB"
-    },
-    {
-        id: "file15",
-        fileName: "20110811_001234_345678_PlateNo005_ShotNo_01_MarkPosNo1_r0-0-2.bmp",
-        size: "14MB"
+        if (response.status === 200) {
+            if (response.data.status == "done") return response;
+        } else {
+            return response
+        }
+
+        yield new Promise((resolve) => {
+            setTimeout(resolve, 300);
+        })
     }
-];
+};
 
-const RSSvftpFilelist = () => {
+const initialDownStatus = {
+    downloadId: "",
+    downloadUrl: "",
+    downloadedFiles: 0,
+    status: "",
+    totalFiles: 0,
+};
+
+const RSSvftpFilelist = ({ responseList, downloadCnt, downloadAll, isNewResponseList, sssActions }) => {
     const [pageSize, setPageSize] = useState(10);
-    const [checkedList, setCheckedList] = useState([]);
-    const [itemsChecked, setItemsChecked] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortDirection, setSortDirection] = useState("");
     const [sortKey, setSortKey] = useState("");
-    const [sortedList, setSortedList] = useState(initialFileList);
+    const [sortedList, setSortedList] = useState([]);
     const [isDownloadConfirm, setIsDownloadConfirm] = useState(false);
     const [isDownloadStart, setIsDownloadStart] = useState(false);
     const [isDownloadCancel, setIsDownloadCancel] = useState(false);
     const [isDownloadComplete, setIsDownloadComplete] = useState(false);
     const [isDownloadError, setIsDownloadError] = useState(false);
 
+    const [downStatus, setDownStatus] = useState(initialDownStatus);
+
+    useEffect(() => {
+        console.log("useEffect")
+        console.log("isNewResponseList", isNewResponseList)
+        console.log("responseList", responseList !== undefined ?  responseList.toJS() : undefined);
+
+        if(responseList !== undefined) {
+            if(isNewResponseList) {
+                setSortDirection("");
+                setSortKey("");
+                sssActions.vftpSssSetIsNewResponseList(false);
+            }
+            const sortList = _.orderBy(responseList.toJS(), sortKey, sortDirection)
+            setSortedList(sortList)
+        }
+    }, [responseList, isNewResponseList])
+
+    const initDownStatus = useCallback(() => {
+        gCancel = false;
+        setDownStatus(initialDownStatus);
+    }, []);
+
     const openDownloadConfirm = useCallback(() => {
-        if (checkedList.length === 0) {
+        if (downloadCnt === 0) {
             setIsDownloadError(true);
         } else {
             setIsDownloadConfirm(true);
         }
-    }, [checkedList]);
+    }, [downloadCnt]);
 
     const closeDownloadConfirm = useCallback(() => {
         setIsDownloadConfirm(false);
     }, []);
 
-    const openDownloadStart = useCallback(() => {
+
+    const requestDownload = async () => {
+        initDownStatus();
+        const responseListJS = responseList.toJS();
+        const reqData = responseListJS.filter(item => item.checked === true)
+        let res;
+        try {
+            res = await services.axiosAPI.requestPost('/rss/api/vftp/sss/download', { lists: reqData });
+        } catch (error) {
+            console.error(error);
+        }
+
+        console.log("res.data.downloadId", res.data.downloadId);
+        const statusFunc = () => {
+            return services.axiosAPI.requestGet('/rss/api/vftp/sss/download/' + res.data.downloadId);
+        }
+
+        const iterator = geneDownloadStatus(statusFunc);
+        const next = ({ value, done }) => {
+            console.log('done', done);
+            console.log('gCancel', gCancel);
+            if (gCancel) {
+                return;
+            }
+            if (done) {
+                console.log("value", value);
+                if (value.status === 200) {
+                    openDownloadComplete();
+                } else {
+                    // 에러인 경우 처리..
+                }
+            } else {
+                console.log("success");
+                value.then((res) => {
+                    console.log("then.value", res);
+                    setDownStatus(res.data);
+                    next(iterator.next(res))
+                }).catch(err => {
+                    console.log("error.value", err);
+                    next(iterator.next(err.response))
+                })
+            }
+        }
+
+        next(iterator.next());
+    };
+
+    const openDownloadStart = () => {
         setIsDownloadConfirm(false);
+        requestDownload();
         setTimeout(() => { setIsDownloadStart(true); }, 400);
-    }, []);
+    }
 
     const openDownloadCancel = useCallback(() => {
         setIsDownloadStart(false);
         setTimeout(() => { setIsDownloadCancel(true); }, 400);
     }, []);
 
-    const closeDownloadCancel = useCallback(type => {
+    const closeDownloadCancel = useCallback((type) => {
         setIsDownloadCancel(false);
-
         if (type !== "OK") {
-            setTimeout(() => { setIsDownloadStart(true); }, 400);
+           if (downStatus.status === "done") {
+               setTimeout(() => { openDownloadComplete(true); }, 400);
+           } else {
+               setTimeout(() => { setIsDownloadStart(true); }, 400);
+           }
+        } else {
+            gCancel = true;
+            setIsDownloadConfirm(false);
+            setIsDownloadStart(false);
+            setIsDownloadCancel(false);
+            setIsDownloadComplete(false);
+            setIsDownloadError(false);
         }
-    }, []);
+    }, [downStatus, gCancel])
 
     const openDownloadComplete = useCallback(() => {
-        setIsDownloadComplete(true);
-    }, []);
+        setIsDownloadStart(false)
+        if(!isDownloadCancel) setIsDownloadComplete(true);
+    }, [isDownloadCancel]);
 
-    const closeDownloadComplete = useCallback(() => {
+    // save file
+    const closeDownloadComplete = useCallback((isSave) => {
         setIsDownloadComplete(false);
-    }, []);
+        console.log("closeDownloadComplete");
+        console.log("isSave", isSave);
+        console.log("downStatus");
+        if(isSave) {
+            try {
+                services.axiosAPI.downloadFile(downStatus.downloadUrl)
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }, [downStatus]);
 
     const closeDownloadError = useCallback(() => {
         setIsDownloadError(false);
     }, []);
 
-    const selectItem = useCallback(() => {
-        const collection = [];
-
-        if (!itemsChecked) {
-            initialFileList.map(file => collection.push(file.id));
+    const handleCheckboxClick = e => {
+         if(e !== null && e !== undefined) {
+            const idx = e.target.id;
+            if (idx !== null && idx !== undefined) {
+                sssActions.vftpSssCheckResponseList(idx);
+            }
+            e.stopPropagation();
         }
+    };
 
-        setCheckedList(collection);
-        setItemsChecked(!itemsChecked);
-    }, [itemsChecked]);
-
-    const handleCheckboxClick = useCallback(e => {
-        const { id, checked } = e.target;
-        let newList = [];
-
-        if (checked) {
-            newList = [...checkedList, id];
-        } else {
-            newList = checkedList.filter(checkedId => checkedId !== id);
+    const handleTrClick = e => {
+           if(e !== null && e !== undefined) {
+            const id = e.target.parentElement.getAttribute("cbinfo");
+            if (id !== null && id !== undefined) {
+                //API.checkResponseList(this.props, id);
+                sssActions.vftpSssCheckResponseList(id);
+            }
+            e.stopPropagation();
         }
-
-        setCheckedList(newList);
-        setItemsChecked(initialFileList.length === newList.length);
-    },[checkedList]);
-
-    const handleTrClick = useCallback(e => {
-        const id = e.target.parentElement.getAttribute("cbinfo");
-        const isChecked = checkedList.filter(checkedId => checkedId === id);
-        let newList = [];
-
-        if (isChecked.length === 0) {
-            newList = [...checkedList, id];
-        } else {
-            newList = checkedList.filter(checkedId => checkedId !== id);
-        }
-
-        setCheckedList(newList);
-        setItemsChecked(initialFileList.length === newList.length);
-        e.stopPropagation();
-    },[checkedList]);
+    };
 
     const handleThClick = useCallback(key => {
         let changeDirection = "asc";
@@ -241,8 +262,6 @@ const RSSvftpFilelist = () => {
         return sortKey === name ? style + " sort-active " + sortDirection : style;
     };
 
-    const selectedFile = useMemo(() => calculateCount(checkedList), [checkedList]);
-
     if (sortedList.length === 0) {
         return (
             <div className="filelist-container">
@@ -275,6 +294,7 @@ const RSSvftpFilelist = () => {
                     confirmAction={openDownloadStart}
                     startAction={openDownloadCancel}
                     completeAction={closeDownloadComplete}
+                    downStatus={downStatus}
                 />
                 <div className="filelist-container">
                     <Card className="ribbon-wrapper filelist-card">
@@ -289,8 +309,8 @@ const RSSvftpFilelist = () => {
                                                     outline
                                                     size="sm"
                                                     color="info"
-                                                    className={"filelist-btn filelist-btn-toggle" + (itemsChecked ? " active" : "")}
-                                                    onClick={selectItem}
+                                                    className={"filelist-btn filelist-btn-toggle" + (downloadAll ? " active" : "")}
+                                                    onClick={() => sssActions.vftpSssCheckAllResponseList(!downloadAll)}
                                                 >
                                                     All
                                                 </ButtonToggle>
@@ -302,10 +322,10 @@ const RSSvftpFilelist = () => {
                                                 <span className={sortIconRender("fileName")}>➜</span>
                                             </span>
                                         </th>
-                                        <th onClick={() => handleThClick("size")}>
+                                        <th onClick={() => handleThClick("fileSize")}>
                                             <span className="sortLabel-root">
                                                 Size
-                                                <span className={sortIconRender("size")}>➜</span>
+                                                <span className={sortIconRender("fileSize")}>➜</span>
                                             </span>
                                         </th>
                                     </tr>
@@ -313,7 +333,7 @@ const RSSvftpFilelist = () => {
                                 <tbody>
                                     <CreateFileList
                                         fileList={filePaginate(sortedList, currentPage, pageSize)}
-                                        checkedList={checkedList}
+                                        downloadCnt={downloadCnt}
                                         trClick={handleTrClick}
                                         checkboxClick={handleCheckboxClick}
                                     />
@@ -327,7 +347,7 @@ const RSSvftpFilelist = () => {
                             className="custom-pagination"
                         />
                         <div className="filelist-info-area">
-                            <label>{selectedFile} File Selected</label>
+                            <label>{downloadCnt} File Selected</label>
                         </div>
                         <div className="filelist-item-area">
                             <label>Rows per page : </label>
@@ -359,30 +379,30 @@ const RSSvftpFilelist = () => {
 };
 
 const CreateFileList = React.memo(
-    ({ fileList, checkedList, trClick, checkboxClick }) => {
+    ({ fileList, downloadCnt, trClick, checkboxClick }) => {
         return fileList.map(file => {
             return (
-                <tr key={file.id} onClick={trClick} cbinfo={file.id}>
+                <tr key={file.index} onClick={trClick} cbinfo={file.index}>
                     <td>
                         <div className="custom-control custom-checkbox">
                             <input
                                 type="checkbox"
                                 className="custom-control-input"
-                                id={file.id}
-                                value={file.name}
-                                checked={checkedList.includes(file.id)}
+                                id={file.index}
+                                value={file.fileName}
+                                checked={file.checked}
                                 onChange={checkboxClick}
                             />
-                            <label className="custom-control-label filelist-label" htmlFor={file.id}/>
+                            <label className="custom-control-label filelist-label" htmlFor={file.index}/>
                         </div>
                     </td>
                     <td><FontAwesomeIcon icon={faFileAlt} /> {file.fileName}</td>
-                    <td>{file.size}</td>
+                    <td>{API.bytesToSize(file.fileSize)}</td>
                 </tr>
             );
         });
     },
-    propsCompare
+    // propsCompare
 );
 
 const CreateModal = React.memo(
@@ -398,7 +418,8 @@ const CreateModal = React.memo(
          errorClose,
          confirmAction,
          startAction,
-         completeAction
+         completeAction,
+         downStatus
      }) => {
         if (isConfirm) {
             return (
@@ -440,7 +461,7 @@ const CreateModal = React.memo(
                             <p style={{ marginBottom: "0", paddingBottom: "0" }}>
                                 Downloading...
                             </p>
-                            <p>(10/100)</p>
+                            <p>{`${downStatus.downloadedFiles}/${downStatus.totalFiles}`}</p>
                         </div>
                         <div className="button-wrap">
                             <button className="secondary alert-type" onClick={startAction}>
@@ -488,10 +509,10 @@ const CreateModal = React.memo(
                             <p>Download Complete!</p>
                         </div>
                         <div className="button-wrap">
-                            <button className="secondary form-type left-btn" onClick={completeAction}>
+                            <button className="secondary form-type left-btn" onClick={() => completeAction(true)}>
                                 Save
                             </button>
-                            <button className="secondary form-type right-btn" onClick={completeClose}>
+                            <button className="secondary form-type right-btn" onClick={() => completeClose(false)}>
                                 Cancel
                             </button>
                         </div>
@@ -531,4 +552,15 @@ const CreateModal = React.memo(
     }
 );
 
-export default RSSvftpFilelist;
+export default connect(
+    (state) => ({
+        responseList: state.vftpSss.get('responseList'),
+        responseListCnt: state.vftpSss.get('responseListCnt'),
+        downloadCnt: state.vftpSss.get('downloadCnt'),
+        downloadAll: state.vftpSss.get('downloadAll'),
+        isNewResponseList: state.vftpSss.get('isNewResponseList'),
+    }),
+    (dispatch) => ({
+        sssActions: bindActionCreators(sssActions, dispatch),
+    })
+)(RSSvftpFilelist);

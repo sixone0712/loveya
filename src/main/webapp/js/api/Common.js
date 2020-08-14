@@ -51,6 +51,7 @@ export const getErrorMsg = (error) => {
         case Define.SEARCH_FAIL_NO_CATEGORY: msg = "Please choose a category."; break;
         case Define.SEARCH_FAIL_DATE: msg = "Please set the start time before the end time."; break;
         case Define.SEARCH_FAIL_SERVER_ERROR: msg = "Network connection error."; break;
+        case Define.SEARCH_FAIL_NO_COMMAND: msg = "Please choose a command."; break;
         case Define.FILE_FAIL_NO_ITEM: msg = "Please choose a file."; break;
         case Define.FILE_FAIL_SERVER_ERROR: msg = "Network connection error."; break;
         case Define.LOGIN_FAIL_NO_REGISTER_USER: msg = "No such user."; break;

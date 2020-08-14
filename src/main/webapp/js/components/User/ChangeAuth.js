@@ -33,7 +33,7 @@ class ChangeAuthModal extends Component {
             const res = await API.changePermission(this.props,
               `${Define.REST_USERS_PATCH_CHANGE_PERMISSION}/${id}/permission`, requestData);
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
         const err = API.getUserInfoErrorCode(this.props);
         console.log("changePermission err: ", err);

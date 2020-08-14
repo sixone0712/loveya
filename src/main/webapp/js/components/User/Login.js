@@ -66,7 +66,7 @@ class Login extends Component {
                     sessionStorage.setItem("refreshToken", refreshToken);
                 }
             } catch (e) {
-                console.log(e)
+                console.error(e)
             }
             const isLoggedIn = API.getLoginIsLoggedIn(this.props);
             const errCode = API.getErrCode(this.props);
