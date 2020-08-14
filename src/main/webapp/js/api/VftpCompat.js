@@ -154,7 +154,7 @@ export const setDownload = (props) => {
     return jsonList;
 };
 
-export const setWatchDlStatus = (requestId, modalFunc) => {
+export const setVftpComaptWatchDlStatus = (requestId, modalFunc) => {
     const timeoutVal = setTimeout(async (requestId, modalFunc) => {
         const downloadStatus = modalFunc.getDownloadStatus();
         let { func } = downloadStatus;

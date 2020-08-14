@@ -79,23 +79,23 @@ export default handleActions({
     [VFTP_COMPAT_INIT_RESPONSE_LIST] : (state, action) => {
         return state.set("responseList", List([]))
             .set("requestListCnt", 0)
-            .set("responseListCnt", 0)
-            .set('downloadCnt', 0);
+b            .set("downloadStatus", initialState.get("downloadStatus"))
     },
 
     [VFTP_COMPAT_SET_DOWNLOAD_STATUS] : (state, action) => {
         const { func, dlId, status, totalFiles, downloadFiles, downloadUrl } = action.payload;
-        const downloadStatus = state.get("downloadStatus").toJS();
-//console.log("func", func);
+        const downloadStatus = state.get("downloadStatus");
+        console.log("downloadStatus", downloadStatus);
+
+        console.log("func", func);
         if(func !== undefined ) {
             downloadStatus.func = func;
         }
 
-        //console.log("dlId", dlId);
+        console.log("dlId", dlId);
         if(dlId !== undefined) {
             downloadStatus.dlId = dlId;
         }
-        //console.log("status", status);
         if(status !== undefined) {
             if(status ==="done" || status === "error") {
                 clearInterval(downloadStatus.func);
@@ -114,17 +114,14 @@ export default handleActions({
         if(downloadUrl !== undefined) {
             downloadStatus.downloadUrl = downloadUrl;
         }
-
         //console.log("downloadStatus", downloadStatus);
-        return state.set("downloadStatus", fromJS(downloadStatus));
-
-
+        return state.set("downloadStatus", downloadStatus);
     },
 
     [VFTP_COMPAT_CHECK_DOWNLOAD_STATUS] : (state, action) => {
 
         const { func, dlId, status, totalFiles, downloadFiles, downloadUrl } = action.payload;
-        const downloadStatus = state.get("downloadStatus").toJS();
+        const downloadStatus = state.get("downloadStatus");
 
         //console.log("func", func);
         if(func !== undefined ) {
@@ -151,12 +148,13 @@ export default handleActions({
         if(downloadFiles !== undefined) {
             downloadStatus.downloadFiles = downloadFiles;
         }
+
         if(downloadUrl !== undefined) {
             downloadStatus.downloadUrl = downloadUrl;
         }
 
         //console.log("downloadStatus", downloadStatus);
-        return state.set("downloadStatus", fromJS(downloadStatus));
+        return state.set("downloadStatus", downloadStatus);
     }
 
 }, initialState)

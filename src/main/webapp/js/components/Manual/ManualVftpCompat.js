@@ -17,6 +17,7 @@ import Commandline from "../Manual/VFTP/commandline";
 import Footer from "../Common/Footer";
 import moment from "moment";
 import * as Define from "../../define";
+import services from "../../services";
 
 const scrollStyle = {
     backgroundColor: "#343a40",
@@ -47,32 +48,138 @@ function convertCommand (cmd, sDate,eDate) {
     return  cmdString + ".log";
 }
 
-const downloadFunc = (props) => {
-    const machines= props.toolInfoListCheckCnt;
+const downloadFunc = async (props) => {
+    console.log("================downloadFunc================");
+    const {CompatActions} = props;
+    const machines = props.toolInfoListCheckCnt;
     const fromDate = props.startDate;
     const toDate = props.endDate;
-    let error = Define.RSS_SUCCESS;
-    console.log("================downloadFunc================");
-    let requestID = 0;
+
+    const ret = {
+        error: Define.RSS_SUCCESS,
+        requestID: ""
+    };
+
     //if ----- Machine is no selected
     if (machines <= 0) {
-        error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY;
+        ret.error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY;
     } else if (fromDate.isAfter(toDate)) {
-        error = Define.SEARCH_FAIL_DATE;
+        ret.error = Define.SEARCH_FAIL_DATE;
     } else {
-        requestID = API.startVftpCompatDownload(props);
-        if (requestID !== "") {
-            console.log("requestId", requestID);
-            CompatActions.vftpCompatSetDlStatus({dlId: requestID});
-        } else {
-            //await CompatActions.vftpCompatCheckDlStatus({toolList, logInfoList, startDate, endDate});
-            //API.startVftpCompatDownload(props).then(r => );
+        try {
+            const requestId = await API.startVftpCompatDownload(props);
+            if (requestId !== "") {
+                CompatActions.vftpCompatSetDlStatus({
+                    func: null,
+                    dlId: requestId,
+                    status: "init",
+                    totalFiles: 0,
+                    downloadFiles: 0,
+                    downloadUrl: ""
+                })
+            } else {
+                console.log("startVftpCompatDownload requestID: 0 ");
+            }
+            ret.requestID = requestId;
+        } catch (error) {
+            console.error(error);
+            ret.error = Define.RSS_FAIL;
         }
     }
-    return error;
+    return ret;
 }
 
-const statusCheckFunc = (props) => {
+const statusCheckFunc = async (props) => {
+    const {dlId} = props.downloadStatus;
+    const {CompatActions} = props;
+    const ret = {
+        error:Define.RSS_SUCCESS,
+        msg:"",
+        status:"",
+        url:"",
+    }
+    let res;
+    if(dlId !== 0)
+    {
+        try {
+            res = await services.axiosAPI.requestGet(`${Define.REST_VFTP_COMPAT_POST_DOWNLOAD}/${dlId}`);
+            const {status, downloadId, totalFiles, downloadedFiles, downloadUrl} = res.data;
+            console.log("[statusCheckFunc] status", status);
+            ret.status = status;
+            if (status === "error") {
+                ret.error=Define.RSS_FAIL;
+                ret.msg = Define.FILE_FAIL_SERVER_ERROR;
+            }else if(status === "done"){
+                ret.error=Define.RSS_SUCCESS;
+                ret.url = downloadUrl;
+            }
+            CompatActions.vftpCompatSetDlStatus({
+                func: null,
+                dlId: downloadId,
+                status: status,
+                totalFiles: totalFiles,
+                downloadFiles: downloadedFiles,
+                downloadUrl: downloadUrl
+            })
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    return ret;
+}
+
+const completeFunc = async (props) => {
+    const {downloadUrl} = props.downloadStatus;
+    let res = 0;
+    res = await services.axiosAPI.downloadFile(downloadUrl);
+    console.log("res: ", res);
+    if(res.result === Define.RSS_SUCCESS){
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,res.fileName, "Download Completed")
+    }
+    else{
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,res.fileName, "Download Fail");
+    }
+    CompatActions.vftpCompatSetDlStatus({
+        func: null,
+        dlId: "",
+        status: "init",
+        totalFiles: 0,
+        downloadFiles: 0,
+        downloadUrl: ""
+    })
+    return res;
+}
+const cancelFunc = async (props) => {
+    const {downloadStatus, CompatActions} = props;
+    let res = 0;
+    console.log("============cancelFunc=============");
+    if(downloadStatus.status == "done")
+    {
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,"unknown", "User Cancel")
+        CompatActions.vftpCompatSetDlStatus({
+            func: null,
+            dlId: "",
+            status: "init",
+            totalFiles: 0,
+            downloadFiles: 0,
+            downloadUrl: ""
+        })
+    }
+    else if(downloadStatus.dlId !== 0)
+    {
+        try {
+            const res = await services.axiosAPI.requestDelete(Define.REST_VFTP_COMPAT_POST_DOWNLOAD + "/" + downloadStatus.dlId);
+            console.log("res", res)
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    else
+    {
+        console.log("downloadStatus", downloadStatus)
+    }
+    return res;
 }
 
 const ManualVftpCompat = (props) => {
@@ -80,13 +187,14 @@ const ManualVftpCompat = (props) => {
     const [fromDate, setFromDate] = useState(props.startDate);
     const [toDate, setToDate] = useState(props.endDate);
     const dbCommand = API.vftpConvertDBCommand(props.dbCommand.get("lists").toJS());
-    const modalMsglist ={
+    const modalMsgList ={
         cancel: "Are you sure want to cancel the download?",
         process: "downloading.....",
         confirm: "Do you want to execute the command?",
         complete: "Download Complete!",
         ready:"",
     }
+
     useEffect(()=>{
         console.log("====ManualVftpCompat initialized=====");
         API.vftpCompatInitAll(props);
@@ -114,11 +222,16 @@ const ManualVftpCompat = (props) => {
                     <Col className="machinelist"><Machinelist/></Col>
                     <Col><Commandlist cmdType={"vftp_compat"}/></Col>
                     <Col className="datesetting">
-                        <Datesetting from={fromDate} handleChangeFromDate={setFromDate}
-                                     to={toDate} handleChangeToDate={setToDate} />
+                        <Datesetting from={fromDate} FromDateChangehandler={setFromDate}
+                                     to={toDate} ToDateChangehandler={setToDate} />
                     </Col>
                 </Row>
-                <Commandline type ="compat/optional" string={command} func={() => downloadFunc(props)} modalMsglist={modalMsglist}/>
+                <Commandline type ="compat/optional" string={command} modalMsglist={modalMsgList}
+                             confirmfunc={() => downloadFunc(props)}
+                             processfunc={() => statusCheckFunc(props)}
+                             completeFunc={()=> completeFunc(props)}
+                             cancelFunc={()=> cancelFunc(props)}
+                />
             </Container>
             <Footer/>
             <ScrollToTop showUnder={160} style={scrollStyle}>
@@ -137,6 +250,7 @@ export default connect(
         startDate:state.vftpCompat.get('startDate'),
         endDate:state.vftpCompat.get('endDate'),
         command:state.vftpCompat.getIn(['requestList', "command"]),
+        downloadStatus: state.vftpCompat.get('downloadStatus'),
         dbCommand: state.command.get('command'),
     }),
     (dispatch) => ({

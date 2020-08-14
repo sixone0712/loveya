@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
 
 
-const RSSdatesettings = ({from, handleChangeFromDate, to, handleChangeToDate}) => {
+ const RSSdatesettings = ({from, FromDateChangehandler, to, ToDateChangehandler}) => {
     return (
         <Card className="ribbon-wrapper formlist-card">
             <CardBody className="custom-scrollbar manual-card-body">
@@ -13,8 +13,8 @@ const RSSdatesettings = ({from, handleChangeFromDate, to, handleChangeToDate}) =
                 <Col>
                     <FormGroup className="formlist-form-group">
                         <div className="datepicker-item-area">
-                            <CreateDatetimePicker label={"From"} date={from} handleChange={date=> handleChangeFromDate(date)} />
-                            <CreateDatetimePicker label={"To"} date={to} handleChange={date=> handleChangeToDate(date)}/>
+                            <CreateDatetimePicker label={"From"} date={from} handleChange={date=> FromDateChangehandler(date)} />
+                            <CreateDatetimePicker label={"To"} date={to} handleChange={date=> ToDateChangehandler(date)}/>
                         </div>
                     </FormGroup>
                 </Col>
