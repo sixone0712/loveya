@@ -31,6 +31,7 @@ const commandWriter = (element, string) => {
         type: type
     };
 };
+let isStopScreen = false;
 
 const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
@@ -38,16 +39,19 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
     const [modalMsg, setModalMsg] = useState("");
     const [isComplete, setComplete] = useState(false);
     const [isCancel, setCancel] = useState(false);
+    const [downloadFile, setDownloadFile] = useState(0);
+    const [totalFiles, setTotalFiles] = useState(0);
+
     const element = useRef();
     const setModalOpen = (type) => {
         setPrevModal(modalType);
         setModalType(type);
         switch (type) {
-            case "confirm":     setModalMsg(modalMsglist.confirm); break;
-            case "cancel":      setModalMsg(modalMsglist.cancel);break;
-            case "ready":       setModalMsg("");break;
-            case "process":     setModalMsg(modalMsglist.process);break;
-            case "complete":    setModalMsg(modalMsglist.complete);break;
+            case "confirm":     isStopScreen = false;setModalMsg(modalMsglist.confirm); break;
+            case "cancel":      isStopScreen = true; setModalMsg(modalMsglist.cancel);break;
+            case "ready":       isStopScreen = false;setModalMsg("");break;
+            case "process":     isStopScreen = false;setModalMsg(modalMsglist.process);break;
+            case "complete":    isStopScreen = false;setModalMsg(modalMsglist.complete);break;
         }
     };
 
@@ -55,20 +59,16 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         setModalOpen("ready") ;
     };
 
-    const cancelModal = async (yesno, modaltype) => {
-        console.log("[cancelModal]yesno: ",yesno);
-        console.log("[cancelModal]modalType: ",modaltype);
+    const cancelModal = async (yesno, type) => {
+        const {modalType} = type;
         if (type === "compat/optional") {
-            if (yesno === "yes") {
-                if (modaltype !== "complete") {
-                    setModalOpen("cancel")
-                    let result = await cancelFunc();
-                } else {
-                    closeModal();
-                }
+            console.log("[cancelModal]yesno: ",yesno);
+            console.log("[cancelModal]modalType: ",modalType);
+            if(yesno === "yes") {
+                closeModal();
+                cancelFunc();
             } else {
-                console.log("[cancelModal]prevModal: ", prevModal);
-                setModalOpen(prevModal)
+                (modalType !== "complete") ? setModalOpen(prevModal): closeModal();
             }
         } else {
             if (yesno === "yes") {
@@ -85,9 +85,9 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
     };
 
     const completeModal = async () => {
-        if (type == "compat/optional") {
+        if (type === "compat/optional") {
             let res = await completeFunc();
-            if (res.result != Define.RSS_SUCCESS) {
+            if (res.result !== Define.RSS_SUCCESS) {
                 setModalOpen("alert");
                 setModalMsg(API.getErrorMsg(result.error));
             } else {
@@ -102,15 +102,17 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             try {
                 let result;
                 result = await processfunc();
-                if (result.status == "error" || result.status == "done") {
+                if (result.status === "error" || result.status === "done") {
                     clearTimeout(processSequence);
-                    if(result.status == "done") {
-                        setModalOpen("complete");
+                    if(result.status === "done"  ){
+                        (isStopScreen !== true) ? setModalOpen("complete") : setPrevModal("complete");
                     } else {
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(result.error));
                     }
                 } else {
+                    setDownloadFile(result.downloadedFiles);
+                    setTotalFiles(result.totalFiles);
                     processSequence();
                 }
             }
@@ -127,15 +129,14 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         setComplete(false);
 
         if(type === "compat/optional") {
+            setModalOpen("process");
             let result = await confirmfunc();
             console.log("result ", result);
-            if (result.error != Define.RSS_SUCCESS) {
+            if (result.error !== Define.RSS_SUCCESS) {
                 setModalOpen("alert");
                 setModalMsg(API.getErrorMsg(result.error));
             } else {
-                setModalOpen("process");
-                let tVal = processSequence();
-                console.log("tVal: ", tVal);
+                processSequence();
             }
         } else {
             const result = confirmfunc();
@@ -188,7 +189,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 <CardBody>
                     <div className="command-line">
                         Rapid Collector
-                        { type == "compat/optional" ? "#get " : "#cd " }
+                        { type === "compat/optional" ? "#get " : "#cd " }
                         <span className="command" ref={element} />
                     </div>
                     <Button color="info" outline onClick={()=> setModalOpen("confirm")}>
@@ -247,6 +248,9 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                                 />
                             </div>
                             <p>{modalMsg}</p>
+                            { type === "compat/optional" &&
+                                <p>{downloadFile}/{totalFiles }</p>
+                            }
                         </div>
                         <div className="button-wrap">
                             <button className="secondary alert-type" onClick={()=> setModalOpen("cancel")}>

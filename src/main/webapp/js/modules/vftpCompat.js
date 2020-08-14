@@ -87,20 +87,11 @@ b            .set("downloadStatus", initialState.get("downloadStatus"))
         const downloadStatus = state.get("downloadStatus");
         console.log("downloadStatus", downloadStatus);
 
-        console.log("func", func);
-        if(func !== undefined ) {
-            downloadStatus.func = func;
-        }
-
-        console.log("dlId", dlId);
+        //console.log("dlId", dlId);
         if(dlId !== undefined) {
             downloadStatus.dlId = dlId;
         }
         if(status !== undefined) {
-            if(status ==="done" || status === "error") {
-                clearInterval(downloadStatus.func);
-                downloadStatus.func = null;
-            }
             downloadStatus.status = status;
         }
         //console.log("totalFiles", totalFiles);
