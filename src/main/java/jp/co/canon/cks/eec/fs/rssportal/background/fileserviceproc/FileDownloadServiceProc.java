@@ -87,6 +87,7 @@ public class FileDownloadServiceProc extends Thread {
                 status = Status.Error;
                 return;
             }
+            context.setDownloadInfo(info);
             if(info.isFinish()) {
                 log.info("["+getProcessName()+"#download] download completed");
                 break;

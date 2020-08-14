@@ -359,7 +359,12 @@ public class FileDownloadExecutor {
 
     public long getDownloadFiles() {
         AtomicLong files = new AtomicLong();
-        downloadContexts.forEach(context->files.addAndGet(context.getDownloadFiles()));
+        downloadContexts.forEach(context->{
+            FileDownloadInfo info = context.getDownloadInfo();
+            if(info!=null) {
+                files.addAndGet(info.getDownloadFiles());
+            }
+        });
         return files.get();
     }
 

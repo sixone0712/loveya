@@ -2,6 +2,7 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.portal.bussiness.CustomURL;
+import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.FileDownloadInfo;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,10 +20,7 @@ public class FileDownloadContext {
 
     private final String ftpType;
     private final String id;
-    //private final String system;
     private final String tool;
-    //private String user;
-    //private String comment;
     private String logType;
     private String logTypeStr;
 
@@ -56,6 +54,10 @@ public class FileDownloadContext {
     @Getter
     private String directory;
 
+    @Getter @Setter
+    private FileDownloadInfo downloadInfo;
+
+    @Deprecated
     private long downloadFiles;
 
     public FileDownloadContext(@NonNull String ftpType, @NonNull String id, @NonNull DownloadRequestForm form, @NonNull String baseDir) {
@@ -63,9 +65,7 @@ public class FileDownloadContext {
         this.ftpType = ftpType;
         this.downloadForm = form;
         this.id = id;
-        //this.system = form.getSystem();
         this.tool = form.getMachine();
-        //this.comment = "";
 
         if(ftpType.equals("ftp")) {
             FtpDownloadRequestForm ftp = (FtpDownloadRequestForm)form;
