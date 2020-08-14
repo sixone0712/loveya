@@ -97,6 +97,8 @@ const statusCheckFunc = async (props) => {
         msg:"",
         status:"",
         url:"",
+        totalFiles:"",
+        downloadedFiles:"",
     }
     let res;
     if(dlId !== 0)
@@ -105,13 +107,18 @@ const statusCheckFunc = async (props) => {
             res = await services.axiosAPI.requestGet(`${Define.REST_VFTP_COMPAT_POST_DOWNLOAD}/${dlId}`);
             const {status, downloadId, totalFiles, downloadedFiles, downloadUrl} = res.data;
             console.log("[statusCheckFunc] status", status);
+            console.log("[statusCheckFunc] totalFiles", totalFiles);
+            console.log("[statusCheckFunc] downloadedFiles", downloadedFiles);
             ret.status = status;
             if (status === "error") {
                 ret.error=Define.RSS_FAIL;
                 ret.msg = Define.FILE_FAIL_SERVER_ERROR;
-            }else if(status === "done"){
+            } else if(status === "done"){
                 ret.error=Define.RSS_SUCCESS;
                 ret.url = downloadUrl;
+            } else {
+                ret.totalFiles = totalFiles;
+                ret.downloadedFiles = downloadedFiles;
             }
             CompatActions.vftpCompatSetDlStatus({
                 func: null,
