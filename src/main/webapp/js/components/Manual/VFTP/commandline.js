@@ -53,22 +53,17 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         setModalOpen("ready") ;
     };
 
-    const cancelModal = async (yesno, modaltype) => {
+    const cancelModal = async (yesno, type) => {
+        const {modalType} = type;
         console.log("[cancelModal]yesno: ",yesno);
-        console.log("[cancelModal]modalType: ",modaltype);
-        if(yesno =="yes")
-        {
-            if(modaltype !== "complete"){
-                setModalOpen("cancel")
-                let result = await cancelFunc();
-            }else {
-                closeModal();
-            }
-        }
-        else
-        {
+        console.log("[cancelModal]modalType: ",modalType);
+        if(yesno =="yes") {
+            closeModal();
+            let result = await cancelFunc();
+            console.log("result: ",result);
+        } else {
             console.log("[cancelModal]prevModal: ",prevModal);
-            setModalOpen(prevModal)
+            (modalType !== "complete") ? setModalOpen(prevModal): closeModal();
         }
     };
 
