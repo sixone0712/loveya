@@ -298,7 +298,7 @@ public class FileDownloaderController {
                     addDownloadItem(map, fabName, machineName, categoryCode, categoryName, fileName, fileSize, fileDate);
                 } else {
                     try {
-                        fileDownloader.createDownloadFileList(requestList, fabName, machineName, categoryCode, categoryName, null, null, fileName);
+                        fileDownloader.createFtpDownloadFileList(requestList, fabName, machineName, categoryCode, categoryName, null, null, fileName);
                     } catch (InterruptedException e) {
                         log.error("stopped creating download list");
                         return null;

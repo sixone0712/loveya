@@ -162,7 +162,7 @@ public class CollectPlanner extends Thread {
         for(String tool: tools) {
             tool = tool.trim();
             for(int i=0; i<types.length; ++i) {
-                boolean ret = downloader.createDownloadFileList(downloadList, "undefined", tool, types[i].trim(),
+                boolean ret = downloader.createFtpDownloadFileList(downloadList, "undefined", tool, types[i].trim(),
                         typeStrs[i].trim(), from, to, "");
                 if(ret==false) {
                     // That form is null means that a timeout has occurred on createFileList.

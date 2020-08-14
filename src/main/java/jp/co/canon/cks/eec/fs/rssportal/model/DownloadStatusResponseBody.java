@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.model;
 
+import jp.co.canon.cks.eec.fs.rssportal.background.CollectType;
 import jp.co.canon.cks.eec.fs.rssportal.background.FileDownloader;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +22,16 @@ public class DownloadStatusResponseBody {
         status = fileDownloader.getStatus(dlId);
         totalFiles = fileDownloader.getTotalFiles(dlId);
         downloadedFiles = fileDownloader.getDownloadFiles(dlId);
+
         if(status.equals("done")) {
-            downloadUrl = "/rss/api/ftp/storage/" + dlId;
+            CollectType collectType = fileDownloader.getFtpType(dlId);
+            if(collectType==CollectType.vftp_compat) {
+                downloadUrl = "/rss/api/vftp/compat/storage/" + dlId;
+            } else if(collectType==CollectType.vftp_sss) {
+                downloadUrl = "/rss/api/vftp/sss/storage/" + dlId;
+            } else {
+                downloadUrl = "/rss/api/ftp/storage/" + dlId;
+            }
         }
     }
 }
