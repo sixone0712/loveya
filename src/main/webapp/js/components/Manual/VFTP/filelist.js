@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo, useEffect} from "react";
+import React, {useState, useCallback, useMemo, useEffect, useRef} from "react";
 import { Card, CardBody, Table, ButtonToggle, Button } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle, faDownload, faBan, faChevronCircleDown } from "@fortawesome/free-solid-svg-icons";
@@ -29,7 +29,6 @@ const propsCompare = (prevProps, nextProps) => {
 };
 */
 
-let gCancel = false;
 const geneDownloadStatus = function* (func) {
     while (true) {
         let response = yield func();
@@ -72,6 +71,7 @@ const RSSvftpFilelist = ({
     const [isDownloadCancel, setIsDownloadCancel] = useState(false);
     const [isDownloadComplete, setIsDownloadComplete] = useState(false);
     const [isDownloadError, setIsDownloadError] = useState(false);
+    const cancelRef = useRef(false);
 
     const [downStatus, setDownStatus] = useState(initialDownStatus);
 
@@ -92,7 +92,7 @@ const RSSvftpFilelist = ({
     }, [responseList, isNewResponseList])
 
     const initDownStatus = useCallback(() => {
-        gCancel = false;
+        cancelRef.current = false;
         setDownStatus(initialDownStatus);
     }, []);
 
@@ -128,8 +128,8 @@ const RSSvftpFilelist = ({
         const iterator = geneDownloadStatus(statusFunc);
         const next = ({ value, done }) => {
             console.log('done', done);
-            console.log('gCancel', gCancel);
-            if (gCancel) {
+            console.log('cancelRef.current', cancelRef.current);
+            if (cancelRef.current) {
                 return;
             }
             if (done) {
@@ -175,14 +175,14 @@ const RSSvftpFilelist = ({
                setTimeout(() => { setIsDownloadStart(true); }, 400);
            }
         } else {
-            gCancel = true;
+            cancelRef.current = true;
             setIsDownloadConfirm(false);
             setIsDownloadStart(false);
             setIsDownloadCancel(false);
             setIsDownloadComplete(false);
             setIsDownloadError(false);
         }
-    }, [downStatus, gCancel])
+    }, [downStatus, cancelRef])
 
     const openDownloadComplete = useCallback(() => {
         setIsDownloadStart(false)

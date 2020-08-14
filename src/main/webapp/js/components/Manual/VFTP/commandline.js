@@ -31,7 +31,6 @@ const commandWriter = (element, string) => {
         type: type
     };
 };
-let isStopScreen = false;
 
 const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
@@ -49,11 +48,11 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         setPrevModal(modalType);
         setModalType(type);
         switch (type) {
-            case "confirm":     isStopScreen = false;setModalMsg(modalMsglist.confirm); break;
-            case "cancel":      isStopScreen = true; setModalMsg(modalMsglist.cancel);break;
-            case "ready":       isStopScreen = false;setModalMsg("");break;
-            case "process":     isStopScreen = false;setModalMsg(modalMsglist.process);break;
-            case "complete":    isStopScreen = false;setModalMsg(modalMsglist.complete);break;
+            case "confirm": setModalMsg(modalMsglist.confirm); break;
+            case "cancel": setModalMsg(modalMsglist.cancel);break;
+            case "ready": setModalMsg("");break;
+            case "process": setModalMsg(modalMsglist.process);break;
+            case "complete": setModalMsg(modalMsglist.complete);break;
         }
     };
 
@@ -107,7 +106,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 if (result.status === "error" || result.status === "done") {
                     clearTimeout(processSequence);
                     if(result.status === "done"  ){
-                        (isStopScreen !== true) ? setModalOpen("complete") : setPrevModal("complete");
+                        (modalTypeRef.current !== "cancel") ? setModalOpen("complete") : setPrevModal("complete");
                     } else {
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(result.error));
