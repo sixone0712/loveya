@@ -82,7 +82,7 @@ public class FileDownloadServiceProc extends Thread {
         log.info("["+getProcessName()+"#download] download  machine="+context.getTool()+" category="+context.getLogType());
         while(true) {
             FileDownloadInfo info = handler.getDownloadedFiles();
-            if(info.isError()) {
+            if(info==null || info.isError()) {
                 log.error("["+getProcessName()+"#download] download error occurs");
                 status = Status.Error;
                 return;

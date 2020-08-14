@@ -80,10 +80,14 @@ public class FileDownloaderController extends DownloadControllerCommon {
                         long searchTo = Long.parseLong(request.getEndDate());
                         if(dirTimestamp > searchTo || dirTimestamp < searchFrom) continue;
                         */
+                        if(request.getDir().endsWith("/.") || request.getDir().endsWith("/..")) {
+                            continue;
+                        }
                         if(!fileDownloader.isBetween(file.getTimestamp(), request.getStartDate(), request.getEndDate())) {
                             continue;
                         }
                         RSSFtpSearchRequest child = request.getClone();
+                        log.info("### request child-dir="+child.getDir());
                         child.setDir(file.getFilename());
                         if(!createFileList(list, child)) {
                             log.warn(String.format("[createFileList]connection error (%s %s %s)",
