@@ -87,7 +87,6 @@ public class FileDownloaderController extends DownloadControllerCommon {
                             continue;
                         }
                         RSSFtpSearchRequest child = request.getClone();
-                        log.info("### request child-dir="+child.getDir());
                         child.setDir(file.getFilename());
                         if(!createFileList(list, child)) {
                             log.warn(String.format("[createFileList]connection error (%s %s %s)",
