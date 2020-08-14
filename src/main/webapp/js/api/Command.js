@@ -57,3 +57,7 @@ export const setCmdEndDate = (props, date) => {
     const { CmdActions } = props;
     CmdActions.setCmdEndDate(date);
 };
+export const initializeCmd = (props) =>{
+    const { CmdActions } = props;
+    CmdActions.initializeCmd();
+}

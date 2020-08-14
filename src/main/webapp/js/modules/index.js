@@ -8,6 +8,7 @@ import user from './User';
 import dlHistory from './dlHistory';
 import autoPlan from './autoPlan';
 import command from './command';
+import vftpCompat from './vftpCompat';
 import { penderReducer } from 'redux-pender';
 
 export default combineReducers({
@@ -18,6 +19,7 @@ export default combineReducers({
     user,
     autoPlan,
     dlHistory,
+    vftpCompat,
     command,
     pender: penderReducer
 });
