@@ -22,6 +22,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.11.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.12'
     implementation project(':fileservicecommon')
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.6.2'

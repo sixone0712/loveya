@@ -3,10 +3,12 @@ package jp.co.canon.ckbs.eec.fs.manage.controller;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.*;
 import jp.co.canon.ckbs.eec.fs.manage.service.FileServiceManageException;
 import jp.co.canon.ckbs.eec.fs.manage.service.VFtpFileService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 public class VFtpCommandController {
     @Autowired
