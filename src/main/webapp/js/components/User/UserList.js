@@ -68,7 +68,7 @@ class UserList extends Component {
         try {
             const res = await API.getDBUserList(this.props);
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
         const lists = API.getUserList(this.props)
         // filter Administrator
@@ -185,7 +185,7 @@ class UserList extends Component {
         try {
             const res = await API.deleteUser(this.props, this.state.selected);
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
         let result = API.getUserInfoErrorCode(this.props);
         console.log("result:" + result);

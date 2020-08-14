@@ -63,7 +63,7 @@ export const startSearchList = (props) => {
     try {
         searchListActions.searchLoadResponseList(Define.REST_FTP_POST_FILELIST, newRequestList);
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 };
 

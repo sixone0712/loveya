@@ -83,7 +83,7 @@ class SignOut extends Component {
             try {
                 await API.createUser(this.props, uInfo);
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
             result = API.getUserInfoErrorCode(this.props);
             console.log("result:" + result);
@@ -102,7 +102,7 @@ class SignOut extends Component {
                 try {
                     await API.getDBUserList(this.props);
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
                 this.close(); //create modal Close
                 this.props.alertOpen("create");

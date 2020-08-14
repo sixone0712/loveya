@@ -61,7 +61,7 @@ class App extends Component {
                   this.onMovePage(Define.PAGE_LOGIN);
               }
           } catch (e) {
-            console.log(e);
+            console.error(e);
             this.onMovePage(Define.PAGE_LOGIN);
           }
         }
