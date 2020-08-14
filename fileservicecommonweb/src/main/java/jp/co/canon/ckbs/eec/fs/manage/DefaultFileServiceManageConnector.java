@@ -12,8 +12,8 @@ public class DefaultFileServiceManageConnector implements FileServiceManageConne
     String host;
     String prefix;
 
-    public DefaultFileServiceManageConnector(String host){
-        this.restTemplate = new RestTemplate();
+    public DefaultFileServiceManageConnector(String host, RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
         this.host = host;
         this.prefix = String.format("http://%s", this.host);
     }

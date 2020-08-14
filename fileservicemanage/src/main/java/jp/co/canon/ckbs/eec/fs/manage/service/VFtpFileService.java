@@ -1,6 +1,5 @@
 package jp.co.canon.ckbs.eec.fs.manage.service;
 
-import jp.co.canon.ckbs.eec.fs.collect.DefaultFileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnector;
 import jp.co.canon.ckbs.eec.fs.collect.FileServiceCollectConnectorFactory;
 import jp.co.canon.ckbs.eec.fs.collect.controller.param.VFtpCompatDownloadRequestResponse;
@@ -10,11 +9,13 @@ import jp.co.canon.ckbs.eec.fs.collect.model.RequestFileInfo;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.service.configuration.ConfigurationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+@Slf4j
 @Component
 public class VFtpFileService {
     @Autowired
@@ -23,18 +24,14 @@ public class VFtpFileService {
     @Autowired
     FileServiceCollectConnectorFactory connectorFactory;
 
-    @PostConstruct
-    void postConstruct(){
-
-    }
-
     public VFtpSssListRequestResponse createVFtpSssListRequest(String machine, String directory) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
-        DefaultFileServiceCollectConnector connector = new DefaultFileServiceCollectConnector(host);
+        FileServiceCollectConnector connector = connectorFactory.getConnector(host);
         VFtpSssListRequestResponse res = connector.createVFtpSssListRequest(machine, directory);
         return res;
     }
@@ -42,6 +39,7 @@ public class VFtpFileService {
     public VFtpSssListRequestResponse getVFtpSssListRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -53,6 +51,7 @@ public class VFtpFileService {
     public void cancelAndDeleteVFtpSssListRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -83,6 +82,7 @@ public class VFtpFileService {
     public VFtpSssDownloadRequestResponse createVFtpSssDownloadRequest(String machine, String directory, String[] fileList, boolean archive) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -95,6 +95,7 @@ public class VFtpFileService {
     public VFtpSssDownloadRequestResponse getVFtpSssDownloadRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -107,6 +108,7 @@ public class VFtpFileService {
     public void cancelAndDeleteVFtpSssDownloadRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -134,6 +136,7 @@ public class VFtpFileService {
     public VFtpCompatDownloadRequestResponse createVFtpCompatDownloadRequest(String machine, String filename, boolean archive) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -146,6 +149,7 @@ public class VFtpFileService {
     public VFtpCompatDownloadRequestResponse getVFtpCompatDownloadRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 
@@ -158,6 +162,7 @@ public class VFtpFileService {
     public void cancelAndDeleteVFtpCompatDownloadRequest(String machine, String requestNo) throws FileServiceManageException {
         String host = configurationService.getFileServiceHost(machine);
         if (host == null){
+            log.error("cannot find file service host for {}", machine);
             throw new FileServiceManageException(400, "Parameter(machine) is not valid.");
         }
 

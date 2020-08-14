@@ -11,8 +11,8 @@ public class DefaultFileServiceCollectConnector implements FileServiceCollectCon
     String host;
     String prefix;
 
-    public DefaultFileServiceCollectConnector(String host){
-        this.restTemplate = new RestTemplate();
+    public DefaultFileServiceCollectConnector(String host, RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
         this.host = host;
         this.prefix = String.format("http://%s", this.host);
     }

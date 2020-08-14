@@ -42,31 +42,33 @@ public class FtpDownloadFileRepository {
     }
 
     public Map<String, FtpDownloadRequest> getRequestList(){
-        for (FtpDownloadRequest request : requestMap.values()){
-            File requestDir = new File(downloadDirectory, request.getDirectory());
-            if (!requestDir.exists()){
-                removeRequest(request);
-                continue;
-            }
-            if (request.getStatus() == FtpDownloadRequest.Status.CANCEL){
-                removeRequest(request);
-                continue;
-            }
-            if (request.getStatus() == FtpDownloadRequest.Status.WAIT){
-                continue;
-            }
-            if (request.getStatus() == FtpDownloadRequest.Status.EXECUTED){
-                continue;
-            }
-            if (request.getStatus() == FtpDownloadRequest.Status.EXECUTING){
-                try {
-                    readDirectory(request);
-                } catch (IOException e){
-                    e.printStackTrace();
+        synchronized (requestMap) {
+            for (FtpDownloadRequest request : requestMap.values()) {
+                File requestDir = new File(downloadDirectory, request.getDirectory());
+                if (!requestDir.exists()) {
+                    removeRequest(request);
+                    continue;
+                }
+                if (request.getStatus() == FtpDownloadRequest.Status.CANCEL) {
+                    removeRequest(request);
+                    continue;
+                }
+                if (request.getStatus() == FtpDownloadRequest.Status.WAIT) {
+                    continue;
+                }
+                if (request.getStatus() == FtpDownloadRequest.Status.EXECUTED) {
+                    continue;
+                }
+                if (request.getStatus() == FtpDownloadRequest.Status.EXECUTING) {
+                    try {
+                        readDirectory(request);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+            return getCloneRequestMap();
         }
-        return getCloneRequestMap();
     }
 
     public void addRequest(FtpDownloadRequest request) throws IOException{
@@ -74,8 +76,9 @@ public class FtpDownloadFileRepository {
         request.setDirectory(requestDirStr);
         File requestDownDirectory = new File(downloadDirectory, request.getDirectory());
         requestDownDirectory.mkdirs();
-
-        requestMap.put(request.getRequestNo(), request);
+        synchronized (requestMap) {
+            requestMap.put(request.getRequestNo(), request);
+        }
     }
 
     synchronized void writeRequest(FtpDownloadRequest request, File file) throws IOException {
@@ -217,7 +220,9 @@ public class FtpDownloadFileRepository {
             if (requestFile.exists()){
                 deleteDirectory(requestDownDirectory);
             }
-            requestMap.remove(request.getRequestNo());
+            synchronized (requestMap) {
+                requestMap.remove(request.getRequestNo());
+            }
         }
     }
 }

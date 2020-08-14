@@ -4,6 +4,7 @@ import jp.co.canon.ckbs.eec.fs.collect.executor.CustomExecutor;
 import jp.co.canon.ckbs.eec.fs.collect.executor.CustomOutputStreamLineHandler;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 
 import java.io.BufferedWriter;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+@Slf4j
 public class CompatDownloadProcessThread extends Thread implements CustomOutputStreamLineHandler {
     VFtpCompatDownloadRequest request;
     FtpServerInfo ftpServerInfo;
@@ -32,6 +34,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
         BufferedWriter out = null;
         try {
             file = File.createTempFile("FILE", ".LST", workingDir);
+            if (log.isTraceEnabled()){
+                log.trace("create filename list file({}) for {}", file.getPath(), request.getRequestNo());
+            }
             out = new BufferedWriter(new FileWriter(file));
             out.write(request.getFile().getName());
             out.newLine();
@@ -73,6 +78,7 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
     }
 
     public void stopExecute(){
+        log.trace("stop requested. {}", request.getRequestNo());
         request.setStatus(VFtpCompatDownloadRequest.Status.CANCEL);
         executor.stop();
     }
@@ -90,6 +96,9 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
             e.printStackTrace();
         } finally {
             if (fileNameListFile != null){
+                if (log.isTraceEnabled()) {
+                    log.trace("delete filename list file({}) for {}", fileNameListFile.getPath(), request.getRequestNo());
+                }
                 fileNameListFile.delete();
             }
             request.setCompletedTime(System.currentTimeMillis());

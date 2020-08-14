@@ -1,8 +1,28 @@
 package jp.co.canon.ckbs.eec.fs.collect;
 
+import jp.co.canon.ckbs.eec.fs.manage.DefaultFileServiceManageConnector;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
 public class DefaultFileServiceCollectConnectorFactory implements FileServiceCollectConnectorFactory{
+    RestTemplate restTemplate;
+
+    public DefaultFileServiceCollectConnectorFactory(){
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setReadTimeout(5000);
+        factory.setConnectionRequestTimeout(3000);
+        HttpClient httpClient = HttpClientBuilder.create()
+                .setMaxConnTotal(100)
+                .setMaxConnPerRoute(5)
+                .build();
+        factory.setHttpClient(httpClient);
+        restTemplate = new RestTemplate(factory);
+    }
+
     @Override
     public FileServiceCollectConnector getConnector(String host) {
-        return new DefaultFileServiceCollectConnector(host);
+        return new DefaultFileServiceCollectConnector(host, this.restTemplate);
     }
 }
