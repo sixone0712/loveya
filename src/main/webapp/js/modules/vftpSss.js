@@ -132,10 +132,10 @@ export default handleActions({
 
     [VFTP_SSS_INIT_RESPONSE_LIST] : (state, action) => {
         return state.set("responseList", List([]))
-            .set("requestListCnt", 0)
-            .set("responseListCnt", 0)
-            .set('downloadCnt', 0)
-            .set('isNewResponseList', false);
+                    .set("requestListCnt", 0)
+                    .set("responseListCnt", 0)
+                    .set('downloadCnt', 0)
+                    .set('isNewResponseList', false);
     },
 
     [VFTP_SSS_SET_IS_NEW_RESPONSE_LIST] : (state, action) => {

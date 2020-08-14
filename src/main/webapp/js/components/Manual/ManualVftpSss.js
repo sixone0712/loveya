@@ -41,7 +41,7 @@ function convertCommand (cmd, sDate, eDate) {
     const command = splitCmd[0];
     const option = splitCmd.length > 1 ? `-${splitCmd[1]}` : "";
     const formatDate = 'YYYYMMDD_HHmmss';
-    return `${command}-${moment(sDate).format(formatDate)}-${moment(eDate).format(formatDate)}${option}`
+    return `${command}-${moment(sDate).format(formatDate)}-${moment(eDate).format(formatDate)}${option}`;
 }
 
 const ManualVftpSss = ({
@@ -50,9 +50,9 @@ const ManualVftpSss = ({
         fromDate,
         toDate,
         toolInfoList,
-        toolInfoListCnt,
         commandActions,
-        sssActions}) =>
+        sssActions,
+        viewListActions }) =>
 {
     const commandList = API.vftpConvertDBCommand(dbCommandList.toJS());
 
@@ -97,6 +97,7 @@ const ManualVftpSss = ({
         }
 
         try {
+            await sssActions.vftpSssInitResponseList()
             const res = await services.axiosAPI.requestPost("/rss/api/vftp/sss", reqData);
             sssActions.vftpSssSetResponseList(res);
             return Define.RSS_SUCCESS
@@ -155,7 +156,6 @@ export default connect(
         fromDate: state.vftpSss.get('startDate'),
         toDate: state.vftpSss.get('endDate'),
         toolInfoList: state.viewList.get('toolInfoList'),
-        toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
     }),
     (dispatch) => ({
         commandActions: bindActionCreators(commandActions, dispatch),

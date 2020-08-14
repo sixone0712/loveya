@@ -54,7 +54,14 @@ const initialDownStatus = {
     totalFiles: 0,
 };
 
-const RSSvftpFilelist = ({ responseList, downloadCnt, downloadAll, isNewResponseList, sssActions }) => {
+const RSSvftpFilelist = ({
+     responseList,
+     responseListCnt,
+     downloadCnt,
+     downloadAll,
+     isNewResponseList,
+     sssActions
+}) => {
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortDirection, setSortDirection] = useState("");
@@ -342,7 +349,7 @@ const RSSvftpFilelist = ({ responseList, downloadCnt, downloadAll, isNewResponse
                         </CardBody>
                         <RenderPagination
                             pageSize={pageSize}
-                            itemsCount={initialFileList.length}
+                            itemsCount={responseListCnt}
                             onPageChange={handlePageChange}
                             className="custom-pagination"
                         />

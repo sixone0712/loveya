@@ -184,7 +184,8 @@ class FileList extends Component {
       const downloadStatus = this.props.downloadStatus;
       const { status, totalFiles, downloadFiles} = downloadStatus.toJS();
       // If the download has already been completed, open openCompleteModal.
-      if(status === "done" && totalFiles === downloadFiles) {
+      //if(status === "done" && totalFiles === downloadFiles) {
+      if(status === "done") {
         this.openCompleteModal();
       }
     }

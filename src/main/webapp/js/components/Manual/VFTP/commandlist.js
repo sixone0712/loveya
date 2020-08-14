@@ -141,7 +141,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             if(commandList.length == 0 || actionId === selectCommand) {
                 setSelectCommand(-1);
             } else {
-                await commandActions.commandCheckOnlyOneList(selectCommand);
+                if(selectCommand !== -1) await commandActions.commandCheckOnlyOneList(selectCommand);
             }
             setIsDeleteOpen(false);
             setActionId(-1);

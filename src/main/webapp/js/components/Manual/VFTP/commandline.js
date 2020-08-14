@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, {useRef, useEffect, useState } from "react";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { Card, CardHeader, CardBody, Button } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -35,15 +35,17 @@ let isStopScreen = false;
 
 const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
+    const modalTypeRef = useRef("ready");
     const [prevModal, setPrevModal] = useState("ready");
     const [modalMsg, setModalMsg] = useState("");
-    const [isComplete, setComplete] = useState(false);
-    const [isCancel, setCancel] = useState(false);
+    const isCompleteRef = useRef(false);
+    const isCancelRef = useRef(false);
     const [downloadFile, setDownloadFile] = useState(0);
     const [totalFiles, setTotalFiles] = useState(0);
 
     const element = useRef();
     const setModalOpen = (type) => {
+        modalTypeRef.current = type;
         setPrevModal(modalType);
         setModalType(type);
         switch (type) {
@@ -72,13 +74,13 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             }
         } else {
             if (yesno === "yes") {
-                if (!isComplete) {
-                    setCancel(true);
+                if (!isCompleteRef.current) {
+                    isCompleteRef.current = true;
                     cancelFunc();
                 }
                 closeModal();
             } else {
-                if (!isComplete) setModalOpen(prevModal);
+                if (!isCompleteRef.current) setModalOpen(prevModal);
                 else closeModal();
             }
         }
@@ -125,8 +127,8 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
     };
 
     const confirmLeftBtnFunc = async () => {
-        setCancel(false);
-        setComplete(false);
+        isCancelRef.current = false;
+        isCompleteRef.current = false;
 
         if(type === "compat/optional") {
             setModalOpen("process");
@@ -145,24 +147,25 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 try {
                     const res = await processfunc();
                     if (res === Define.RSS_SUCCESS) {
-                        if (!isComplete) setModalOpen("ready");
+                        if (modalTypeRef.current !== "cancel") setModalOpen("ready");
                     } else {
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(res));
                     }
                 } catch (e) {
                     console.error(e);
-                    if (!isCancel) {
+                    if (!isCancelRef.current) {
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(Define.SEARCH_FAIL_SERVER_ERROR));
                     }
                 } finally {
-                    setComplete(true)
+                    isCompleteRef.current = true;
                 }
             } else {
                 setModalOpen("alert");
                 setModalMsg(API.getErrorMsg(result));
             }
+
         }
     };
 
@@ -174,8 +177,6 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         }, 500);
         return ()=>{console.log("===cleanup===");}
     }, [string]);
-
-    console.log("[RSSCommandLine]modalType",modalType);
 
     return (
         <>
