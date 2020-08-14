@@ -13,6 +13,7 @@ import {bindActionCreators} from "redux";
 import * as sssActions from "../../../modules/vftpSss";
 import * as API from "../../../api";
 import services from "../../../services"
+import * as Define from "../../../define";
 
 const { Option } = Select;
 
@@ -181,6 +182,11 @@ const RSSvftpFilelist = ({
             setIsDownloadCancel(false);
             setIsDownloadComplete(false);
             setIsDownloadError(false);
+            if (downStatus.status === "done") {
+                API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,"unknown", "User Cancel")
+                    .then(r => r)
+                    .catch(e => console.error(e));
+            }
         }
     }, [downStatus, cancelRef])
 
@@ -190,18 +196,23 @@ const RSSvftpFilelist = ({
     }, [isDownloadCancel]);
 
     // save file
-    const closeDownloadComplete = useCallback((isSave) => {
+    const closeDownloadComplete = useCallback(async (isSave) => {
         setIsDownloadComplete(false);
         console.log("closeDownloadComplete");
         console.log("isSave", isSave);
         console.log("downStatus");
         if(isSave) {
             try {
-                services.axiosAPI.downloadFile(downStatus.downloadUrl)
+                const res = await services.axiosAPI.downloadFile(downStatus.downloadUrl);
+                await API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,res.fileName, "Download Completed");
             } catch (e) {
                 console.error(e);
+                await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT , "unknown", "Download Fail");
             }
+        } else {
+            await API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,"unknown", "User Cancel");
         }
+
     }, [downStatus]);
 
     const closeDownloadError = useCallback(() => {
