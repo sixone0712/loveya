@@ -26,9 +26,9 @@ const CommandTest = ({ command, commandActions }) => {
 		}
 		try {
 			const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", addData);
-			console.log(res)
+			console.log(res);
 		} catch (e) {
-			console.log(e.message())
+			console.error(e);
 		}
 		await commandActions.commandLoadList("/rss/api/vftp/command");
 	}
@@ -40,9 +40,9 @@ const CommandTest = ({ command, commandActions }) => {
 		for (let item of removeList) {
 			try {
 				const res = await services.axiosAPI.requestDelete(`/rss/api/vftp/command/${item.id}`);
-				console.log(res)
+				console.log(res);
 			} catch (e) {
-				console.log(e.message())
+				console.error(e);
 			}
 		}
 
@@ -58,9 +58,9 @@ const CommandTest = ({ command, commandActions }) => {
 		}
 		try {
 			const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${editList.id}`, editItem);
-			console.log(res)
+			console.log(res);
 		} catch (e) {
-			console.log(e.message())
+			console.error(e);
 		}
 
 		await commandActions.commandLoadList("/rss/api/vftp/command");

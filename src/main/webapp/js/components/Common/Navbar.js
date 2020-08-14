@@ -110,7 +110,7 @@ class RSSNavbar extends Component{
     try {
       await axios.get(Define.REST_AUTHS_GET_LOGOUT);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     this.props.onMovePage(Define.PAGE_LOGIN);
   };

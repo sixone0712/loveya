@@ -45,7 +45,7 @@ class Manual extends Component {
 
           await genreListActions.genreLoadDbList(Define.REST_API_URL + "/genre/get");
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
       loadInfos().then(r => r).catch(e => console.log(e));

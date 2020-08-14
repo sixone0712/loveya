@@ -32,10 +32,12 @@ const commandWriter = (element, string) => {
     };
 };
 
-const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc,cancelFunc}) => {
+const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
     const [prevModal, setPrevModal] = useState("ready");
     const [modalMsg, setModalMsg] = useState("");
+    const [isComplete, setComplete] = useState(false);
+    const [isCancel, setCancel] = useState(false);
     const element = useRef();
     const setModalOpen = (type) => {
         setPrevModal(modalType);
@@ -56,19 +58,29 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
     const cancelModal = async (yesno, modaltype) => {
         console.log("[cancelModal]yesno: ",yesno);
         console.log("[cancelModal]modalType: ",modaltype);
-        if(yesno =="yes")
-        {
-            if(modaltype !== "complete"){
-                setModalOpen("cancel")
-                let result = await cancelFunc();
-            }else {
-                closeModal();
+        if (type === "compat/optional") {
+            if (yesno === "yes") {
+                if (modaltype !== "complete") {
+                    setModalOpen("cancel")
+                    let result = await cancelFunc();
+                } else {
+                    closeModal();
+                }
+            } else {
+                console.log("[cancelModal]prevModal: ", prevModal);
+                setModalOpen(prevModal)
             }
-        }
-        else
-        {
-            console.log("[cancelModal]prevModal: ",prevModal);
-            setModalOpen(prevModal)
+        } else {
+            if (yesno === "yes") {
+                if (!isComplete) {
+                    setCancel(true);
+                    cancelFunc();
+                }
+                closeModal();
+            } else {
+                if (!isComplete) setModalOpen(prevModal);
+                else closeModal();
+            }
         }
     };
 
@@ -83,7 +95,8 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             }
         }
     };
-    const processSequence =() =>{
+
+    const processSequence = () => {
         setTimeout(async () => {
             console.log("==============process==============");
             try {
@@ -107,18 +120,48 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 setModalMsg(API.getErrorMsg(Define.FILE_FAIL_SERVER_ERROR));
             }
         }, 1000);
-    }
+    };
 
     const confirmLeftBtnFunc = async () => {
-        let result = await confirmfunc();
-        console.log("result ", result);
-        if (result.error != Define.RSS_SUCCESS) {
-            setModalOpen("alert");
-            setModalMsg(API.getErrorMsg(result.error));
+        setCancel(false);
+        setComplete(false);
+
+        if(type === "compat/optional") {
+            let result = await confirmfunc();
+            console.log("result ", result);
+            if (result.error != Define.RSS_SUCCESS) {
+                setModalOpen("alert");
+                setModalMsg(API.getErrorMsg(result.error));
+            } else {
+                setModalOpen("process");
+                let tVal = processSequence();
+                console.log("tVal: ", tVal);
+            }
         } else {
-            setModalOpen("process");
-            let tVal= processSequence();
-            console.log("tVal: ",tVal);
+            const result = confirmfunc();
+            if (result === Define.RSS_SUCCESS) {
+                setModalOpen("process");
+                try {
+                    const res = await processfunc();
+                    if (res === Define.RSS_SUCCESS) {
+                        if (!isComplete) setModalOpen("ready");
+                    } else {
+                        setModalOpen("alert");
+                        setModalMsg(API.getErrorMsg(res));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    if (!isCancel) {
+                        setModalOpen("alert");
+                        setModalMsg(API.getErrorMsg(Define.SEARCH_FAIL_SERVER_ERROR));
+                    }
+                } finally {
+                    setComplete(true)
+                }
+            } else {
+                setModalOpen("alert");
+                setModalMsg(API.getErrorMsg(result));
+            }
         }
     };
 

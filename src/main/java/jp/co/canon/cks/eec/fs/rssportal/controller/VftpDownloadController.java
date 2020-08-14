@@ -303,7 +303,7 @@ public class VftpDownloadController {
         ArrayList<String> machineNames = param.containsKey("machineNames") ? (ArrayList<String>) param.get("machineNames") : null;
         String command = param.containsKey("command") ? (String) param.get("command") : null;
 
-        if(fabNames == null || machineNames == null || command == null) {
+        if(fabNames == null || fabNames.size() == 0 || machineNames == null  || machineNames.size() == 0|| command == null) {
             log.error(requestUrl + " : parameter is not matched");
             error.setReason(RSSErrorReason.INVALID_PARAMETER);
             resBody.put("error", error.getRSSError());

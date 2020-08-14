@@ -83,7 +83,7 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                     const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", commandItem);
                     console.log(res);
                 } catch (e) {
-                    console.log(e.message());
+                    console.error(e);
                 }
                 setItemsChecked(false);
                 setIsNewOpen(false);
@@ -131,7 +131,7 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                     const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, commandItem);
                     console.log(res);
                 } catch (e) {
-                    console.log(e.message());
+                    console.error(e);
                 }
                 setIsEditOpen(false);
                 setActionId("");
@@ -161,7 +161,7 @@ const RSSautoCommandList = ({ type, command, commandActions }) => {
                 setCheckedCount(newCount);
             }
         } catch (e) {
-            console.log(e.message());
+            console.error(e);
         }
         setIsDeleteOpen(false);
         setActionId("");
