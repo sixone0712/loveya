@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.background;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.*;
+import lombok.Getter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.NonNull;
@@ -26,6 +27,7 @@ public class FileDownloadExecutor {
     }
 
     private static int mUniqueKey = 1;
+    @Getter
     private final String ftpType;
     private final String desc;
     private final String downloadId;

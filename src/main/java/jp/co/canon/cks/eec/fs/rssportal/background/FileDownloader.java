@@ -147,7 +147,14 @@ public class FileDownloader extends Thread {
         return executorList.get(dlId).getFabs();
     }
 
-    public boolean createDownloadFileList(
+    public CollectType getFtpType(String dlId) {
+        if(!isValidId(dlId))
+            return null;
+        String ftpType = executorList.get(dlId).getFtpType();
+        return CollectType.valueOf(ftpType);
+    }
+
+    public boolean createFtpDownloadFileList(
             final List<DownloadRequestForm> formList,
             @NonNull String fab, @NonNull String tool,
             @NonNull String type, @NonNull String typeStr,
@@ -167,59 +174,28 @@ public class FileDownloader extends Thread {
         while(retry<fileServiceRetryCount) {
             Thread.sleep(1); // job interrupt point
             try {
-                if(true) {
-                    LogFileList logFileList = getConnector().getFtpFileList(tool, type, dateFormat.format(from.getTime()),
-                            dateFormat.format(to.getTime()), "", dir);
-                    for(FileInfo logFile:logFileList.getList()) {
-                        String fileName = logFile.getFilename();
-                        if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
-                            continue;
-                        }
-                        if(true || logFile.getType().equalsIgnoreCase("D")) {
-                            long current = System.currentTimeMillis();
-                            if(current>=from.getTimeInMillis() && current<=to.getTimeInMillis()) {
-                                if (!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {
-                                    log.warn("failed to createFileList(dir=" + fileName + ")");
-                                    return false;
-                                }
-                            }
-                        } else {
-                            Date date = dateFormat.parse(logFile.getTimestamp());
-                            form.addFile(fileName, logFile.getSize(), logFile.getTimestamp(), date.getTime());
-                        }
-                    }
-                } else {
-                    // Todo support vftp
-                }
-                break;
-                /*FileInfoModel[] fileInfos = getServiceManage().createFileList(tool, type, from, to, "", dir);
-                for (FileInfoModel file : fileInfos) {
-                    if(file.getSize()==0 || file.getName().endsWith(".") || file.getName().endsWith(".."))
+                LogFileList logFileList = getConnector().getFtpFileList(tool, type, dateFormat.format(from.getTime()),
+                        dateFormat.format(to.getTime()), "", dir);
+                for(FileInfo logFile:logFileList.getList()) {
+                    String fileName = logFile.getFilename();
+                    if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
                         continue;
-                    // Add recursive searching
-                    if(file.getType().equals("D")) {
-                        if(!createDownloadFileList(formList, fab, tool, type, typeStr, from, to, file.getName())) {
-                            log.warn("failed to createFileList(dir="+file.getName()+")");
-                            return false;
+                    }
+                    if(true || logFile.getType().equalsIgnoreCase("D")) {
+                        long current = System.currentTimeMillis();
+                        if(current>=from.getTimeInMillis() && current<=to.getTimeInMillis()) {
+                            if (!createFtpDownloadFileList(formList, fab, tool, type, typeStr, from, to, fileName)) {
+                                log.warn("failed to createFileList(dir=" + fileName + ")");
+                                return false;
+                            }
                         }
                     } else {
-                        dateFormat.setTimeZone(file.getTimestamp().getTimeZone());
-                        String time = dateFormat.format(file.getTimestamp().getTime());
-                        form.addFile(file.getName(), file.getSize(), time, file.getTimestamp().getTimeInMillis());
+                        Date date = dateFormat.parse(logFile.getTimestamp());
+                        form.addFile(fileName, logFile.getSize(), logFile.getTimestamp(), date.getTime());
                     }
-                }*/
-            } /*catch (RemoteException e) {
-                log.error("failed to createFileList(" + tool + "/" + type + ") retry=" + retry);
-                if((++retry)>=fileServiceRetryCount)
-                    return false;
-                try {
-                    Thread.sleep(fileServiceRetryInterval);
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
-                    log.error("interrupt exception occurs on thread sleep");
-                    return false;
                 }
-            }*/ catch (ParseException e) {
+                break;
+            } catch (ParseException e) {
                 log.error("error on parsing logFile date");
                 return false;
             }

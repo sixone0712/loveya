@@ -11,6 +11,10 @@ import * as Define from "../../../define";
 
 const modalType = { NEW: 1, EDIT: 2 };
 
+const propsCompare = (prevProps, nextProps) => {
+    return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+};
+
 const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) => {
     const commandList = command.get("lists").toJS();
     const checkedCount = command.get("checkedCnt");
@@ -270,25 +274,28 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
     );
 };
 
-const CreateModal = ({ ...props }) => {
-    if (props.addOpen) {
+const CreateModal = React.memo(({ ...props }) => {
+    const { listType, dataType, context, dataTypeChanger, contextChanger, addOpen, editOpen, deleteOpen,
+            errorOpen, actionAdd, actionEdit, actionDelete, closeAdd, closeEdit, closeDelete, closeError, msg } = props;
+
+    if (addOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={props.closeAdd} />
+                <div className="Custom-modal-overlay" onClick={closeAdd} />
                 <div className="Custom-modal auto-plan-confirm-modal command">
                     <p className="title">Add</p>
                     <div className="content-with-title">
-                        <FormGroup className={"command-input-modal" + (props.listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
                             <label>Data type</label>
                             <Input
                                 type="text"
                                 placeholder="Enter data type"
-                                value={props.dataType}
-                                onChange={props.dataTypeChanger}
+                                value={dataType}
+                                onChange={dataTypeChanger}
                             />
                         </FormGroup>
                         <FormGroup className="command-input-modal">
@@ -296,40 +303,40 @@ const CreateModal = ({ ...props }) => {
                             <Input
                                 type="text"
                                 placeholder="Enter context"
-                                value={props.context}
-                                onChange={props.contextChanger}
+                                value={context}
+                                onChange={contextChanger}
                             />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={props.actionAdd}>
+                        <button className="auto-plan form-type left-btn" onClick={actionAdd}>
                             Add
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={props.closeAdd}>
+                        <button className="auto-plan form-type right-btn" onClick={closeAdd}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (props.editOpen) {
+    } else if (editOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={props.closeEdit} />
+                <div className="Custom-modal-overlay" onClick={closeEdit} />
                 <div className="Custom-modal auto-plan-confirm-modal command">
                     <p className="title">Edit</p>
                     <div className="content-with-title">
-                        <FormGroup className={"command-input-modal" + (props.listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
                             <label>Data type</label>
                             <Input
                                 type="text"
                                 placeholder="Enter data type"
-                                value={props.dataType}
-                                onChange={props.dataTypeChanger}
+                                value={dataType}
+                                onChange={dataTypeChanger}
                             />
                         </FormGroup>
                         <FormGroup className="command-input-modal">
@@ -337,47 +344,47 @@ const CreateModal = ({ ...props }) => {
                             <Input
                                 type="text"
                                 placeholder="Enter context"
-                                value={props.context}
-                                onChange={props.contextChanger}
+                                value={context}
+                                onChange={contextChanger}
                             />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={props.actionEdit}>
+                        <button className="auto-plan form-type left-btn" onClick={actionEdit}>
                             Save
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={props.closeEdit}>
+                        <button className="auto-plan form-type right-btn" onClick={closeEdit}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (props.deleteOpen) {
+    } else if (deleteOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={props.closeDelete}/>
+                <div className="Custom-modal-overlay" onClick={closeDelete}/>
                 <div className="Custom-modal">
                     <div className="content-without-title">
                         <p><FontAwesomeIcon icon={faTrashAlt} size="6x"/></p>
                         <p>Do you want to delete command?</p>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={props.actionDelete}>
+                        <button className="auto-plan form-type left-btn" onClick={actionDelete}>
                             Delete
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={props.closeDelete}>
+                        <button className="auto-plan form-type right-btn" onClick={closeDelete}>
                             Cancel
                         </button>
                     </div>
                 </div>
             </ReactTransitionGroup>
         );
-    } else if (props.errorOpen) {
+    } else if (errorOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
@@ -388,10 +395,10 @@ const CreateModal = ({ ...props }) => {
                 <div className="Custom-modal">
                     <div className="content-without-title">
                         <p><FontAwesomeIcon icon={faExclamationCircle} size="6x" /></p>
-                        <p>{props.msg}</p>
+                        <p>{msg}</p>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan alert-type" onClick={props.closeError}>
+                        <button className="auto-plan alert-type" onClick={closeError}>
                             Close
                         </button>
                     </div>
@@ -407,10 +414,10 @@ const CreateModal = ({ ...props }) => {
             />
         );
     }
-};
+}, propsCompare);
 
 const CreateButtonArea = React.memo(({ ...props}) => {
-    const { isOpen, isChecked, searchToggler, searchText, textChanger, itemToggler, openModal } = props;
+    const {isOpen, isChecked, searchToggler, searchText, textChanger, itemToggler, openModal} = props;
 
     return (
         <div className="form-btn-section dis-flex">
@@ -422,7 +429,7 @@ const CreateButtonArea = React.memo(({ ...props}) => {
                     className={"form-btn" + (isOpen ? " active" : "")}
                     onClick={searchToggler}
                 >
-                    <FontAwesomeIcon icon={faSearch} />
+                    <FontAwesomeIcon icon={faSearch}/>
                 </ButtonToggle>
                 <FormGroup>
                     <Input
@@ -447,7 +454,7 @@ const CreateButtonArea = React.memo(({ ...props}) => {
             </Button>
         </div>
     );
-});
+}, propsCompare);
 
 const CreateCommandList = React.memo(({ ...props }) => {
     const { commandList, checkHandler, query, editModal, deleteModal, type } = props;
@@ -497,14 +504,14 @@ const CreateCommandList = React.memo(({ ...props }) => {
                     })}
                 </ul>
             ) : (
-                <div style={{ alignSelf: "center", textAlign: "center", margin: "auto" }}>
+                <div className="command-not-found">
                     <p><FontAwesomeIcon icon={faExclamationCircle} size="8x" /></p>
                     <p>Command not found.</p>
                 </div>
             )}
         </FormGroup>
     );
-});
+}, propsCompare);
 
 export default connect(
     (state) => ({

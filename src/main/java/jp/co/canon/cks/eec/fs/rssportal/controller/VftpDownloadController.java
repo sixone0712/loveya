@@ -10,6 +10,7 @@ import jp.co.canon.cks.eec.fs.rssportal.model.DownloadStatusResponseBody;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.vftp.VFtpFileInfoExtends;
 import jp.co.canon.cks.eec.fs.rssportal.model.vftp.VFtpSssListRequestResponseExtends;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/rss/api/vftp")
-public class VftpDownloadController {
-    private final HttpSession session;
-    private final FileDownloader fileDownloader;
+public class VftpDownloadController extends DownloadControllerCommon {
     private final Log log = LogFactory.getLog(getClass());
 
     @Value("${rssportal.file-collect-service.retry}")
@@ -46,12 +45,9 @@ public class VftpDownloadController {
     private String fileServiceAddress;
 
     @Autowired
-    FileServiceManageConnectorFactory connectorFactory;
-
-    @Autowired
-    public VftpDownloadController(HttpSession session, FileDownloader fileDownloader) {
-        this.session = session;
-        this.fileDownloader = fileDownloader;
+    public VftpDownloadController(JwtService jwtService, FileDownloader fileDownloader,
+                                  FileServiceManageConnectorFactory connectorFactory) {
+        super(jwtService, fileDownloader, connectorFactory);
     }
 
     // Request VFTP Comapt Downlaod
@@ -74,7 +70,7 @@ public class VftpDownloadController {
 
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.size(); ++i) {
-            VFtpCompatDownloadRequestForm form = new VFtpCompatDownloadRequestForm(fabs.get(i), machines.get(i), command, false);
+            VFtpCompatDownloadRequestForm form = new VFtpCompatDownloadRequestForm(fabs.get(i), machines.get(i), command, true);
             list.add(form);
         }
 
@@ -171,7 +167,7 @@ public class VftpDownloadController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentLength(Files.size(Paths.get(dlPath)));
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            response.setHeader("Content-Disposition", "attachment; filename="+"vftpxxxx.zip");
+            response.setHeader("Content-Disposition", "attachment; filename="+createZipFilename(downloadId));
             return ResponseEntity.status(HttpStatus.OK).headers(headers).body(isr);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
