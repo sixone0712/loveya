@@ -80,7 +80,7 @@ public class FileDownloaderController extends DownloadControllerCommon {
                         long searchTo = Long.parseLong(request.getEndDate());
                         if(dirTimestamp > searchTo || dirTimestamp < searchFrom) continue;
                         */
-                        if(request.getDir().endsWith("/.") || request.getDir().endsWith("/..")) {
+                        if(file.getFilename().endsWith("/.") || file.getFilename().endsWith("/..")) {
                             continue;
                         }
                         if(!fileDownloader.isBetween(file.getTimestamp(), request.getStartDate(), request.getEndDate())) {
