@@ -1,27 +1,32 @@
 import React, {useState, useCallback, useEffect} from "react";
 import { Card, CardBody, Col, FormGroup, Button, Input, CustomInput } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt, faPencilAlt, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {faTrashAlt, faPencilAlt, faTimes, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { connect } from "react-redux";
 import {bindActionCreators} from "redux";
+import { propsCompare } from "../../Common/CommonFunction";
 import * as commandActions from "../../../modules/command";
-import * as CompatActions from "../../../modules/vftpCompat";
 import services from "../../../services";
 import * as API from "../../../api";
+import * as Define from "../../../define";
 
 const UNIQUE_COMMAND = "not use.";
+const regex = /(-)|(%s)/g;
+const modalType = { NEW: 1, EDIT: 2 };
 
 const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
     const commandList = API.vftpConvertDBCommand(dbCommand.get("lists").toJS());
     const [selectCommand, setSelectCommand] = useState(-1);
     const [actionId, setActionId] = useState(-1);
-    const [currentCommand, setCurrentCommand] = useState("");
+    const [currentDataType, setCurrentDataType] = useState("");
+    const [currentContext, setCurrentContext] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
     const [isNewOpen, setIsNewOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    /* const [isAlertOpen, setIsAlertOpen] = useState(false); */
+    const [isErrorOpen, setIsErrorOpen] = useState(false);
+    const [openedModal, setOpenedModal] = useState("");
 
     const handleCommandChange = useCallback(id => {
         if(id === -1) {
@@ -39,7 +44,12 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
     const openEditModal = useCallback((id, value) => {
         setIsEditOpen(true);
         setActionId(id);
-        setCurrentCommand(value);
+        if ((value.match(/-/g) || []).length > 0) {
+            setCurrentDataType(value.slice(0, value.indexOf("-")));
+            setCurrentContext(value.slice(value.indexOf("-") + 1, value.length));
+        } else {
+            setCurrentContext(value);
+        }
     }, []);
 
     const openDeleteModal = useCallback(id => {
@@ -49,15 +59,17 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
 
     const closeAddModal = useCallback(() => {
         setIsNewOpen(false);
-        setCurrentCommand("");
         setErrorMsg("");
+        setCurrentDataType("");
+        setCurrentContext("");
     }, []);
 
     const closeEditModal = useCallback(() => {
         setIsEditOpen(false);
         setActionId(-1);
-        setCurrentCommand("");
         setErrorMsg("");
+        setCurrentDataType("");
+        setCurrentContext("");
     }, []);
 
     const closeDeleteModal = useCallback(() => {
@@ -65,80 +77,128 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
         setActionId(-1);
     }, []);
 
-    const onTextChange = useCallback(e => {
-        setCurrentCommand(e.target.value);
-        setErrorMsg("");
-    }, []);
+    const closeErrorModal = useCallback(() => {
+        setIsErrorOpen(false);
+        setTimeout(() => {
+            if (openedModal === modalType.NEW) {
+                setIsNewOpen(true);
+            } else {
+                setIsEditOpen(true);
+            }
+        }, 500);
+    }, [openedModal]);
+
+    const onContextChange = useCallback(e => { setCurrentContext(e.target.value); }, []);
+    const onDataTypeChange = useCallback(e=> { setCurrentDataType(e.target.value); }, []);
+
+    const invalidCheck = useCallback((modal) => {
+        if (cmdType === Define.PLAN_TYPE_VFTP_SSS) {
+            if (currentDataType === "") {
+                setErrorMsg("Data type is empty.");
+                setOpenedModal(modal);
+                return true;
+            }
+        } else {
+            if (currentContext === "") {
+                setErrorMsg("Context is empty.");
+                setOpenedModal(modal);
+                return true;
+            }
+        }
+
+        return false;
+    }, [currentContext, currentDataType]);
+
+    const setCurrentCommand = useCallback(() => {
+        if (cmdType === Define.PLAN_TYPE_VFTP_COMPAT) {
+            return "%s-%s-" + currentContext;
+        } else {
+            if (currentContext.length > 0) {
+                return currentDataType + "-%s-%s-" + currentContext;
+            } else {
+                return currentDataType + "-%s-%s";
+            }
+        }
+    }, [currentContext, currentDataType]);
 
     const addCommand = useCallback(async () => {
-        const lowerCommand = currentCommand.toLowerCase();
-
-        const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === lowerCommand);
-
-        if (duplicateArray.length !== 0 || lowerCommand === UNIQUE_COMMAND) {
-            setErrorMsg("This command is duplicate.");
-        } else if (lowerCommand.length === 0) {
-            setErrorMsg("The command is Empty.");
+        if (invalidCheck(modalType.NEW)) {
+            setIsNewOpen(false);
+            setTimeout(() => { setIsErrorOpen(true); }, 500);
         } else {
-            const addData = {
-                cmd_name: cmdType === "vftp_compat"
-                            ? `%s-%s-${currentCommand}`
-                            : `${currentCommand}-%s-%s`,
-                cmd_type: cmdType
-            }
-            try {
-                const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", addData);
-                const { data: { id } } = res;
-                await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
-                await commandActions.commandCheckOnlyOneList(id);
-                setSelectCommand(id)
+            const currentCommand = setCurrentCommand();
+            const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase().replace(regex, ""));
 
+            if (duplicateArray.length !== 0 || currentCommand.toLowerCase() === UNIQUE_COMMAND) {
+                setErrorMsg("This command is duplicate.");
+                setOpenedModal(modalType.NEW);
                 setIsNewOpen(false);
-                setCurrentCommand("");
-                setErrorMsg("");
-            } catch (e) {
-                // 에러 처리
-                console.error(e);
+                setTimeout(() => { setIsErrorOpen(true); }, 500);
+            } else {
+                const addData = {
+                    cmd_name: currentCommand,
+                    cmd_type: cmdType
+                }
+                try {
+                    const res = await services.axiosAPI.requestPost("/rss/api/vftp/command", addData);
+                    const {data: {id}} = res;
+                    await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
+                    await commandActions.commandCheckOnlyOneList(id);
+
+                    setSelectCommand(id)
+                    setIsNewOpen(false);
+                    setCurrentContext("");
+                    setCurrentDataType("");
+                    setErrorMsg("");
+                    setOpenedModal("");
+                } catch (e) {
+                    // 에러 처리
+                    console.error(e);
+                }
             }
         }
-    }, [commandList, currentCommand]);
+    }, [commandList]);
 
     const editCommand = useCallback(async () => {
-        const lowerCommand = currentCommand.toLowerCase();
-        const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === lowerCommand);
-
-        if ((duplicateArray.length !== 0 && duplicateArray[0].id !== actionId) || lowerCommand === UNIQUE_COMMAND) {
-            setErrorMsg("This command is duplicate.");
-        } else if (lowerCommand.length === 0) {
-            setErrorMsg("The command is Empty.");
+        if (invalidCheck(modalType.EDIT)) {
+            setIsEditOpen(false);
+            setTimeout(() => { setIsErrorOpen(true); }, 500);
         } else {
-            const editItem = {
-                cmd_name: cmdType === "vftp_compat"
-                    ? `%s-%s-${currentCommand}`
-                    : `${currentCommand}-%s-%s`,
-            }
-            try {
-                const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, editItem);
-                await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
-                if(selectCommand !== -1) {
-                    await commandActions.commandCheckOnlyOneList(selectCommand);
-                }
+            const currentCommand = setCurrentCommand();
+            const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase().replace(regex, ""));
+
+            if ((duplicateArray.length !== 0 && duplicateArray[0].id !== actionId) || currentCommand.toLowerCase() === UNIQUE_COMMAND) {
+                setErrorMsg("This command is duplicate.");
+                setOpenedModal(modalType.EDIT);
                 setIsEditOpen(false);
-                setActionId(-1);
-                setCurrentCommand("");
-                setErrorMsg("");
-            } catch (e) {
-                // 에러 처리
-                console.error(e);
+                setTimeout(() => { setIsErrorOpen(true); }, 500);
+            } else {
+                const editItem = { cmd_name: currentCommand };
+                try {
+                    const res = await services.axiosAPI.requestPut(`/rss/api/vftp/command/${actionId}`, editItem);
+                    await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
+                    if (selectCommand !== -1) {
+                        await commandActions.commandCheckOnlyOneList(selectCommand);
+                    }
+                    setIsEditOpen(false);
+                    setActionId(-1);
+                    setCurrentContext("");
+                    setCurrentDataType("");
+                    setErrorMsg("");
+                    setOpenedModal("");
+                } catch (e) {
+                    // 에러 처리
+                    console.error(e);
+                }
             }
         }
-    }, [commandList, actionId, currentCommand, selectCommand]);
+    }, [commandList, actionId, selectCommand]);
 
     const deleteCommand = useCallback(async () => {
         try {
             const res = await services.axiosAPI.requestDelete(`/rss/api/vftp/command/${actionId}`);
             await commandActions.commandLoadList(`/rss/api/vftp/command?type=${cmdType}`);
-            if(commandList.length == 0 || actionId === selectCommand) {
+            if(commandList.length === 0 || actionId === selectCommand) {
                 setSelectCommand(-1);
             } else {
                 if(selectCommand !== -1) await commandActions.commandCheckOnlyOneList(selectCommand);
@@ -173,7 +233,6 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                                 }
                                 <CreateCommandList
                                     commandList={commandList}
-                                    selectCommand={selectCommand}
                                     commandChanger={handleCommandChange}
                                     editModal={openEditModal}
                                     deleteModal={openDeleteModal}
@@ -195,37 +254,32 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                 </CardBody>
             </Card>
             <CreateModal
-                value={currentCommand}
-                message={errorMsg}
-                textChanger={onTextChange}
+                listType={cmdType}
+                dataType={currentDataType}
+                context={currentContext}
+                dataTypeChanger={onDataTypeChange}
+                contextChanger={onContextChange}
                 newOpen={isNewOpen}
                 editOpen={isEditOpen}
                 deleteOpen={isDeleteOpen}
+                errorOpen={isErrorOpen}
                 actionNew={addCommand}
                 actionEdit={editCommand}
                 actionDelete={deleteCommand}
                 closeNew={closeAddModal}
                 closeEdit={closeEditModal}
                 closeDelete={closeDeleteModal}
+                closeError={closeErrorModal}
+                msg={errorMsg}
             />
         </>
     );
 };
 
-const CreateModal = ({
-     value,
-     message,
-     textChanger,
-     newOpen,
-     editOpen,
-     deleteOpen,
-     actionNew,
-     actionEdit,
-     actionDelete,
-     closeNew,
-     closeEdit,
-     closeDelete
- }) => {
+const CreateModal = React.memo(({ ...props }) => {
+    const { listType, dataType, context, dataTypeChanger, contextChanger, newOpen, editOpen, deleteOpen, errorOpen,
+            actionNew, actionEdit, actionDelete, closeNew, closeEdit, closeDelete, closeError, msg } = props;
+
     if (newOpen) {
         return (
             <ReactTransitionGroup
@@ -237,17 +291,25 @@ const CreateModal = ({
                 <div className="Custom-modal">
                     <p className="title">Add</p>
                     <div className="content-with-title">
-                        <FormGroup>
+                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                            <label className="manual">Data type</label>
                             <Input
                                 type="text"
-                                placeholder="Enter command"
-                                className="catlist-modal-input"
-                                value={value}
-                                onChange={textChanger}
+                                placeholder="Enter data type"
+                                className="manual"
+                                value={dataType}
+                                onChange={dataTypeChanger}
                             />
-                            <span className={"error" + (message.length > 0 ? " active" : "")}>
-                                {message}
-                            </span>
+                        </FormGroup>
+                        <FormGroup className="command-input-modal">
+                            <label className="manual">Context</label>
+                            <Input
+                                type="text"
+                                placeholder="Enter context"
+                                className="manual"
+                                value={context}
+                                onChange={contextChanger}
+                            />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
@@ -272,17 +334,25 @@ const CreateModal = ({
                 <div className="Custom-modal">
                     <p className="title">Edit</p>
                     <div className="content-with-title">
-                        <FormGroup>
+                        <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
+                            <label className="manual">Data type</label>
                             <Input
                                 type="text"
-                                placeholder="Enter command"
-                                className="catlist-modal-input"
-                                value={value}
-                                onChange={textChanger}
+                                placeholder="Enter data type"
+                                className="manual"
+                                value={dataType}
+                                onChange={dataTypeChanger}
                             />
-                            <span className={"error" + (message.length > 0 ? " active" : "")}>
-                                {message}
-                            </span>
+                        </FormGroup>
+                        <FormGroup className="command-input-modal">
+                            <label className="manual">Context</label>
+                            <Input
+                                type="text"
+                                placeholder="Enter context"
+                                className="manual"
+                                value={context}
+                                onChange={contextChanger}
+                            />
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
@@ -303,12 +373,10 @@ const CreateModal = ({
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={closeDelete} />
+                <div className="Custom-modal-overlay" onClick={closeDelete}/>
                 <div className="Custom-modal">
                     <div className="content-without-title">
-                        <p>
-                            <FontAwesomeIcon icon={faTrashAlt} size="6x" />
-                        </p>
+                        <p><FontAwesomeIcon icon={faTrashAlt} size="6x"/></p>
                         <p>Do you want to delete this command?</p>
                     </div>
                     <div className="button-wrap">
@@ -328,6 +396,27 @@ const CreateModal = ({
                 </div>
             </ReactTransitionGroup>
         );
+    } else if (errorOpen) {
+        return (
+            <ReactTransitionGroup
+                transitionName={"Custom-modal-anim"}
+                transitionEnterTimeout={200}
+                transitionLeaveTimeout={200}
+            >
+                <div className="Custom-modal-overlay" />
+                <div className="Custom-modal">
+                    <div className="content-without-title">
+                        <p><FontAwesomeIcon icon={faExclamationCircle} size="6x" /></p>
+                        <p>{msg}</p>
+                    </div>
+                    <div className="button-wrap">
+                        <button className="primary alert-type" onClick={closeError}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </ReactTransitionGroup>
+        );
     } else {
         return (
             <ReactTransitionGroup
@@ -337,9 +426,9 @@ const CreateModal = ({
             />
         );
     }
-};
+}, propsCompare);
 
-const CreateCommandList = React.memo(({ commandList, selectCommand, commandChanger, editModal, deleteModal }) => {
+const CreateCommandList = React.memo(({ commandList, commandChanger, editModal, deleteModal }) => {
     return (
         <>
             {commandList.map((command, index) => {
@@ -364,7 +453,7 @@ const CreateCommandList = React.memo(({ commandList, selectCommand, commandChang
             })}
         </>
     );
-});
+}, propsCompare);
 
 export default connect(
   (state) => ({

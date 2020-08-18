@@ -214,6 +214,9 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
             const { commands } = autoPlan.toJS();
             commandActions.commandInit();
             await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
+            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                await commandActions.commandAddNotUse();
+            }
             await commandActions.commandCheckInit(commands);
         }
         fetchData();
@@ -460,7 +463,7 @@ const CreateCommandList = React.memo(({ ...props }) => {
 
     if (query.length > 0) {
         filteredData = commandList.filter(command => command.cmd_name.toLowerCase().replace(regex, "").includes(query.toLowerCase()));
-    } else { filteredData = commandList; }
+    } else { filteredData = commandList.sort((a, b) => a.id - b.id); }
 
     return (
         <FormGroup className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
@@ -477,6 +480,7 @@ const CreateCommandList = React.memo(({ ...props }) => {
                                 displayCommand = command.cmd_name.replace("-%s-%s-", "-");
                             }
                         }
+
                         return (
                             <li className="custom-control custom-checkbox" key={index}>
                                 <input
@@ -490,12 +494,16 @@ const CreateCommandList = React.memo(({ ...props }) => {
                                 <label className="custom-control-label form-check-label" htmlFor={command.id}>
                                     {displayCommand}
                                 </label>
-                                <span className="icon" onClick={() => deleteModal(command.id)}>
-                                    <FontAwesomeIcon icon={faTimes}/>
-                                </span>
-                                <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
-                                    <FontAwesomeIcon icon={faPencilAlt}/>
-                                </span>
+                                {command.id !== -1 ? (
+                                    <>
+                                        <span className="icon" onClick={() => deleteModal(command.id)}>
+                                            <FontAwesomeIcon icon={faTimes}/>
+                                        </span>
+                                        <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
+                                            <FontAwesomeIcon icon={faPencilAlt}/>
+                                        </span>
+                                    </>
+                                ):(<></>)}
                             </li>
                         );
                     })}
