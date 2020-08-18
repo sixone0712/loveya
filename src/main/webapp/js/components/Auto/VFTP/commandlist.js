@@ -149,12 +149,12 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
                     setErrorMsg("Data type is empty.");
                     setOpenedModal(modal);
                     return true;
-                } else {
-                    if (currentContext === "") {
-                        setErrorMsg("Context is empty.");
-                        setOpenedModal(modal);
-                        return true;
-                    }
+                }
+            } else {
+                if (currentContext === "") {
+                    setErrorMsg("Context is empty.");
+                    setOpenedModal(modal);
+                    return true;
                 }
             }
         }

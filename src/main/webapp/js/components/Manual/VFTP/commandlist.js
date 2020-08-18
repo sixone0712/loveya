@@ -104,12 +104,12 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                     setErrorMsg("Data type is empty.");
                     setOpenedModal(modal);
                     return true;
-                } else {
-                    if (currentContext === "") {
-                        setErrorMsg("Context is empty.");
-                        setOpenedModal(modal);
-                        return true;
-                    }
+                }
+            } else {
+                if (currentContext === "") {
+                    setErrorMsg("Context is empty.");
+                    setOpenedModal(modal);
+                    return true;
                 }
             }
         }
