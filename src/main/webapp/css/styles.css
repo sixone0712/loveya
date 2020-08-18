@@ -870,8 +870,7 @@ span.error.active {
 .navbar-container > .navbar .custom-brand {
     font-weight: 700;
     margin-right: 1em;
-    /* chpark_command_test */
-    /*pointer-events: none;*/
+    pointer-events: none;
 }
 
 .navbar-container > .navbar .navbar-nav {

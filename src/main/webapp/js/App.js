@@ -18,7 +18,6 @@ import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
 import {Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
-import CommandTest from "./components/CommandTest";   /* chpark_command_test */
 
 class App extends Component {
 
@@ -93,8 +92,6 @@ class App extends Component {
                         <Route path={Define.PAGE_MANUAL} render={() => <Manual {...this.props} />} />
                         <Route path={Define.PAGE_AUTO} render={() => <Auto {...this.props} />} />
                         */}
-                        {/* chpark_command_test */}
-                        <Route path={'/rss/page/test'} component={CommandTest} />
                     </Switch>
                 </>
         );

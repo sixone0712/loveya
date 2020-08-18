@@ -126,9 +126,7 @@ class RSSNavbar extends Component{
           <PlanModal isOpen={isPlanOpen} btnAction={this.handlePageChange} closer={this.closeModal} />
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
-              {/* chpark_command_test */}
-              <NavbarBrand className="custom-brand" tag={RRNavLink} to={'/rss/page/test'} onClick={() => this.handlePageChange("Manual")} >Rapid Collector</NavbarBrand>
-              {/*<NavbarBrand className="custom-brand">{"Rapid Collector"}</NavbarBrand>*/}
+              <NavbarBrand className="custom-brand">{"Rapid Collector"}</NavbarBrand>
               {/*<NavbarBrand className="custom-brand">{`Rapid Collector ${process.env.RSS_VERSION}`}</NavbarBrand>*/}
             <Nav className="mr-auto" navbar>
               <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
