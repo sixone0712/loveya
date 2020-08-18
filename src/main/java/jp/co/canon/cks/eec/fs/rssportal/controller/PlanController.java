@@ -39,17 +39,15 @@ import java.util.*;
 @RequestMapping("/rss/api/plans")
 public class PlanController {
 
-    private final HttpSession session;
-    private final CollectPlanner collector;
+    //private final CollectPlanner collector;
     private final CollectPlanService service;
     private final DownloadListService downloadService;
     private final JwtService jwtService;
 
     @Autowired
-    public PlanController(@NonNull HttpSession session, @NonNull CollectPlanner collector,
+    public PlanController(@NonNull HttpSession session, /*@NonNull CollectPlanner collector,*/
                           @NonNull CollectPlanService service, @NonNull DownloadListService downloadListService, @NonNull JwtService jwtService) {
-        this.session = session;
-        this.collector = collector;
+        //this.collector = collector;
         this.service = service;
         this.downloadService = downloadListService;
         this.jwtService = jwtService;
@@ -152,12 +150,7 @@ public class PlanController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resBody);
         }
 
-        int userId = -1;
-        SessionContext context = (SessionContext)session.getAttribute("context");
-        if(context!=null) {
-            userId = context.getUser().getId();
-        }
-
+        int userId = jwtService.getCurAccTokenUserID();
         List<CollectPlanVo> plans;
         if(param.containsKey("withPriority")) {
             plans = service.getAllPlansBySchedulePriority();
