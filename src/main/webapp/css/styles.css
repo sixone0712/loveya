@@ -2545,6 +2545,7 @@ span.error.active {
 /* command style start */
 .command-list ul {
   list-style: none;
+  word-break: break-all;
 }
 
 .command-list.auto-plan-form-group ul {
@@ -2592,6 +2593,10 @@ span.error.active {
 
 .command-list li > .icon:hover {
   opacity: 0.9;
+}
+
+.command-list li > label {
+  width: 96%;
 }
 
 .command-list > .command-not-found {

@@ -1,17 +1,18 @@
-import React, {useState, useCallback, useEffect} from "react";
+import React, {useState, useCallback} from "react";
 import { Card, CardBody, Col, FormGroup, Button, Input, CustomInput } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faTrashAlt, faPencilAlt, faTimes, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import { connect } from "react-redux";
 import {bindActionCreators} from "redux";
-import { propsCompare } from "../../Common/CommonFunction";
+import { propsCompare, stringBytes } from "../../Common/CommonFunction";
 import * as commandActions from "../../../modules/command";
 import services from "../../../services";
 import * as API from "../../../api";
 import * as Define from "../../../define";
 
 const UNIQUE_COMMAND = "not use.";
+const MAX_STRING_BYTES = 980;
 const regex = /(-)|(%s)/g;
 const modalType = { NEW: 1, EDIT: 2 };
 
@@ -92,20 +93,26 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
     const onDataTypeChange = useCallback(e=> { setCurrentDataType(e.target.value); }, []);
 
     const invalidCheck = useCallback((modal) => {
-        if (cmdType === Define.PLAN_TYPE_VFTP_SSS) {
-            if (currentDataType === "") {
-                setErrorMsg("Data type is empty.");
-                setOpenedModal(modal);
-                return true;
-            }
+        const currentCommand = cmdType === Define.PLAN_TYPE_VFTP_SSS ? currentContext : currentDataType + currentContext;
+        if (stringBytes(currentCommand) > MAX_STRING_BYTES) {
+            setErrorMsg("This command is too long.");
+            setOpenedModal(modal);
+            return true;
         } else {
-            if (currentContext === "") {
-                setErrorMsg("Context is empty.");
-                setOpenedModal(modal);
-                return true;
+            if (cmdType === Define.PLAN_TYPE_VFTP_SSS) {
+                if (currentDataType === "") {
+                    setErrorMsg("Data type is empty.");
+                    setOpenedModal(modal);
+                    return true;
+                } else {
+                    if (currentContext === "") {
+                        setErrorMsg("Context is empty.");
+                        setOpenedModal(modal);
+                        return true;
+                    }
+                }
             }
         }
-
         return false;
     }, [currentContext, currentDataType]);
 
@@ -288,7 +295,7 @@ const CreateModal = React.memo(({ ...props }) => {
                 transitionLeaveTimeout={200}
             >
                 <div className="Custom-modal-overlay" onClick={closeNew} />
-                <div className="Custom-modal">
+                <div className="Custom-modal command">
                     <p className="title">Add</p>
                     <div className="content-with-title">
                         <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>
@@ -331,7 +338,7 @@ const CreateModal = React.memo(({ ...props }) => {
                 transitionLeaveTimeout={200}
             >
                 <div className="Custom-modal-overlay" onClick={closeEdit} />
-                <div className="Custom-modal">
+                <div className="Custom-modal command">
                     <p className="title">Edit</p>
                     <div className="content-with-title">
                         <FormGroup className={"command-input-modal" + (listType === Define.PLAN_TYPE_VFTP_COMPAT ? " hidden" : "")}>

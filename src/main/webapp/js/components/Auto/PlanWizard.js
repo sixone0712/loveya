@@ -407,16 +407,15 @@ export function invalidCheck(step, toolCnt, targetCnt, optionList, type, command
     case wizardStep.TARGET_COMMAND:
       if (targetCnt === 0 && type === Define.PLAN_TYPE_FTP) {
         return modalMessage.TARGET_ALERT_MESSAGE;
-      } else if (type === Define.PLAN_TYPE_VFTP_SSS) {
+      } else if (type !== Define.PLAN_TYPE_FTP) {
         const { checkedCnt } = command.toJS();
         if (checkedCnt === 0) {
           return modalMessage.COMMAND_ALERT_MESSAGE;
         } else {
           return null;
         }
-      } else {
-        return null;
       }
+      return null;
 
     case wizardStep.OPTION:
       const { planId, collectType, interval, from, to, description, intervalUnit } = optionList.toJS();

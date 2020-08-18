@@ -33,3 +33,9 @@ export const RenderPagination = ({pageSize, itemsCount, onPageChange, currentPag
 export const propsCompare = (prevProps, nextProps) => {
     return JSON.stringify(prevProps) === JSON.stringify(nextProps);
 };
+
+export const stringBytes = (s) => {
+    let b, i, c = 0;
+    for(b=i=0; c=s.charCodeAt(i++); b += c >> 11 ? 3 : c >> 7 ? 2 : 1);
+    return b;
+};

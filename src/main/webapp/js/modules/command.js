@@ -117,13 +117,14 @@ const reducer = handleActions({
     },
     [COMMAND_ADD_NOT_USE]: (state) => {
         const lists = state.getIn(["command", "lists"]);
+        const checkedList = state.getIn(["command", "checkedLists"]);
         const newLists = [
             {
                 index: -1,
                 id: -1,
                 cmd_name: "not use.",
                 cmd_type: "vftp_compat",
-                checked: false
+                checked: checkedList.includes(-1)
             }
         ];
 

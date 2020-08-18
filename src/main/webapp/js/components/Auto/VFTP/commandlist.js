@@ -5,12 +5,14 @@ import {faExclamationCircle, faPencilAlt, faSearch, faTimes, faTrashAlt} from "@
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-import { propsCompare } from "../../Common/CommonFunction";
+import { propsCompare, stringBytes } from "../../Common/CommonFunction";
 import services from "../../../services";
 import * as commandActions from "../../../modules/command";
 import * as Define from "../../../define";
 
 const modalType = { NEW: 1, EDIT: 2 };
+const UNIQUE_COMMAND = "not use.";
+const MAX_STRING_BYTES = 980;
 
 const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
     const commandList = command.get("lists").toJS();
@@ -51,7 +53,7 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
             const currentCommand = setCurrentCommand();
             const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase());
 
-            if (duplicateArray.length !== 0) {
+            if (duplicateArray.length !== 0 || (type === Define.PLAN_TYPE_VFTP_COMPAT && currentContext === UNIQUE_COMMAND)) {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.NEW);
                 setIsNewOpen(false);
@@ -71,6 +73,9 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
                 setOpenedModal("");
 
                 await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
+                if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                    await commandActions.commandAddNotUse();
+                }
             }
         }
     }, [commandList]);
@@ -87,7 +92,7 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
                 }
             });
 
-            if (duplicateArray.length !== 0) {
+            if (duplicateArray.length !== 0 || (type === Define.PLAN_TYPE_VFTP_COMPAT && currentContext === UNIQUE_COMMAND)) {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.EDIT);
                 setIsEditOpen(false);
@@ -108,6 +113,9 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
                 setOpenedModal("");
 
                 await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
+                if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                    await commandActions.commandAddNotUse();
+                }
             }
         }
     }, [commandList, actionId]);
@@ -124,23 +132,32 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
         setActionId("");
 
         await commandActions.commandLoadList("/rss/api/vftp/command?type=" + type);
+        if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+            await commandActions.commandAddNotUse();
+        }
     }, [commandList, actionId]);
 
     const invalidCheck = useCallback((modal) => {
-        if (type === Define.PLAN_TYPE_VFTP_SSS) {
-            if (currentDataType === "") {
-                setErrorMsg("Data type is empty.");
-                setOpenedModal(modal);
-                return true;
-            }
+        const currentCommand = type === Define.PLAN_TYPE_VFTP_SSS ? currentContext : currentDataType + currentContext;
+        if (stringBytes(currentCommand) > MAX_STRING_BYTES) {
+            setErrorMsg("This command is too long.");
+            setOpenedModal(modal);
+            return true;
         } else {
-            if (currentContext === "") {
-                setErrorMsg("Context is empty.");
-                setOpenedModal(modal);
-                return true;
+            if (type === Define.PLAN_TYPE_VFTP_SSS) {
+                if (currentDataType === "") {
+                    setErrorMsg("Data type is empty.");
+                    setOpenedModal(modal);
+                    return true;
+                } else {
+                    if (currentContext === "") {
+                        setErrorMsg("Context is empty.");
+                        setOpenedModal(modal);
+                        return true;
+                    }
+                }
             }
         }
-
         return false;
     }, [currentContext, currentDataType]);
 
@@ -285,7 +302,7 @@ const CreateModal = React.memo(({ ...props }) => {
                 transitionEnterTimeout={200}
                 transitionLeaveTimeout={200}
             >
-                <div className="Custom-modal-overlay" onClick={closeAdd} />
+                <div className="Custom-modal-overlay" onClick={closeNew} />
                 <div className="Custom-modal auto-plan-confirm-modal command">
                     <p className="title">Add</p>
                     <div className="content-with-title">
