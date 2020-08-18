@@ -153,11 +153,16 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 </div>
                 <CardHeader>
                     <p>The following command will be executed.</p>
+                    <div className="execute-btn-area">
+                        <Button color="info" outline onClick={()=> setModalOpen("confirm")}>
+                            <FontAwesomeIcon icon={faPlay} />
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardBody>
                     <div className="command-line">
                         Rapid Collector
-                        { type === "compat/optional" ? " #get " : " #cd " }
+                        { type === "compat/optional" ? "# get " : "# cd " }
                         <Typewriter
                             options={{
                                 strings: string,
@@ -166,9 +171,6 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                             }}
                         />
                     </div>
-                    <Button color="info" outline onClick={()=> setModalOpen("confirm")}>
-                        <FontAwesomeIcon icon={faPlay} />
-                    </Button>
                 </CardBody>
             </Card>
             <ConfirmModal

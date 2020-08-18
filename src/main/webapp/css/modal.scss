@@ -234,6 +234,9 @@
           border-radius: 3px;
           content: " ";
         }
+        &.manual::before{
+          background-color: rgb(255, 169, 77);
+        }
       }
       & > input[type="text"] {
         font-size: 14px;
@@ -241,6 +244,11 @@
         &:hover {
           border-color: rgb(92, 124, 250);
           box-shadow: 0 0 0 0.1rem rgba(92, 124, 250, 0.5);
+        }
+        &.manual:focus,
+        &.manual:hover {
+          border-color: rgb(255, 169, 77);
+          box-shadow: 0 0 0 0.1rem rgba(255, 169, 77, 0.5);
         }
       }
       &:last-child {

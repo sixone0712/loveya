@@ -8,7 +8,7 @@ import * as dlHistoryAction from "../../modules/dlHistory";
 import {Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleDoubleUp, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
-import {filePaginate, RenderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/CommonFunction";
 import Footer from "../Common/Footer";
 import ScrollToTop from "react-scroll-up";
 import moment from "moment";

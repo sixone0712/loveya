@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import ClockLoader from "react-spinners/ClockLoader";
 import {Select} from "antd";
-import {filePaginate, RenderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/CommonFunction";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import * as Define from "../../define";

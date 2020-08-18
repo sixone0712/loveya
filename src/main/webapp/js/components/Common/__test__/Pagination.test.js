@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import React from 'react';
 import { mount } from 'enzyme';
-import { filePaginate, RenderPagination } from "../Pagination";
+import { filePaginate, RenderPagination } from "../CommonFunction";
 
 const data = [
     { name: "dummy", index: 0 },

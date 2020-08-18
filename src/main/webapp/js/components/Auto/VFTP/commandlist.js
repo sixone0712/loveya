@@ -5,17 +5,14 @@ import {faExclamationCircle, faPencilAlt, faSearch, faTimes, faTrashAlt} from "@
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
+import { propsCompare } from "../../Common/CommonFunction";
 import services from "../../../services";
 import * as commandActions from "../../../modules/command";
 import * as Define from "../../../define";
 
 const modalType = { NEW: 1, EDIT: 2 };
 
-const propsCompare = (prevProps, nextProps) => {
-    return JSON.stringify(prevProps) === JSON.stringify(nextProps);
-};
-
-const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) => {
+const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
     const commandList = command.get("lists").toJS();
     const checkedCount = command.get("checkedCnt");
     const [query, setQuery] = useState("");
@@ -161,7 +158,7 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
 
     const onContextChange = useCallback(e => { setCurrentContext(e.target.value); }, []);
     const onDataTypeChange = useCallback(e=> { setCurrentDataType(e.target.value); }, []);
-    const openAddModal = useCallback(() => { setIsNewOpen(true); }, []);
+    const openNewModal = useCallback(() => { setIsNewOpen(true); }, []);
 
     const openEditModal = useCallback((id, value) => {
         setIsEditOpen(true);
@@ -183,7 +180,7 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
         setActionId(id);
     }, []);
 
-    const closeAddModal = useCallback(() => {
+    const closeNewModal = useCallback(() => {
         setIsNewOpen(false);
         setCurrentDataType("");
         setCurrentContext("");
@@ -238,7 +235,7 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
                             searchText={query}
                             textChanger={handleSearch}
                             itemToggler={selectItem}
-                            openModal={openAddModal}
+                            openModal={openNewModal}
                         />
                     </div>
                     <CreateCommandList
@@ -257,14 +254,14 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
                 context={currentContext}
                 dataTypeChanger={onDataTypeChange}
                 contextChanger={onContextChange}
-                addOpen={isNewOpen}
+                newOpen={isNewOpen}
                 editOpen={isEditOpen}
                 deleteOpen={isDeleteOpen}
                 errorOpen={isErrorOpen}
-                actionAdd={addCommand}
+                actionNew={addCommand}
                 actionEdit={saveCommand}
                 actionDelete={deleteCommand}
-                closeAdd={closeAddModal}
+                closeNew={closeNewModal}
                 closeEdit={closeEditModal}
                 closeDelete={closeDeleteModal}
                 closeError={closeErrorModal}
@@ -275,10 +272,10 @@ const RSSautoCommandList = ({ isNew, type, command, commandActions, autoPlan }) 
 };
 
 const CreateModal = React.memo(({ ...props }) => {
-    const { listType, dataType, context, dataTypeChanger, contextChanger, addOpen, editOpen, deleteOpen,
-            errorOpen, actionAdd, actionEdit, actionDelete, closeAdd, closeEdit, closeDelete, closeError, msg } = props;
+    const { listType, dataType, context, dataTypeChanger, contextChanger, newOpen, editOpen, deleteOpen,
+            errorOpen, actionNew, actionEdit, actionDelete, closeNew, closeEdit, closeDelete, closeError, msg } = props;
 
-    if (addOpen) {
+    if (newOpen) {
         return (
             <ReactTransitionGroup
                 transitionName={"Custom-modal-anim"}
@@ -309,10 +306,10 @@ const CreateModal = React.memo(({ ...props }) => {
                         </FormGroup>
                     </div>
                     <div className="button-wrap">
-                        <button className="auto-plan form-type left-btn" onClick={actionAdd}>
+                        <button className="auto-plan form-type left-btn" onClick={actionNew}>
                             Add
                         </button>
-                        <button className="auto-plan form-type right-btn" onClick={closeAdd}>
+                        <button className="auto-plan form-type right-btn" onClick={closeNew}>
                             Cancel
                         </button>
                     </div>
@@ -458,11 +455,11 @@ const CreateButtonArea = React.memo(({ ...props}) => {
 
 const CreateCommandList = React.memo(({ ...props }) => {
     const { commandList, checkHandler, query, editModal, deleteModal, type } = props;
-    const regex = /[-|%s]/g;
+    const regex = /(-)|(%s)/g;
     let filteredData = [];
 
     if (query.length > 0) {
-        filteredData = commandList.filter(command => command.cmd_name.replace(regex, "").toLowerCase().includes(query.toLowerCase()));
+        filteredData = commandList.filter(command => command.cmd_name.toLowerCase().replace(regex, "").includes(query.toLowerCase()));
     } else { filteredData = commandList; }
 
     return (
@@ -494,9 +491,9 @@ const CreateCommandList = React.memo(({ ...props }) => {
                                     {displayCommand}
                                 </label>
                                 <span className="icon" onClick={() => deleteModal(command.id)}>
-                                <FontAwesomeIcon icon={faTimes}/>
+                                    <FontAwesomeIcon icon={faTimes}/>
                                 </span>
-                                    <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
+                                <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
                                     <FontAwesomeIcon icon={faPencilAlt}/>
                                 </span>
                             </li>
