@@ -40,9 +40,11 @@ public class PlanManager extends Thread {
 
     private List<CollectProcess> collects;
     private boolean inited;
+    private boolean halted;
 
     public PlanManager() {
         inited = false;
+        halted = false;
     }
 
     @PostConstruct
@@ -58,8 +60,14 @@ public class PlanManager extends Thread {
 
         try {
             while (true) {
-                sleep(5000);
                 killThread();
+
+                if(halted) {
+                    log.warn("PlanManager halted");
+                    sleep(30000);
+                    continue;
+                }
+                sleep(5000);
 
                 int nextIdx = findNextScheduledPlan();
                 if(nextIdx!=-1) {
@@ -256,6 +264,11 @@ public class PlanManager extends Thread {
             log.info("deletePlan: CollectProcess deleted "+planId);
         }
         return result;
+    }
+
+    public void setHalted(boolean halted) {
+        log.info("setHalted "+halted);
+        this.halted = halted;
     }
 
     private CollectProcess getPlanProcess(int planId) {
