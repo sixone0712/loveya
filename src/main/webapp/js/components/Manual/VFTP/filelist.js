@@ -334,6 +334,12 @@ const RSSvftpFilelist = ({
                                                 </ButtonToggle>
                                             </div>
                                         </th>
+                                        <th onClick={() => handleThClick("machineName")}>
+                                            <span className="sortLabel-root">
+                                                Machine
+                                                <span className={sortIconRender("machineName")}>➜</span>
+                                            </span>
+                                        </th>
                                         <th onClick={() => handleThClick("fileName")}>
                                             <span className="sortLabel-root">
                                                 File Name
@@ -414,6 +420,7 @@ const CreateFileList = React.memo(
                             <label className="custom-control-label filelist-label" htmlFor={file.index}/>
                         </div>
                     </td>
+                    <td>{file.machineName}</td>
                     <td><FontAwesomeIcon icon={faFileAlt} /> {file.fileName}</td>
                     <td>{API.bytesToSize(file.fileSize)}</td>
                 </tr>

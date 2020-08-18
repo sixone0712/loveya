@@ -239,6 +239,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                                     </li>
                                 }
                                 <CreateCommandList
+                                    type={cmdType}
                                     commandList={commandList}
                                     commandChanger={handleCommandChange}
                                     editModal={openEditModal}
@@ -435,31 +436,40 @@ const CreateModal = React.memo(({ ...props }) => {
     }
 }, propsCompare);
 
-const CreateCommandList = React.memo(({ commandList, commandChanger, editModal, deleteModal }) => {
-    return (
-        <>
-            {commandList.map((command, index) => {
-                return (
-                    <li key={index}>
-                        <CustomInput
-                            type="radio"
-                            id={command.id}
-                            name={command.cmd_name}
-                            label={command.cmd_name}
-                            checked={command.checked}
-                            onChange={() => commandChanger(command.id)}
-                        />
-                        <span className="icon" onClick={() => deleteModal(command.id)}>
-                            <FontAwesomeIcon icon={faTimes} />
+const CreateCommandList = React.memo(({ type, commandList, commandChanger, editModal, deleteModal }) => {
+    if (type === Define.PLAN_TYPE_VFTP_SSS && commandList.length === 0) {
+        return (
+            <div className="no-search-genre">
+                <p><FontAwesomeIcon icon={faExclamationCircle} size="8x" /></p>
+                <p>No registered command.</p>
+            </div>
+        );
+    } else {
+        return (
+            <>
+                {commandList.map((command, index) => {
+                    return (
+                        <li key={index}>
+                            <CustomInput
+                                type="radio"
+                                id={command.id}
+                                name={command.cmd_name}
+                                label={command.cmd_name}
+                                checked={command.checked}
+                                onChange={() => commandChanger(command.id)}
+                            />
+                            <span className="icon" onClick={() => deleteModal(command.id)}>
+                            <FontAwesomeIcon icon={faTimes}/>
                         </span>
-                        <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
-                            <FontAwesomeIcon icon={faPencilAlt} />
+                            <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
+                            <FontAwesomeIcon icon={faPencilAlt}/>
                         </span>
-                    </li>
-                );
-            })}
-        </>
-    );
+                        </li>
+                    );
+                })}
+            </>
+        );
+    }
 }, propsCompare);
 
 export default connect(

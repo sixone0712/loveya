@@ -187,7 +187,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             <ConfirmModal isOpen={modalType === "cancel"}
                           icon={faExclamationCircle}
                           message={modalMsg}
-                          style={"secondary"}
+                          style={"administrator"}
                           leftBtn={"Yes"}
                           rightBtn={"No"}
                           actionBg={null}
@@ -199,12 +199,12 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                           message={modalMsg}
                           leftBtn={"Save"}
                           rightBtn={"Cancel"}
-                          style={"secondary"}
+                          style={"administrator"}
                           actionBg={null}
                           actionLeft={completeModal}
                           actionRight={()=> cancelModal("yes",{modalType})}
             />
-            <AlertModal isOpen={modalType === "alert"} icon={faExclamationCircle} message={modalMsg} style={"green"} closer={closeModal} />
+            <AlertModal isOpen={modalType === "alert"} icon={faExclamationCircle} message={modalMsg} style={"administrator"} closer={closeModal} />
             {modalType === "process" ? (
                 <ReactTransitionGroup
                     transitionName={"Custom-modal-anim"}
@@ -223,13 +223,13 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                                     margin={5}
                                 />
                             </div>
-                            <p>{modalMsg}</p>
+                            <p style={{ marginBottom: 0 }}>{modalMsg}</p>
                             { type === "compat/optional" &&
-                                <p>{downloadFile}/{totalFiles }</p>
+                                <p>{downloadFile}/{totalFiles}</p>
                             }
                         </div>
                         <div className="button-wrap">
-                            <button className="secondary alert-type" onClick={()=> setModalOpen("cancel")}>
+                            <button className="administrator alert-type" onClick={()=> setModalOpen("cancel")}>
                                 Cancel
                             </button>
                         </div>
