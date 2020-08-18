@@ -114,10 +114,8 @@ public class PlanManager extends Thread {
         killList = new ArrayList<>();
         List<CollectPlanVo> plans = planDao.findAll();
         for(CollectPlanVo plan: plans) {
-            if(!plan.getLastStatus().equals("completed")) {
-                createCollectProcess(plan);
-                log.info(plan.toString());
-            }
+            createCollectProcess(plan);
+            log.info(plan.toString());
         }
         inited = true;
     }
@@ -180,7 +178,9 @@ public class PlanManager extends Thread {
     public List<CollectPlanVo> getPlans() {
         List<CollectPlanVo> list = new ArrayList<>();
         for(CollectProcess process: collects) {
-            list.add(process.getPlan());
+            CollectPlanVo resp = process.getPlan().createCollectPlanResponse();
+            resp.setStop(process.isStop());
+            list.add(resp);
         }
         return list;
     }
@@ -213,17 +213,8 @@ public class PlanManager extends Thread {
             log.warn("stopPlan: invalid request. planid="+planId);
             return false;
         }
-        CollectPlanVo plan = process.getPlan();
-        process.setStop(true);
-        if(process.isThreading()) {
-            Thread thd = process.getThread();
-            if(thd.isAlive()) {
-
-                log.info("interrupt thread "+plan.getId());
-                thd.interrupt();
-            }
-        }
-        log.info("stopPlan "+plan.getId());
+        process.stop();
+        log.info("request stop "+process.getPlan().getId());
         return true;
     }
 
