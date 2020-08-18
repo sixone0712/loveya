@@ -18,8 +18,8 @@ const { Option } = Select;
 export function getDownloadType(type) {
     let typeString = 0;
     //console.log("type: ",type);
-    typeString = (type == Define.RSS_TYPE_FTP_MANUAL)  ? "Manual download(ftp)"
-        : (type == Define.RSS_TYPE_FTP_AUTO)  ? "Auto download(ftp)"
+    typeString = (type == Define.RSS_TYPE_FTP_MANUAL)  ? "Manual download(FTP)"
+        : (type == Define.RSS_TYPE_FTP_AUTO)  ? "Auto download(FTP)"
         : (type == Define.RSS_TYPE_VFTP_SSS)  ? "Manual download(VFTP/SSS)"
         : (type == Define.RSS_TYPE_VFTP_COMPAT)  ? "Manual download(VFTP/COMPAT)"
         : " ";
