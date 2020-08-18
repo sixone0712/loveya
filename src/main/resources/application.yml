@@ -15,7 +15,7 @@ log4j:
 
 spring:
   profiles:
-    active: release
+    active: dev
   datasource:
     initialization-mode: always
     driver-class-name: org.postgresql.Driver
@@ -93,7 +93,7 @@ rssportal:
     logBase: planroot
     cacheBase: downloadcache
     resultBase: zipa
-    max-threads: 4
+    max-threads: 1
   file-collect-service:
     addr: 10.1.31.237
     retry: 1 # retry count
@@ -122,7 +122,7 @@ rssportal:
     logBase: /LOG/autocollect
     cacheBase: /LOG/cache
     resultBase: /LOG/zip
-    max-threads: 4
+    max-threads: 1
   file-collect-service:
     addr: localhost
     retry: 1 # retry count
