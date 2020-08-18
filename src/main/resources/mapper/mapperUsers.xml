@@ -20,7 +20,7 @@
     </select>
 
     <select id="selectToken" parameterType="string" resultType="int">
-        select count(token) from rsss."blackList" where token = #{token}
+        select count(token) from rsss."black_list" where token = #{token}
     </select>
 
     <insert id="insert" parameterType="UserVo">
@@ -38,7 +38,7 @@
     </insert>
 
     <insert id="insertToken" parameterType="hashMap">
-        insert into rsss."blackList" (token, expired) values (#{token}, #{exp})
+        insert into rsss."black_list" (token, expired) values (#{token}, #{exp})
     </insert>
 
     <update id="update" parameterType="UserVo">
@@ -67,7 +67,7 @@
     </delete>
 
     <delete id="cleanBlacklist">
-        delete from rsss."blackList" where expired <![CDATA[ < ]]> #{queryDate}
+        delete from rsss."black_list" where expired <![CDATA[ < ]]> #{queryDate}
     </delete>
 
 </mapper>

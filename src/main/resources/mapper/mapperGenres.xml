@@ -56,15 +56,15 @@
     </delete>
 
     <select id="selectUpdate" resultType="Date">
-        select update from rsss."genreUpdate"
+        select update from rsss."genre_update"
     </select>
 
     <update id="updateUpdate" parameterType="Date">
-        update rsss."genreUpdate" set update = now()
+        update rsss."genre_update" set update = now()
     </update>
 
     <insert id="insertUpdate">
-        insert into rsss."genreUpdate" (update) values (now())
+        insert into rsss."genre_update" (update) values (now())
     </insert>
 
     <!--
