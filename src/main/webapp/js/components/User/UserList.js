@@ -13,7 +13,7 @@ import {
     faTrashAlt,
     faUser
 } from "@fortawesome/free-solid-svg-icons";
-import {filePaginate, RenderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/CommonFunction";
 import ConfirmModal from "../Common/ConfirmModal";
 import moment from "moment";
 import ChangeAuthModal from "./ChangeAuth";

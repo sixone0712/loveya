@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Component
+//@Component
 public class CollectPlanner extends Thread {
 
     @Value("${rssportal.collect.logBase}")

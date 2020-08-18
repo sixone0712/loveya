@@ -135,7 +135,7 @@ public class JwtServiceImpl implements JwtService{
             Jws<Claims> claims = Jwts.parser()
                     .setSigningKey(this.generateKey())
                     .parseClaimsJws(claimsJws);
-            return (int) claims.getBody().get("userName");
+            return (int) claims.getBody().get("userId");
         } catch (Exception e) {
             log.error(e);
             return 0;

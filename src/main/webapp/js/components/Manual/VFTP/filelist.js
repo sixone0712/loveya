@@ -6,7 +6,7 @@ import { faFileAlt } from "@fortawesome/free-regular-svg-icons";
 import { Select } from "antd";
 import ReactTransitionGroup from "react-addons-css-transition-group";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import { filePaginate, RenderPagination } from "../../Common/Pagination";
+import { filePaginate, RenderPagination } from "../../Common/CommonFunction";
 import _ from "lodash";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";

@@ -15,7 +15,7 @@ import * as API from "../../../api";
 import {setRowsPerPage} from "../../../api";
 import * as Define from '../../../define';
 import services from "../../../services";
-import {filePaginate, RenderPagination} from "../../Common/Pagination";
+import {filePaginate, RenderPagination} from "../../Common/CommonFunction";
 import ConfirmModal from "../../Common/ConfirmModal";
 import AlertModal from "../../Common/AlertModal";
 import _ from "lodash";

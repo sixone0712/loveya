@@ -113,7 +113,7 @@ public abstract class CollectProcess implements Runnable {
         try {
             createDownloadFileList();
         } catch (InterruptedException e) {
-            log.info("stop collecting");
+            printInfo("stop collecting");
             __exit0();
         }
     }
@@ -123,7 +123,7 @@ public abstract class CollectProcess implements Runnable {
         if(requestList==null)
             throw new CollectException(plan, "null collect file list");
         if(requestFiles==0) {
-            log.info("no files to collect");
+            printInfo("no files to collect");
             __exit0();
         }
 
@@ -135,14 +135,14 @@ public abstract class CollectProcess implements Runnable {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                log.info("stop downloading");
+                printInfo("stop downloading");
                 __exit0();
             }
             status = downloader.getStatus(downloadId);
         } while(status.equalsIgnoreCase("in-progress"));
 
         if(!status.equalsIgnoreCase("done")) {
-            log.error("file download failed");
+            printError("file download failed");
             throw new CollectException(plan, "file download failed");
         }
     }
@@ -155,15 +155,15 @@ public abstract class CollectProcess implements Runnable {
         try {
             updatedFiles = copyFiles(plan, downloader.getBaseDir(downloadId));
         } catch (IOException e) {
-            log.error("copying files failed");
+            printError("copying files failed");
             throw new CollectException(plan, "copying files failed");
         }
-        log.info("collecting complete. copied="+updatedFiles);
+        printInfo("collecting complete. copied="+updatedFiles);
     }
 
     private void _compress() throws CollectException {
+        printInfo("compress updatedFiles="+updatedFiles);
         if(updatedFiles>0) {
-            printInfo("compress");
             String out = compress(plan);
             if (out == null) {
                 log.error("compressing failed");

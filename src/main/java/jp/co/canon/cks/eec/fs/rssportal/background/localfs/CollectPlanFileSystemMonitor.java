@@ -1,6 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.background.localfs;
 
-import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
+import jp.co.canon.cks.eec.fs.rssportal.background.autocollect.PlanManager;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
 import org.apache.commons.logging.Log;
@@ -34,15 +34,15 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
     private long keepPeriodMillis;
 
     private final DownloadListService downloadService;
-    private final CollectPlanner collectPlanner;
+    private final PlanManager manager;
 
     private List<DownloadListVo> cleanupList;
 
     @Autowired
-    public CollectPlanFileSystemMonitor(DownloadListService downloadService, CollectPlanner collectPlanner) {
+    public CollectPlanFileSystemMonitor(DownloadListService downloadService, PlanManager manager) {
         super(name);
         this.downloadService = downloadService;
-        this.collectPlanner = collectPlanner;
+        this.manager = manager;
         cleanupList = new ArrayList<>();
     }
 
@@ -94,13 +94,13 @@ public class CollectPlanFileSystemMonitor extends FileSystemMonitor {
     @Override
     protected void restart() {
         log.info("restart collecting");
-        collectPlanner.restart();
+        manager.setHalted(false);
     }
 
     @Override
     protected void halt() {
         log.info("halt collecting");
-        collectPlanner.halt();
+        manager.setHalted(true);
     }
 
     @Override

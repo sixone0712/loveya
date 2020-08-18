@@ -309,7 +309,7 @@ class RSSautoplanwizard extends Component {
                       <div className="step-number">
                         {this.completeCheck(wizardStep.TARGET_COMMAND)}
                       </div>
-                      <div className="step-label">{type === "FTP" ? "Target" : "Command"}</div>
+                      <div className="step-label">{type === Define.PLAN_TYPE_FTP ? "Target" : "Command"}</div>
                     </div>
                   </li>
                   <li>

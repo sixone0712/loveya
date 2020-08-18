@@ -148,6 +148,7 @@ class FormList extends Component{
                     intervalValue: null
                 })
 
+                /*
                 if(this.props.responseListCnt === 0) {
                     setTimeout(() => {
                         this.setState({
@@ -156,6 +157,7 @@ class FormList extends Component{
                         });
                     }, 200);
                 }
+                 */
                 break;
 
             default:

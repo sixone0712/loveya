@@ -3,7 +3,7 @@ import {Button, Card, CardBody, CardHeader, Col, Table} from "reactstrap";
 import {Select} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faDownload, faExclamation, faExclamationCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
-import {filePaginate, RenderPagination} from "../Common/Pagination";
+import {filePaginate, RenderPagination} from "../Common/CommonFunction";
 import ConfirmModal from "../Common/ConfirmModal";
 import AlertModal from "../Common/AlertModal";
 import services from "../../services"

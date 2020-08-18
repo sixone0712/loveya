@@ -10,6 +10,7 @@ const COMMAND_CHECK_LIST = "cmd/COMMAND_CHECK_LIST";
 const COMMAND_CHECK_ALL_LIST = "cmd/COMMAND_CHECK_ALL_LIST";
 const COMMAND_CHECK_INIT ="cmd/COMMAND_CHECK_INIT";
 const COMMAND_DELETE_ITEM = "cmd/COMMAND_DELETE_ITEM";
+const COMMAND_ADD_NOT_USE = "cmd/COMMAND_ADD_NOT_USE";
 
 export const commandInit = createAction(COMMAND_INIT);
 export const commandLoadList = createAction(COMMAND_LOAD_LIST, services.axiosAPI.requestGet);
@@ -17,6 +18,7 @@ export const commandCheckOnlyOneList = createAction(COMMAND_CHECK_ONLY_ONE_LIST)
 export const commandCheckList = createAction(COMMAND_CHECK_LIST);
 export const commandCheckAllList = createAction(COMMAND_CHECK_ALL_LIST);
 export const commandCheckInit = createAction(COMMAND_CHECK_INIT);
+export const commandAddNotUse = createAction(COMMAND_ADD_NOT_USE);
 export const commandDeleteItem = createAction(COMMAND_DELETE_ITEM);
 
 const initialState = Map({
@@ -41,7 +43,7 @@ const initialState = Map({
 });
 
 const reducer = handleActions({
-    [COMMAND_INIT]: (state, action) => {
+    [COMMAND_INIT]: () => {
         console.log("COMMAND_INIT");
         return initialState;
     },
@@ -113,6 +115,23 @@ const reducer = handleActions({
             .setIn(["command", "checkedLists"], newCheckedList)
             .setIn(["command", "checkedCnt"], realCheckCnt);
     },
+    [COMMAND_ADD_NOT_USE]: (state) => {
+        const lists = state.getIn(["command", "lists"]);
+        const newLists = [
+            {
+                index: -1,
+                id: -1,
+                cmd_name: "not use.",
+                cmd_type: "vftp_compat",
+                checked: false
+            }
+        ];
+
+        lists.map(list => newLists.push(list));
+
+        return state.setIn(["command", "lists"], fromJS(newLists))
+                    .setIn(["command", "totalCnt"], newLists.length);
+    },
     [COMMAND_DELETE_ITEM]: (state, action) => {
         const id = +action.payload;
         const checkedCnt = state.getIn(["command", "checkedCnt"]);
@@ -146,6 +165,7 @@ export default applyPenders(reducer, [
                 cmd_type: item.cmd_type,
                 checked: checkedList.includes(item.id)
             }));
+
             const totalCnt = commandList.length;
 
             return state.setIn(["command", "lists"], fromJS(commandList))
