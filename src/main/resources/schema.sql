@@ -85,12 +85,12 @@ DO '
             create unique index genres_name_uindex
                 on rsss.genres (name);
 
-            create table rsss.genre_update
+            create table rsss."genreUpdate"
                 (
                     update timestamp not null
                     );
 
-            alter table rsss.genre_update
+            alter table rsss."genreUpdate"
                 owner to rssadmin;
 
             create table rsss.users
