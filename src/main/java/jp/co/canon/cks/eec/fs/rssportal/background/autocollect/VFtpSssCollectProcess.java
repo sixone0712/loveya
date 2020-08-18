@@ -50,7 +50,7 @@ public class VFtpSssCollectProcess extends CollectProcess {
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.length; ++i) {
             for(String directory: directories) {
-                String _directory = String.format("%s-%s-%s", directory, startTime, endTime);
+                String _directory = String.format(directory, startTime, endTime);
                 VFtpSssListRequestResponse response = connector.createVFtpSssListRequest(machines[i], _directory);
                 VFtpFileInfo[] files = response.getRequest().getFileList();
                 if(files.length>0) {

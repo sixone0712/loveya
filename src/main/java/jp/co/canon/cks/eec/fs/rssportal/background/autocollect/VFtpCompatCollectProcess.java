@@ -50,10 +50,10 @@ public class VFtpCompatCollectProcess extends CollectProcess {
         for(int i=0; i<machines.length; ++i) {
             for(String command: commands) {
                 String _command;
-                if(command.equals("")) {
+                if(command.equals("") || command.startsWith("not use")) {
                     _command = String.format("%s_%s", startTime, endTime);
                 } else {
-                    _command = String.format("%s_%s-%s", startTime, endTime, command);
+                    _command = String.format(command, startTime, endTime);
                 }
                 list.add(new VFtpCompatDownloadRequestForm(fabs[i], machines[i], _command, true));
             }
