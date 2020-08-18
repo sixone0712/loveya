@@ -35,8 +35,10 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
     }, [showSearch]);
 
     const selectItem = useCallback(() => {
-        const checked = commandList.length !== checkedCount;
-        commandActions.commandCheckAllList(checked);
+        if (commandList.length !== 0) {
+            const checked = commandList.length !== checkedCount;
+            commandActions.commandCheckAllList(checked);
+        }
     }, [commandList]);
 
     const handleCheckboxClick = useCallback(e => {
@@ -250,7 +252,7 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
                         </div>
                         <CreateButtonArea
                             isOpen={showSearch}
-                            isChecked={checkedCount === commandList.length}
+                            isChecked={commandList.length === 0 ? false : checkedCount === commandList.length}
                             searchToggler={handleSearchToggle}
                             searchText={query}
                             textChanger={handleSearch}
@@ -475,64 +477,80 @@ const CreateButtonArea = React.memo(({ ...props}) => {
 
 const CreateCommandList = React.memo(({ ...props }) => {
     const { commandList, checkHandler, query, editModal, deleteModal, type } = props;
-    const regex = /(-)|(%s)/g;
-    let filteredData = [];
 
-    if (query.length > 0) {
-        filteredData = commandList.filter(command => command.cmd_name.toLowerCase().replace(regex, "").includes(query.toLowerCase()));
-    } else { filteredData = commandList.sort((a, b) => a.id - b.id); }
+    if (commandList.length === 0) {
+        return (
+            <FormGroup className="custom-scrollbar auto-plan-form-group pd-5 command-list targetlist">
+                <div className="command-not-found">
+                    <p><FontAwesomeIcon icon={faExclamationCircle} size="8x"/></p>
+                    <p>No registered command.</p>
+                </div>
+            </FormGroup>
+        );
+    } else {
+        const regex = /(-)|(%s)/g;
+        let filteredData = [];
 
-    return (
-        <FormGroup className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
-            {filteredData.length > 0 ? (
-                <ul>
-                    {filteredData.map((command, index) => {
-                        let displayCommand = "";
-                        if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
-                            displayCommand = command.cmd_name.replace("%s-%s-", "");
-                        } else {
-                            if (command.cmd_name.endsWith("%s")) {
-                                displayCommand = command.cmd_name.replace("-%s-%s", "");
+        if (query.length > 0) {
+            filteredData = commandList.filter(command => command.cmd_name.toLowerCase().replace(regex, "").includes(query.toLowerCase()));
+        } else {
+            filteredData = commandList.sort((a, b) => a.id - b.id);
+        }
+
+        return (
+            <FormGroup
+                className={"custom-scrollbar auto-plan-form-group pd-5 command-list" + (filteredData.length > 0 ? "" : " targetlist")}>
+                {filteredData.length > 0 ? (
+                    <ul>
+                        {filteredData.map((command, index) => {
+                            let displayCommand = "";
+                            if (type === Define.PLAN_TYPE_VFTP_COMPAT) {
+                                displayCommand = command.cmd_name.replace("%s-%s-", "");
                             } else {
-                                displayCommand = command.cmd_name.replace("-%s-%s-", "-");
+                                if (command.cmd_name.endsWith("%s")) {
+                                    displayCommand = command.cmd_name.replace("-%s-%s", "");
+                                } else {
+                                    displayCommand = command.cmd_name.replace("-%s-%s-", "-");
+                                }
                             }
-                        }
 
-                        return (
-                            <li className="custom-control custom-checkbox" key={index}>
-                                <input
-                                    type="checkbox"
-                                    className="custom-control-input"
-                                    id={command.id}
-                                    value={command.cmd_name}
-                                    checked={command.checked}
-                                    onChange={checkHandler}
-                                />
-                                <label className="custom-control-label form-check-label" htmlFor={command.id}>
-                                    {displayCommand}
-                                </label>
-                                {command.id !== -1 ? (
-                                    <>
+                            return (
+                                <li className="custom-control custom-checkbox" key={index}>
+                                    <input
+                                        type="checkbox"
+                                        className="custom-control-input"
+                                        id={command.id}
+                                        value={command.cmd_name}
+                                        checked={command.checked}
+                                        onChange={checkHandler}
+                                    />
+                                    <label className="custom-control-label form-check-label" htmlFor={command.id}>
+                                        {displayCommand}
+                                    </label>
+                                    {command.id !== -1 ? (
+                                        <>
                                         <span className="icon" onClick={() => deleteModal(command.id)}>
                                             <FontAwesomeIcon icon={faTimes}/>
                                         </span>
-                                        <span className="icon" onClick={() => editModal(command.id, command.cmd_name)}>
+                                            <span className="icon"
+                                                  onClick={() => editModal(command.id, command.cmd_name)}>
                                             <FontAwesomeIcon icon={faPencilAlt}/>
                                         </span>
-                                    </>
-                                ):(<></>)}
-                            </li>
-                        );
-                    })}
-                </ul>
-            ) : (
-                <div className="command-not-found">
-                    <p><FontAwesomeIcon icon={faExclamationCircle} size="8x" /></p>
-                    <p>Command not found.</p>
-                </div>
-            )}
-        </FormGroup>
-    );
+                                        </>
+                                    ) : (<></>)}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <div className="command-not-found">
+                        <p><FontAwesomeIcon icon={faExclamationCircle} size="8x"/></p>
+                        <p>Command not found.</p>
+                    </div>
+                )}
+            </FormGroup>
+        );
+    }
 }, propsCompare);
 
 export default connect(
