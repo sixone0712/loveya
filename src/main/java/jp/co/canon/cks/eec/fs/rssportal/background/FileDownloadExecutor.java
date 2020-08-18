@@ -172,116 +172,86 @@ public class FileDownloadExecutor {
 
         private Log log;
         private AtomicInteger runnings;
-        private final int maxThreads = 16;
+        private final int maxThreads = 1;
 
         public DownloadRunner(Log log) {
             this.log = log;
             runnings = new AtomicInteger(0);
         }
 
-        private Consumer<FileServiceProc> finishCallback = proc->{
-            log.info(proc.getName()+" finished");
-            runnings.getAndDecrement();
-        };
-
-        private Consumer<FileServiceProc> errorCallback = proc->{
-            log.info(proc.getName()+" error");
-            setStatus(Status.error);
-        };
-
         @Override
         public void run() {
             try {
                 initialize();
-                if(status==Status.stop)
+
+                if(status==Status.stop) {
                     return;
+                }
 
                 setStatus(Status.download);
+                List<FileDownloadServiceProc> procs = new ArrayList<>();
 
-                if(true) {
-                    List<FileDownloadServiceProc> procs = new ArrayList<>();
+                context_loop:
+                for(FileDownloadContext context: downloadContexts) {
+                    if (status == Status.stop || status == Status.error) {
+                        break;
+                    }
 
-                    for(FileDownloadContext context: downloadContexts) {
-                        if (status == Status.stop || status == Status.error)
+                    while (runnings.get() >= maxThreads) {
+                        log.info("waiting thread free");
+                        Thread.sleep(1000);
+                        if (status == Status.stop || status == Status.error) {
+                            break context_loop;
+                        }
+                    }
+
+                    FileDownloadHandler handler;
+                    switch(ftpType) {
+                        default:
+                        case "ftp":
+                            handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
                             break;
-                        FileDownloadHandler handler;
-                        switch(ftpType) {
-                            default:
-                            case "ftp":
-                                handler = new FtpFileDownloadHandler(connector, context.getTool(), context.getLogType(), context.getFileNames());
-                                break;
-                            case "vftp_compat":
-                                handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
-                                break;
-                            case "vftp_sss":
-                                handler = new VFtpSssFileDownloadHandler(connector, context.getTool(), context.getDirectory(), context.getFileNames());
-                                break;
-
-                        }
-                        procs.add(new FileDownloadServiceProc(handler, context, process->{
-                            if(process.getStatus()==FileDownloadServiceProc.Status.Error) {
-                                status = Status.error;
-                                log.error("download error occurs");
-                            }}));
-                    }
-
-                    thread_wait:
-                    for (FileDownloadServiceProc proc : procs) {
-                        while(true) {
-                            if (status == Status.stop || status == Status.error) {
-                                log.info("stop waiting threads");
-                                break thread_wait;
-                            }
-                            if (proc.getStatus() == FileDownloadServiceProc.Status.InProgress) {
-                                Thread.sleep(100);
-                                continue;
-                            } else if(proc.getStatus()==FileDownloadServiceProc.Status.Finished) {
-                                continue thread_wait;
-                            }
-                        }
-                    }
-
-                    log.info("threads terminate");
-                    for (FileDownloadServiceProc proc : procs) {
-                        proc.interrupt();
-                        proc.join();
-                    }
-                } else {
-                    List<FileServiceProc> procs = new ArrayList<>();
-
-                    for (int i = 0; i < downloadContexts.size(); ) {
-                        FileDownloadContext context = downloadContexts.get(i);
-                        if (status == Status.stop || status == Status.error)
+                        case "vftp_compat":
+                            handler = new VFtpCompatFileDownloadHandler(connector, context.getTool(), context.getCommand());
+                            break;
+                        case "vftp_sss":
+                            handler = new VFtpSssFileDownloadHandler(connector, context.getTool(), context.getDirectory(), context.getFileNames());
                             break;
 
-                        while (runnings.get() >= maxThreads) {
-                            Thread.sleep(500);
-                        }
-
-                        FileServiceProc proc = null;
-                        switch (context.getFtpType()) {
-                            case "manual":
-                            case "auto":
-                                proc = new RemoteFileServiceProc(context);
-                                break;
-                            default:
-                                throw new IllegalArgumentException("invalid jobType");
-                        }
-                        proc.setMonitor(monitor);
-                        proc.setNotifyError(errorCallback);
-                        proc.setNotifyFinish(finishCallback);
-                        proc.start();
-                        procs.add(proc);
-                        runnings.getAndIncrement();
-                        log.info(proc.getName() + " starts");
-                        ++i;
                     }
+                    procs.add(new FileDownloadServiceProc(handler, context, process->{
+                        if(process.getStatus()==FileDownloadServiceProc.Status.Error) {
+                            status = Status.error;
+                            log.error("download error occurs");
+                        } else if(process.getStatus()==FileDownloadServiceProc.Status.Finished) {
+                            int currentThreads = runnings.decrementAndGet();
+                            log.info("download done. "+currentThreads+" threads is running");
+                        }
+                    }));
 
-                    while (runnings.get() > 0) {
-                        Thread.sleep(500);
-                        if (status == Status.stop || status == Status.error)
-                            return;
+                    runnings.getAndIncrement();
+                }
+
+                thread_wait:
+                for (FileDownloadServiceProc proc : procs) {
+                    while(true) {
+                        if (status == Status.stop || status == Status.error) {
+                            log.info("stop waiting threads");
+                            break thread_wait;
+                        }
+                        if (proc.getStatus() == FileDownloadServiceProc.Status.InProgress) {
+                            Thread.sleep(100);
+                            continue;
+                        } else if(proc.getStatus()==FileDownloadServiceProc.Status.Finished) {
+                            continue thread_wait;
+                        }
                     }
+                }
+
+                log.info("threads terminate");
+                for (FileDownloadServiceProc proc : procs) {
+                    proc.interrupt();
+                    proc.join();
                 }
 
                 if(attrCompression) {
