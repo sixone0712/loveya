@@ -8,29 +8,7 @@ import AlertModal from "../../Common/AlertModal";
 import * as Define from "../../../define";
 import {ScaleLoader} from "react-spinners";
 import * as API from "../../../api";
-
-const commandWriter = (element, string) => {
-    const command = string;
-    const typeSpeed = 10;
-    let cursorPosition = 0;
-    let tempTypeSpeed = 0;
-
-    element.innerHTML = "";
-
-    const type = () => {
-        tempTypeSpeed = Math.random() * typeSpeed + 30;
-        element.innerHTML += command[cursorPosition];
-        cursorPosition++;
-
-        if (cursorPosition < command.length) {
-            setTimeout(type, tempTypeSpeed);
-        }
-    };
-
-    return {
-        type: type
-    };
-};
+import Typewriter from 'typewriter-effect';
 
 const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, completeFunc, cancelFunc}) => {
     const [modalType, setModalType] = useState("ready");
@@ -42,7 +20,6 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
     const [downloadFile, setDownloadFile] = useState(0);
     const [totalFiles, setTotalFiles] = useState(0);
 
-    const element = useRef();
     const setModalOpen = (type) => {
         modalTypeRef.current = type;
         setPrevModal(modalType);
@@ -168,15 +145,6 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         }
     };
 
-    useEffect(() => {
-        console.log("===RSSCommandLine useEffect===");
-        console.log(string);
-        setTimeout(() => {
-            commandWriter(element.current, string).type();
-        }, 500);
-        return ()=>{console.log("===cleanup===");}
-    }, [string]);
-
     return (
         <>
             <Card className="ribbon-wrapper command-line-card">
@@ -189,8 +157,14 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                 <CardBody>
                     <div className="command-line">
                         Rapid Collector
-                        { type === "compat/optional" ? "#get " : "#cd " }
-                        <span className="command" ref={element} />
+                        { type === "compat/optional" ? " #get " : " #cd " }
+                        <Typewriter
+                            options={{
+                                strings: string,
+                                autoStart: true,
+                                delay: 20
+                            }}
+                        />
                     </div>
                     <Button color="info" outline onClick={()=> setModalOpen("confirm")}>
                         <FontAwesomeIcon icon={faPlay} />

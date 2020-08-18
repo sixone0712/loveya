@@ -192,7 +192,7 @@ const RSSvftpFilelist = ({
 
     const openDownloadComplete = useCallback(() => {
         setIsDownloadStart(false)
-        if(!isDownloadCancel) setIsDownloadComplete(true);
+        if(!isDownloadCancel) setTimeout(() => setIsDownloadComplete(true), 400);
     }, [isDownloadCancel]);
 
     // save file
