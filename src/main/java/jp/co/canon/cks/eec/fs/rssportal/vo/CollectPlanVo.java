@@ -37,6 +37,37 @@ public class CollectPlanVo implements Comparable<CollectPlanVo> {
     private String detail;
     private String collectTypeStr;
 
+    public CollectPlanVo createCollectPlanResponse() {
+        CollectPlanVo plan = new CollectPlanVo();
+        plan.id = this.getId();
+        plan.planType = this.getPlanType();
+        plan.planName = this.getPlanName();
+        plan.fab = this.getFab();
+        plan.tool = this.getTool();
+        plan.logType = this.getLogType();
+        plan.logTypeStr = this.getLogTypeStr();
+        plan.created = this.getCreated();
+        plan.description = this.getDescription();
+        plan.collectionType = this.getCollectionType();
+        plan.lastCollect = this.getLastCollect();
+        plan.interval = this.getInterval();
+        plan.collectStart = this.getCollectStart();
+        plan.start = this.getStart();
+        plan.end = this.getEnd();
+        plan.owner = this.getOwner();
+        plan.nextAction = this.getNextAction();
+        plan.lastPoint = this.getLastPoint();
+        plan.stop = this.isStop();
+        plan.lastStatus = this.getLastStatus();
+        plan.planStatus = this.getPlanStatus();
+        plan.command = this.getCommand();
+        plan.directory = this.getDirectory();
+        plan.status = this.getLastStatus().equals("halted")||this.getLastStatus().equals("completed")||this.isStop()?"stop":"running";
+        plan.detail = this.getLastStatus();
+        plan.collectTypeStr = this.getCollectTypeStr();
+        return plan;
+    }
+
     @Override
     public int compareTo(CollectPlanVo o) {
         return this.id-o.getId();
@@ -46,10 +77,8 @@ public class CollectPlanVo implements Comparable<CollectPlanVo> {
     public String toString() {
         StringBuilder sb = new StringBuilder("");
         sb.append("collect-plan [id=").append(id);
-        sb.append(" stop=").append(stop);
-        sb.append(" interval=").append(interval);
-        sb.append(" lastCollect=").append(lastCollect==null?"":lastCollect.toString());
-        sb.append(" nextAction=").append(nextAction==null?"":nextAction.toString());
+        sb.append(" status=").append(status);
+        sb.append(" next=").append(nextAction==null?"":nextAction.toString());
         sb.append("]");
         return sb.toString();
     }

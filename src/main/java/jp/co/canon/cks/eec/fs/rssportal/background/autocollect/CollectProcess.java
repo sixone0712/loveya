@@ -7,6 +7,7 @@ import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.model.FileInfo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import jp.co.canon.cks.eec.fs.rssportal.vo.PlanStatus;
+import lombok.Getter;
 import org.apache.commons.logging.Log;
 import org.springframework.lang.NonNull;
 import org.springframework.util.FileCopyUtils;
@@ -23,6 +24,7 @@ import java.util.List;
 
 public abstract class CollectProcess implements Runnable {
 
+    @Getter
     protected CollectPlanVo plan;
 
     private final PlanManager manager;
@@ -188,19 +190,23 @@ public abstract class CollectProcess implements Runnable {
             }
             printInfo("all pipe finished");
             setStatus(PlanStatus.collected);
+            plan.setLastCollect(getTimestamp());
         } catch (CollectException e) {
             if(e.isError()) {
                 printError(e.getMessage());
                 setStatus(PlanStatus.suspended);
             } else {
                 setStatus(PlanStatus.collected);
+                plan.setLastCollect(getTimestamp());
             }
         }
-        plan.setLastCollect(getTimestamp());
+        if(stop) {
+            plan.setStop(true);
+        }
         schedule();
+        updateStatus();
         push();
         doneProc();
-
     }
 
     private void pull() {
@@ -297,7 +303,7 @@ public abstract class CollectProcess implements Runnable {
 
     private void setStatus(PlanStatus status) {
         plan.setLastStatus(status.name());
-        plan.setDetail(status.name());
+        //plan.setDetail(status.name());
     }
 
     private void schedule() {
@@ -332,13 +338,23 @@ public abstract class CollectProcess implements Runnable {
         printInfo(toString());
     }
 
-    public CollectPlanVo getPlan() {
-        return plan;
+    public void stop() {
+        printInfo("stop");
+        if(!threading) {
+            setStop(true);
+            //push();
+        } else {
+            stop = true;
+            if(thread.isAlive()) {
+                printInfo("request interrupt");
+                thread.interrupt();
+            }
+        }
     }
 
     private int copyFiles(CollectPlanVo plan, @NonNull String tmpDir) throws IOException {
         Path planPath = Paths.get(manager.getCollectRoot(), String.valueOf(plan.getId()));
-        log.info("copyFiles(from="+tmpDir+" to="+planPath.toString()+")");
+        printInfo("copyFiles(from="+tmpDir+" to="+planPath.toString()+")");
         File planRoot = planPath.toFile();
         if(!planRoot.exists()) {
             planRoot.mkdirs();

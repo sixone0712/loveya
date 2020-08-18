@@ -67,7 +67,7 @@ public class FtpFileDownloadHandler implements FileDownloadHandler {
             info.setDownloadBytes(downloadSize);
             info.setRequestFiles(download.getTotalFileCount());
             info.setDownloadFiles(download.getDownloadedFileCount());
-            log.info("### "+download.getDownloadedFileCount()+"/"+download.getTotalFileCount());
+            //log.info("### "+download.getDownloadedFileCount()+"/"+download.getTotalFileCount());
 
             if(download.getStatus()==FtpDownloadRequest.Status.ERROR) {
                 log.error("getDownloadedFiles: error "+download.getErrorMessage());
