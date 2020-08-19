@@ -136,7 +136,8 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             const currentCommand = setCurrentCommand();
             const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase().replace(regex, ""));
 
-            if (duplicateArray.length !== 0 || currentCommand.toLowerCase().replace(regex, "") === UNIQUE_COMMAND) {
+            if (duplicateArray.length !== 0
+                || (cmdType === Define.PLAN_TYPE_VFTP_COMPAT && currentCommand.toLowerCase().replace(regex, "") === UNIQUE_COMMAND)) {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.NEW);
                 setIsNewOpen(false);
@@ -175,7 +176,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
             const duplicateArray = commandList.filter(command => command.cmd_name.toLowerCase() === currentCommand.toLowerCase().replace(regex, ""));
 
             if ((duplicateArray.length !== 0 && duplicateArray[0].id !== actionId)
-                || currentCommand.toLowerCase().replace(regex, "") === UNIQUE_COMMAND) {
+                || (cmdType === Define.PLAN_TYPE_VFTP_COMPAT && currentCommand.toLowerCase().replace(regex, "") === UNIQUE_COMMAND)) {
                 setErrorMsg("This command is duplicate.");
                 setOpenedModal(modalType.EDIT);
                 setIsEditOpen(false);
