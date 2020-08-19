@@ -150,7 +150,7 @@ public class PlanManager extends Thread {
     }
 
     public String getCollectRoot() {
-        return "test/"+planRootDir;
+        return planRootDir;
     }
 
     public boolean isInitialized() {
