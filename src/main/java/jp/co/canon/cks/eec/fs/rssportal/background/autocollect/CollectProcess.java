@@ -54,6 +54,8 @@ public abstract class CollectProcess implements Runnable {
 
     private long expectedLastPoint;
 
+    private CollectPipe[] pipes = {this::_listFiles, this::_download, this::_copyFiles, this::_compress};
+
     /**
      * This method has to set `requestList` and `requestFiles` on success.
      * @throws CollectException
@@ -101,7 +103,7 @@ public abstract class CollectProcess implements Runnable {
         notifyJobDone.run();
     }
 
-    private CollectPipe[] pipes = {this::_listFiles, this::_download, this::_copyFiles, this::_compress};
+
 
     private void _listFiles() throws CollectException {
         printInfo("listFiles");
@@ -303,7 +305,7 @@ public abstract class CollectProcess implements Runnable {
 
     private void setStatus(PlanStatus status) {
         plan.setLastStatus(status.name());
-        //plan.setDetail(status.name());
+        plan.setDetail(status.name());
     }
 
     private void schedule() {

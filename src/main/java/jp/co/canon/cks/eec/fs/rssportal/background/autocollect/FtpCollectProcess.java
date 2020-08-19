@@ -102,6 +102,10 @@ public class FtpCollectProcess extends CollectProcess {
         FtpDownloadRequestForm form = new FtpDownloadRequestForm(fab, machine, categoryCode, categoryName);
 
         for(FileInfo file: fileList.getList()) {
+            if(file.getFilename().endsWith(".") || file.getFilename().endsWith("..")) {
+                continue;
+            }
+
             if(file.getType().equalsIgnoreCase("D")) {
                 SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
                 try {
