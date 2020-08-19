@@ -116,3 +116,40 @@ jacocoTestReport {
     }
 }
 */
+
+task distribution_build_all(dependsOn: [
+        'clean',
+        'bootWar',
+        ':fileservicecollect:bootWar',
+        ':fileservicemanage:bootWar',
+        ':logfilecollectcommand:jar'
+]) {
+    bootWar.mustRunAfter('clean')
+}
+
+task distribution_copyfiles(type:Copy, dependsOn: [
+        distribution_build_all
+]) {
+    from "build/libs/rssportal.war"
+    from "fileservicecollect/build/libs/fsc.war"
+    from "fileservicemanage/build/libs/fsm.war"
+    from "logfilecollectcommand/build/libs/ELogCollector.jar"
+    into "setup_RSS/data"
+}
+
+task distribution(type:Tar, dependsOn: [
+        distribution_copyfiles
+]) {
+    doFirst {
+        println "build tar.gz"
+    }
+    archiveFileName = "setup_RSS.tar.gz"
+    destinationDirectory = file(".")
+
+    from "./setup_RSS"
+}
+
+task release(dependsOn: [
+        distribution
+]) {
+}
