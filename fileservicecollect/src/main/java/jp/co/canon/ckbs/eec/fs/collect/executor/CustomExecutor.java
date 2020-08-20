@@ -13,7 +13,7 @@ public class CustomExecutor {
     ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
 
     public void execute(CommandLine cmdLine, CustomOutputStreamLineHandler streamLineHandler){
-        log.trace("execute command : {}", cmdLine.toString());
+        log.info("execute command : {}", cmdLine.toString());
         DefaultExecuteResultHandler resultHandler = new DefaultExecuteResultHandler();
         DefaultExecutor executor = new DefaultExecutor();
         executor.setWatchdog(watchdog);
