@@ -147,6 +147,7 @@ task distribution(type:Tar, dependsOn: [
     destinationDirectory = file(".")
 
     from "./setup_RSS"
+    into "setup_RSS"
 }
 
 task release(dependsOn: [
