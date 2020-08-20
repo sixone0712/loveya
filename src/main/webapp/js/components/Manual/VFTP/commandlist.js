@@ -11,7 +11,7 @@ import services from "../../../services";
 import * as API from "../../../api";
 import * as Define from "../../../define";
 
-const UNIQUE_COMMAND = "not use.";
+const UNIQUE_COMMAND = "none";
 const MAX_STRING_BYTES = 980;
 const regex = /(-)|(%s)/g;
 const modalType = { NEW: 1, EDIT: 2 };
@@ -45,11 +45,16 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
     const openEditModal = useCallback((id, value) => {
         setIsEditOpen(true);
         setActionId(id);
-        if ((value.match(/-/g) || []).length > 0) {
-            setCurrentDataType(value.slice(0, value.indexOf("-")));
-            setCurrentContext(value.slice(value.indexOf("-") + 1, value.length));
-        } else {
+
+        if (cmdType === Define.PLAN_TYPE_VFTP_COMPAT) {
             setCurrentContext(value);
+        } else {
+            if ((value.match(/-/g) || []).length > 0) {
+                setCurrentDataType(value.slice(0, value.indexOf("-")));
+                setCurrentContext(value.slice(value.indexOf("-") + 1, value.length));
+            } else {
+                setCurrentDataType(value);
+            }
         }
     }, []);
 
@@ -234,7 +239,7 @@ const RSScommandlist = ({ cmdType, dbCommand, commandActions }) => {
                                             type="radio"
                                             id={-1}
                                             name="notUse"
-                                            label="not use."
+                                            label="none"
                                             checked={selectCommand === -1}
                                             onChange={() => handleCommandChange(-1)}
                                         />

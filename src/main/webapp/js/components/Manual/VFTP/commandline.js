@@ -163,13 +163,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                     <div className="command-line">
                         Rapid Collector
                         { type === "compat/optional" ? "# get " : "# cd " }
-                        <Typewriter
-                            options={{
-                                strings: string,
-                                autoStart: true,
-                                delay: 20
-                            }}
-                        />
+                        { string }
                     </div>
                 </CardBody>
             </Card>

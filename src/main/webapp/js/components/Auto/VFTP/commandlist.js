@@ -11,7 +11,7 @@ import * as commandActions from "../../../modules/command";
 import * as Define from "../../../define";
 
 const modalType = { NEW: 1, EDIT: 2 };
-const UNIQUE_COMMAND = "not use.";
+const UNIQUE_COMMAND = "none";
 const MAX_STRING_BYTES = 980;
 
 const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {

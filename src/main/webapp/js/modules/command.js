@@ -122,7 +122,7 @@ const reducer = handleActions({
             {
                 index: -1,
                 id: -1,
-                cmd_name: "not use.",
+                cmd_name: "none",
                 cmd_type: "vftp_compat",
                 checked: checkedList.includes(-1)
             }
