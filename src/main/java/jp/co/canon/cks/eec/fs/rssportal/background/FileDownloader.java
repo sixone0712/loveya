@@ -176,6 +176,10 @@ public class FileDownloader extends Thread {
             try {
                 LogFileList logFileList = getConnector().getFtpFileList(tool, type, dateFormat.format(from.getTime()),
                         dateFormat.format(to.getTime()), "", dir);
+                if(logFileList.getErrorMessage()!=null) {
+                    log.error("createFtpDownloadFileList failed to get file-list err="+logFileList.getErrorMessage());
+                    return false;
+                }
                 for(FileInfo logFile:logFileList.getList()) {
                     String fileName = logFile.getFilename();
                     if(fileName==null || fileName.equals("") || fileName.endsWith(".") || fileName.endsWith("..")) {
