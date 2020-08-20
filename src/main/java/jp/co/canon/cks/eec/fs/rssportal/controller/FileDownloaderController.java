@@ -68,6 +68,11 @@ public class FileDownloaderController extends DownloadControllerCommon {
                         request.getKeyword(),
                         request.getDir());
 
+                if(fileInfo.getErrorMessage()!=null) {
+                    log.error("failed to get file-list  err="+fileInfo.getErrorMessage());
+                    return false;
+                }
+
                 for(FileInfo file: fileInfo.getList()) {
                     if(file.getType().equals("D")) {
                         // Search for files in a directory only when the directory date falls within the search date range
@@ -290,15 +295,25 @@ public class FileDownloaderController extends DownloadControllerCommon {
             String fileDate = (String) item.get("fileDate");
             boolean file = true; // (boolean) item.get("file"); // if an item doesn't contains 'file', it occurs NullPointException.
 
-            if(fabName!=null && machineName!=null && categoryCode!=null && categoryName!=null && fileName!=null && fileSize!=null && fileDate!=null) {
+            if(fabName!=null && machineName!=null && categoryCode!=null && categoryName!=null && fileName!=null &&
+                    fileSize!=null && fileDate!=null) {
+
                 if(file) {
                     addDownloadItem(map, fabName, machineName, categoryCode, categoryName, fileName, fileSize, fileDate);
                 } else {
                     try {
-                        fileDownloader.createFtpDownloadFileList(requestList, fabName, machineName, categoryCode, categoryName, null, null, fileName);
+                        if(!fileDownloader.createFtpDownloadFileList(requestList, fabName, machineName, categoryCode,
+                                categoryName, null, null, fileName)) {
+                            log.error("failed to create file-list");
+                            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+                            resBody.put("error", error.getRSSError());
+                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
+                        }
                     } catch (InterruptedException e) {
                         log.error("stopped creating download list");
-                        return null;
+                        error.setReason(RSSErrorReason.INTERNAL_ERROR);
+                        resBody.put("error", error.getRSSError());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
                     }
                 }
             } else {

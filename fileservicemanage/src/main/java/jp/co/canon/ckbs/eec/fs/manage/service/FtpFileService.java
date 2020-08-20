@@ -161,8 +161,10 @@ public class FtpFileService {
         if (errorCount > 0){
             if (response.getErrorCode() != null){
                 response.setErrorCode(response.getErrorCode() + ";Excution Exception");
+                response.setErrorMessage("errorCount("+errorCount+") is over 0.");
             } else {
                 response.setErrorCode("Execution Exception");
+                response.setErrorMessage("no request exists");
             }
         }
         return response;
