@@ -11,4 +11,7 @@ public class FtpDownloadRequestListResponse {
     @Getter @Setter
     String errorCode;
 
+    @Getter @Setter
+    String errorMessage;
+
 }
