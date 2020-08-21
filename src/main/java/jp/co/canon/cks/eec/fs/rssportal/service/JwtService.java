@@ -8,6 +8,7 @@ public interface JwtService {
     String getCurrentAccessToken();
     String getCurAccTokenUserName();
     int getCurAccTokenUserID();
+    String getCurAccTokenUserPermission();
     AccessToken decodeAccessToken(String jwt);
     RefreshToken decodeRefreshToken(String jwt);
     boolean isUsable(String jwt);

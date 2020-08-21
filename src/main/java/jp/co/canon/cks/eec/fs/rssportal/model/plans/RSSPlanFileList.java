@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 @ToString
 public class RSSPlanFileList {
     private int planId;
+    private String planName;
     private int fileId;
     private String created;
     private String status;

@@ -143,6 +143,26 @@ public class JwtServiceImpl implements JwtService{
     }
 
     @Override
+    public String getCurAccTokenUserPermission() {
+        String curAccessToken = getCurrentAccessToken();
+
+        if (curAccessToken == null || curAccessToken.isEmpty()) {
+            return null;
+        }
+
+        String claimsJws = curAccessToken.replace(TOKEN_PREFIX, "");
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .setSigningKey(this.generateKey())
+                    .parseClaimsJws(claimsJws);
+            return (String) claims.getBody().get("permission");
+        } catch (Exception e) {
+            log.error(e);
+            return null;
+        }
+    }
+
+    @Override
     public AccessToken decodeAccessToken(String jwt) {
         String claimsJws = jwt.replace(TOKEN_PREFIX, "");
         log.info("[decodeAccessToken]claimsJws: " + claimsJws);

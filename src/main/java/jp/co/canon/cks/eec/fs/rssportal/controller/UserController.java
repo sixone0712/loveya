@@ -3,6 +3,7 @@ package jp.co.canon.cks.eec.fs.rssportal.controller;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
 import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.users.RSSUserResponse;
+import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
 import jp.co.canon.cks.eec.fs.rssportal.service.UserService;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 import org.apache.commons.logging.Log;
@@ -25,12 +26,15 @@ import java.util.Map;
 public class UserController {
     private final HttpSession httpSession;
     private final UserService serviceUser;
+    private final JwtService jwtService;
     private final Log log = LogFactory.getLog(getClass());
+    public final String ADMIN_PERMISSION = "100";
 
     @Autowired
-    public UserController(HttpSession httpSession, UserService serviceUser) {
+    public UserController(HttpSession httpSession, UserService serviceUser, JwtService jwtService) {
         this.httpSession = httpSession;
         this.serviceUser = serviceUser;
+        this.jwtService = jwtService;
     }
 
     @PatchMapping("/{userID}/password")
@@ -214,6 +218,18 @@ public class UserController {
         log.info(String.format("[Get] %s", request.getServletPath()));
         Map<String, Object> resBody = new HashMap<>();
         RSSError error = new RSSError();
+
+        try {
+            if(!jwtService.getCurAccTokenUserPermission().equals(ADMIN_PERMISSION)) {
+                error.setReason(RSSErrorReason.INSUFFICIENT_PERMISSIONS);
+                resBody.put("error", error.getRSSError());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resBody);
+            }
+        } catch (Exception e) {
+            error.setReason(RSSErrorReason.NOT_FOUND);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resBody);
+        }
 
         List<UserVo> lists = serviceUser.getUserList();
         List<RSSUserResponse> userList = new ArrayList<RSSUserResponse>();

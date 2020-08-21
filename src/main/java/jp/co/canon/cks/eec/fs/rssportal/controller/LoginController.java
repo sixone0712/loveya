@@ -32,8 +32,8 @@ public class LoginController {
     @Value("${rssportal.jwt.autoRefresh}")
     private long autoRefresh;
 
-    private static final String TOKEN_PREFIX = "Bearer ";
-    private static final String HEADER_STRING = "Authorization";
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String HEADER_STRING = "Authorization";
     private final Log log = LogFactory.getLog(getClass());
 
     @Autowired
@@ -152,6 +152,7 @@ public class LoginController {
             if (jwtService.isUsable(accessToken)) {
                 AccessToken decodedAccess = jwtService.decodeAccessToken(accessToken);
                 serviceUser.setToken(accessToken.substring(TOKEN_PREFIX.length()), decodedAccess.getExp());
+                resBody.put("userName", decodedAccess.getUserName());
             }
             return ResponseEntity.status(HttpStatus.OK).body(resBody);
         } catch (Exception e) {
@@ -172,6 +173,12 @@ public class LoginController {
         String refreshToken = param.containsKey("refreshToken") ? (String) param.get("refreshToken") : null;
 
         if(refreshToken == null) {
+            error.setReason(RSSErrorReason.INVALID_REFRESH_TOKEN);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resBody);
+        }
+
+        if(serviceUser.getToken(refreshToken.replace(TOKEN_PREFIX, ""))) {
             error.setReason(RSSErrorReason.INVALID_REFRESH_TOKEN);
             resBody.put("error", error.getRSSError());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resBody);

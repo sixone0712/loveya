@@ -8,4 +8,5 @@ public class RSSErrorReason {
     public static final String DUPLICATE_USER = "duplicateUser";
     public static final String INVALID_REFRESH_TOKEN = "invalidRefreshToken";
     public static final String INVALID_ACCESS_TOKEN = "invalidAccessToken";
+    public static final String INSUFFICIENT_PERMISSIONS = "insufficientPermissions";
 }
