@@ -32,7 +32,7 @@ public class VFtpSssDownloadRequest extends FtpRequest {
         return fileInfoMap.values().toArray(new RequestFileInfo[0]);
     }
 
-    public void downloaded(String filename, long size){
+    public synchronized void downloaded(String filename, long size){
         RequestFileInfo info = fileInfoMap.get(filename);
         if (info != null){
             info.setSize(size);
