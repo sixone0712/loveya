@@ -11,6 +11,8 @@ export const PAGE_AUTO_STATUS = "/rss/page/auto/status";
 export const PAGE_AUTO_DOWNLOAD = "/rss/page/auto/download";
 export const PAGE_ADMIN_ACCOUNT = "/rss/page/admin/account";
 export const PAGE_ADMIN_DL_HISTORY = "/rss/page/admin/history";
+export const PAGE_DEFAULT = "/rss/page/default"
+export const PAGE_NEWORK_ERROR = "/rss/page/error";
 
 export const PAGE_REFRESH_MANUAL_FTP = PAGE_REFRESH + "?target=" + PAGE_MANUAL_FTP;
 export const PAGE_REFRESH_MANUAL_VFTP_COMPAT = PAGE_REFRESH + "?target=" + PAGE_MANUAL_VFTP_COMPAT;
@@ -20,6 +22,7 @@ export const PAGE_REFRESH_AUTO_PLAN_EDIT = PAGE_REFRESH + "?target=" + PAGE_AUTO
 export const PAGE_REFRESH_AUTO_STATUS = PAGE_REFRESH + "?target=" + PAGE_AUTO_STATUS;
 export const PAGE_REFRESH_ADMIN_ACCOUNT = PAGE_REFRESH + "?target=" + PAGE_ADMIN_ACCOUNT;
 export const PAGE_REFRESH_ADMIN_DL_HISTORY = PAGE_REFRESH + "?target=" + PAGE_ADMIN_DL_HISTORY;
+export const PAGE_REFRESH_DEFAULT = PAGE_REFRESH + "?target=" + PAGE_DEFAULT;
 
 export const REST_INFOS = "/rss/api/infos";
 export const REST_INFOS_GET_FABS =  REST_INFOS + "/fabs";

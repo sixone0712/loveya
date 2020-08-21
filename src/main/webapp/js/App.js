@@ -1,9 +1,6 @@
 import React, {Component} from "react";
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux';
-import * as viewListActions from './modules/viewList';
-import * as genreListActions from './modules/genreList';
-import * as searchListActions from './modules/searchList';
 import * as loginActions from './modules/login';
 import services from './services'
 import * as API from "./api";
@@ -18,6 +15,9 @@ import Login from "./components/User/Login";
 import MoveRefreshPage from "./components/Common/MoveRefreshPage";
 import {Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
+import NetworkError from "./components/Common/NetworkError";
+
+export let appHistory = null;
 
 class App extends Component {
 
@@ -27,19 +27,6 @@ class App extends Component {
 
     componentDidMount() {
         console.log("[App][componentDidMount]");
-        /*
-        const isLoggedInStorage = window.sessionStorage.getItem('isLoggedIn');
-        console.log("this.props.isLoggedIn", this.props.isLoggedIn);
-        console.log("isLoggedInStorage", isLoggedInStorage);
-
-        if(isLoggedInStorage === null || isLoggedInStorage === false) {
-            API.setLoginIsLoggedIn(this.props, false);
-            this.onMovePage(Define.PAGE_LOGIN);
-        } else {
-            API.setLoginIsLoggedIn(this.props, true);
-            this.onMovePage(Define.PAGE_MANUAL);
-        }
-        */
 
         const checkConnection = async () => {
           try {
@@ -52,7 +39,7 @@ class App extends Component {
                       await API.setLoginIsLoggedIn(this.props, true);
                       await API.setLoginUserName(this.props, userName);
                       await API.setLoginAuth(this.props, permission);
-                      this.onMovePage(Define.PAGE_MANUAL_FTP);
+                      this.onMovePage(Define.PAGE_REFRESH_DEFAULT);     // move to first initialized ftp manual page
                   } else {
                       this.onMovePage(Define.PAGE_LOGIN);
                   }
@@ -72,6 +59,7 @@ class App extends Component {
         console.log("[App][render]");
         console.log("[App][render]isLoggedIn", isLoggedIn);
         //console.log("[App][render]this.props.history", this.props.history);
+        appHistory = this.props.history;    // for the network error page
         return (
                 <>
                     {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}
@@ -84,7 +72,7 @@ class App extends Component {
                         <Route path={Define.PAGE_AUTO} component={Auto}/>
                         <Route path={Define.PAGE_ADMIN_ACCOUNT} component={AccountList} />
                         <Route path={Define.PAGE_ADMIN_DL_HISTORY} component={DlHistory} />
-                        {/*<Redirect to={Define.PAGE_MANUAL} component={Manual} />*/}
+                        <Route path={Define.PAGE_NEWORK_ERROR} component={NetworkError} />
 
                         {/* How to pass props */}
                         {/*
@@ -100,24 +88,10 @@ class App extends Component {
 
 export default connect(
     (state) => ({
-        equipmentList: state.viewList.get('equipmentList'),
-        toolInfoList: state.viewList.get('toolInfoList'),
-        logInfoList: state.viewList.get('logInfoList'),
-        genreList: state.genreList.get('genreList'),
-        genreCnt: state.genreList.get('genreCnt'),
-        requestList: state.searchList.get('requestList'),
-        responseList: state.searchList.get('responseList'),
-        startDate: state.searchList.get('startDate'),
-        endDate: state.searchList.get('endDate'),
-        logTypeSuccess: state.pender.success['viewList/VIEW_LOAD_TOOLINFO_LIST'],
-        toolInfoSuccess: state.pender.success['viewList/VIEW_LOAD_LOGTYPE_LIST'],
         loginInfo : state.login.get('loginInfo'),
     }),
     (dispatch) => ({
         // bindActionCreators automatically bind action functions.
-        viewListActions: bindActionCreators(viewListActions, dispatch),
-        genreListActions: bindActionCreators(genreListActions, dispatch),
-        searchListActions: bindActionCreators(searchListActions, dispatch),
         loginActions: bindActionCreators(loginActions, dispatch),
     })
 )(App);

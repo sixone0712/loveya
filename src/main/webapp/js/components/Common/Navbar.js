@@ -17,13 +17,12 @@ import {NavLink as RRNavLink} from "react-router-dom";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as loginActions from "../../modules/login";
-import * as viewListActions from "../../modules/viewList"
 import * as API from "../../api";
 import * as Define from "../../define";
 import LogOutModal from "../User/LogOut";
 import ChangePwModal from "../User/ChangePw";
 import AlertModal from "../Common/AlertModal";
-import axios from "axios";
+import services from "../../services"
 
 const PASSWORD_ALERT_MESSAGE = "Password change completed.";
 
@@ -108,7 +107,7 @@ class RSSNavbar extends Component{
   onLogout = async () => {
     await API.setLoginInit(this.props);
     try {
-      await axios.get(Define.REST_AUTHS_GET_LOGOUT);
+      await services.axiosAPI.requestGet(Define.REST_AUTHS_GET_LOGOUT);
     } catch (e) {
       console.error(e);
     }
@@ -126,7 +125,15 @@ class RSSNavbar extends Component{
           <PlanModal isOpen={isPlanOpen} btnAction={this.handlePageChange} closer={this.closeModal} />
           <div className="navbar-container">
             <Navbar color="dark" dark expand="md">
-              <NavbarBrand className="custom-brand">{"Rapid Collector"}</NavbarBrand>
+              <NavbarBrand
+                  tag={RRNavLink}
+                  to={Define.PAGE_REFRESH_DEFAULT}    // move to first initialized ftp manual page
+                  className="custom-brand"
+                  onClick={() => this.handlePageChange("Manual")}
+              >
+                {"Rapid Collector"}
+                {/*{`Rapid Collector ${process.env.RSS_VERSION}`}*/}
+              </NavbarBrand>
               {/*<NavbarBrand className="custom-brand">{`Rapid Collector ${process.env.RSS_VERSION}`}</NavbarBrand>*/}
             <Nav className="mr-auto" navbar>
               <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
@@ -271,6 +278,5 @@ export default connect(
     }),
     (dispatch) => ({
       loginActions: bindActionCreators(loginActions, dispatch),
-      viewListActions: bindActionCreators(viewListActions, dispatch),
     })
 )(RSSNavbar);

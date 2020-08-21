@@ -73,7 +73,8 @@ class Login extends Component {
             console.log("isLoggedIn", isLoggedIn);
             console.log("errCode", errCode);
             if (isLoggedIn) {
-                this.props.history.replace(Define.PAGE_MANUAL_FTP);
+                // move to first initialized ftp manual page
+                this.props.history.replace(Define.PAGE_REFRESH_DEFAULT);
             } else {
                 const msg = API.getErrorMsg(errCode);
                 if (msg.length > 0) {

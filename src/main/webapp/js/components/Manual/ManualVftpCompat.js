@@ -202,11 +202,14 @@ const ManualVftpCompat = (props) => {
         ready:"",
     }
 
+    // Move to MoveRefreshPage.js
+    /*
     useEffect(()=>{
         console.log("====ManualVftpCompat initialized=====");
         API.vftpCompatInitAll(props);
         console.log("=====================================");
         },[]);
+    */
 
     useEffect(()=>{
         console.log("==== ManualVftpCompat Command Update ====");

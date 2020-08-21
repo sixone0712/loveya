@@ -50,12 +50,12 @@ const ManualVftpSss = ({
         fromDate,
         toDate,
         toolInfoList,
-        commandActions,
-        sssActions,
-        viewListActions }) =>
+        sssActions }) =>
 {
     const commandList = API.vftpConvertDBCommand(dbCommandList.toJS());
 
+    // Move to MoveRefreshPage.js
+    /*
     useEffect(()=>{
         const init = async () => {
             await viewListActions.viewCheckAllToolList(false);
@@ -65,8 +65,9 @@ const ManualVftpSss = ({
         }
         init().then(r => r).catch(e => console.log(e));
     },[]);
+    */
 
-    useEffect(()=>{
+    useEffect(() => {
         const setCommand = async () => {
             const selectCmd = commandList.find(item => item.checked && item.cmd_type === "vftp_sss");
             const convCmd = convertCommand(selectCmd === undefined ? "" : selectCmd.cmd_name, fromDate, toDate);
@@ -158,8 +159,6 @@ export default connect(
         toolInfoList: state.viewList.get('toolInfoList'),
     }),
     (dispatch) => ({
-        commandActions: bindActionCreators(commandActions, dispatch),
         sssActions: bindActionCreators(sssActions, dispatch),
-        viewListActions: bindActionCreators(viewListActions, dispatch),
     })
 )(ManualVftpSss);

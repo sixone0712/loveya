@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as Define from "../define";
+import { appHistory } from "../../js/App";
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -24,6 +25,26 @@ axios.interceptors.response.use(
     },
     function (error) {
         console.log("[axios.interceptors.response.use] error", error);
+        console.log("[axios.interceptors.response.use] error.response", error.response);
+
+        // If an internal service error occurs, go to the network error page.
+        if(error.response === undefined || error.response.status === Define.INTERNAL_SERVER_ERROR) {
+            appHistory.replace(Define.PAGE_NEWORK_ERROR);
+            /*
+            const serverError = {
+                response: {
+                    status: Define.INTERNAL_SERVER_ERROR,
+                    data: {
+                        error: {
+                            reason: "internalError"
+                        }
+                    }
+                }
+            }
+            return Promise.reject(serverError);
+            */
+        }
+
         const originalRequest = error.config;
         if (error.response.status === Define.UNAUTHORIZED && originalRequest.url === '/rss/api/auths/token') {
             console.log("[axios.interceptors.response.use] case 1");
