@@ -4,6 +4,7 @@ import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.FileServiceCollectException;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.ConfigurationService;
 import jp.co.canon.ckbs.eec.fs.collect.service.configuration.FtpServerInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+@Slf4j
 @Component
 public class VFtpListService {
     @Value("${fileservice.configDirectory}")
@@ -90,9 +92,11 @@ public class VFtpListService {
     public VFtpSssListRequest addListRequest(VFtpSssListRequest request) throws FileServiceCollectException {
         FtpServerInfo ftpServerInfo = configurationService.getFtpServerInfo(request.getMachine());
         if (ftpServerInfo == null){
+            log.error("Parameter machine is not valid ({})", request.getMachine());
             throw new FileServiceCollectException(400, "Parameter(machine) is not valid.");
         }
         if (isValidDirectory(request.getDirectory()) == false){
+            log.error("Parameter directory is not valid ({})", request.getDirectory());
             throw new FileServiceCollectException(400, "Parameter(directory) is not valid");
         }
 
