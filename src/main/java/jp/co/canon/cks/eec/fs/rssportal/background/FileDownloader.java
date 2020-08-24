@@ -28,7 +28,6 @@ public class FileDownloader extends Thread {
     private static final String STS_ERROR = "error";
     private static final String STS_DONE = "done";
 
-    private final DownloadMonitor monitor;
     private final FileServiceManageConnectorFactory connectorFactory;
     private final HashMap<String, FileDownloadExecutor> executorList;
     private FileServiceManageConnector connector;
@@ -52,9 +51,8 @@ public class FileDownloader extends Thread {
     private String fileServiceAddress;
 
     @Autowired
-    private FileDownloader(DownloadMonitor monitor, FileServiceManageConnectorFactory connectorFactory) {
+    private FileDownloader(FileServiceManageConnectorFactory connectorFactory) {
         log.info("initialize FileDownloader");
-        this.monitor = monitor;
         this.connectorFactory = connectorFactory;
         executorList = new HashMap<>();
     }
@@ -63,7 +61,6 @@ public class FileDownloader extends Thread {
         log.info("addRequest( request-size="+dlList.size()+")");
 
         FileDownloadExecutor executor = new FileDownloadExecutor(collectType.name(),"", this, dlList, true);
-        executor.setMonitor(monitor);
         executor.setAttrDownloadFilesViaMultiSessions(true);
         executorList.put(executor.getId(), executor);
         executor.start();

@@ -133,12 +133,13 @@
 
     <update id="updateInfo" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
-             stop = #{stop},
+            stop = #{stop},
           <if test="lastStatus!=null">
-             laststatus = #{lastStatus},
+            laststatus = #{lastStatus},
           </if>
-             tslastcollect = #{lastCollect},
-             tsnext = #{nextAction}
+            tslastcollect = #{lastCollect},
+            tsnext = #{nextAction},
+            tslastpoint = #{lastPoint}
         where id = #{id}
     </update>
 
