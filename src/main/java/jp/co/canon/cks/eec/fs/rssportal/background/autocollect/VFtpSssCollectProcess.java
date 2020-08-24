@@ -66,14 +66,21 @@ public class VFtpSssCollectProcess extends CollectProcess {
         printInfo("start=" + startTime + " end=" + endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
+        loop_top:
         for (int i = 0; i < machines.length; ++i) {
             for (String directory : directories) {
                 String _directory = String.format(directory, startTime, endTime);
                 VFtpSssListRequestResponse response = connector.createVFtpSssListRequest(machines[i], _directory);
                 if (response == null || response.getErrorMessage() != null || response.getRequest() == null) {
-                    throw new CollectException(plan, "failed to get file-list");
+                    printError("failed to get file-list machine="+machines[i]+" dir="+_directory);
+                    continue loop_top;
                 }
-                response = waitListRequestDone(machines[i], response.getRequest().getRequestNo());
+                try {
+                    response = waitListRequestDone(machines[i], response.getRequest().getRequestNo());
+                } catch (CollectMpaException e) {
+                    printError("machine "+e.getMachine()+"msg="+e.getMessage());
+                    continue loop_top;
+                }
                 VFtpFileInfo[] files = response.getRequest().getFileList();
                 if (files.length > 0) {
                     VFtpSssDownloadRequestForm form = new VFtpSssDownloadRequestForm(fabs[i], machines[i], _directory);
@@ -89,7 +96,7 @@ public class VFtpSssCollectProcess extends CollectProcess {
         lastPointMillis = endMillis;
     }
 
-    private VFtpSssListRequestResponse waitListRequestDone(String machine, String requestNo) throws CollectException, InterruptedException {
+    private VFtpSssListRequestResponse waitListRequestDone(String machine, String requestNo) throws CollectMpaException, InterruptedException {
         final long timeout = 10000;
         long start = System.currentTimeMillis();
         while (true) {
@@ -104,7 +111,7 @@ public class VFtpSssCollectProcess extends CollectProcess {
             }
             Thread.sleep(100);
         }
-        throw new CollectException(plan, "failed to create file-list");
+        throw new CollectMpaException(machine, "failed to create file-list");
     }
 
     @Override
