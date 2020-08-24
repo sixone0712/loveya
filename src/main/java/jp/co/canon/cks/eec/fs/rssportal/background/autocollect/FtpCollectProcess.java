@@ -92,6 +92,17 @@ public class FtpCollectProcess extends CollectProcess {
         return new Timestamp(currentMillis);
     }
 
+    @Override
+    protected Timestamp getNextPlan() {
+        long interval;
+        if (plan.getCollectionType() == 1 /*COLLECTTYPE_CYCLE*/) {
+            interval = plan.getInterval();
+        } else {
+            interval = 60000; /*CONTINUOUS_DEFAULT_INTERVAL*/
+        }
+        return new Timestamp(plan.getLastCollect().getTime() + interval);
+    }
+
     private void getFileList(List<DownloadRequestForm> list, String machine, String fab, String categoryCode,
                              String categoryName, String start, String end, String keyword, String path)
             throws CollectMpaException, InterruptedException {

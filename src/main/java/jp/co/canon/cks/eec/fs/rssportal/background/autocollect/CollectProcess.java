@@ -65,6 +65,7 @@ public abstract class CollectProcess implements Runnable {
      */
     abstract protected void createDownloadFileList() throws CollectException, InterruptedException;
     abstract protected Timestamp getLastPoint();
+    abstract protected Timestamp getNextPlan();
 
     public CollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader,
                           Log log ) {
@@ -332,13 +333,7 @@ public abstract class CollectProcess implements Runnable {
                 setStatus(PlanStatus.completed);
                 planning = null;
             } else {
-                long interval;
-                if (plan.getCollectionType() == 1 /*COLLECTTYPE_CYCLE*/) {
-                    interval = plan.getInterval();
-                } else {
-                    interval = 60000; /*CONTINUOUS_DEFAULT_INTERVAL*/
-                }
-                planning = new Timestamp(lastCollectedTime.getTime() + interval);
+                planning = getNextPlan();
             }
         }
         if(planning!=null) {
@@ -435,8 +430,26 @@ public abstract class CollectProcess implements Runnable {
         return false;
     }
 
-    private Timestamp getTimestamp() {
+    protected Timestamp getTimestamp() {
         return new Timestamp(System.currentTimeMillis());
+    }
+
+    protected long getMidnightMillis(long millis) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE),0, 0, 0);
+        return cal.getTimeInMillis();
+    }
+
+    protected boolean isSameDay(long a, long b) {
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        c1.setTimeInMillis(a);
+        c2.setTimeInMillis(b);
+        if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR) && c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH) &&
+                c1.get(Calendar.DATE)==c2.get(Calendar.DATE))
+            return true;
+        return false;
     }
 
     private void clearLogFiles() {
@@ -464,14 +477,14 @@ public abstract class CollectProcess implements Runnable {
         }
     }
 
-    private void printInfo(String str) {
+    protected void printInfo(String str) {
         if(log!=null) {
             String formed = String.format("[%s] %s", planName, str);
             log.info(formed);
         }
     }
 
-    private void printError(String str) {
+    protected void printError(String str) {
         if(log!=null) {
             String formed = String.format("[%s] %s", planName, str);
             log.error(formed);
@@ -481,6 +494,7 @@ public abstract class CollectProcess implements Runnable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("");
+        sb.append(String.format("[%s] ", plan.getPlanType()));
         sb.append(plan.getPlanName()).append(" : ");
         sb.append(plan.getLastStatus()).append(" : ");
         sb.append(plan.getNextAction());

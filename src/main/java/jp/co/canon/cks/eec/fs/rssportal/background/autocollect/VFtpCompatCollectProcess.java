@@ -22,7 +22,7 @@ public class VFtpCompatCollectProcess extends CollectProcess {
             PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader, Log log) {
         super(manager, plan, dao, downloader, log);
         if(!plan.getPlanType().equalsIgnoreCase("vftp_compat")) {
-            log.error("invalid planType "+plan.getPlanType());
+            printError("invalid planType "+plan.getPlanType());
         }
     }
 
@@ -63,7 +63,7 @@ public class VFtpCompatCollectProcess extends CollectProcess {
 
         startTime = Tool.getVFtpTimeFormat(startTs);
         endTime = Tool.getVFtpTimeFormat(new Timestamp(endMillis));
-        log.info("[vftp-compat] start="+startTime+" end="+endTime);
+        printInfo("start="+startTime+" end="+endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.length; ++i) {
@@ -88,6 +88,20 @@ public class VFtpCompatCollectProcess extends CollectProcess {
             return new Timestamp(lastPointMillis);
         }
         return null;
+    }
+
+    @Override
+    protected Timestamp getNextPlan() {
+        long todayMillis = getMidnightMillis(System.currentTimeMillis());
+        long lastMillis = getMidnightMillis(plan.getLastPoint().getTime());
+
+        if(isSameDay(todayMillis, lastMillis)) {
+            Calendar next = Calendar.getInstance();
+            next.setTimeInMillis(todayMillis);
+            next.add(Calendar.DATE, 1);
+            return new Timestamp(next.getTimeInMillis());
+        }
+        return new Timestamp(System.currentTimeMillis());
     }
 
     private void __checkPlanType() throws CollectException {
