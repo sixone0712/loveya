@@ -31,7 +31,6 @@ public class VFtpSssCollectProcess extends CollectProcess {
     protected void createDownloadFileList() throws CollectException, InterruptedException {
         __checkPlanType();
 
-        final long aDayMillis = 24*60*60000;
         String[] machines = plan.getTool().split(",");
         String[] fabs = plan.getFab().split(",");
         String[] directories = plan.getDirectory().split(",");
@@ -60,13 +59,12 @@ public class VFtpSssCollectProcess extends CollectProcess {
         }
 
         if(endMillis>currentMillis) {
-            log.info("------ one per a day ------");
             throw new CollectException(plan, false);
         }
 
         startTime = Tool.getVFtpTimeFormat(startTs);
         endTime = Tool.getVFtpTimeFormat(new Timestamp(endMillis));
-        log.info("---- start : "+startTime+" end : "+endTime);
+        log.info("[vftp-sss] start="+startTime+" end="+endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.length; ++i) {

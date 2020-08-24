@@ -11,9 +11,12 @@ import org.apache.commons.logging.Log;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class VFtpCompatCollectProcess extends CollectProcess {
+
+    private long lastPointMillis;
 
     public VFtpCompatCollectProcess(
             PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader, Log log) {
@@ -33,19 +36,34 @@ public class VFtpCompatCollectProcess extends CollectProcess {
         if(machines.length==0 || machines.length!=fabs.length)
             throw new CollectException(plan, "parameter exception");
 
-        SimpleDateFormat dateFormat = Tool.getVFtpSimpleDateFormat();
+        lastPointMillis = 0;
         String startTime, endTime;
+        Timestamp startTs;
+        long endMillis;
+
         if(plan.getLastPoint()==null) {
-            startTime = Tool.getVFtpTimeFormat(plan.getStart());
+            startTs = plan.getStart();
         } else {
-            startTime = Tool.getVFtpTimeFormat(plan.getLastPoint());
+            startTs = plan.getLastPoint();
         }
 
-        if(currentMillis>plan.getEnd().getTime()) {
-            endTime = Tool.getVFtpTimeFormat(plan.getEnd());
-        } else {
-            endTime = dateFormat.format(currentMillis);
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTimeInMillis(startTs.getTime()+aDayMillis);
+        endCal.set(endCal.get(Calendar.YEAR), endCal.get(Calendar.MONTH), endCal.get(Calendar.DATE),
+                0, 0, 0);
+
+        endMillis = endCal.getTimeInMillis();
+        if(endMillis>plan.getEnd().getTime()) {
+            endMillis = plan.getEnd().getTime();
         }
+
+        if(endMillis>currentMillis) {
+            throw new CollectException(plan, false);
+        }
+
+        startTime = Tool.getVFtpTimeFormat(startTs);
+        endTime = Tool.getVFtpTimeFormat(new Timestamp(endMillis));
+        log.info("[vftp-compat] start="+startTime+" end="+endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
         for(int i=0; i<machines.length; ++i) {
@@ -61,10 +79,14 @@ public class VFtpCompatCollectProcess extends CollectProcess {
         }
         requestList = list;
         requestFiles = list.size();
+        lastPointMillis = endMillis;
     }
 
     @Override
     protected Timestamp getLastPoint() {
+        if(lastPointMillis!=0) {
+            return new Timestamp(lastPointMillis);
+        }
         return null;
     }
 

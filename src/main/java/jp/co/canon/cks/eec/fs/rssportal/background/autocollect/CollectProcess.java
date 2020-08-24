@@ -24,6 +24,8 @@ import java.util.List;
 
 public abstract class CollectProcess implements Runnable {
 
+    protected final long aDayMillis = 24*60*60000;
+
     @Getter
     protected CollectPlanVo plan;
 
@@ -194,7 +196,7 @@ public abstract class CollectProcess implements Runnable {
             plan.setLastCollect(getTimestamp());
             Timestamp lastPoint = getLastPoint();
             if(lastPoint!=null) {
-                plan.setLastPoint(getLastPoint());
+                plan.setLastPoint(lastPoint);
             }
 
         } catch (CollectException e) {
@@ -206,7 +208,7 @@ public abstract class CollectProcess implements Runnable {
                 plan.setLastCollect(getTimestamp());
                 Timestamp lastPoint = getLastPoint();
                 if(lastPoint!=null) {
-                    plan.setLastPoint(getLastPoint());
+                    plan.setLastPoint(lastPoint);
                 }
             }
         }
