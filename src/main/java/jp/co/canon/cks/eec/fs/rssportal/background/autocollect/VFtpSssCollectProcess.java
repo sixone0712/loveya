@@ -53,10 +53,10 @@ public class VFtpSssCollectProcess extends CollectProcess {
             for(String directory: directories) {
                 String _directory = String.format(directory, startTime, endTime);
                 VFtpSssListRequestResponse response = connector.createVFtpSssListRequest(machines[i], _directory);
-                if(response==null || response.getErrorMessage()!=null || response.getRequest()==null ||
-                        response.getRequest().getFileList()==null) {
+                if(response==null || response.getErrorMessage()!=null || response.getRequest()==null) {
                     throw new CollectException(plan, "failed to get file-list");
                 }
+                response = waitListRequestDone(machines[i], response.getRequest().getRequestNo());
                 VFtpFileInfo[] files = response.getRequest().getFileList();
                 if(files.length>0) {
                     VFtpSssDownloadRequestForm form = new VFtpSssDownloadRequestForm(fabs[i], machines[i], _directory);
@@ -69,6 +69,24 @@ public class VFtpSssCollectProcess extends CollectProcess {
         }
         requestList = list;
         requestFiles = list.size();
+    }
+
+    private VFtpSssListRequestResponse waitListRequestDone(String machine, String requestNo) throws CollectException, InterruptedException {
+        final long timeout = 10000;
+        long start = System.currentTimeMillis();
+        while(true) {
+            VFtpSssListRequestResponse resp = connector.getVFtpSssListRequest(machine, requestNo);
+            if(resp==null || resp.getErrorMessage()!=null || resp.getRequest()==null) {
+                break;
+            } else if (resp.getRequest().getFileList()!=null) {
+                return resp;
+            } else if((System.currentTimeMillis()-start)>timeout) {
+                log.error("create list timeout");
+                break;
+            }
+            Thread.sleep(100);
+        }
+        throw new CollectException(plan, "failed to create file-list");
     }
 
     @Override
@@ -86,4 +104,6 @@ public class VFtpSssCollectProcess extends CollectProcess {
             throw new CollectException(plan, "wrong plan type");
         }
     }
+
+
 }
