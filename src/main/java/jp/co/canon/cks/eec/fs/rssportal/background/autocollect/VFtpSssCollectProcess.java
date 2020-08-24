@@ -52,6 +52,10 @@ public class VFtpSssCollectProcess extends CollectProcess {
             for(String directory: directories) {
                 String _directory = String.format(directory, startTime, endTime);
                 VFtpSssListRequestResponse response = connector.createVFtpSssListRequest(machines[i], _directory);
+                if(response==null || response.getErrorMessage()!=null || response.getRequest()==null ||
+                        response.getRequest().getFileList()==null) {
+                    throw new CollectException(plan, "failed to get file-list");
+                }
                 VFtpFileInfo[] files = response.getRequest().getFileList();
                 if(files.length>0) {
                     VFtpSssDownloadRequestForm form = new VFtpSssDownloadRequestForm(fabs[i], machines[i], _directory);
