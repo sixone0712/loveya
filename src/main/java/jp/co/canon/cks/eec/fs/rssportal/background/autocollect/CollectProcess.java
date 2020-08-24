@@ -103,8 +103,6 @@ public abstract class CollectProcess implements Runnable {
         notifyJobDone.run();
     }
 
-
-
     private void _listFiles() throws CollectException {
         printInfo("listFiles");
         String status = plan.getLastStatus();

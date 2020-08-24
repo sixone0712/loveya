@@ -1,8 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
-import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.Defines.RSSErrorReason;
-import jp.co.canon.cks.eec.fs.rssportal.background.CollectPlanner;
 import jp.co.canon.cks.eec.fs.rssportal.background.CollectType;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListService;
 import jp.co.canon.cks.eec.fs.rssportal.downloadlist.DownloadListVo;
@@ -10,7 +8,6 @@ import jp.co.canon.cks.eec.fs.rssportal.model.error.RSSError;
 import jp.co.canon.cks.eec.fs.rssportal.model.plans.RSSPlanCollectionPlan;
 import jp.co.canon.cks.eec.fs.rssportal.service.CollectPlanService;
 import jp.co.canon.cks.eec.fs.rssportal.service.JwtService;
-import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
