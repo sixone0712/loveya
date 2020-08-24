@@ -16,7 +16,7 @@ public class VFtpCompatDownloadRequest extends FtpRequest {
     @Getter @Setter
     String archiveFilePath;
 
-    public void downloaded(String filename, long size){
+    public synchronized void downloaded(String filename, long size){
         if (file.getName().equals(filename)){
             file.setSize(size);
             file.setDownloaded(true);

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class RequestFileInfo {
-    @Getter @Setter
+    @Getter
     String name;
 
     @Getter @Setter
@@ -23,6 +23,10 @@ public class RequestFileInfo {
     }
 
     public RequestFileInfo(String name){
+        this.setName(name);
+    }
+
+    public void setName(String name){
         this.name = name;
         netName = this.name;
 
