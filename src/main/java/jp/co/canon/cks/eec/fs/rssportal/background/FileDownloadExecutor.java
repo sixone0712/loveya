@@ -298,7 +298,6 @@ public class FileDownloadExecutor {
     public void start() {
         log.info("file download start ("+ downloadForms.size()+")");
         printExecutorInfo();
-//        (new Thread(runner)).start();
         (new Thread(new DownloadRunner(log))).start();
     }
 

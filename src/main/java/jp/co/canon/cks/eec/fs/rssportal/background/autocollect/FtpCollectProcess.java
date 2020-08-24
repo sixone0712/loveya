@@ -10,6 +10,7 @@ import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -84,6 +85,16 @@ public class FtpCollectProcess extends CollectProcess {
         }
         requestList = list;
         requestFiles = files;
+    }
+
+    @Override
+    protected void scheduleNext() {
+
+    }
+
+    @Override
+    protected Timestamp getLastPoint() {
+        return null;
     }
 
     private void getFileList(List<DownloadRequestForm> list, String machine, String fab, String categoryCode,

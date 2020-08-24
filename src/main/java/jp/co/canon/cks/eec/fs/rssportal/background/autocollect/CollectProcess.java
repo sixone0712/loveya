@@ -62,6 +62,8 @@ public abstract class CollectProcess implements Runnable {
      * @throws InterruptedException     When the manager(parent) asks stop operation.
      */
     abstract protected void createDownloadFileList() throws CollectException, InterruptedException;
+    abstract protected void scheduleNext();
+    abstract protected Timestamp getLastPoint();
 
     public CollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader,
                           Log log ) {
@@ -406,63 +408,6 @@ public abstract class CollectProcess implements Runnable {
         }
         log.info("compress done ("+zipName+")");
         return zipPath.toString();
-    }
-
-    private List<DownloadRequestForm> createDownloadListDeprecated(CollectPlanVo plan) throws InterruptedException {
-        List<DownloadRequestForm> downloadList = new ArrayList<>();
-        String[] tools = plan.getTool().split(",");
-        String[] types = plan.getLogType().split(",");
-        String[] typeStrs = plan.getLogTypeStr().split(",");
-        long lastTime = plan.getLastPoint().getTime();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        log.info("createDownloadList: tools="+tools.length+" types="+types.length+" lastPoint="+dateFormat.format(lastTime));
-
-        Calendar from = Calendar.getInstance();
-        from.setTimeInMillis(lastTime+1000);
-        Calendar to = Calendar.getInstance();
-        if(plan.getEnd().before(new Timestamp(System.currentTimeMillis()))) {
-            to.setTimeInMillis(plan.getEnd().getTime());
-        } else {
-            to.setTimeInMillis(System.currentTimeMillis());
-        }
-
-        boolean updateLastPoint = true;
-        for(String tool: tools) {
-            tool = tool.trim();
-            for(int i=0; i<types.length; ++i) {
-                boolean ret = downloader.createFtpDownloadFileList(downloadList, "undefined", tool, types[i].trim(),
-                        typeStrs[i].trim(), from, to, "");
-                if(ret==false) {
-                    // That form is null means that a timeout has occurred on createFileList.
-                    printError("cannot create download filelist for "+tool+"/"+types[i]);
-                    updateLastPoint = false;
-                    // There is only 1 last-point for a plan.
-                    // it means if createFileList error occurred,
-                    // updating last-point is possible to causes some omission logs for a tool which has an error.
-                    // That's why it doesn't update a last-point at this point.
-                }
-                Thread.sleep(1);
-            }
-        }
-        int totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
-        if(updateLastPoint) {
-            for(DownloadRequestForm f: downloadList) {
-                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
-                for(FileInfo file: form.getFiles()) {
-                    if (expectedLastPoint < file.getMilliTime())
-                        expectedLastPoint = file.getMilliTime();
-                }
-            }
-        } else {
-            expectedLastPoint = plan.getLastPoint().getTime();
-        }
-
-        printInfo(String.format("totalFiles=%d (%s~%s) lastPoint=%s",
-                totalFiles,
-                new Timestamp(from.getTimeInMillis()).toString(),
-                new Timestamp(to.getTimeInMillis()).toString(),
-                dateFormat.format(expectedLastPoint)));
-        return downloadList;
     }
 
     private boolean isChangeable() {

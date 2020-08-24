@@ -10,6 +10,7 @@ import jp.co.canon.cks.eec.fs.rssportal.dao.CollectionPlanDao;
 import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,16 @@ public class VFtpSssCollectProcess extends CollectProcess {
         }
         requestList = list;
         requestFiles = list.size();
+    }
+
+    @Override
+    protected void scheduleNext() {
+
+    }
+
+    @Override
+    protected Timestamp getLastPoint() {
+        return null;
     }
 
     private void __checkPlanType() throws CollectException {
