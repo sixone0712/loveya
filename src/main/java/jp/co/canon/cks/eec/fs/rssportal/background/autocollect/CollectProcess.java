@@ -62,7 +62,6 @@ public abstract class CollectProcess implements Runnable {
      * @throws InterruptedException     When the manager(parent) asks stop operation.
      */
     abstract protected void createDownloadFileList() throws CollectException, InterruptedException;
-    abstract protected void scheduleNext();
     abstract protected Timestamp getLastPoint();
 
     public CollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader,
@@ -193,6 +192,11 @@ public abstract class CollectProcess implements Runnable {
             printInfo("all pipe finished");
             setStatus(PlanStatus.collected);
             plan.setLastCollect(getTimestamp());
+            Timestamp lastPoint = getLastPoint();
+            if(lastPoint!=null) {
+                plan.setLastPoint(getLastPoint());
+            }
+
         } catch (CollectException e) {
             if(e.isError()) {
                 printError(e.getMessage());
@@ -200,6 +204,10 @@ public abstract class CollectProcess implements Runnable {
             } else {
                 setStatus(PlanStatus.collected);
                 plan.setLastCollect(getTimestamp());
+                Timestamp lastPoint = getLastPoint();
+                if(lastPoint!=null) {
+                    plan.setLastPoint(getLastPoint());
+                }
             }
         }
         if(stop) {

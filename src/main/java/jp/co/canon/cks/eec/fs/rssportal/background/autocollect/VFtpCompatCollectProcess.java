@@ -64,11 +64,6 @@ public class VFtpCompatCollectProcess extends CollectProcess {
     }
 
     @Override
-    protected void scheduleNext() {
-
-    }
-
-    @Override
     protected Timestamp getLastPoint() {
         return null;
     }

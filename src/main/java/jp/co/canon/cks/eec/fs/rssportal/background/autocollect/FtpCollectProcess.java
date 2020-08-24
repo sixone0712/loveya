@@ -88,13 +88,8 @@ public class FtpCollectProcess extends CollectProcess {
     }
 
     @Override
-    protected void scheduleNext() {
-
-    }
-
-    @Override
     protected Timestamp getLastPoint() {
-        return null;
+        return new Timestamp(currentMillis);
     }
 
     private void getFileList(List<DownloadRequestForm> list, String machine, String fab, String categoryCode,
