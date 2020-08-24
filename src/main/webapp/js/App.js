@@ -17,8 +17,6 @@ import {Route, Switch} from 'react-router-dom';
 import * as Define from "./define";
 import NetworkError from "./components/Common/NetworkError";
 
-export let appHistory = null;
-
 class App extends Component {
 
     onMovePage = (url) => {
@@ -59,7 +57,8 @@ class App extends Component {
         console.log("[App][render]");
         console.log("[App][render]isLoggedIn", isLoggedIn);
         //console.log("[App][render]this.props.history", this.props.history);
-        appHistory = this.props.history;    // for the network error page
+        window.appHistory = this.props.history;   // for the network error page
+
         return (
                 <>
                     {isLoggedIn && <Navbar onMovePage={this.onMovePage}/>}

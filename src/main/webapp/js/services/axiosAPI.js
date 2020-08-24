@@ -1,6 +1,5 @@
 import axios from 'axios';
 import * as Define from "../define";
-import { appHistory } from "../../js/App";
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -29,7 +28,7 @@ axios.interceptors.response.use(
 
         // If an internal service error occurs, go to the network error page.
         if(error.response === undefined || error.response.status === Define.INTERNAL_SERVER_ERROR) {
-            appHistory.replace(Define.PAGE_NEWORK_ERROR);
+            window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
             /*
             const serverError = {
                 response: {

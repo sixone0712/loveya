@@ -1,17 +1,6 @@
 import services from "../services";
 import * as Define from "../define";
 
-import axios from "axios";
-import * as CompatActions from "../modules/vftpCompat";
-import * as viewListActions from "../modules/viewList";
-import * as commandActions from "../modules/command";
-
-//vftp
-export const getRequestList = (props) => {
-    const { requestList } = props;
-    return requestList.toJS();
-};
-
 export const vftpCompatInitAll = (props) => {
     const {CompatActions, commandActions, viewListActions} = props;
     viewListActions.viewCheckAllToolList(false);
@@ -72,86 +61,6 @@ export const startVftpCompatDownload = async (props) => {
         console.error(error);
         return "";
     }
-};
-
-
-
-export const requestDownload = async (props) => {
-    const { responseList } = props;
-    const responseListJS = responseList.toJS();
-
-    const downloadList = responseListJS.reduce((acc, cur, idx) => {
-        if (cur.checked) acc.push({
-            fabName: cur.structId,
-            machineName: cur.targetName,
-            categoryName: cur.logName,
-            fileName: cur.fileName,
-            fileSize: cur.fileSize,
-            fileDate: cur.fileDate,
-            file: cur.file,
-        });
-        return acc;
-    }, []);
-
-    //console.log("downloadList", downloadList);
-
-    const requestList = {
-        lists: downloadList
-    }
-    //console.log("requestList", requestList);
-
-
-};
-
-
-export const convertDateFormat = (date) => {
-    if(date == "" || date == null) return "0000/00/00 00:00:00";
-
-    const year = date.substr(0,4);
-    const month = date.substr(4,2);
-    const day = date.substr(6,2);
-    const hour = date.substr(8,2);
-    const min = date.substr(10,2);
-    const sec = date.substr(12,2);
-
-    return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
-};
-
-export const setRowsPerPage = (props, page) => {
-    const { searchListActions } = props;
-    searchListActions.searchSetResponsePerPage(page);
-};
-
-export const bytesToSize = (bytes) => {
-    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes == 0) return 'n/a';
-    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    if (i == 0) return bytes + ' ' + sizes[i];
-    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-};
-
-
-export const setDownload = (props) => {
-    const { responseList } = props;
-    const responseListJS = responseList.toJS();
-    //console.log("responseListJS", responseListJS);
-
-    const downloadList = responseListJS.reduce((acc, cur, idx) => {
-        if (cur.checked) acc.push({
-            structId: cur.structId,
-            machine: cur.targetName,
-            category: cur.logId,
-            file: cur.fileName,
-            filesize: String(cur.fileSize),
-            date: cur.fileDate,
-        });
-        return acc;
-    }, []);
-
-    const jsonList = new Object();
-    jsonList.list = downloadList;
-
-    return jsonList;
 };
 
 export const setVftpComaptWatchDlStatus = (requestId, modalFunc) => {
