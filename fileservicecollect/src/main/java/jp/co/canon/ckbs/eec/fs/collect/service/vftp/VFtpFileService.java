@@ -29,7 +29,7 @@ public class VFtpFileService {
     public VFtpSssListRequest getSssListRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpSssListRequest request = listService.getListRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request not found");
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }
@@ -57,7 +57,7 @@ public class VFtpFileService {
     public VFtpSssDownloadRequest getSssDownloadRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpSssDownloadRequest request = downloadService.getSssDownloadRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request is not found.");
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }
@@ -80,7 +80,7 @@ public class VFtpFileService {
     public VFtpCompatDownloadRequest getCompatDownloadRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpCompatDownloadRequest request = downloadService.getCompatDownloadRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request is not found");
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }
