@@ -5,12 +5,14 @@ import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.collect.model.VFtpSssListRequest;
 import jp.co.canon.ckbs.eec.fs.collect.service.FileServiceCollectException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class VFtpFileService {
     @Autowired
@@ -29,7 +31,8 @@ public class VFtpFileService {
     public VFtpSssListRequest getSssListRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpSssListRequest request = listService.getListRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request not found");
+            log.error("request is not found ({}, {})", machine, requestNo);
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }
@@ -57,7 +60,8 @@ public class VFtpFileService {
     public VFtpSssDownloadRequest getSssDownloadRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpSssDownloadRequest request = downloadService.getSssDownloadRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request is not found.");
+            log.error("request is not found ({}, {})", machine, requestNo);
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }
@@ -80,7 +84,8 @@ public class VFtpFileService {
     public VFtpCompatDownloadRequest getCompatDownloadRequest(String machine, String requestNo) throws FileServiceCollectException {
         VFtpCompatDownloadRequest request = downloadService.getCompatDownloadRequest(machine, requestNo);
         if (request == null){
-            throw new FileServiceCollectException(400, "request is not found");
+            log.error("request is not found ({}, {})", machine, requestNo);
+            throw new FileServiceCollectException(400, "request is not found ("+machine+","+requestNo+")");
         }
         return request;
     }

@@ -229,9 +229,9 @@ const ManualVftpCompat = (props) => {
                     <BreadcrumbItem active>VFTP (COMPAT)</BreadcrumbItem>
                 </Breadcrumb>
                 <Row>
-                    <Col className="machinelist"><Machinelist/></Col>
+                    <Col><Machinelist/></Col>
                     <Col><Commandlist cmdType={"vftp_compat"}/></Col>
-                    <Col className="datesetting">
+                    <Col>
                         <Datesetting from={fromDate} FromDateChangehandler={setFromDate}
                                      to={toDate} ToDateChangehandler={setToDate} />
                     </Col>

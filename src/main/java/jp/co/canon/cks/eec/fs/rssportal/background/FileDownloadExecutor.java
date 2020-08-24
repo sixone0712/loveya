@@ -1,6 +1,5 @@
 package jp.co.canon.cks.eec.fs.rssportal.background;
 
-import jp.co.canon.ckbs.eec.fs.collect.model.VFtpCompatDownloadRequest;
 import jp.co.canon.ckbs.eec.fs.manage.FileServiceManageConnector;
 import jp.co.canon.cks.eec.fs.rssportal.background.fileserviceproc.*;
 import lombok.Getter;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 public class FileDownloadExecutor {
 
@@ -38,7 +36,6 @@ public class FileDownloadExecutor {
 
     private final FileDownloader downloader;
     private final FileServiceManageConnector connector;
-    private DownloadMonitor monitor;
     private int totalFiles = -1;
     private String mPath = null;
     private long lastUpdate;
@@ -301,7 +298,6 @@ public class FileDownloadExecutor {
     public void start() {
         log.info("file download start ("+ downloadForms.size()+")");
         printExecutorInfo();
-//        (new Thread(runner)).start();
         (new Thread(new DownloadRunner(log))).start();
     }
 
@@ -340,10 +336,6 @@ public class FileDownloadExecutor {
 
     public int getTotalFiles() {
         return totalFiles;
-    }
-
-    public void setMonitor(@NonNull DownloadMonitor monitor) {
-        this.monitor = monitor;
     }
 
     public List<String> getFabs() {

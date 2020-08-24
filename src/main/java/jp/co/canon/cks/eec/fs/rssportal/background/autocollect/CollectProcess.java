@@ -24,6 +24,8 @@ import java.util.List;
 
 public abstract class CollectProcess implements Runnable {
 
+    protected final long aDayMillis = 24*60*60000;
+
     @Getter
     protected CollectPlanVo plan;
 
@@ -62,6 +64,8 @@ public abstract class CollectProcess implements Runnable {
      * @throws InterruptedException     When the manager(parent) asks stop operation.
      */
     abstract protected void createDownloadFileList() throws CollectException, InterruptedException;
+    abstract protected Timestamp getLastPoint();
+    abstract protected Timestamp getNextPlan();
 
     public CollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader,
                           Log log ) {
@@ -102,8 +106,6 @@ public abstract class CollectProcess implements Runnable {
         threading = false;
         notifyJobDone.run();
     }
-
-
 
     private void _listFiles() throws CollectException {
         printInfo("listFiles");
@@ -193,6 +195,11 @@ public abstract class CollectProcess implements Runnable {
             printInfo("all pipe finished");
             setStatus(PlanStatus.collected);
             plan.setLastCollect(getTimestamp());
+            Timestamp lastPoint = getLastPoint();
+            if(lastPoint!=null) {
+                plan.setLastPoint(lastPoint);
+            }
+
         } catch (CollectException e) {
             if(e.isError()) {
                 printError(e.getMessage());
@@ -200,6 +207,10 @@ public abstract class CollectProcess implements Runnable {
             } else {
                 setStatus(PlanStatus.collected);
                 plan.setLastCollect(getTimestamp());
+                Timestamp lastPoint = getLastPoint();
+                if(lastPoint!=null) {
+                    plan.setLastPoint(lastPoint);
+                }
             }
         }
         if(stop) {
@@ -322,13 +333,7 @@ public abstract class CollectProcess implements Runnable {
                 setStatus(PlanStatus.completed);
                 planning = null;
             } else {
-                long interval;
-                if (plan.getCollectionType() == 1 /*COLLECTTYPE_CYCLE*/) {
-                    interval = plan.getInterval();
-                } else {
-                    interval = 60000; /*CONTINUOUS_DEFAULT_INTERVAL*/
-                }
-                planning = new Timestamp(lastCollectedTime.getTime() + interval);
+                planning = getNextPlan();
             }
         }
         if(planning!=null) {
@@ -410,63 +415,6 @@ public abstract class CollectProcess implements Runnable {
         return zipPath.toString();
     }
 
-    private List<DownloadRequestForm> createDownloadListDeprecated(CollectPlanVo plan) throws InterruptedException {
-        List<DownloadRequestForm> downloadList = new ArrayList<>();
-        String[] tools = plan.getTool().split(",");
-        String[] types = plan.getLogType().split(",");
-        String[] typeStrs = plan.getLogTypeStr().split(",");
-        long lastTime = plan.getLastPoint().getTime();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        log.info("createDownloadList: tools="+tools.length+" types="+types.length+" lastPoint="+dateFormat.format(lastTime));
-
-        Calendar from = Calendar.getInstance();
-        from.setTimeInMillis(lastTime+1000);
-        Calendar to = Calendar.getInstance();
-        if(plan.getEnd().before(new Timestamp(System.currentTimeMillis()))) {
-            to.setTimeInMillis(plan.getEnd().getTime());
-        } else {
-            to.setTimeInMillis(System.currentTimeMillis());
-        }
-
-        boolean updateLastPoint = true;
-        for(String tool: tools) {
-            tool = tool.trim();
-            for(int i=0; i<types.length; ++i) {
-                boolean ret = downloader.createFtpDownloadFileList(downloadList, "undefined", tool, types[i].trim(),
-                        typeStrs[i].trim(), from, to, "");
-                if(ret==false) {
-                    // That form is null means that a timeout has occurred on createFileList.
-                    printError("cannot create download filelist for "+tool+"/"+types[i]);
-                    updateLastPoint = false;
-                    // There is only 1 last-point for a plan.
-                    // it means if createFileList error occurred,
-                    // updating last-point is possible to causes some omission logs for a tool which has an error.
-                    // That's why it doesn't update a last-point at this point.
-                }
-                Thread.sleep(1);
-            }
-        }
-        int totalFiles = downloadList.stream().mapToInt(item->((FtpDownloadRequestForm)item).getFiles().size()).sum();
-        if(updateLastPoint) {
-            for(DownloadRequestForm f: downloadList) {
-                FtpDownloadRequestForm form = (FtpDownloadRequestForm)f;
-                for(FileInfo file: form.getFiles()) {
-                    if (expectedLastPoint < file.getMilliTime())
-                        expectedLastPoint = file.getMilliTime();
-                }
-            }
-        } else {
-            expectedLastPoint = plan.getLastPoint().getTime();
-        }
-
-        printInfo(String.format("totalFiles=%d (%s~%s) lastPoint=%s",
-                totalFiles,
-                new Timestamp(from.getTimeInMillis()).toString(),
-                new Timestamp(to.getTimeInMillis()).toString(),
-                dateFormat.format(expectedLastPoint)));
-        return downloadList;
-    }
-
     private boolean isChangeable() {
         String status = plan.getLastStatus();
         if(status!=null && status.equalsIgnoreCase(PlanStatus.collecting.name())) {
@@ -482,8 +430,26 @@ public abstract class CollectProcess implements Runnable {
         return false;
     }
 
-    private Timestamp getTimestamp() {
+    protected Timestamp getTimestamp() {
         return new Timestamp(System.currentTimeMillis());
+    }
+
+    protected long getMidnightMillis(long millis) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE),0, 0, 0);
+        return cal.getTimeInMillis();
+    }
+
+    protected boolean isSameDay(long a, long b) {
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+        c1.setTimeInMillis(a);
+        c2.setTimeInMillis(b);
+        if(c1.get(Calendar.YEAR)==c2.get(Calendar.YEAR) && c1.get(Calendar.MONTH)==c2.get(Calendar.MONTH) &&
+                c1.get(Calendar.DATE)==c2.get(Calendar.DATE))
+            return true;
+        return false;
     }
 
     private void clearLogFiles() {
@@ -511,14 +477,14 @@ public abstract class CollectProcess implements Runnable {
         }
     }
 
-    private void printInfo(String str) {
+    protected void printInfo(String str) {
         if(log!=null) {
             String formed = String.format("[%s] %s", planName, str);
             log.info(formed);
         }
     }
 
-    private void printError(String str) {
+    protected void printError(String str) {
         if(log!=null) {
             String formed = String.format("[%s] %s", planName, str);
             log.error(formed);
@@ -528,6 +494,7 @@ public abstract class CollectProcess implements Runnable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("");
+        sb.append(String.format("[%s] ", plan.getPlanType()));
         sb.append(plan.getPlanName()).append(" : ");
         sb.append(plan.getLastStatus()).append(" : ");
         sb.append(plan.getNextAction());
