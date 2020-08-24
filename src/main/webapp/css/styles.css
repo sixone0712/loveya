@@ -974,7 +974,7 @@ span.error.active {
 .rss-container,
 .navbar-container > .navbar,
 .footer-container > .row {
-    min-width: 1680px;
+    min-width: 1440px;
     max-width: 1680px;
 }
 /* container style end */
@@ -1243,14 +1243,6 @@ span.error.active {
     max-width: 120px;
 }
 
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .datepicker-item-area .datetime-picker .time .sliders {
-        flex: 0 1 55%;
-        width: 100%;
-        max-width: 55%;
-    }
-}
-
 .datepicker-item-area .datetime-picker .time .sliders .slider .thumb {
     top: 3px;
 }
@@ -1259,12 +1251,6 @@ span.error.active {
 /* machinelist style start */
 .machinelist-card {
     min-width: 280px;
-}
-
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .col.machinelist > .machinelist-card {
-        min-width: auto;
-    }
 }
 
 .machinelist-btn {
@@ -1490,12 +1476,6 @@ span.error.active {
     min-width: 490px;
 }
 
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .col.datesetting > .formlist-card {
-        min-width: auto;
-    }
-}
-
 .formlist-card .formlist-btn {
     color: rgb(55, 178, 77);
     background-color: white;
@@ -1669,12 +1649,6 @@ span.error.active {
     word-break: break-all;
 }
 
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .filelist-card-body table {
-        border-collapse: separate;
-    }
-}
-
 .filelist-card-body table thead tr {
     height: 60px;
 }
@@ -1715,12 +1689,6 @@ span.error.active {
     width: 150px;
 }
 
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .filelist-card-body table.vftp-sss thead tr th:first-child {
-        width: 0;
-    }
-}
-
 .filelist-card-body table.vftp-sss thead tr th:not(:first-child) {
     width: 0;
 }
@@ -1742,6 +1710,7 @@ span.error.active {
     font-size: 14px;
     text-align: center;
 }
+
 .filelist-card-body table td {
     padding: 0.5em;
 }
@@ -2377,12 +2346,6 @@ span.error.active {
     word-break: break-all;
 }
 
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .auto-plan-collection-list table {
-        border-collapse: separate;
-    }
-}
-
 .auto-plan-collection-list table thead tr {
     height: 60px;
 }
@@ -2477,17 +2440,6 @@ span.error.active {
 
 .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
     left: 1px;
-}
-
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
-    .auto-plan-collection-list table tbody tr td > .icon-area > svg {
-        top: 4px !important;
-    }
-
-    .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
-        left: 0 !important;
-    }
 }
 
 .auto-plan-collection-list table tbody tr td span > svg.stopped,
@@ -2711,3 +2663,117 @@ span.error.active {
   box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.5);
 }
 /* add plan modal style end */
+
+/* media query start */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .datepicker-item-area .datetime-picker .time .sliders {
+        flex: 0 1 55%;
+        width: 100%;
+        max-width: 55%;
+    }
+
+    .col.machinelist > .machinelist-card {
+        min-width: auto;
+    }
+
+    .col.datesetting > .formlist-card {
+        min-width: auto;
+    }
+
+    .filelist-card-body table,
+    .auto-plan-collection-list table {
+        border-collapse: separate;
+    }
+
+    .filelist-card-body table.vftp-sss thead tr th:first-child {
+        width: 0;
+    }
+
+    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+    .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+        top: 4px !important;
+    }
+
+    .auto-plan-collection-list table tbody tr td > .icon-area.move-left > svg {
+        left: 0 !important;
+    }
+}
+
+@media screen and (max-width: 1603px) and (-ms-high-contrast: none), (-ms-high-contrast: active)  {
+    .filelist-card-body table thead tr th,
+    .auto-plan-collection-list table thead tr th {
+        font-size: 13px;
+    }
+
+    .filelist-card-body table tbody tr th,
+    .filelist-card-body table tbody tr td,
+    .auto-plan-collection-list table tbody tr th,
+    .auto-plan-collection-list table tbody tr td {
+        font-size: 12px;
+    }
+
+    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+    .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+        top: 5px !important;
+    }
+}
+
+@media screen and (max-width: 1470px) and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .filelist-card-body table thead tr th,
+    .auto-plan-collection-list table thead tr th {
+        font-size: 12px;
+    }
+
+    .filelist-card-body table tbody tr th,
+    .filelist-card-body table tbody tr td,
+    .auto-plan-collection-list table tbody tr th,
+    .auto-plan-collection-list table tbody tr td {
+        font-size: 11px;
+    }
+
+    .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+    .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+        top: 6px !important;
+    }
+}
+
+@supports not (-ms-high-contrast: none) {
+    @media screen and (max-width: 1577px) {
+        .filelist-card-body table thead tr th,
+        .auto-plan-collection-list table thead tr th {
+            font-size: 13px;
+        }
+
+        .filelist-card-body table tbody tr th,
+        .filelist-card-body table tbody tr td,
+        .auto-plan-collection-list table tbody tr th,
+        .auto-plan-collection-list table tbody tr td {
+            font-size: 12px;
+        }
+
+        .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+        .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+            top: 5px;
+        }
+    }
+
+    @media screen and (max-width: 1443px) {
+        .filelist-card-body table thead tr th,
+        .auto-plan-collection-list table thead tr th {
+            font-size: 12px;
+        }
+
+        .filelist-card-body table tbody tr th,
+        .filelist-card-body table tbody tr td,
+        .auto-plan-collection-list table tbody tr th,
+        .auto-plan-collection-list table tbody tr td {
+            font-size: 11px;
+        }
+
+        .auto-plan-collection-list table tbody tr td > .icon-area-administrator > svg,
+        .auto-plan-collection-list table tbody tr td > .icon-area > svg {
+            top: 6px;
+        }
+    }
+}
+/* media query end */

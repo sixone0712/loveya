@@ -120,9 +120,9 @@ const ManualVftpSss = ({
                     <BreadcrumbItem active>VFTP (SSS)</BreadcrumbItem>
                 </Breadcrumb>
                 <Row>
-                    <Col className="machinelist"><Machinelist /></Col>
+                    <Col><Machinelist /></Col>
                     <Col><Commandlist cmdType={"vftp_sss"} /></Col>
-                    <Col className="datesetting">
+                    <Col>
                       <Datesetting
                         from={fromDate}
                         FromDateChangehandler={sssActions.vftpSssSetRequestStartDate}
