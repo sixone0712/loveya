@@ -26,6 +26,10 @@ axios.interceptors.response.use(
         console.log("[axios.interceptors.response.use] error", error);
         console.log("[axios.interceptors.response.use] error.response", error.response);
 
+        if(error.message === "Operation canceled by the user") {
+            return Promise.reject(error);
+        }
+
         // If an internal service error occurs, go to the network error page.
         if(error.response === undefined || error.response.status === Define.INTERNAL_SERVER_ERROR) {
             window.appHistory.replace(Define.PAGE_NEWORK_ERROR);

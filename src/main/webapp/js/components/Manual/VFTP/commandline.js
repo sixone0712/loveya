@@ -125,15 +125,19 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                     if (res === Define.RSS_SUCCESS) {
                         if (modalTypeRef.current !== "cancel") setModalOpen("ready");
                     } else {
+                        /*
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(res));
+                        */
                     }
                 } catch (e) {
                     console.error(e);
+                    /*
                     if (!isCancelRef.current) {
                         setModalOpen("alert");
                         setModalMsg(API.getErrorMsg(Define.SEARCH_FAIL_SERVER_ERROR));
                     }
+                    */
                 } finally {
                     isCompleteRef.current = true;
                 }

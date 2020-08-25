@@ -136,7 +136,7 @@ class FormList extends Component{
             case modalType.CANCEL_COMPLETE:
                 //this.closeModal();
                 if(this.props.responseListCnt === 0) {
-                    services.axiosAPI.postCancel();
+                    services.axiosAPI.postCancel("Operation canceled by the user");
                     clearTimeout(this.getIntervalFunc());
                 }
                 await this.setState({
