@@ -15,7 +15,7 @@ log4j:
 
 spring:
   profiles:
-    active: dev
+    active: release
   datasource:
     initialization-mode: always
     driver-class-name: org.postgresql.Driver
