@@ -6,6 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 @Controller
 public class RssController {
     private Log log = LogFactory.getLog(getClass());
@@ -22,5 +25,11 @@ public class RssController {
     public String redirect() {
         log.info("[RssController] other url called");
         return "redirect:/rss";
+    }
+
+    @RequestMapping(value={"/rss/version"})
+    public void version(HttpServletResponse response) throws IOException {
+        String version = "Rapid_Collector_V20_03_01";
+        response.getWriter().print(version);
     }
 }

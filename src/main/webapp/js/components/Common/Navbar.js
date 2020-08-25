@@ -132,9 +132,7 @@ class RSSNavbar extends Component{
                   onClick={() => this.handlePageChange("Manual")}
               >
                 {"Rapid Collector"}
-                {/*{`Rapid Collector ${process.env.RSS_VERSION}`}*/}
               </NavbarBrand>
-              {/*<NavbarBrand className="custom-brand">{`Rapid Collector ${process.env.RSS_VERSION}`}</NavbarBrand>*/}
             <Nav className="mr-auto" navbar>
               <UncontrolledDropdown nav inNavbar className={this.getClassName("Manual")}>
                 <DropdownToggle nav>Manual Download</DropdownToggle>

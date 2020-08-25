@@ -1,5 +1,5 @@
 import React from "react";
-import {Col, Row} from "reactstrap";
+import {Col, NavbarBrand, Row} from "reactstrap";
 
 const RSSfooter = () => {
   return (
@@ -7,6 +7,7 @@ const RSSfooter = () => {
       <Row>
         <Col>
           <ul className="list-unstyled">
+            {/*<li className="float-lg-left">{process.env.RSS_VERSION}</li>*/}
             <li className="float-lg-right">Copyright CANON INC. 2020</li>
           </ul>
         </Col>
