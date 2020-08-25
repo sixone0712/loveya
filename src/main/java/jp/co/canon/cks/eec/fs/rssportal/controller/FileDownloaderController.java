@@ -248,7 +248,8 @@ public class FileDownloaderController extends DownloadControllerCommon {
                     public ArrayList<RSSFtpSearchResponse> call() throws Exception {
                         ArrayList<RSSFtpSearchResponse> result = new ArrayList<>();
                         if(!createFileList(result, serachReqeust)) {
-                            log.warn("[createFileList]failed to connect "+serachReqeust.getMachineName());
+                            log.warn("[searchFTPFileListWithThreadPool]failed to connect "+serachReqeust.getMachineName());
+                            return null;
                         }
                         return result;
                     }
@@ -258,8 +259,23 @@ public class FileDownloaderController extends DownloadControllerCommon {
         }
         threadPool.shutdown();
 
+        int totalCnt = 0;
+        int errCnt = 0;
+
         for (Future<ArrayList<RSSFtpSearchResponse>> future : futures) {
-            responselists.addAll(future.get());
+            totalCnt++;
+            if(future.get() == null) {
+                errCnt++;
+            } else {
+                responselists.addAll(future.get());
+            }
+        }
+
+        if(totalCnt == errCnt) {
+            log.error("[searchFTPFileListWithThreadPool]There is no response to all requests.");
+            error.setReason(RSSErrorReason.INTERNAL_ERROR);
+            resBody.put("error", error.getRSSError());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(resBody);
         }
 
         resBody.put("lists", responselists);
