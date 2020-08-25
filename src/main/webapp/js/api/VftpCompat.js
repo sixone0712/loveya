@@ -63,51 +63,6 @@ export const startVftpCompatDownload = async (props) => {
     }
 };
 
-export const setVftpComaptWatchDlStatus = (requestId, modalFunc) => {
-    const timeoutVal = setTimeout(async (requestId, modalFunc) => {
-        const downloadStatus = modalFunc.getDownloadStatus();
-        let { func } = downloadStatus;
-        if(func === null) return;
-
-        let res;
-        try {
-            res = await services.axiosAPI.requestGet(`${Define.REST_VFTP_COMPAT_POST_DOWNLOAD}/${requestId}`);
-            const { status } = res.data;
-            if(status === "done" || res.data.status ==="error") {
-                clearTimeout(func);
-                func = null;
-                modalFunc.closeProcessModal()
-                if(status === "done") {
-                    modalFunc.openCompleteModal();
-                } else {
-                    // 1. axios timeout
-                    // 2. Respond error from /dl/status
-                    // 3. Respond null from /dl/status
-                    modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
-                    modalFunc.openErrorModal();
-                }
-            }
-        } catch (error) {
-            console.error(error);
-            modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
-            modalFunc.openErrorModal();
-        }
-
-        modalFunc.setSearchListActions({
-            func: func,
-            dlId: res.data.donwloadId,
-            status: res.data.status,
-            totalFiles: res.data.totalFiles,
-            downloadFiles: res.data.downloadedFiles,
-            downloadUrl: res.data.downloadUrl
-        });
-
-        setWatchDlStatus(requestId, modalFunc);
-    }, 500, requestId, modalFunc);
-
-    return timeoutVal;
-};
-
 export const vftpConvertDBCommand = (cmdList) => {
     return cmdList.map(item => {
         if (item.cmd_type == "vftp_compat") {
