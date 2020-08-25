@@ -83,6 +83,8 @@ const RSSvftpFilelist = ({
 
         if(responseList !== undefined) {
             if(isNewResponseList) {
+                setPageSize(10);
+                setCurrentPage(1);
                 setSortDirection("");
                 setSortKey("");
                 sssActions.vftpSssSetIsNewResponseList(false);
