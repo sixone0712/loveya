@@ -109,7 +109,7 @@ const ManualVftpSss = ({
     }
 
     const searchCancel = () => {
-        services.axiosAPI.postCancel();
+        services.axiosAPI.postCancel("Operation canceled by the user");
     }
 
     return (
