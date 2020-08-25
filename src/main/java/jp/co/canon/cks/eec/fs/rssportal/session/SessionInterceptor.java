@@ -46,6 +46,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             "/dbtest/[\\w./]*",
             "/dbtest",
             "/rss",
+            "/rss/version",
             "/build/react/[\\w.]*"
     };
 
