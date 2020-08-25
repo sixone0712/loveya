@@ -83,9 +83,9 @@ const reducer =  handleActions({
         let convInterval = ""
         let intervalUnit = "";
 
-        const minutes = (intervalInt / (1000 * 60)).toFixed(0);
-        const hours = (intervalInt / (1000 * 60 * 60)).toFixed(0);
-        const days = (intervalInt / (1000 * 60 * 60 * 24)).toFixed(0);
+        const minutes = Math.floor(intervalInt / (1000 * 60));
+        const hours = Math.floor(intervalInt / (1000 * 60 * 60));
+        const days = Math.floor(intervalInt / (1000 * 60 * 60 * 24));
 
         if(days > 0) {
             intervalUnit = Define.AUTO_UNIT_DAY;
