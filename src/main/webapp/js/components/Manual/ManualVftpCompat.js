@@ -111,8 +111,10 @@ const statusCheckFunc = async (props) => {
             console.log("[statusCheckFunc] downloadedFiles", downloadedFiles);
             ret.status = status;
             if (status === "error") {
-                ret.error=Define.RSS_FAIL;
-                ret.msg = Define.FILE_FAIL_SERVER_ERROR;
+                //ret.error=Define.RSS_FAIL;
+                //ret.msg = Define.FILE_FAIL_SERVER_ERROR;
+                // when download status is error, go to network error page
+                window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
             } else if(status === "done"){
                 ret.error=Define.RSS_SUCCESS;
                 ret.url = downloadUrl;

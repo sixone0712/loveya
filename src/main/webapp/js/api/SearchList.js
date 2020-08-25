@@ -189,7 +189,7 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
         try {
             res = await services.axiosAPI.requestGet(`${Define.REST_FTP_POST_DOWNLOAD}/${requestId}`);
             const { status } = res.data;
-            if(status === "done" || res.data.status ==="error") {
+            if(status === "done" || status ==="error") {
                 clearTimeout(func);
                 func = null;
                 modalFunc.closeProcessModal()
@@ -199,14 +199,19 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
                     // 1. axios timeout
                     // 2. Respond error from /dl/status
                     // 3. Respond null from /dl/status
-                    modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
-                    modalFunc.openErrorModal();
+                    //modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
+                    //modalFunc.openErrorModal();
+
+                    // when download status is error, go to network error page
+                    window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
                 }
             }
         } catch (error) {
             console.error(error);
-            modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
-            modalFunc.openErrorModal();
+            //modalFunc.setErrorMsg(Define.FILE_FAIL_SERVER_ERROR)
+            //modalFunc.openErrorModal();
+
+            window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
         }
 
         modalFunc.setSearchListActions({

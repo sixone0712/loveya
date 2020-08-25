@@ -128,26 +128,28 @@ const RSSvftpFilelist = ({
 
         const iterator = geneDownloadStatus(statusFunc);
         const next = ({ value, done }) => {
-            console.log('done', done);
-            console.log('cancelRef.current', cancelRef.current);
+            console.log('[geneDownloadStatus]done', done);
+            console.log('[geneDownloadStatus]cancelRef.current', cancelRef.current);
             if (cancelRef.current) {
                 return;
             }
             if (done) {
-                console.log("value", value);
-                if (value.status === 200) {
+                console.log("[geneDownloadStatus]value", value);
+                if (value.status === Define.OK) {
+                    if (value.data.status === "error") {
+                        // when download status is error, go to network error page
+                        window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+                    }
                     openDownloadComplete();
-                } else {
-                    // 에러인 경우 처리..
                 }
             } else {
-                console.log("success");
+                console.log("[geneDownloadStatus]success");
                 value.then((res) => {
-                    console.log("then.value", res);
+                    console.log("[geneDownloadStatus]then.value", res);
                     setDownStatus(res.data);
                     next(iterator.next(res))
                 }).catch(err => {
-                    console.log("error.value", err);
+                    console.log("[geneDownloadStatus]error.value", err);
                     next(iterator.next(err.response))
                 })
             }
