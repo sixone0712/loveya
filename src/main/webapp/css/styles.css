@@ -972,9 +972,13 @@ span.error.active {
 }
 
 .rss-container,
-.navbar-container > .navbar,
 .footer-container > .row {
     min-width: 1440px;
+    max-width: 1680px;
+}
+
+.navbar-container > .navbar {
+    min-width: 0;
     max-width: 1680px;
 }
 /* container style end */
