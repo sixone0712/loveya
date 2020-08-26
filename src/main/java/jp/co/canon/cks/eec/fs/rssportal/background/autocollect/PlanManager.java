@@ -202,11 +202,33 @@ public class PlanManager extends Thread {
             else
                 otherList.add(process.getPlan());
         }
-        Collections.sort(myList);
-        Collections.sort(otherList);
+        //Collections.sort(myList);
+        //Collections.sort(otherList);
+        myList = orderPlansByStatus(myList);
+        otherList = orderPlansByStatus(otherList);
         List<CollectPlanVo> list = new ArrayList<>();
         list.addAll(myList);
         list.addAll(otherList);
+        return list;
+    }
+
+    private List<CollectPlanVo> orderPlansByStatus(List<CollectPlanVo> list) {
+        List<CollectPlanVo> completes = new ArrayList<>();
+        List<CollectPlanVo> others = new ArrayList<>();
+
+        for(CollectPlanVo plan: list) {
+            if(plan.getLastStatus().equalsIgnoreCase("completed")) {
+                completes.add(plan);
+            } else {
+                others.add(plan);
+            }
+        }
+
+        Collections.sort(completes);
+        Collections.sort(others);
+        list.clear();
+        list.addAll(others);
+        list.addAll(completes);
         return list;
     }
 
