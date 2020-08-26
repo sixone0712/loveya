@@ -10,11 +10,10 @@ public class DefaultFileServiceManageConnectorFactory implements FileServiceMana
 
     public DefaultFileServiceManageConnectorFactory(){
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setReadTimeout(5000);
-        factory.setConnectionRequestTimeout(3000);
+        factory.setConnectionRequestTimeout(10000);
         HttpClient httpClient = HttpClientBuilder.create()
-                .setMaxConnTotal(100)
-                .setMaxConnPerRoute(5)
+                .setMaxConnTotal(200)
+                .setMaxConnPerRoute(200)
                 .build();
         factory.setHttpClient(httpClient);
         restTemplate = new RestTemplate(factory);

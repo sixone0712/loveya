@@ -70,7 +70,7 @@ public class CollectPlanVo implements Comparable<CollectPlanVo> {
 
     @Override
     public int compareTo(CollectPlanVo o) {
-        return this.id-o.getId();
+        return o.getId()-this.id;
     }
 
     @Override
