@@ -194,28 +194,28 @@ public abstract class CollectProcess implements Runnable {
             }
             printInfo("all pipe finished");
             setStatus(PlanStatus.collected);
-            plan.setLastCollect(getTimestamp());
             Timestamp lastPoint = getLastPoint();
             if(lastPoint!=null) {
                 plan.setLastPoint(lastPoint);
             }
-
         } catch (CollectException e) {
             if(e.isError()) {
                 printError(e.getMessage());
                 setStatus(PlanStatus.suspended);
             } else {
                 setStatus(PlanStatus.collected);
-                plan.setLastCollect(getTimestamp());
                 Timestamp lastPoint = getLastPoint();
                 if(lastPoint!=null) {
                     plan.setLastPoint(lastPoint);
                 }
             }
         }
+
         if(stop) {
             plan.setStop(true);
         }
+
+        plan.setLastCollect(getTimestamp());
         schedule();
         updateStatus();
         push();
