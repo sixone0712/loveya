@@ -141,7 +141,7 @@ const RSSautoCommandList = ({ type, command, commandActions, autoPlan }) => {
     }, [commandList, actionId]);
 
     const invalidCheck = useCallback((modal) => {
-        const currentCommand = type === Define.PLAN_TYPE_VFTP_SSS ? currentContext : currentDataType + currentContext;
+        const currentCommand = type === Define.PLAN_TYPE_VFTP_COMPAT ? currentContext : currentDataType + currentContext;
         if (stringBytes(currentCommand) > MAX_STRING_BYTES) {
             setErrorMsg("This command is too long.");
             setOpenedModal(modal);
