@@ -5,10 +5,18 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class ListFtpCommand extends BaseFtpCommand {
+    private static Logger logger = Logger.getLogger(ListFtpCommand.class.getName());
     String rootDir;
     String destDir;
+
+    String commandInfoString;
+
+    String createCommandInfoString(){
+        return String.format("(%s, %s, %d, %s, %s, %s)", "list", this.host, this.port, this.ftpmode, this.rootDir, this.destDir);
+    }
 
     void doCommand(){
         FTPClient ftpClient = new FTPClient();
@@ -19,24 +27,29 @@ public class ListFtpCommand extends BaseFtpCommand {
             boolean logined = ftpClient.login(user, password);
             if (!logined){
                 System.out.println("ERR: LOGIN FAILED");
+                logger.severe("ERR: LOGIN FAILED "+commandInfoString);
                 return;
             }
             System.out.println("STATUS:LOGIN_OK");
+            logger.info("STATUS:LOGIN_OK " + commandInfoString);
 
             boolean moved = true;
             moved = ftpClient.changeWorkingDirectory(rootDir);
             if (!moved){
                 System.out.println("ERR: DIRECTORY MOVE FAILED(ROOT DIR)");
+                logger.severe("ERR: DIRECTORY MOVE FAILED(ROOT DIR) " + commandInfoString);
                 return;
             }
             moved = ftpClient.changeWorkingDirectory(destDir);
             if (!moved){
                 System.out.println("ERR: DIRECTORY MOVE FAILED(DEST DIR)");
+                logger.severe("ERR: DIRECTORY MOVE FAILED(DEST DIR) " + commandInfoString);
                 return;
             }
             if (!ftpmode.equalsIgnoreCase("active")){
                 ftpClient.enterLocalPassiveMode();
                 System.out.println("STATUS:ENTER PASSIVE");
+                logger.info("STATUS:ENTER PASSIVE "+commandInfoString);
             }
             FTPFile[] ftpFiles = ftpClient.listFiles();
             for(FTPFile file : ftpFiles){
@@ -47,8 +60,10 @@ public class ListFtpCommand extends BaseFtpCommand {
                 }
             }
             System.out.println("END TOTAL:" + ftpFiles.length);
+            logger.info("END TOTAL:" + ftpFiles.length + commandInfoString);
         } catch (IOException e) {
             System.out.println("ERR: IOEXCEPTION");
+            logger.severe("ERR: IOEXCEPTION " + commandInfoString);
             e.printStackTrace();
         } finally {
             if (ftpClient.isConnected()) {
@@ -91,9 +106,11 @@ public class ListFtpCommand extends BaseFtpCommand {
             this.rootDir = commandLine.getOptionValue("root");
             this.destDir = commandLine.getOptionValue("dest");
 
+            this.commandInfoString = createCommandInfoString();
             doCommand();
         } catch (ParseException e) {
             System.out.println("ERR: Command Parse Exception");
+            logger.severe("ERR: Command Parse Exception");
             e.printStackTrace();
         }
     }

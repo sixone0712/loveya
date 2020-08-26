@@ -2,3 +2,7 @@ server:
   servlet:
     contextPath: /fsm
   port: 8081
+logging:
+  level:
+    jp.co.canon.ckbs.eec.fs.collect: info
+  file: /usr/local/canon/esp/Logs/SystemLogs/fsm_logging.log
