@@ -65,6 +65,7 @@ public class SssDownloadProcessThread extends Thread implements CustomOutputStre
         CommandLine cmdLine = new CommandLine("java");
         cmdLine.addArgument("-cp")
                 .addArgument("/usr/local/canon/esp/CanonFileService/Libs/ELogCollector.jar")
+                .addArgument("-Djava.util.logging.config.file=/usr/local/canon/esp/CanonFileService/Libs/logging.properties")
                 .addArgument("jp.co.canon.ckbs.eec.service.FtpCommand")
                 .addArgument("get")
                 .addArgument("-host").addArgument(ftpServerInfo.getHost())

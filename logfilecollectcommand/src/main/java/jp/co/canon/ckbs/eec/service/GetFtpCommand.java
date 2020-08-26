@@ -7,16 +7,23 @@ import org.apache.commons.net.ftp.FTPClient;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class GetFtpCommand extends BaseFtpCommand {
-
+    private static Logger logger = Logger.getLogger(GetFtpCommand.class.getName());
     String directory;
     String downloadDirectory;
     String [] files;
     boolean zip = false;
     String zipFileName;
+
+    String commandInfoString;
+
+    String createCommandInfoString(){
+        return String.format("(%s, %s, %d, %s, %s, %s)", "list", this.host, this.port, this.ftpmode, this.directory, this.downloadDirectory);
+    }
 
     void loadFileList(String fileListFile) throws IOException{
         try {
@@ -28,15 +35,14 @@ public class GetFtpCommand extends BaseFtpCommand {
                     continue;
                 }
                 String[] lineArr = line.split(",");
-                if (lineArr[0].length() > 0){
-                    fileList.add(lineArr[0]);
+                if (lineArr.length == 0){
+                    continue;
                 }
+                fileList.add(lineArr[0]);
             }
             files = fileList.toArray(new String[0]);
         } catch (FileNotFoundException e) {
             throw new IOException(e);
-        } catch (IOException e){
-            throw e;
         }
     }
 
@@ -44,17 +50,16 @@ public class GetFtpCommand extends BaseFtpCommand {
         File downloadDirectoryFile = new File(downloadDirectory);
         OutputStream outputStream = null;
         File outputFile = new File(downloadDirectoryFile, fileName);
-        if (!outputFile.getParentFile().exists()){
-            outputFile.getParentFile().mkdirs();
-        }
         try {
             outputStream = new FileOutputStream(outputFile);
         } catch (FileNotFoundException e) {
             System.out.println("ERR: FileNotFoundException...");
+            logger.severe("ERR: inputStreamToFile FileNotFoundException...("+fileName+")" + commandInfoString);
             e.printStackTrace();
         }
         if (outputStream == null){
             System.out.println("ERR:outputStream == null");
+            logger.severe("ERR:inputStreamToFile outputStream == null("+fileName+")" + commandInfoString);
             return;
         }
         byte[] buffer = new byte[8192];
@@ -68,8 +73,11 @@ public class GetFtpCommand extends BaseFtpCommand {
                 total_readed += readed;
             }
             System.out.println("DOWNLOAD_COMPLETE:"+fileName+";"+total_readed);
+            logger.fine("STATUS: download complete ("+fileName + ","+ total_readed +")");
         } catch (IOException e) {
-            System.out.println("ERR: IOException:"+e.getMessage());
+            logger.severe("ERR: inputStreamToFile IOException (" +fileName+")"+ commandInfoString + " " + e.getMessage());
+            logger.severe("ERR: download failed ("+fileName + ","+ total_readed +")");
+            System.out.println("ERR: inputStreamToFile IOException:"+e.getMessage());
         } finally{
             try {
                 outputStream.close();
@@ -80,7 +88,7 @@ public class GetFtpCommand extends BaseFtpCommand {
 
     }
 
-    void downloadFile(FTPClient ftpClient, String fileName){
+    boolean downloadFile(FTPClient ftpClient, String fileName){
         System.out.println("STATUS:TRY_DOWNLOAD( "+fileName+" )");
         InputStream inputStream = null;
         try {
@@ -91,17 +99,24 @@ public class GetFtpCommand extends BaseFtpCommand {
             ftpClient.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
             inputStream = ftpClient.retrieveFileStream(fileName);
         } catch (IOException e) {
+            logger.severe("ERR:downloadFile IOException on download file("+fileName+")" + commandInfoString);
+            logger.severe("ERR:" + e.getMessage());
             e.printStackTrace();
         }
         if (inputStream == null){
+            logger.severe("ERR:downloadFile inputStream == null "+ftpClient.getReplyCode()+commandInfoString);
             System.out.println("ERR:inputStream == null "+ftpClient.getReplyCode());
-            return;
+            return false;
         }
 
         try {
             inputStreamToFile(inputStream, fileName);
+            return true;
         } catch (Exception e){
+            logger.severe("ERR:downloadFile IOException on download file("+fileName+").." + commandInfoString);
+            logger.severe("ERR:downloadFile " + e.getMessage());
             System.out.println("ERR:Exception");
+            return false;
         } finally {
             try {
                 inputStream.close();
@@ -116,14 +131,18 @@ public class GetFtpCommand extends BaseFtpCommand {
         }
     }
 
-    void downloadFiles(FTPClient ftpClient){
+    long downloadFiles(FTPClient ftpClient){
+        long downloaded_count = 0;
         File downloadDirectoryFile = new File(downloadDirectory);
         if (!downloadDirectoryFile.exists()){
             downloadDirectoryFile.mkdirs();
         }
         for(String fileName : files){
-            downloadFile(ftpClient, fileName);
+            if (downloadFile(ftpClient, fileName)){
+                ++downloaded_count;
+            }
         }
+        return downloaded_count;
     }
 
     void appendZipFile(ZipOutputStream out, File f) throws IOException {
@@ -161,8 +180,9 @@ public class GetFtpCommand extends BaseFtpCommand {
                 File f = new File(downloadDirectory, filename);
                 f.delete();
             }
+            logger.info("STATUS: compression finished" + commandInfoString);
         } catch (IOException e){
-
+            logger.severe("ERR: IOException on zipFiles" + commandInfoString);
         } finally {
             if (out != null){
                 try {
@@ -185,8 +205,10 @@ public class GetFtpCommand extends BaseFtpCommand {
                 System.out.println("ERR: LOGIN FAILED");
                 return;
             }
+            logger.info("STATUS:LOGIN_OK " + commandInfoString);
             if (!ftpmode.equalsIgnoreCase("active")){
                 ftpClient.enterLocalPassiveMode();
+                logger.info("STATUS:ENTER PASSIVE "+commandInfoString);
             }
 
             boolean moved = true;
@@ -194,17 +216,20 @@ public class GetFtpCommand extends BaseFtpCommand {
             moved = ftpClient.changeWorkingDirectory(directory);
             if (!moved){
                 System.out.println("ERR: DIRECTORY MOVE FAILED(DIRECTORY)");
+                logger.severe("ERR: DIRECTORY MOVE FAILED(DIRECTORY)" + commandInfoString);
                 return;
             }
 
-            downloadFiles(ftpClient);
+            long downloaded_count = downloadFiles(ftpClient);
 
             if (zip){
                 zipFiles();
             }
-            System.out.println("END DOWNLOAD TOTAL:" + 0);
+            System.out.println("END DOWNLOAD TOTAL:" + downloaded_count);
+            logger.info("END DOWNLOAD TOTAL:" + downloaded_count + commandInfoString);
         } catch (IOException e) {
             System.out.println("ERR: IOEXCEPTION");
+            logger.severe("ERR: IOEXCEPTION" + commandInfoString);
             e.printStackTrace();
         } finally {
             if (ftpClient.isConnected()) {
@@ -252,13 +277,17 @@ public class GetFtpCommand extends BaseFtpCommand {
             zip = commandLine.hasOption("az");
             zipFileName = commandLine.getOptionValue("az");
 
+            commandInfoString = createCommandInfoString();
+
             doCommand();
         } catch (ParseException e) {
             System.out.println("ERR:Command Line Parse Exception");
+            logger.severe("ERR:Command Line Parse Exception");
             e.printStackTrace();
 //            throw new Exception (e.getMessage());
         } catch (IOException e) {
             System.out.println("ERR:IOException");
+            logger.severe("ERR:IOException");
             e.printStackTrace();
         }
 
