@@ -23,7 +23,7 @@ export const vftpCompatSetDlStatus = createAction(VFTP_COMPAT_SET_DOWNLOAD_STATU
 export const vftpCompatInitResponseList = createAction(VFTP_COMPAT_INIT_RESPONSE_LIST);
 
 
-const initialState = Map({
+export const initialState = Map({
     requestCompletedDate: "",
     requestListCnt: 0,
     requestList: Map({

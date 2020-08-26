@@ -24,7 +24,7 @@ export const loginCheckAuth = createAction(LOGIN_CHECK_AUTH, services.axiosAPI.r
 export const loginSetLogOff = createAction(LOGIN_SET_LOGOFF,services.axiosAPI.requestGet);
 export const changeUserPassword = createAction(CHANGE_USER_PASSWORD,services.axiosAPI.requestPatch);
 
-const initialState = Map({
+export const initialState = Map({
     loginInfo : Map({
         errCode: 0,
         isLoggedIn: false,

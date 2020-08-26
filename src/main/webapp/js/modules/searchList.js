@@ -33,7 +33,7 @@ export const searchSetDlId = createAction(SEARCH_SET_DL_DOWNLOAD_FILES);
 */
 
 
-const initialState = Map({
+export const initialState = Map({
     requestCompletedDate: "",
     requestListCnt: 0,
     requestList: Map({

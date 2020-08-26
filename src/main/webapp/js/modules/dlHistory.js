@@ -13,7 +13,7 @@ export const loadDlHistoryList = createAction(GET_DL_HISTORY, services.axiosAPI.
 export const addDlHistory = createAction(ADD_DL_HISTORY, services.axiosAPI.requestGet);
 export const deleteDlHistory = createAction(DELETE_DL_HISTORY, services.axiosAPI.requestGet);
 
-const initialState = Map({
+export const initialState = Map({
     dlHistoryInfo :
         Map({
         result:"",

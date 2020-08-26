@@ -23,7 +23,7 @@ export const viewCheckAllLogTypeList = createAction(VIEW_CHECK_ALL_LOGTYPE_LIST)
 export const viewApplyGenreList = createAction(VIEW_APPLY_GENRE_LIST); 	// { index, genrelist }
 export const viewSetEditPlanList = createAction(VIEW_SET_EDIT_PLAN_LIST);
 
-const initialState = Map({
+export const initialState = Map({
 	gotReady: false,	// flag for loaded data
 	equipmentList: List([
 		Map({

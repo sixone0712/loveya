@@ -26,7 +26,7 @@ export const autoPlanSetIntervalUnit = createAction(AUTO_PLAN_SET_INTERVAL_UNIT)
 export const autoPlanSetDescription = createAction(AUTO_PLAN_SET_DESCRIPTION);
 export const autoPlanSetEditPlanList = createAction(AUTO_PLAN_SET_EDIT_PLAN_LIST);
 
-const initialState = Map({
+export const initialState = Map({
     autoPlan: Map({
         planId: "",
         collectStart: moment().startOf('day'),

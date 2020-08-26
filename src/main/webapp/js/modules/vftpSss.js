@@ -26,7 +26,7 @@ export const vftpSssCheckAllResponseList = createAction(VFTP_SSS_CHECK_ALL_RESPO
 export const vftpSssInitResponseList = createAction(VFTP_SSS_INIT_RESPONSE_LIST);
 export const vftpSssSetIsNewResponseList = createAction(VFTP_SSS_SET_IS_NEW_RESPONSE_LIST);
 
-const initialState = Map({
+export const initialState = Map({
     requestCompletedDate: "",
     requestListCnt: 0,
     requestList: Map({

@@ -21,7 +21,7 @@ export const commandCheckInit = createAction(COMMAND_CHECK_INIT);
 export const commandAddNotUse = createAction(COMMAND_ADD_NOT_USE);
 export const commandDeleteItem = createAction(COMMAND_DELETE_ITEM);
 
-const initialState = Map({
+export const initialState = Map({
     command: Map({
         error: "",
         checkedCnt: 0,

@@ -16,7 +16,7 @@ export const deleteUser = createAction(USER_DELETE, services.axiosAPI.requestDel
 export const loadUserList = createAction(USER_GET_LIST, services.axiosAPI.requestGet);
 export const changeUserPermission = createAction(USER_MODIFY_AUTH, services.axiosAPI.requestPatch);
 
-const initialState = Map({
+export const initialState = Map({
     UserInfo : Map({
         name: "",
         pwd:"",
