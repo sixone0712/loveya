@@ -95,6 +95,7 @@ public abstract class CollectProcess implements Runnable {
         currentMillis = System.currentTimeMillis();
         jobStartTime = getTimestamp();
         jobDoneTime = null;
+        clearLogFiles();
     }
 
     private void doneProc() {
