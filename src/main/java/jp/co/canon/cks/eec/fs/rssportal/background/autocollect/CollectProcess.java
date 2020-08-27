@@ -525,7 +525,7 @@ public abstract class CollectProcess implements Runnable {
         this.plan.setDirectory(plan.getDirectory());
 
         schedule();
-        push();
+        dao.updatePlan(plan);
         return true;
     }
 
