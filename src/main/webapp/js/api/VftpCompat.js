@@ -54,9 +54,15 @@ export const startVftpCompatDownload = async (props) => {
     CompatActions.vftpCompatInitResponseList();
     try {
         const response = await services.axiosAPI.requestPost(Define.REST_VFTP_COMPAT_POST_DOWNLOAD, newRequestList)
-        const {downloadId} = response.data;
+        const {status, downloadId} = response.data;
+        const res = {
+            downloadId: downloadId,
+            totalFiles: machineNames.length,
+            downloadedFiles: 0,
+            status: "init"
+        }
         console.log("[requestDownload]donwloadId", downloadId);
-        return downloadId;
+        return res;
     } catch (error) {
         console.error(error);
         return "";

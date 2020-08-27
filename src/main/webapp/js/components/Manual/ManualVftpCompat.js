@@ -31,56 +31,46 @@ const scrollStyle = {
 function convertCommand (cmd, sDate,eDate) {
     let cmdString = '';
     const formatDate = 'YYYYMMDD_HHmmss';
-
-    if (sDate) {
-        cmdString += (moment(sDate).format(formatDate) + '-');
-    }
-    if (eDate) {
-        cmdString += (moment(eDate).format(formatDate));
-    }
-    if (cmd !== '') {
-        cmdString += ('-' + cmd);
-    }
-
-    console.log("eDate" + eDate);
-    console.log("sDate" + sDate);
+    cmdString += (moment(sDate).format(formatDate) + '-'+moment(eDate).format(formatDate))
+    cmdString += (cmd !== '') ? ('-' + cmd) :"";
     console.log("cmd: " + cmdString);
     return  cmdString + ".log";
 }
 
-const downloadFunc = async (props) => {
-    console.log("================downloadFunc================");
+const checkFunc = async (props) => {
+    console.log("================checkFunc================");
     const {CompatActions} = props;
     const machines = props.toolInfoListCheckCnt;
     const fromDate = props.startDate;
     const toDate = props.endDate;
-
     const ret = {
         error: Define.RSS_SUCCESS,
-        requestID: ""
+        totalFiles: 0,
+        downloadFiles: 0,
     };
 
     //if ----- Machine is no selected
     if (machines <= 0) {
-        ret.error = Define.SEARCH_FAIL_NO_MACHINE_AND_CATEGORY;
+        ret.error = Define.SEARCH_FAIL_NO_MACHINE;
     } else if (fromDate.isAfter(toDate)) {
         ret.error = Define.SEARCH_FAIL_DATE;
     } else {
         try {
-            const requestId = await API.startVftpCompatDownload(props);
-            if (requestId !== "") {
+            const res = await API.startVftpCompatDownload(props);
+            if (res !== "") {
                 CompatActions.vftpCompatSetDlStatus({
                     func: null,
-                    dlId: requestId,
-                    status: "init",
-                    totalFiles: 0,
+                    dlId: res.downloadId,
+                    status: res.status,
+                    totalFiles: res.totalFiles,
                     downloadFiles: 0,
                     downloadUrl: ""
                 })
+                ret.totalFiles = res.totalFiles;
+                ret.downloadFiles = 0;
             } else {
                 console.log("startVftpCompatDownload requestID: 0 ");
             }
-            ret.requestID = requestId;
         } catch (error) {
             console.error(error);
             ret.error = Define.RSS_FAIL;
@@ -97,8 +87,8 @@ const statusCheckFunc = async (props) => {
         msg:"",
         status:"",
         url:"",
-        totalFiles:"",
-        downloadedFiles:"",
+        totalFiles:0,
+        downloadedFiles:0,
     }
     let res;
     if(dlId !== 0)
@@ -111,22 +101,18 @@ const statusCheckFunc = async (props) => {
             console.log("[statusCheckFunc] downloadedFiles", downloadedFiles);
             ret.status = status;
             if (status === "error") {
-                //ret.error=Define.RSS_FAIL;
-                //ret.msg = Define.FILE_FAIL_SERVER_ERROR;
                 // when download status is error, go to network error page
                 window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
             } else if(status === "done"){
                 ret.error=Define.RSS_SUCCESS;
                 ret.url = downloadUrl;
             } else {
-                ret.totalFiles = totalFiles;
                 ret.downloadedFiles = downloadedFiles;
             }
             CompatActions.vftpCompatSetDlStatus({
                 func: null,
                 dlId: downloadId,
                 status: status,
-                totalFiles: totalFiles,
                 downloadFiles: downloadedFiles,
                 downloadUrl: downloadUrl
             })
@@ -140,6 +126,8 @@ const statusCheckFunc = async (props) => {
 
 const completeFunc = async (props) => {
     const {downloadUrl} = props.downloadStatus;
+    const {CompatActions} = props;
+
     let res = 0;
     res = await services.axiosAPI.downloadFile(downloadUrl);
     console.log("res: ", res);
@@ -204,15 +192,6 @@ const ManualVftpCompat = (props) => {
         ready:"",
     }
 
-    // Move to MoveRefreshPage.js
-    /*
-    useEffect(()=>{
-        console.log("====ManualVftpCompat initialized=====");
-        API.vftpCompatInitAll(props);
-        console.log("=====================================");
-        },[]);
-    */
-
     useEffect(()=>{
         console.log("==== ManualVftpCompat Command Update ====");
         const selectCmd = dbCommand.find(item => item.checked && item.cmd_type === "vftp_compat");
@@ -239,7 +218,7 @@ const ManualVftpCompat = (props) => {
                     </Col>
                 </Row>
                 <Commandline type ="compat/optional" string={command} modalMsglist={modalMsgList}
-                             confirmfunc={() => downloadFunc(props)}
+                             confirmfunc={() => checkFunc(props)}
                              processfunc={() => statusCheckFunc(props)}
                              completeFunc={()=> completeFunc(props)}
                              cancelFunc={()=> cancelFunc(props)}

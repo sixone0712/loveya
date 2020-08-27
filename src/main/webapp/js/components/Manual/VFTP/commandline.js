@@ -71,6 +71,8 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             } else {
                 closeModal();
             }
+            setDownloadFile(0);
+            setTotalFiles(0);
         }
     };
 
@@ -90,7 +92,6 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                     }
                 } else {
                     setDownloadFile(result.downloadedFiles);
-                    setTotalFiles(result.totalFiles);
                     processSequence();
                 }
             }
@@ -107,13 +108,15 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         isCompleteRef.current = false;
 
         if(type === "compat/optional") {
-            setModalOpen("process");
             let result = await confirmfunc();
             console.log("result ", result);
             if (result.error !== Define.RSS_SUCCESS) {
                 setModalOpen("alert");
                 setModalMsg(API.getErrorMsg(result.error));
             } else {
+                setDownloadFile(0);
+                setTotalFiles(result.totalFiles);
+                setModalOpen("process");
                 processSequence();
             }
         } else {
