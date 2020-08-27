@@ -115,13 +115,31 @@
     <update id="update" parameterType="CollectPlanVo">
         update rsss."collection_plan" set
             planname = #{planName},
-            tslastcollect = #{lastCollect},
+            fab = #{fab},
+            tool = #{tool},
+            logtype = #{logType},
+            logtypestr = #{logTypeStr},
+            tscreated = now(),
+            description = #{description},
+            collecttype = #{collectionType},
+            cinterval = #{interval},
+            tscollectstart = #{collectStart},
+            tsstart = #{start},
+            tsend = #{end},
+            ownerid = #{owner},
             tsnext = #{nextAction},
-            <if test="lastStatus!=null">
-            laststatus = #{lastStatus},
+            tslastpoint = #{lastPoint},
+            <if test="command!=null">
+                command = #{command},
             </if>
-            stop = #{stop},
-            tslastpoint = #{lastPoint}
+            <if test="directory!=null">
+                directory = #{directory},
+            </if>
+            <if test="lastStatus!=null">
+                laststatus = #{lastStatus},
+            </if>
+            tslastcollect = #{lastCollect},
+            stop = #{stop}
         where id = #{id}
     </update>
 
