@@ -1,3 +1,7 @@
 server:
   servlet:
     contextPath: /fsc
+logging:
+  level:
+    jp.co.canon.ckbs.eec.fs.collect: info
+  file: /usr/local/canon/esp/Logs/SystemLogs/fsc_logging.log

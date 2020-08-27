@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 }
 
 group = 'jp.co.canon.cks.eec.fs'
@@ -34,9 +35,43 @@ repositories {
 dependencies {
 	implementation 'commons-net:commons-net:3.6'
 	implementation 'commons-cli:commons-cli:1.4'
+	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
+	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
+	testCompile 'commons-io:commons-io:2.7'
 }
 
 test {
 	useJUnitPlatform()
 }
 
+test {
+	finalizedBy jacocoTestReport
+}
+
+jacoco {
+	toolVersion = '0.8.5'
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	reports {
+		html.enabled true
+		xml.enabled false
+		csv.enabled false
+
+		html.destination file("$buildDir/jacocoHtml")
+	}
+
+	afterEvaluate {
+		classDirectories.from = files(classDirectories.files.collect {
+			fileTree(
+					dir: it,
+					exclude: [
+							"jp/co/canon/cks/**",
+					])
+		})
+	}
+}
