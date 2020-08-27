@@ -40,7 +40,7 @@ public class FtpCommandController {
     }
 
     @GetMapping(value="/ftp/files")
-    ResponseEntity<?> getFileList(@RequestParam(name="machine", required = false) String machine,
+    ResponseEntity<LogFileList> getFileList(@RequestParam(name="machine", required = false) String machine,
                                   @RequestParam(name="category", required = false) String category,
                                   @RequestParam(name="from", required = false) String from,
                                   @RequestParam(name="to", required = false) String to,
@@ -56,7 +56,7 @@ public class FtpCommandController {
     }
 
     @PostMapping(value="/ftp/download/{machine}")
-    ResponseEntity<?> createFtpDownloadRequest(@PathVariable String machine,
+    ResponseEntity<FtpDownloadRequestResponse> createFtpDownloadRequest(@PathVariable String machine,
                                                @RequestBody CreateFtpDownloadRequestParam param){
 
         FtpDownloadRequestResponse res = null;
