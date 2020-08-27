@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ConstructionInfo {
-    List<Equipment> equipmentList;
-    List<Fab> fabList;
-    Map<String, Ots> otsMap;
+    List<Equipment> equipmentList = null;
+    List<Fab> fabList = null;
+    Map<String, Ots> otsMap = null;
 
-    File infoFile;
+    File infoFile = null;
 
-    long timestamp;
+    long timestamp = 0;
 
     public ConstructionInfo(File file){
         this.infoFile = file;
