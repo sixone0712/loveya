@@ -204,6 +204,7 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
 
                     // when download status is error, go to network error page
                     window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+                    return;
                 }
             }
         } catch (error) {
@@ -212,6 +213,7 @@ export const setWatchDlStatus = (requestId, modalFunc) => {
             //modalFunc.openErrorModal();
 
             window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+            return;
         }
 
         modalFunc.setSearchListActions({

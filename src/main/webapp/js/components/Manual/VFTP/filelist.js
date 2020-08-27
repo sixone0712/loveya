@@ -141,6 +141,7 @@ const RSSvftpFilelist = ({
                     if (value.data.status === "error") {
                         // when download status is error, go to network error page
                         window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+                        return;
                     }
                     openDownloadComplete();
                 }

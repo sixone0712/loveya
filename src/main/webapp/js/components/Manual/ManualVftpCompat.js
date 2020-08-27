@@ -100,6 +100,7 @@ const statusCheckFunc = async (props) => {
             if (status === "error") {
                 // when download status is error, go to network error page
                 window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+                return;
             } else if(status === "done"){
                 ret.error=Define.RSS_SUCCESS;
                 ret.url = downloadUrl;
