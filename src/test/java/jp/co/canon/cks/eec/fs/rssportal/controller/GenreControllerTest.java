@@ -1,101 +1,68 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
 import jp.co.canon.cks.eec.fs.rssportal.vo.GenreVo;
-import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class GenreControllerTest {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    @Autowired
+    private MockMvc mockMvc;
+
     private final GenreController genreController;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
-    public GenreControllerTest(GenreController genreController) {
+    GenreControllerTest(GenreController genreController) {
         this.genreController = genreController;
     }
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
-    void getGenre() {
-        Map<String, Object> ret= new HashMap<>();
-        ret = genreController.getGenre();
-        assertEquals(0,ret.get("result"));
-        assertNotNull(ret.get("update"));
-        assertNotNull(ret.get("data"));
-    }
+    void Genre() {
 
-    @Test
-    void addGenre() {
-        Map<String, Object> ret= new HashMap<>();
+        Map<String, Object> ret;
         GenreVo genreVo = new GenreVo();
 
-        /*test 1 - in case : name is empty*/
         genreVo.setName("");
         genreVo.setCategory("");
         ret = genreController.addGenre(genreVo);
         assertEquals(15,ret.get("result"));
         assertNull(ret.get("data"));
 
-        /*test 2 - in case : normal add */
         genreVo.setName("TEST");
         genreVo.setCategory("001");
         ret = genreController.addGenre(genreVo);
         assertEquals(0,ret.get("result"));
         assertNotNull(ret.get("data"));
 
-        /*test 2 - in case : name is empty*/
         genreVo.setName("TEST");
         genreVo.setCategory("002");
         ret = genreController.addGenre(genreVo);
         assertEquals(11,ret.get("result"));
         assertNull(ret.get("data"));
 
-
-    }
-
-    @Test
-    void modifyGenre() {
-        Map<String, Object> ret= null;
-        GenreVo genreVo = new GenreVo();
-
-        /*test 1 - in case : name is empty*/
-        ret = genreController.modifyGenre(genreVo);
-        assertEquals(15,ret.get("result"));
-        assertNull(ret.get("data"));
-        assertNotNull(ret.get("update"));
-
-        /*test 2 - in case : not found id */
-        genreVo.setId(100000);
-        genreVo.setName("1");
-        genreVo.setCategory("1");
-        ret = genreController.modifyGenre(genreVo);
-        assertEquals(16,ret.get("result"));
-        assertNull(ret.get("data"));
-        assertNotNull(ret.get("update"));
-
-        /*test 3 - in case : same name modify */
-        genreVo.setName("TEST");
-        genreVo.setCategory("001");
-        genreController.addGenre(genreVo);
-        genreVo.setName("TEST1");
-        genreVo.setCategory("001");
-        genreController.addGenre(genreVo);
-
+        //=====================================================================
         Map<String, Object> getReturn= null;
         getReturn = genreController.getGenre();
         if(getReturn.get("result").toString().equals("0"))
@@ -103,38 +70,30 @@ class GenreControllerTest {
             List<GenreVo> list = (List<GenreVo>) getReturn.get("data");
             for (GenreVo genre : list)
                 if ("TEST".equals(genre.getName())) {
-                    genre.setName("TEST1");
-                    ret = genreController.modifyGenre(genre);
-                    assertEquals(11,ret.get("result"));
+
+                    genreVo.setName(null);
+                    genreVo.setCategory(null);
+                    ret = genreController.delete(genreVo);
+                    assertEquals(15,ret.get("result"));
                     assertNull(ret.get("data"));
                     assertNotNull(ret.get("update"));
 
-                    genre.setName("TEST");
+                    genreVo.setCategory("003");
                     ret = genreController.modifyGenre(genre);
                     assertEquals(0,ret.get("result"));
                     assertNotNull(ret.get("data"));
+                    assertNotNull(ret.get("update"));
 
                 }
         }
+        GenreVo genre = new GenreVo();
+        ret = genreController.modifyGenre(genre);
+        assertEquals(15,ret.get("result"));
 
-
-    }
-
-    @Test
-    void delete() {
-        Map<String, Object> ret= null;
-        Map<String, Object> getReturn= null;
-        GenreVo genreVo = new GenreVo();
-
-        /*test 1 - in case : name is empty*/
-        genreVo.setName("");
-        genreVo.setCategory("");
+        //==========================================
         ret = genreController.delete(genreVo);
         assertEquals(15,ret.get("result"));
-        assertNull(ret.get("data"));
-        assertNotNull(ret.get("update"));
 
-        /*test 1 - in case : not found id */
         genreVo.setId(100000);
         genreVo.setName("");
         genreVo.setCategory("");
@@ -143,20 +102,21 @@ class GenreControllerTest {
         assertNull(ret.get("data"));
         assertNotNull(ret.get("update"));
 
-        /*test 1 - in case :delete test genre  */
         genreVo.setName("TEST");
-        genreVo.setCategory("001");
+        genreVo.setCategory("003");
         genreController.addGenre(genreVo);
         getReturn = genreController.getGenre();
         if(getReturn.get("result").toString().equals("0"))
         {
             List<GenreVo> list = (List<GenreVo>) getReturn.get("data");
-            for (GenreVo genre : list)
-                if ("TEST".equals(genre.getName())) {
-                    genreController.delete(genre);
+            for (GenreVo genre2 : list)
+                if ("TEST".equals(genre2.getName())) {
+                    genreController.delete(genre2);
                 }
         }
     }
+
+
 
     @Test
     void getUpdate() {

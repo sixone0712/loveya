@@ -1,5 +1,6 @@
 package jp.co.canon.cks.eec.fs.rssportal.controller;
 
+import io.jsonwebtoken.Jwt;
 import jp.co.canon.cks.eec.fs.rssportal.session.SessionContext;
 import jp.co.canon.cks.eec.fs.rssportal.vo.UserVo;
 //import org.eclipse.jdt.internal.compiler.lookup.InferenceContext18;   //compile Error
@@ -10,18 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
@@ -35,7 +32,7 @@ class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    private MockHttpSession session;
+    private MockHttpServletRequest request;
 
     @Autowired
     public UserControllerTest(UserController userController) {
@@ -45,7 +42,9 @@ class UserControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         log.info("setup===============================");
-        if(session==null) {
+        //this.mockMvc = MockMvcBuilders.standaloneSetup(context).build();
+        // save user
+        /*if(session==null) {
             log.info("create session");
             String user = "ymkwon";
             String pass = "c4ca4238a0b923820dcc509a6f75849b";
@@ -59,9 +58,10 @@ class UserControllerTest {
             sessionContext.setUser(LoginUser);
             sessionContext.setAuthorized(true);
             session.setAttribute("context",sessionContext);
-        }
+        }*/
         log.info("setup===============================End");
     }
+
 
 //    @Test
 //    void isLogin() throws Exception {
