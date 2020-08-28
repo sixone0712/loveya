@@ -95,16 +95,17 @@ public abstract class CollectProcess implements Runnable {
         currentMillis = System.currentTimeMillis();
         jobStartTime = getTimestamp();
         jobDoneTime = null;
-        clearLogFiles();
     }
 
     private void doneProc() {
         printInfo("collecting done");
+        printInfo("lastPoint="+Tool.getFtpTimeFormat(plan.getLastPoint()));
         requestList = null;
         failMachines = null;
         requestFiles = -1;
         jobDoneTime = getTimestamp();
         threading = false;
+        clearLogFiles();
         notifyJobDone.run();
     }
 
@@ -334,7 +335,15 @@ public abstract class CollectProcess implements Runnable {
                 setStatus(PlanStatus.completed);
                 planning = null;
             } else {
-                planning = getNextPlan();
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(lastCollectedTime.getTime());
+                if(getCollectBase()>plan.getLastPoint().getTime()) {
+                    cal.add(Calendar.MINUTE, 1);
+                } else {
+                    long interval = plan.getCollectionType()==1/*COLLECTTYPE_CYCLE*/?plan.getInterval():60000;
+                    cal.add(Calendar.MILLISECOND, (int) interval);
+                }
+                planning = new Timestamp(cal.getTimeInMillis());
             }
         }
         if(planning!=null) {
@@ -538,5 +547,16 @@ public abstract class CollectProcess implements Runnable {
             clearAllFiles();
         }
         return result;
+    }
+
+    protected long getCollectBase() {
+        Timestamp _base = plan.getCreated().after(plan.getCollectStart())?plan.getCreated():plan.getCollectStart();
+        Calendar base = Calendar.getInstance();
+        base.setTimeInMillis(_base.getTime());
+        base.set(Calendar.HOUR_OF_DAY, 0);
+        base.set(Calendar.MINUTE, 0);
+        base.set(Calendar.SECOND, 0);
+        base.set(Calendar.MILLISECOND, 0);
+        return base.getTimeInMillis();
     }
 }
