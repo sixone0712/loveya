@@ -35,7 +35,8 @@ const geneDownloadStatus = function* (func) {
         let response = yield func();
 
         if (response.status === 200) {
-            if (response.data.status == "done") return response;
+            const { status } = response.data;
+            if (status === "done" || status === "error" ) return response;
         } else {
             return response
         }
@@ -54,43 +55,72 @@ const initialDownStatus = {
     totalFiles: 0,
 };
 
+export function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+        ref.current = value;
+    });
+    return ref.current;
+}
+
 const RSSvftpFilelist = ({
      responseList,
      responseListCnt,
      downloadCnt,
      downloadAll,
      isNewResponseList,
-     sssActions
+     sssActions,
+     // codecoverage
+     // testIsDownloadConfirm,
+     // testIsDownloadStart,
+     // testIsDownloadCancel,
+     // testIsDownloadComplete,
+     // testIsDownloadError,
+     // testDownStatus,
 }) => {
+    const cancelRef = useRef(false);
+    const preResponseList = usePrevious(responseList);
     const [pageSize, setPageSize] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortDirection, setSortDirection] = useState("");
     const [sortKey, setSortKey] = useState("");
-    const [sortedList, setSortedList] = useState([]);
+    const [sortedList, setSortedList] = useState(responseList ? _.orderBy(responseList.toJS(), "", "") : []);
     const [isDownloadConfirm, setIsDownloadConfirm] = useState(false);
     const [isDownloadStart, setIsDownloadStart] = useState(false);
     const [isDownloadCancel, setIsDownloadCancel] = useState(false);
     const [isDownloadComplete, setIsDownloadComplete] = useState(false);
     const [isDownloadError, setIsDownloadError] = useState(false);
-    const cancelRef = useRef(false);
-
     const [downStatus, setDownStatus] = useState(initialDownStatus);
 
-    useEffect(() => {
-        console.log("useEffect")
-        console.log("isNewResponseList", isNewResponseList)
-        console.log("responseList", responseList !== undefined ?  responseList.toJS() : undefined);
+    // codecoverage
+    // const [isDownloadConfirm, setIsDownloadConfirm] = useState(testIsDownloadConfirm);
+    // const [isDownloadStart, setIsDownloadStart] = useState(testIsDownloadStart);
+    // const [isDownloadCancel, setIsDownloadCancel] = useState(testIsDownloadCancel);
+    // const [isDownloadComplete, setIsDownloadComplete] = useState(testIsDownloadComplete);
+    // const [isDownloadError, setIsDownloadError] = useState(testIsDownloadError);
+    // const [downStatus, setDownStatus] = useState(testDownStatus);
 
-        if(responseList !== undefined) {
-            if(isNewResponseList) {
-                setPageSize(10);
-                setCurrentPage(1);
-                setSortDirection("");
-                setSortKey("");
-                sssActions.vftpSssSetIsNewResponseList(false);
+    useEffect(() => {
+        console.log("[useEffect]isNewResponseList", isNewResponseList)
+        //console.log("[useEffect]responseList", responseList !== undefined ?  responseList.toJS() : undefined);
+        //console.log("[useEffect]preResponseList", preResponseList !== undefined ?  preResponseList.toJS() : undefined);
+        if(preResponseList !== responseList) {
+            // codecoverage
+            if(responseList !== undefined) {
+                console.log("[useEffect]update");
+                if(isNewResponseList) {
+                    setPageSize(10);
+                    setCurrentPage(1);
+                    setSortDirection("");
+                    setSortKey("");
+                    sssActions.vftpSssSetIsNewResponseList(false);
+                }
+                const sortList = _.orderBy(responseList.toJS(), sortKey, sortDirection)
+
+                setSortedList(sortList)
             }
-            const sortList = _.orderBy(responseList.toJS(), sortKey, sortDirection)
-            setSortedList(sortList)
+        } else {
+            console.log("[useEffect]no update");
         }
     }, [responseList, isNewResponseList])
 
@@ -121,6 +151,7 @@ const RSSvftpFilelist = ({
             res = await services.axiosAPI.requestPost('/rss/api/vftp/sss/download', { lists: reqData });
         } catch (error) {
             console.error(error);
+            return;
         }
 
         console.log("res.data.downloadId", res.data.downloadId);
@@ -161,10 +192,11 @@ const RSSvftpFilelist = ({
         next(iterator.next());
     };
 
-    const openDownloadStart = () => {
+    const openDownloadStart = async () => {
         setIsDownloadConfirm(false);
-        requestDownload();
         setTimeout(() => { setIsDownloadStart(true); }, 400);
+        await requestDownload();
+
     }
 
     const openDownloadCancel = useCallback(() => {

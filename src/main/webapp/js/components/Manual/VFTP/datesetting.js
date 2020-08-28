@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Card, CardBody, Col, FormGroup, Input, Label } from "reactstrap";
-import { DatetimePicker } from "rc-datetime-picker";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
+import React from "react";
+import {Card, CardBody, Col, FormGroup, Input, Label} from "reactstrap";
+import {DatetimePicker} from "rc-datetime-picker";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCalendarCheck} from "@fortawesome/free-regular-svg-icons";
 
 
- const RSSdatesettings = ({from, FromDateChangehandler, to, ToDateChangehandler}) => {
+const RSSdatesettings = ({from, FromDateChangehandler, to, ToDateChangehandler}) => {
     return (
         <Card className="ribbon-wrapper formlist-card">
             <CardBody className="custom-scrollbar manual-card-body">
@@ -23,7 +23,7 @@ import { faCalendarCheck } from "@fortawesome/free-regular-svg-icons";
     );
 };
 
-const CreateDatetimePicker = ({ label, date, handleChange}) => {
+export const CreateDatetimePicker = ({ label, date, handleChange}) => {
     return (
         <div className="datepicker-item">
             <Label>
