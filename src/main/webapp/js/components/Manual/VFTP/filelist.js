@@ -187,7 +187,7 @@ const RSSvftpFilelist = ({
             setIsDownloadComplete(false);
             setIsDownloadError(false);
             if (downStatus.status === "done") {
-                API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,"unknown", "User Cancel")
+                API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_SSS ,"unknown", "User Cancel")
                     .then(r => r)
                     .catch(e => console.error(e));
             }
@@ -208,13 +208,13 @@ const RSSvftpFilelist = ({
         if(isSave) {
             try {
                 const res = await services.axiosAPI.downloadFile(downStatus.downloadUrl);
-                await API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,res.fileName, "Download Completed");
+                await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_SSS ,res.fileName, "Download Completed");
             } catch (e) {
                 console.error(e);
-                await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT , "unknown", "Download Fail");
+                await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_SSS , "unknown", "Download Fail");
             }
         } else {
-            await API.addDlHistory(Define.RSS_TYPE_VFTP_SSS ,"unknown", "User Cancel");
+            await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_SSS ,"unknown", "User Cancel");
         }
 
     }, [downStatus]);
