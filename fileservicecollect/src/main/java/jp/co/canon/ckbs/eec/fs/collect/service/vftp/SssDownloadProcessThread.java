@@ -72,7 +72,8 @@ public class SssDownloadProcessThread extends Thread implements CustomOutputStre
                 .addArgument("-port").addArgument("22001")
                 .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
                 .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
-                .addArgument("-dir").addArgument("/VROOT/SSS/Optional/"+request.getDirectory())
+                .addArgument("-root").addArgument("/VROOT/SSS/Optional")
+                .addArgument("-dir").addArgument(request.getDirectory())
                 .addArgument("-dest").addArgument(requestDownloadDir.getAbsolutePath())
                 .addArgument("-fl").addArgument(fileList.getAbsolutePath());
         if (request.isArchive()){

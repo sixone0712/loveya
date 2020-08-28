@@ -1,12 +1,8 @@
 import 'babel-polyfill';
 import React from 'react';
-import renderer from 'react-test-renderer'
-import configureMockStore from 'redux-mock-store'
 import configureStore from 'redux-mock-store'
-import { shallow, mount } from 'enzyme';
-import {createStore} from 'redux';
-import {Provider} from 'react-redux';
-import { Map, List, fromJS, Record } from 'immutable';
+import {shallow} from 'enzyme';
+import {fromJS} from 'immutable';
 import Manual from "../Manual";
 import sinon from "sinon";
 
@@ -69,24 +65,21 @@ describe('Manual', () => {
 
     it('renders correctly(success)', () => {
         store = mockStore(initialState);
-        const wrapper = shallow(<Manual
-            dispatch={dispatch}
-            store={store}
-        />).dive().dive();
+        const wrapper = shallow(<Manual />)
         expect(wrapper).toMatchSnapshot();
     });
 
 
-    it('renders correctly(false)', () => {
-        store = mockStore({
-            ...initialState,
-            pender: penderFailure
-        });
-        const wrapper = shallow(<Manual
-            dispatch={dispatch}
-            store={store}
-        />).dive().dive();
-        expect(wrapper).toMatchSnapshot();
-       // expect('network-connection-error').toExist();
-    });
+    // it('renders correctly(false)', () => {
+    //     store = mockStore({
+    //         ...initialState,
+    //         pender: penderFailure
+    //     });
+    //     const wrapper = shallow(<Manual
+    //         dispatch={dispatch}
+    //         store={store}
+    //     />).dive().dive();
+    //     expect(wrapper).toMatchSnapshot();
+    //    // expect('network-connection-error').toExist();
+    // });
 });
