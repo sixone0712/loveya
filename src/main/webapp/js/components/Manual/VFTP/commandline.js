@@ -37,8 +37,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
         setModalOpen("ready") ;
     };
 
-    const cancelModal = async (yesno, type) => {
-        const {modalType} = type;
+    const cancelModal = async (yesno) => {
         if (type === "compat/optional") {
             console.log("[cancelModal]yesno: ",yesno);
             console.log("[cancelModal]modalType: ",modalType);
@@ -67,7 +66,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
             let res = await completeFunc();
             if (res.result !== Define.RSS_SUCCESS) {
                 setModalOpen("alert");
-                setModalMsg(API.getErrorMsg(result.error));
+                setModalMsg(API.getErrorMsg(res.result));
             } else {
                 closeModal();
             }
@@ -192,8 +191,8 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                           leftBtn={"Yes"}
                           rightBtn={"No"}
                           actionBg={null}
-                          actionLeft={()=>cancelModal("yes",{modalType})}
-                          actionRight={()=>cancelModal("no",{modalType})}
+                          actionLeft={()=>cancelModal("yes")}
+                          actionRight={()=>cancelModal("no")}
             />
             <ConfirmModal isOpen={modalType === "complete"}
                           icon={faChevronCircleDown}
@@ -203,7 +202,7 @@ const RSSCommandLine = ({type, string, modalMsglist, confirmfunc, processfunc, c
                           style={"administrator"}
                           actionBg={null}
                           actionLeft={completeModal}
-                          actionRight={()=> cancelModal("yes",{modalType})}
+                          actionRight={()=> cancelModal("yes")}
             />
             <AlertModal isOpen={modalType === "alert"} icon={faExclamationCircle} message={modalMsg} style={"administrator"} closer={closeModal} />
             {modalType === "process" ? (

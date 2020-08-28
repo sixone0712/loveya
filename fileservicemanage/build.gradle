@@ -67,6 +67,8 @@ jacocoTestReport {
             fileTree(
                     dir: it,
                     exclude: [
+                            "jp/co/canon/ckbs/eec/fs/manage/FileservicemanageApplication.*",
+                            "jp/co/canon/ckbs/eec/fs/manage/ServletInitializer.*"
                     ])
         })
     }

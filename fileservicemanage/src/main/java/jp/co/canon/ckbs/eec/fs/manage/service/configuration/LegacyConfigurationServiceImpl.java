@@ -54,15 +54,6 @@ public class LegacyConfigurationServiceImpl implements ConfigurationService{
         logConfigurationLoader = new LogConfigurationLoader(commandsDir);
     }
 
-    SAXParser createSaxParser() throws SAXException, ParserConfigurationException, IOException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setValidating(true);
-        factory.setNamespaceAware(true);
-        factory.setFeature("http://apache.org/xml/features/validation/schema", true);
-        SAXParser parser = factory.newSAXParser();
-        return parser;
-    }
-
     @Override
     public Machine[] getMachineList() {
         Equipment[] equipmentList = constructionInfo.getEquipmentList();

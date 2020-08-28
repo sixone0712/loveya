@@ -104,6 +104,9 @@ public class ObjectList {
 
     public FileService getFileServiceByToolName(String toolName){
         Tool tool = getTool(toolName);
+        if (tool == null){
+            return null;
+        }
         return findFileServiceById(tool.getCollectFsId());
     }
 

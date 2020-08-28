@@ -140,11 +140,15 @@ public class FtpFileService {
                 errorCount++;
                 continue;
             }
-            for (FtpDownloadRequest req : r.getRequestList()){
-                downloadRequestList.add(req);
-            }
             if (r.getErrorCode() != null){
                 errorCodeList.add(r.getErrorCode());
+            }
+            if (r.getRequestList() == null){
+                errorCount++;
+                continue;
+            }
+            for (FtpDownloadRequest req : r.getRequestList()){
+                downloadRequestList.add(req);
             }
         }
 

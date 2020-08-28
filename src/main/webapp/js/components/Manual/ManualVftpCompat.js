@@ -1,15 +1,12 @@
-
-import React, {useEffect, useState} from "react";
-import {connect, useDispatch} from "react-redux";
+import React, {useCallback, useEffect} from "react";
+import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import * as API from "../../api";
-import * as commandActions from "../../modules/command";
 import * as CompatActions from "../../modules/vftpCompat";
-import * as viewListActions from "../../modules/viewList";
-import { Container, Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import {Breadcrumb, BreadcrumbItem, Col, Container, Row} from "reactstrap";
 import ScrollToTop from "react-scroll-up";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faAngleDoubleUp, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import {faAngleDoubleUp} from "@fortawesome/free-solid-svg-icons";
 import Machinelist from "../Manual/Machine/MachineList";
 import Commandlist from "../Manual/VFTP/commandlist";
 import Datesetting from "../Manual/VFTP/datesetting";
@@ -103,6 +100,7 @@ const statusCheckFunc = async (props) => {
             if (status === "error") {
                 // when download status is error, go to network error page
                 window.appHistory.replace(Define.PAGE_NEWORK_ERROR);
+                return;
             } else if(status === "done"){
                 ret.error=Define.RSS_SUCCESS;
                 ret.url = downloadUrl;
@@ -163,7 +161,7 @@ const cancelFunc = async (props) => {
             downloadUrl: ""
         })
     }
-    else if(downloadStatus.dlId !== 0)
+    else if(downloadStatus.dlId !== "")
     {
         try {
             const res = await services.axiosAPI.requestDelete(Define.REST_VFTP_COMPAT_POST_DOWNLOAD + "/" + downloadStatus.dlId);
@@ -180,10 +178,19 @@ const cancelFunc = async (props) => {
 }
 
 const ManualVftpCompat = (props) => {
-    const [command, setCommand] = useState(props.command);
-    const [fromDate, setFromDate] = useState(props.startDate);
-    const [toDate, setToDate] = useState(props.endDate);
-    const dbCommand = API.vftpConvertDBCommand(props.dbCommand.get("lists").toJS());
+    const fromDate = props.startDate;
+    const setFromDate = useCallback((value) => {
+        props.CompatActions.vftpCompatSetRequestStartDate(value);
+    });
+    const toDate = props.endDate
+    const setToDate = useCallback((value) => {
+        props.CompatActions.vftpCompatSetRequestEndDate(value);
+    });
+    const command = props.command;
+    const setCommand = useCallback((value) => {
+        props.CompatActions.vftpCompatSetRequestCommand(value);
+    });
+    const dbCommand = API.vftpConvertDBCommand(props.dbCommand.toJS());
     const modalMsgList ={
         cancel: "Are you sure want to cancel the download?",
         process: "downloading.....",
@@ -196,9 +203,6 @@ const ManualVftpCompat = (props) => {
         console.log("==== ManualVftpCompat Command Update ====");
         const selectCmd = dbCommand.find(item => item.checked && item.cmd_type === "vftp_compat");
         setCommand(convertCommand(selectCmd === undefined ? "" : selectCmd.cmd_name, fromDate, toDate));
-        API.vftpCompatSetRequestCommand(props, command);
-        API.vftpCompatSetRequestEndDate(props, toDate);
-        API.vftpCompatSetRequestStartDate(props, fromDate);
         console.log("=====================================");
     },[fromDate, toDate, dbCommand]);
 
@@ -235,18 +239,15 @@ const ManualVftpCompat = (props) => {
 
 export default connect(
     (state) => ({
-        equipmentList: state.viewList.get('equipmentList'),
         toolInfoList: state.viewList.get('toolInfoList'),
         toolInfoListCheckCnt: state.viewList.get('toolInfoListCheckCnt'),
         startDate:state.vftpCompat.get('startDate'),
         endDate:state.vftpCompat.get('endDate'),
         command:state.vftpCompat.getIn(['requestList', "command"]),
         downloadStatus: state.vftpCompat.get('downloadStatus'),
-        dbCommand: state.command.get('command'),
+        dbCommand: state.command.getIn(['command', 'lists']),
     }),
     (dispatch) => ({
-        commandActions: bindActionCreators(commandActions, dispatch),
         CompatActions: bindActionCreators(CompatActions, dispatch),
-        viewListActions: bindActionCreators(viewListActions, dispatch),
     })
 )(ManualVftpCompat);

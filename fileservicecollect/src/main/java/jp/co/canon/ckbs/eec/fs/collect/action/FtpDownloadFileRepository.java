@@ -2,15 +2,18 @@ package jp.co.canon.ckbs.eec.fs.collect.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jp.co.canon.ckbs.eec.fs.collect.model.FtpDownloadRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class FtpDownloadFileRepository {
     @Value("${fileservice.collect.ftp.downloadDirectory}")
@@ -43,14 +46,15 @@ public class FtpDownloadFileRepository {
 
     public Map<String, FtpDownloadRequest> getRequestList(){
         synchronized (requestMap) {
+            ArrayList<FtpDownloadRequest> requestListToDelete = new ArrayList<>();
             for (FtpDownloadRequest request : requestMap.values()) {
                 File requestDir = new File(downloadDirectory, request.getDirectory());
                 if (!requestDir.exists()) {
-                    removeRequest(request);
+                    requestListToDelete.add(request);
                     continue;
                 }
                 if (request.getStatus() == FtpDownloadRequest.Status.CANCEL) {
-                    removeRequest(request);
+                    requestListToDelete.add(request);
                     continue;
                 }
                 if (request.getStatus() == FtpDownloadRequest.Status.WAIT) {
@@ -66,6 +70,9 @@ public class FtpDownloadFileRepository {
                         e.printStackTrace();
                     }
                 }
+            }
+            for(FtpDownloadRequest request : requestListToDelete){
+                removeRequest(request);
             }
             return getCloneRequestMap();
         }

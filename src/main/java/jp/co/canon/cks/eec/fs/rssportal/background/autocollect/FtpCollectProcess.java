@@ -14,9 +14,12 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class FtpCollectProcess extends CollectProcess {
+
+    private long lastPointMillis;
 
     public FtpCollectProcess(PlanManager manager, CollectPlanVo plan, CollectionPlanDao dao, FileDownloader downloader, Log log) {
         super(manager, plan, dao, downloader, log);
@@ -38,20 +41,40 @@ public class FtpCollectProcess extends CollectProcess {
                 categoryCodes.length!=categoryNames.length)
             throw new CollectException(plan, "parameter exception");
 
-        SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
         String startTime, endTime;
+        Timestamp startTs = plan.getLastPoint()==null?plan.getStart():plan.getLastPoint();
+        SimpleDateFormat dateFormat = Tool.getSimpleDateFormat();
+        long endMillis;
 
-        if(plan.getLastPoint()==null) {
-            startTime = Tool.getFtpTimeFormat(plan.getStart());
+        printInfo("---base="+Tool.getFtpTimeFormat(new Timestamp(getCollectBase())));
+        if(getCollectBase()>startTs.getTime()) {
+            Calendar _end = Calendar.getInstance();
+            _end.setTimeInMillis(startTs.getTime());
+            _end.add(Calendar.DATE, 1);
+            _end.set(Calendar.HOUR_OF_DAY, 0);
+            _end.set(Calendar.MINUTE, 0);
+            _end.set(Calendar.SECOND, 0);
+            _end.set(Calendar.MILLISECOND, 0);
+            endMillis = _end.getTimeInMillis();
+
+            if(endMillis>getCollectBase()) {
+                endMillis = getCollectBase();
+            }
+
+            startTime = Tool.getFtpTimeFormat(startTs);
+            endTime = dateFormat.format(endMillis);
         } else {
-            startTime = Tool.getFtpTimeFormat(plan.getLastPoint());
+            startTime = Tool.getFtpTimeFormat(startTs);
+            if (currentMillis > plan.getEnd().getTime()) {
+                endTime = Tool.getFtpTimeFormat(plan.getEnd());
+                endMillis = plan.getEnd().getTime();
+            } else {
+                endTime = dateFormat.format(currentMillis);
+                endMillis = currentMillis;
+            }
         }
-        if(currentMillis>plan.getEnd().getTime()) {
-            endTime = Tool.getFtpTimeFormat(plan.getEnd());
-        } else {
-            endTime = dateFormat.format(currentMillis);
-        }
-        log.info("collecting start="+startTime+" end="+endTime);
+
+        printInfo("collecting start="+startTime+" end="+endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
 
@@ -85,11 +108,15 @@ public class FtpCollectProcess extends CollectProcess {
         }
         requestList = list;
         requestFiles = files;
+        lastPointMillis = endMillis;
     }
 
     @Override
     protected Timestamp getLastPoint() {
-        return new Timestamp(currentMillis);
+        if(lastPointMillis!=0) {
+            return new Timestamp(lastPointMillis);
+        }
+        return null;
     }
 
     @Override
@@ -119,7 +146,8 @@ public class FtpCollectProcess extends CollectProcess {
         FtpDownloadRequestForm form = new FtpDownloadRequestForm(fab, machine, categoryCode, categoryName);
 
         for(FileInfo file: fileList.getList()) {
-            if(file.getFilename().endsWith(".") || file.getFilename().endsWith("..")) {
+            if(file.getFilename().endsWith(".") || file.getFilename().endsWith("..") || file.getSize()==0
+                    || file.getFilename().startsWith("###")) {
                 continue;
             }
 
