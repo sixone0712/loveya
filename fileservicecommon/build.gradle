@@ -57,6 +57,7 @@ jacocoTestReport {
             fileTree(
                     dir: it,
                     exclude: [
+                            "jp/co/canon/ckbs/eec/fs/configuration/legacy/toolinfo"
                     ])
         })
     }
