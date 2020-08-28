@@ -68,7 +68,7 @@ public class CompatDownloadProcessThread extends Thread implements CustomOutputS
                 .addArgument("-port").addArgument("22001")
                 .addArgument("-md").addArgument(ftpServerInfo.getFtpmode())
                 .addArgument("-u").addArgument(ftpServerInfo.getUser()+"/"+ftpServerInfo.getPassword())
-                .addArgument("-dir").addArgument("/VROOT/COMPAT/Optional")
+                .addArgument("-root").addArgument("/VROOT/COMPAT/Optional")
                 .addArgument("-dest").addArgument(requestDownloadDir.getAbsolutePath())
                 .addArgument("-fl").addArgument(fileList.getAbsolutePath());
         if (request.isArchive()){
