@@ -29,7 +29,7 @@ public class RssController {
 
     @RequestMapping(value={"/rss/version"})
     public void version(HttpServletResponse response) throws IOException {
-        String version = "Rapid_Collector_V20_03_01";
+        String version = "Rapid_Collector_V20_03_02";
         response.getWriter().print(version);
     }
 }
