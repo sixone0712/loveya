@@ -130,10 +130,10 @@ const completeFunc = async (props) => {
     res = await services.axiosAPI.downloadFile(downloadUrl);
     console.log("res: ", res);
     if(res.result === Define.RSS_SUCCESS){
-        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,res.fileName, "Download Completed")
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_COMPAT ,res.fileName, "Download Completed")
     }
     else{
-        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,res.fileName, "Download Fail");
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_COMPAT ,res.fileName, "Download Fail");
     }
     CompatActions.vftpCompatSetDlStatus({
         func: null,
@@ -151,7 +151,7 @@ const cancelFunc = async (props) => {
     console.log("============cancelFunc=============");
     if(downloadStatus.status == "done")
     {
-        await API.addDlHistory(Define.RSS_TYPE_VFTP_COMPAT ,"unknown", "User Cancel")
+        await API.addDlHistory(Define.RSS_TYPE_VFTP_MANUAL_COMPAT ,"unknown", "User Cancel")
         CompatActions.vftpCompatSetDlStatus({
             func: null,
             dlId: "",

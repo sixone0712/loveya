@@ -112,8 +112,10 @@ describe('DownloadHistory', () => {
     it('getDownloadType', () => {
         getDownloadType(Define.RSS_TYPE_FTP_MANUAL);
         getDownloadType(Define.RSS_TYPE_FTP_AUTO);
-        getDownloadType(Define.RSS_TYPE_VFTP_SSS);
-        getDownloadType(Define.RSS_TYPE_VFTP_COMPAT);
+        getDownloadType(Define.RSS_TYPE_VFTP_MANUAL_SSS);
+        getDownloadType(Define.RSS_TYPE_VFTP_MANUAL_COMPAT);
+        getDownloadType(Define.RSS_TYPE_VFTP_AUTO_SSS);
+        getDownloadType(Define.RSS_TYPE_VFTP_AUTO_COMPAT);
         getDownloadType("");
     });
 

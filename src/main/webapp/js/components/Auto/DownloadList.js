@@ -36,11 +36,16 @@ export const modalType = {
     MODAL_NETWORK_ERROR: 5,
     MODAL_FILE_NOT_FOUND: 6
 };
-
+const getDownloadType = (type) => {
+    return (type === Define.PLAN_TYPE_FTP) ? (Define.RSS_TYPE_FTP_AUTO)
+        :(type === Define.PLAN_TYPE_VFTP_COMPAT) ? (Define.RSS_TYPE_VFTP_AUTO_COMPAT)
+            :(type === Define.PLAN_TYPE_VFTP_SSS) ? (Define.RSS_TYPE_VFTP_AUTO_SSS): "";
+};
 class RSSAutoDownloadList extends Component {
     state = {
         requestName: "",
         requestId: "",
+        requestType:"",
         requestList: [],
         download: {},
         delete: {},
@@ -162,12 +167,13 @@ class RSSAutoDownloadList extends Component {
 
     saveDownloadFile = async () => {
         const { downloadUrl } = this.state.download;
+        const {requestType} = this.state;
         console.log("[DownladList][saveDownloadFile]downloadUrl", downloadUrl);
         if(downloadUrl !== "") {
             const res = await services.axiosAPI.downloadFile(downloadUrl);
             if(res.result == Define.RSS_SUCCESS) {
                 this.closeModal();
-                await API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Completed")
+                await API.addDlHistory(requestType,res.fileName, "Download Completed")
             } else {
                 this.closeModal();
                 if(res.result == Define.COMMON_FAIL_NOT_FOUND) {
@@ -175,13 +181,13 @@ class RSSAutoDownloadList extends Component {
                 } else {
                     this.openModal(modalType.MODAL_NETWORK_ERROR)
                 }
-                await API.addDlHistory(Define.RSS_TYPE_FTP_AUTO ,res.fileName, "Download Fail")
+                await API.addDlHistory(requestType,res.fileName, "Download Fail")
             }
         } else {
             console.error("[DownladList][saveDownloadFile]downloadUrl is null");
             this.closeModal();
         }
-        await this.loadDownloadList(this.state.requestId, this.state.requestName);
+        await this.loadDownloadList(this.state.requestId, this.state.requestName, this.state.requestType);
     }
 
     requestDownloadCancel = async () => {
@@ -222,15 +228,17 @@ class RSSAutoDownloadList extends Component {
             console.error("[DownladList][deleteDownloadFile]id is null");
             this.closeModal();
         }
-        await this.loadDownloadList(this.state.requestId, this.state.requestName);
+        await this.loadDownloadList(this.state.requestId, this.state.requestName, this.state.requestType);
     }
 
 
-    loadDownloadList = async (planId, planName) => {
+    loadDownloadList = async (planId, planName, planType) => {
         try {
             const res = await services.axiosAPI.requestGet(`${Define.REST_PLANS_GET_FILELIST}/${planId}/filelists`);
             const {lists} = res.data;
+            const planTypeEnum = getDownloadType(planType);
             console.log("[DownloadList][componentDidMount]res", res);
+            console.log("[DownloadList][componentDidMount]planTypeEnum", planTypeEnum);
             let newRequestList = [];
             if (lists !== undefined) {
                 newRequestList = lists.map((item, idx) => {
@@ -249,6 +257,7 @@ class RSSAutoDownloadList extends Component {
                 ...this.state,
                 requestName: planName,
                 requestId: planId,
+                requestType: planTypeEnum,
                 requestList: newRequestList
             })
         } catch (error) {
@@ -259,10 +268,11 @@ class RSSAutoDownloadList extends Component {
     componentDidMount() {
         const requestList = async () => {
             const query = queryString.parse(this.props.location.search);
-            const { planId, planName } = query;
+            const { planId, planName ,planType } = query;
             console.log("[DownloadList][componentDidMount]planId", planId);
             console.log("[DownloadList][componentDidMount]planName", planName);
-            return await this.loadDownloadList(planId, planName);
+            console.log("[DownloadList][componentDidMount]planType", planType);
+            return await this.loadDownloadList(planId, planName,planType);
         }
         requestList().then(r => r).catch(e => console.error(e));
     }

@@ -11,6 +11,7 @@ import jp.co.canon.cks.eec.fs.rssportal.vo.CollectPlanVo;
 import org.apache.commons.logging.Log;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -47,25 +48,39 @@ public class VFtpSssCollectProcess extends CollectProcess {
             startTs = plan.getLastPoint();
         }
 
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTimeInMillis(startTs.getTime() + aDayMillis);
-        endCal.set(endCal.get(Calendar.YEAR), endCal.get(Calendar.MONTH), endCal.get(Calendar.DATE),
-                0, 0, 0);
+        if(getCollectBase()>startTs.getTime()) {
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTimeInMillis(startTs.getTime() + aDayMillis);
+            endCal.set(endCal.get(Calendar.YEAR), endCal.get(Calendar.MONTH), endCal.get(Calendar.DATE),
+                    0, 0, 0);
 
-        endMillis = endCal.getTimeInMillis();
-        if (endMillis > plan.getEnd().getTime()) {
-            endMillis = plan.getEnd().getTime();
+            endMillis = endCal.getTimeInMillis();
+            if (endMillis > plan.getEnd().getTime()) {
+                endMillis = plan.getEnd().getTime();
+            }
+
+            if (endMillis > currentMillis) {
+                throw new CollectException(plan, false);
+            }
+
+            startTime = Tool.getVFtpTimeFormat(startTs);
+            endTime = Tool.getVFtpTimeFormat(new Timestamp(endMillis));
+        } else {
+            SimpleDateFormat dateFormat = Tool.getVFtpSimpleDateFormat();
+            startTime = Tool.getVFtpTimeFormat(startTs);
+            if(currentMillis>plan.getEnd().getTime()) {
+                endTime = Tool.getVFtpTimeFormat(plan.getEnd());
+                endMillis = plan.getEnd().getTime();
+            } else {
+                endTime = dateFormat.format(currentMillis);
+                endMillis = currentMillis;
+            }
         }
 
-        if (endMillis > currentMillis) {
-            throw new CollectException(plan, false);
-        }
-
-        startTime = Tool.getVFtpTimeFormat(startTs);
-        endTime = Tool.getVFtpTimeFormat(new Timestamp(endMillis));
         printInfo("start=" + startTime + " end=" + endTime);
 
         List<DownloadRequestForm> list = new ArrayList<>();
+
         loop_top:
         for (int i = 0; i < machines.length; ++i) {
             for (String directory : directories) {
